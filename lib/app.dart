@@ -5,7 +5,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
-import 'theme/app_theme.dart';
+import 'core/theme.dart';
 import 'core/theme_service.dart';
 import 'core/locale_service.dart';
 import 'core/app_localizations.dart';

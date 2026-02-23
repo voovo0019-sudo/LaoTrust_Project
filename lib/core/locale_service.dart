@@ -34,19 +34,22 @@ Future<void> saveLocale(Locale locale) async {
   await prefs.setString(_keyLocale, locale.languageCode);
 }
 
-/// assets/i18n/{code}.json 경로. 지사 인계 시 JSON 키 추가는 동일 파일에 키만 추가.
+/// assets/translations/{code}.json 우선, 없으면 assets/i18n/{code}.json (한국어 설정: translations/ko.json)
 String localeToAssetPath(String languageCode) {
   return 'assets/i18n/$languageCode.json';
 }
 
-/// 해당 로케일의 언어팩(Map) 로드. 실패 시 빈 맵 반환.
+/// 해당 로케일의 언어팩(Map) 로드. translations 우선, 실패 시 i18n, 그 다음 빈 맵.
 Future<Map<String, String>> loadStringsForLocale(Locale locale) async {
-  try {
-    final path = localeToAssetPath(locale.languageCode);
-    final json = await rootBundle.loadString(path);
-    final map = jsonDecode(json) as Map<String, dynamic>;
-    return map.map((k, v) => MapEntry(k, v?.toString() ?? ''));
-  } catch (_) {
-    return {};
+  final code = locale.languageCode;
+  for (final path in ['assets/translations/$code.json', 'assets/i18n/$code.json']) {
+    try {
+      final json = await rootBundle.loadString(path);
+      final map = jsonDecode(json) as Map<String, dynamic>;
+      return map.map((k, v) => MapEntry(k, v?.toString() ?? ''));
+    } catch (_) {
+      continue;
+    }
   }
+  return {};
 }

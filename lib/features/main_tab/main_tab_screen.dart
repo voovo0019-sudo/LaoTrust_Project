@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
-import '../home/home_screen.dart';
+import '../../screens/home_screen.dart';
 import '../jobs/jobs_screen.dart';
 import '../chat/chat_screen.dart';
 import '../profile/profile_screen.dart';

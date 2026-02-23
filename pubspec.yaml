@@ -1,0 +1,31 @@
+name: lao_trust
+description: LaoTrust (라오트러스트) - 신뢰를 기술로 증명하고, 라오스를 연결한다.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.2.2
+  # LT-08 미션02: Firebase (Firestore + Auth)
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+  connectivity_plus: ^6.0.5
+  # LT-08 미션05: 실시간 푸시(긴급 출동) — FCM
+  firebase_messaging: ^15.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/i18n/

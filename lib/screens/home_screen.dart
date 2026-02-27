@@ -58,139 +58,130 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  // 상단: 검색 + 전문가 서비스
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSearchBar(context),
-                        const SizedBox(height: 28),
-                        Text(
-                          context.l10n('section_expert_headline'),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          context.l10n('section_expert_services'),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        GridView.count(
-                          crossAxisCount: 4,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          children: [
-                            _ServiceIcon(
-                              icon: Icons.cleaning_services_outlined,
-                              label: context.l10n('expert_cleaning'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_cleaning')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.translate,
-                              label: context.l10n('expert_translation'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_translation')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.delivery_dining,
-                              label: context.l10n('expert_delivery'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_delivery')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.build,
-                              label: context.l10n('expert_repair'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_repair')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.brush,
-                              label: context.l10n('expert_beauty'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_beauty')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.school,
-                              label: context.l10n('expert_tutoring'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_tutoring')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.photo_camera,
-                              label: context.l10n('expert_photo'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_photo')),
-                            ),
-                            _ServiceIcon(
-                              icon: Icons.emoji_events,
-                              label: context.l10n('expert_event'),
-                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_event')),
-                            ),
-                          ],
-                        ),
-                      ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 상단: 검색 + 전문가 서비스
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSearchBar(context),
+                  const SizedBox(height: 28),
+                  Text(
+                    context.l10n('section_expert_headline'),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  // 중간 여백: Spacer로 상단/하단을 시원하게 분리 (IntrinsicHeight로 높이 제한)
-                  const Spacer(),
-                  // 하단: 급구 알바 + 적용 버튼 (네비게이션 바 바로 위)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.l10n('section_quick_jobs'),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _QuickJobCardsSection(colorScheme: colorScheme),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.check_circle_outline),
-                            label: Text(context.l10n('apply')),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              backgroundColor: colorScheme.primary,
-                              foregroundColor: colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 6),
+                  Text(
+                    context.l10n('section_expert_services'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GridView.count(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      // 1행: 청소, 경비, 수리, 배달
+                      _ServiceIcon(
+                        icon: Icons.cleaning_services_outlined,
+                        label: context.l10n('expert_cleaning'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_cleaning')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.shield,
+                        label: context.l10n('expert_security'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_security')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.build,
+                        label: context.l10n('expert_repair'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_repair')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.delivery_dining,
+                        label: context.l10n('expert_delivery'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_delivery')),
+                      ),
+                      // 2행: 뷰티, 과외, 사진, 이벤트
+                      _ServiceIcon(
+                        icon: Icons.brush,
+                        label: context.l10n('expert_beauty'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_beauty')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.school,
+                        label: context.l10n('expert_tutoring'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_tutoring')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.photo_camera,
+                        label: context.l10n('expert_photo'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_photo')),
+                      ),
+                      _ServiceIcon(
+                        icon: Icons.emoji_events,
+                        label: context.l10n('expert_event'),
+                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_event')),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 하단: 급구 알바 + 적용 버튼 (네비게이션 바 바로 위)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.l10n('section_quick_jobs'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _QuickJobCardsSection(colorScheme: colorScheme),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: Text(context.l10n('apply')),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        );
-      },
-    ),
-  );
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSearchBar(BuildContext context) {

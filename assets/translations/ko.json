@@ -38,12 +38,12 @@
   "lang_ko": "한국어",
   "lang_en": "English",
   "lang_lo": "ພາສາລາວ",
-  "expert_cleaning": "청소 / ການອະນາໄມ",
-  "expert_translation": "통번역 / ລາມ-ແປ",
-  "expert_delivery": "배달 / ສົ່ງອາຫານ",
-  "expert_repair": "수리 / ຊ່ອມແປງ",
-  "expert_beauty": "뷰티 / ຄວາມງາມ",
-  "expert_tutoring": "과외 / ການສອນ",
-  "expert_photo": "사진 / ຖ່າຍຮູບ",
-  "expert_event": "이벤트 / ອີເວັນ"
+  "expert_cleaning": "청소",
+  "expert_security": "경비",
+  "expert_delivery": "배달",
+  "expert_repair": "수리",
+  "expert_beauty": "뷰티",
+  "expert_tutoring": "과외",
+  "expert_photo": "사진",
+  "expert_event": "이벤트"
 }

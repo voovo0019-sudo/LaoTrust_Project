@@ -24,12 +24,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: indigoBlue,
         onPrimary: white,
         surface: surfaceLight,
         onSurface: onSurfaceLight,
-        surfaceContainerHighest: const Color(0xFFEEEEEE),
+        surfaceContainerHighest: Color(0xFFEEEEEE),
       ),
       scaffoldBackgroundColor: backgroundLight,
       appBarTheme: const AppBarTheme(
@@ -46,7 +46,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: indigoBlue,
         onPrimary: white,
         surface: surfaceDark,

@@ -45,12 +45,12 @@ class RequestFlowState {
 
   Future<void> persist() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_keyPrefix + 'symptoms', selectedSymptomIds);
-    await prefs.setString(_keyPrefix + 'location', location);
-    await prefs.setString(_keyPrefix + 'wishedTime', wishedTime);
-    await prefs.setString(_keyPrefix + 'extraNote', extraNote);
+    await prefs.setStringList('${_keyPrefix}symptoms', selectedSymptomIds);
+    await prefs.setString('${_keyPrefix}location', location);
+    await prefs.setString('${_keyPrefix}wishedTime', wishedTime);
+    await prefs.setString('${_keyPrefix}extraNote', extraNote);
     if (photoPath != null) {
-      await prefs.setString(_keyPrefix + 'photoPath', photoPath!);
+      await prefs.setString('${_keyPrefix}photoPath', photoPath!);
     }
   }
 
@@ -58,11 +58,11 @@ class RequestFlowState {
     final prefs = await SharedPreferences.getInstance();
     return RequestFlowState(
       category: category,
-      selectedSymptomIds: prefs.getStringList(_keyPrefix + 'symptoms') ?? [],
-      location: prefs.getString(_keyPrefix + 'location') ?? '',
-      wishedTime: prefs.getString(_keyPrefix + 'wishedTime') ?? '',
-      photoPath: prefs.getString(_keyPrefix + 'photoPath'),
-      extraNote: prefs.getString(_keyPrefix + 'extraNote') ?? '',
+      selectedSymptomIds: prefs.getStringList('${_keyPrefix}symptoms') ?? [],
+      location: prefs.getString('${_keyPrefix}location') ?? '',
+      wishedTime: prefs.getString('${_keyPrefix}wishedTime') ?? '',
+      photoPath: prefs.getString('${_keyPrefix}photoPath'),
+      extraNote: prefs.getString('${_keyPrefix}extraNote') ?? '',
     );
   }
 }

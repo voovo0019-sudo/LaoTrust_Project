@@ -22,8 +22,11 @@ class Step1SymptomStep extends StatelessWidget {
 
   void _toggle(String id) {
     final list = List<String>.from(state.selectedSymptomIds);
-    if (list.contains(id)) list.remove(id);
-    else list.add(id);
+    if (list.contains(id)) {
+      list.remove(id);
+    } else {
+      list.add(id);
+    }
     onChanged(state.copyWith(selectedSymptomIds: list));
   }
 

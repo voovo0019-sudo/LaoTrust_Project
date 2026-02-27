@@ -94,50 +94,55 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            const spacing = 14.0;
-                            const count = 4;
-                            final itemWidth = (constraints.maxWidth - spacing * (count - 1)) / count;
-                            return Wrap(
-                              spacing: spacing,
-                              runSpacing: spacing,
-                              children: [
-                                SizedBox(
-                                  width: itemWidth,
-                                  child: _ServiceIcon(
-                                    icon: Icons.ac_unit,
-                                    label: context.l10n('service_ac'),
-                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_ac')),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: itemWidth,
-                                  child: _ServiceIcon(
-                                    icon: Icons.build,
-                                    label: context.l10n('service_household'),
-                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_household')),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: itemWidth,
-                                  child: _ServiceIcon(
-                                    icon: Icons.electrical_services,
-                                    label: context.l10n('service_electric'),
-                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_electric')),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: itemWidth,
-                                  child: _ServiceIcon(
-                                    icon: Icons.plumbing,
-                                    label: context.l10n('service_plumbing'),
-                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_plumbing')),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                        GridView.count(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: [
+                            _ServiceIcon(
+                              icon: Icons.cleaning_services_outlined,
+                              label: context.l10n('expert_cleaning'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_cleaning')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.translate,
+                              label: context.l10n('expert_translation'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_translation')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.delivery_dining,
+                              label: context.l10n('expert_delivery'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_delivery')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.build,
+                              label: context.l10n('expert_repair'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_repair')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.brush,
+                              label: context.l10n('expert_beauty'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_beauty')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.school,
+                              label: context.l10n('expert_tutoring'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_tutoring')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.photo_camera,
+                              label: context.l10n('expert_photo'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_photo')),
+                            ),
+                            _ServiceIcon(
+                              icon: Icons.emoji_events,
+                              label: context.l10n('expert_event'),
+                              onTap: () => _openRequestFlow(context, category: context.l10n('expert_event')),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -242,46 +247,36 @@ class _ServiceIcon extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+          child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         splashColor: colorScheme.primary.withValues(alpha: 0.12),
         highlightColor: colorScheme.primary.withValues(alpha: 0.06),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-                spreadRadius: 0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blue.withOpacity(0.1),
               ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+              child: Icon(icon, color: Colors.blue, size: 26),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: colorScheme.primary, size: 28),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

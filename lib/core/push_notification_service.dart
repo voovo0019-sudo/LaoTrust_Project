@@ -44,12 +44,12 @@ Future<void> initPushNotificationService() async {
     sound: true,
   );
 
-  final token = await FirebaseMessaging.instance.getToken();
-  if (kDebugMode && token != null) {
-    print('[LT-08 푸시] FCM 토큰(일부): ${token.substring(0, 20)}...');
-  }
+  //final token = await FirebaseMessaging.instance.getToken();
+  //if (kDebugMode && token != null) {
+  //  print('[LT-08 푸시] FCM 토큰(일부): ${token.substring(0, 20)}...');
+  //}
 
-  await FirebaseMessaging.instance.subscribeToTopic(kTopicEmergencyDispatch);
+ // await FirebaseMessaging.instance.subscribeToTopic(kTopicEmergencyDispatch);
 }
 
 /// 포그라운드 메시지 수신 시 콜백. UI에서 등록해 사용.

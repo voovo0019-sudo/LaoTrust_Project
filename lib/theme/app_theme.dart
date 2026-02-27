@@ -1,61 +1,33 @@
 import 'package:flutter/material.dart';
 
-/// LT-10 디지털 캡슐 v1.5 · 인디고 블루(#3F51B5) 전역 테마 고정
-/// Global Indigo Blue theme engine. 한/영 주석 병기.
+/// 🏛️ LaoTrust 전용 화이트-블루 테마 엔진 (Constitution v2.0 반영)
 class AppTheme {
-  /// 전역 고정 Primary (LT-10 명시) / Global primary color
-  static const Color indigoBlue = Color(0xFF3F51B5);
-  static const Color indigoBlueLight = Color(0xFF5C6BC0);
+  // 핵심 색상 정의
+  static const Color indigoBlue = Color(0xFF3F51B5); // 신뢰의 인디고 블루
+  static const Color white = Color(0xFFFFFFFF);     // 깨끗한 배경 화이트
 
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color backgroundLight = Color(0xFFF8FAFD);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color onSurfaceLight = Color(0xFF1A1A1A);
-
-  static const Color backgroundDark = Color(0xFF121212);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color onSurfaceDark = Color(0xFFE8E8E8);
-
-  /// 라이트: #3F51B5 전역 고정 / Light theme
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
-        primary: indigoBlue,
-        onPrimary: white,
-        surface: surfaceLight,
-        onSurface: onSurfaceLight,
-        surfaceContainerHighest: const Color(0xFFEEEEEE),
-      ),
-      scaffoldBackgroundColor: backgroundLight,
+      brightness: Brightness.light, 
+      primaryColor: indigoBlue,
+      scaffoldBackgroundColor: white, // 배경 무조건 화이트
+      
       appBarTheme: const AppBarTheme(
-        backgroundColor: indigoBlue,
-        foregroundColor: white,
+        backgroundColor: white,
+        foregroundColor: indigoBlue,
         elevation: 0,
         centerTitle: true,
+      ),
+
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: indigoBlue,
+        brightness: Brightness.light,
+        surface: white,
       ),
     );
   }
 
-  /// 다크: #3F51B5 Primary 유지 / Dark theme
-  static ThemeData get dark {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
-        primary: indigoBlue,
-        onPrimary: white,
-        surface: surfaceDark,
-        onSurface: onSurfaceDark,
-      ),
-      scaffoldBackgroundColor: backgroundDark,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: backgroundDark,
-        foregroundColor: onSurfaceDark,
-        elevation: 0,
-        centerTitle: true,
-      ),
-    );
-  }
+  // 핵심: 다크 모드 요청이 와도 'light' 테마를 반환하여 화이트 유지!
+  static ThemeData get dark => light; 
 }

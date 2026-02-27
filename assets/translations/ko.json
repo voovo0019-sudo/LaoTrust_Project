@@ -11,6 +11,8 @@
   "service_household": "가전",
   "service_electric": "전기",
   "service_plumbing": "배관",
+  "section_expert_headline": "어떤 도움이 필요하세요?",
+  "tag_deadline_soon": "마감 임박",
   "section_quick_jobs": "급구 알바",
   "apply": "적용",
   "submit": "제출",
@@ -23,5 +25,17 @@
   "payment_amount": "결제 금액",
   "payment_success": "결제 완료",
   "payment_success_badge": "결제가 성공적으로 완료되었습니다.",
-  "go_home": "홈으로"
+  "go_home": "홈으로",
+  "job_title_restaurant_server": "식당 서버",
+  "job_title_simple_labor": "단순 노무",
+  "job_title_delivery_helper": "배달 도우미",
+  "location_near_vientiane_hall": "비엔티안 시청 인근",
+  "location_near_that_luang": "타락광장 근처",
+  "location_downtown": "시내 중심가",
+  "salary_15k_per_hour": "15,000 LAK/시간",
+  "salary_negotiable": "협의",
+  "salary_12k_per_hour": "12,000 LAK/시간",
+  "lang_ko": "한국어",
+  "lang_en": "English",
+  "lang_lo": "ພາສາລາວ"
 }

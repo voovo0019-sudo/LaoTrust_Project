@@ -1,4 +1,5 @@
 // =============================================================================
+import 'package:flutter_localizations/flutter_localizations.dart';
 // LT-10 라오트러스트 앱 루트 · Firebase 연동 및 하이브리드 아키텍처
 // Indigo Blue #3F51B5 전역 고정. 하단 탭(Home, Jobs, Chat, Profile) + 상태 보존.
 // 한/영 주석 병기.
@@ -42,10 +43,12 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
   Future<void> _loadLocaleAndStrings() async {
     final locale = await getSavedLocale();
     final strings = await loadStringsForLocale(locale);
-    if (mounted) setState(() {
+    if (mounted) {
+      setState(() {
       _locale = locale;
       _strings = strings;
     });
+    }
   }
 
   void _setThemeMode(ThemeMode mode) {
@@ -57,10 +60,12 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
     if (_locale == locale) return;
     await saveLocale(locale);
     final strings = await loadStringsForLocale(locale);
-    if (mounted) setState(() {
+    if (mounted) {
+      setState(() {
       _locale = locale;
       _strings = strings;
     });
+    }
   }
 
   @override
@@ -69,10 +74,16 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
       title: 'LaoTrust',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: _themeMode,
+      darkTheme: AppTheme.light,
+      themeMode: ThemeMode.light,
       locale: _locale,
       supportedLocales: supportedLocales,
+      // 여기에 75번 줄 바로 아래에 붙여넣으세요!
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) {
         return AppLocalizationsScope(
           locale: _locale,

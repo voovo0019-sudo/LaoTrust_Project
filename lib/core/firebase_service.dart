@@ -2,7 +2,6 @@
 // 지사 인계용: Firestore 오프라인 지속 저장 활성화, Auth 전화번호 로그인 진입점 제공.
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Firebase 초기화 여부. main()에서 초기화 실패 시 false.

@@ -36,9 +36,9 @@ class HomeScreen extends StatelessWidget {
               tooltip: context.l10n('language'),
               onSelected: onLocaleChanged,
               itemBuilder: (context) => [
-                const PopupMenuItem(value: Locale('ko'), child: Text('한국어')),
-                const PopupMenuItem(value: Locale('en'), child: Text('English')),
-                const PopupMenuItem(value: Locale('lo'), child: Text('ພາສາລາວ')),
+                PopupMenuItem(value: const Locale('ko'), child: Text(context.l10n('lang_ko'))),
+                PopupMenuItem(value: const Locale('en'), child: Text(context.l10n('lang_en'))),
+                PopupMenuItem(value: const Locale('lo'), child: Text(context.l10n('lang_lo'))),
               ],
             ),
           if (onThemeModeChanged != null)
@@ -58,102 +58,134 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // 70% 영역: 검색 + 전문가 서비스 그리드
-          Expanded(
-            flex: 70,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSearchBar(context),
-                  const SizedBox(height: 24),
-                  Text(
-                    context.l10n('section_expert_services'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  // 상단: 검색 + 전문가 서비스
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSearchBar(context),
+                        const SizedBox(height: 28),
+                        Text(
+                          context.l10n('section_expert_headline'),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          context.l10n('section_expert_services'),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            const spacing = 14.0;
+                            const count = 4;
+                            final itemWidth = (constraints.maxWidth - spacing * (count - 1)) / count;
+                            return Wrap(
+                              spacing: spacing,
+                              runSpacing: spacing,
+                              children: [
+                                SizedBox(
+                                  width: itemWidth,
+                                  child: _ServiceIcon(
+                                    icon: Icons.ac_unit,
+                                    label: context.l10n('service_ac'),
+                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_ac')),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: itemWidth,
+                                  child: _ServiceIcon(
+                                    icon: Icons.build,
+                                    label: context.l10n('service_household'),
+                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_household')),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: itemWidth,
+                                  child: _ServiceIcon(
+                                    icon: Icons.electrical_services,
+                                    label: context.l10n('service_electric'),
+                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_electric')),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: itemWidth,
+                                  child: _ServiceIcon(
+                                    icon: Icons.plumbing,
+                                    label: context.l10n('service_plumbing'),
+                                    onTap: () => _openRequestFlow(context, category: context.l10n('service_plumbing')),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.95,
-                    children: [
-                      _ServiceIcon(
-                        icon: Icons.ac_unit,
-                        label: context.l10n('service_ac'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('service_ac')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.build,
-                        label: context.l10n('service_household'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('service_household')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.electrical_services,
-                        label: context.l10n('service_electric'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('service_electric')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.plumbing,
-                        label: context.l10n('service_plumbing'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('service_plumbing')),
-                      ),
-                    ],
+                  // 중간 여백: Spacer로 상단/하단을 시원하게 분리 (IntrinsicHeight로 높이 제한)
+                  const Spacer(),
+                  // 하단: 급구 알바 + 적용 버튼 (네비게이션 바 바로 위)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.l10n('section_quick_jobs'),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _QuickJobCardsSection(colorScheme: colorScheme),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: Text(context.l10n('apply')),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          // 30% 영역: 급구 알바 가로 스크롤 + Apply 버튼
-          Expanded(
-            flex: 30,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n('section_quick_jobs'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: _QuickJobCardsSection(colorScheme: colorScheme),
-                  ),
-                  const SizedBox(height: 12),
-                  // Apply 버튼 — 핵심 CTA
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.check_circle_outline),
-                      label: Text(context.l10n('apply')),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        );
+      },
+    ),
+  );
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -194,6 +226,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+/// 숨고 스타일 세련된 카테고리 아이콘 — 아이콘 크기·간격 조정, 화이트 & 인디고 블루
 class _ServiceIcon extends StatelessWidget {
   const _ServiceIcon({
     required this.icon,
@@ -211,34 +244,37 @@ class _ServiceIcon extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        splashColor: colorScheme.primary.withValues(alpha: 0.12),
+        highlightColor: colorScheme.primary.withValues(alpha: 0.06),
         child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
                 spreadRadius: 0,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: colorScheme.primary, size: 32),
-              const SizedBox(height: 4),
+              Icon(icon, color: colorScheme.primary, size: 28),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: colorScheme.onSurface,
                   fontWeight: FontWeight.w500,
                 ),
@@ -252,103 +288,185 @@ class _ServiceIcon extends StatelessWidget {
   }
 }
 
+/// 급구 알바 가로 스크롤 리스트 — PC/모바일 동일 동작
 class _QuickJobCardsSection extends StatelessWidget {
   const _QuickJobCardsSection({required this.colorScheme});
   final ColorScheme colorScheme;
 
-  static const List<Map<String, String>> _cards = [
-    {'title': '식당 서버', 'location': '비엔티안 시청 인근', 'salary': '15,000 LAK/시간'},
-    {'title': '단순 노무', 'location': '타락광장 근처', 'salary': '협의'},
-    {'title': '배달 도우미', 'location': '시내 중심가', 'salary': '12,000 LAK/시간'},
+  static const List<Map<String, dynamic>> _cards = [
+    {'titleKey': 'job_title_restaurant_server', 'locationKey': 'location_near_vientiane_hall', 'salaryKey': 'salary_15k_per_hour', 'urgent': true},
+    {'titleKey': 'job_title_simple_labor', 'locationKey': 'location_near_that_luang', 'salaryKey': 'salary_negotiable', 'urgent': false},
+    {'titleKey': 'job_title_delivery_helper', 'locationKey': 'location_downtown', 'salaryKey': 'salary_12k_per_hour', 'urgent': true},
   ];
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      itemCount: _cards.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 12),
-      itemBuilder: (context, index) {
-        final c = _cards[index];
-        return _QuickJobCard(
-          title: c['title']!,
-          location: c['location']!,
-          salary: c['salary']!,
-          onTap: () {},
-        );
-      },
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          for (int i = 0; i < _cards.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Builder(
+              builder: (context) {
+                final c = _cards[i];
+                return _QuickJobCard(
+                  titleKey: c['titleKey']! as String,
+                  locationKey: c['locationKey']! as String,
+                  salaryKey: c['salaryKey']! as String,
+                  isUrgent: c['urgent']! as bool,
+                  onTap: () {},
+                );
+              },
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
+/// 알바몬 스타일 카드 — 전체 너비, 높이 내용 기반, 3줄+ 허용, 라오어 여유 패딩
 class _QuickJobCard extends StatelessWidget {
   const _QuickJobCard({
-    required this.title,
-    required this.location,
-    required this.salary,
+    required this.titleKey,
+    required this.locationKey,
+    required this.salaryKey,
+    required this.isUrgent,
     required this.onTap,
   });
-  final String title;
-  final String location;
-  final String salary;
+  final String titleKey;
+  final String locationKey;
+  final String salaryKey;
+  final bool isUrgent;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isLao = Localizations.localeOf(context).languageCode == 'lo';
+    final padding = isLao ? 12.0 : 10.0;
+    // 슬림 카드: 고정 가로 200, 세로 120 (박스 다이어트)
+    const double cardWidth = 200.0;
+    const double cardHeight = 120.0;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 260,
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.12),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+        borderRadius: BorderRadius.circular(14),
+        splashColor: colorScheme.primary.withValues(alpha: 0.1),
+        highlightColor: colorScheme.primary.withValues(alpha: 0.05),
+        child: ClipRect(
+          child: Container(
+            width: cardWidth,
+            height: cardHeight,
+            padding: EdgeInsets.fromLTRB(padding, padding, padding, padding),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.15), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 제목 + 급구 태그 (한 줄, 넘치면 ellipsis)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
+                    Expanded(
+                      child: Text(
+                        context.l10n(titleKey),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$location · $salary',
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    if (isUrgent)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            context.l10n('tag_deadline_soon'),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // 위치 (한 줄)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 14, color: colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        context.l10n(locationKey),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: colorScheme.primary),
-            ],
+                const Spacer(),
+                // 급여 + 화살표 (한 줄)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.l10n(salaryKey),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios, size: 12, color: colorScheme.primary),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

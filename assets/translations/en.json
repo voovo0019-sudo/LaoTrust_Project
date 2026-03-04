@@ -45,5 +45,6 @@
   "expert_beauty": "Beauty",
   "expert_tutoring": "Tutoring",
   "expert_photo": "Photo",
-  "expert_event": "Event"
+  "expert_event": "Event",
+  "no_data_yet": "No registered data at the moment."
 }

@@ -6,6 +6,9 @@
 import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../features/request_flow/request_flow_screen.dart';
+import '../services/firebase_service.dart';
+
+final FirebaseService _firebaseService = FirebaseService();
 
 /// 홈 화면: 70:30 동선. 상단 70% 전문가 서비스 그리드, 하단 30% 급구 알바 + 적용 버튼.
 class HomeScreen extends StatelessWidget {
@@ -89,57 +92,63 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GridView.count(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      // 1행: 청소, 경비, 수리, 배달
-                      _ServiceIcon(
-                        icon: Icons.cleaning_services_outlined,
-                        label: context.l10n('expert_cleaning'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_cleaning')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.shield,
-                        label: context.l10n('expert_security'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_security')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.build,
-                        label: context.l10n('expert_repair'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_repair')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.delivery_dining,
-                        label: context.l10n('expert_delivery'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_delivery')),
-                      ),
-                      // 2행: 뷰티, 과외, 사진, 이벤트
-                      _ServiceIcon(
-                        icon: Icons.brush,
-                        label: context.l10n('expert_beauty'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_beauty')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.school,
-                        label: context.l10n('expert_tutoring'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_tutoring')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.photo_camera,
-                        label: context.l10n('expert_photo'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_photo')),
-                      ),
-                      _ServiceIcon(
-                        icon: Icons.emoji_events,
-                        label: context.l10n('expert_event'),
-                        onTap: () => _openRequestFlow(context, category: context.l10n('expert_event')),
-                      ),
-                    ],
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: _firebaseService.getExpertServices(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text(
+                              context.l10n('no_data_yet'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final list = snapshot.data ?? [];
+                      if (list.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text(
+                              context.l10n('no_data_yet'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return GridView.count(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: list.map<Widget>((e) {
+                          final icon = _iconFromString(e['icon'] as String?);
+                          final label = _labelFromExpertDoc(e, context);
+                          final category = (e['category'] as String?) ?? label;
+                          return _ServiceIcon(
+                            icon: icon,
+                            label: label,
+                            onTap: () => _openRequestFlow(context, category: category),
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -160,7 +169,50 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _QuickJobCardsSection(colorScheme: colorScheme),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: _firebaseService.getQuickJobs(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text(
+                              context.l10n('no_data_yet'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final list = snapshot.data ?? [];
+                      if (list.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text(
+                              context.l10n('no_data_yet'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return _QuickJobCardsSection(
+                        colorScheme: colorScheme,
+                        firebaseItems: list,
+                      );
+                    },
+                  ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -222,6 +274,39 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+IconData _iconFromString(String? name) {
+  switch (name?.toLowerCase()) {
+    case 'cleaning_services_outlined':
+      return Icons.cleaning_services_outlined;
+    case 'shield':
+      return Icons.shield;
+    case 'build':
+      return Icons.build;
+    case 'delivery_dining':
+      return Icons.delivery_dining;
+    case 'brush':
+      return Icons.brush;
+    case 'school':
+      return Icons.school;
+    case 'photo_camera':
+      return Icons.photo_camera;
+    case 'emoji_events':
+      return Icons.emoji_events;
+    default:
+      return Icons.category;
+  }
+}
+
+String _labelFromExpertDoc(Map<String, dynamic> doc, BuildContext context) {
+  final locale = Localizations.localeOf(context).languageCode;
+  if (locale == 'lo' && doc['label_lo'] != null) return doc['label_lo'] as String;
+  if (locale == 'ko' && doc['label_ko'] != null) return doc['label_ko'] as String;
+  if (doc['label'] != null) return doc['label'] as String;
+  final key = doc['labelKey'] as String?;
+  if (key != null) return context.l10n(key);
+  return doc['label_ko'] as String? ?? doc['label_lo'] as String? ?? '';
+}
+
 /// 숨고 스타일 세련된 카테고리 아이콘 — 아이콘 크기·간격 조정, 화이트 & 인디고 블루
 class _ServiceIcon extends StatelessWidget {
   const _ServiceIcon({
@@ -274,10 +359,14 @@ class _ServiceIcon extends StatelessWidget {
   }
 }
 
-/// 급구 알바 가로 스크롤 리스트 — PC/모바일 동일 동작
+/// 급구 알바 가로 스크롤 리스트 — PC/모바일 동일 동작 (Firebase 실시간 연동)
 class _QuickJobCardsSection extends StatelessWidget {
-  const _QuickJobCardsSection({required this.colorScheme});
+  const _QuickJobCardsSection({
+    required this.colorScheme,
+    this.firebaseItems,
+  });
   final ColorScheme colorScheme;
+  final List<Map<String, dynamic>>? firebaseItems;
 
   static const List<Map<String, dynamic>> _cards = [
     {'titleKey': 'job_title_restaurant_server', 'locationKey': 'location_near_vientiane_hall', 'salaryKey': 'salary_15k_per_hour', 'urgent': true},
@@ -287,21 +376,26 @@ class _QuickJobCardsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final items = firebaseItems ?? _cards;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          for (int i = 0; i < _cards.length; i++) ...[
+          for (int i = 0; i < items.length; i++) ...[
             if (i > 0) const SizedBox(width: 12),
             Builder(
               builder: (context) {
-                final c = _cards[i];
+                final c = items[i];
+                final isFromFirebase = firebaseItems != null;
                 return _QuickJobCard(
-                  titleKey: c['titleKey']! as String,
-                  locationKey: c['locationKey']! as String,
-                  salaryKey: c['salaryKey']! as String,
-                  isUrgent: c['urgent']! as bool,
+                  titleKey: c['titleKey'] as String?,
+                  locationKey: c['locationKey'] as String?,
+                  salaryKey: c['salaryKey'] as String?,
+                  title: isFromFirebase ? (c['title'] as String?) : null,
+                  location: isFromFirebase ? (c['location'] as String?) : null,
+                  salary: isFromFirebase ? (c['salary'] as String?) : null,
+                  isUrgent: (c['urgent'] as bool?) ?? false,
                   onTap: () {},
                 );
               },
@@ -313,18 +407,24 @@ class _QuickJobCardsSection extends StatelessWidget {
   }
 }
 
-/// 알바몬 스타일 카드 — 전체 너비, 높이 내용 기반, 3줄+ 허용, 라오어 여유 패딩
+/// 알바몬 스타일 카드 — 전체 너비, 높이 내용 기반, 3줄+ 허용, 라오어 여유 패딩 (Firebase 직렬 표시 지원)
 class _QuickJobCard extends StatelessWidget {
   const _QuickJobCard({
-    required this.titleKey,
-    required this.locationKey,
-    required this.salaryKey,
+    this.titleKey,
+    this.locationKey,
+    this.salaryKey,
+    this.title,
+    this.location,
+    this.salary,
     required this.isUrgent,
     required this.onTap,
   });
-  final String titleKey;
-  final String locationKey;
-  final String salaryKey;
+  final String? titleKey;
+  final String? locationKey;
+  final String? salaryKey;
+  final String? title;
+  final String? location;
+  final String? salary;
   final bool isUrgent;
   final VoidCallback onTap;
 
@@ -334,9 +434,11 @@ class _QuickJobCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isLao = Localizations.localeOf(context).languageCode == 'lo';
     final padding = isLao ? 12.0 : 10.0;
-    // 슬림 카드: 고정 가로 200, 세로 120 (박스 다이어트)
     const double cardWidth = 200.0;
     const double cardHeight = 120.0;
+    final displayTitle = title ?? (titleKey != null ? context.l10n(titleKey!) : '');
+    final displayLocation = location ?? (locationKey != null ? context.l10n(locationKey!) : '');
+    final displaySalary = salary ?? (salaryKey != null ? context.l10n(salaryKey!) : '');
 
     return Material(
       color: Colors.transparent,
@@ -372,13 +474,12 @@ class _QuickJobCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 제목 + 급구 태그 (한 줄, 넘치면 ellipsis)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Text(
-                        context.l10n(titleKey),
+                        displayTitle,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onSurface,
@@ -412,7 +513,6 @@ class _QuickJobCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                // 위치 (한 줄)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -420,7 +520,7 @@ class _QuickJobCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        context.l10n(locationKey),
+                        displayLocation,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontSize: 11,
@@ -432,13 +532,12 @@ class _QuickJobCard extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
-                // 급여 + 화살표 (한 줄)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
-                        context.l10n(salaryKey),
+                        displaySalary,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: colorScheme.primary,

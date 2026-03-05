@@ -21,7 +21,7 @@ class JobsScreen extends StatelessWidget {
             icon: const Icon(Icons.map),
             tooltip: '지도 보기 / Map view',
             onPressed: () {
-              // TODO: 지도 화면 전환 (GeoPoint 연동)
+              // 지도 화면 전환 (GeoPoint 연동) 예정
             },
           ),
         ],

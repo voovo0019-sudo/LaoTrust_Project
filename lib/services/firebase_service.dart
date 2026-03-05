@@ -2,8 +2,8 @@
 // 전문가 서비스 / 급구 알바 데이터 계층 전용. UI 코드 없음.
 // =============================================================================
 
-import '../core/firebase_service.dart';
-import '../data/firestore_schema.dart';
+import 'package:lao_trust/core/firebase_service.dart';
+import 'package:lao_trust/data/firestore_schema.dart';
 
 /// 전문가 서비스·급구 알바 Firestore 스트림 제공. UI는 사용처(예: HomeScreen)에서만 처리.
 class FirebaseService {

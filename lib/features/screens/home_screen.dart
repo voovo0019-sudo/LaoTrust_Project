@@ -3,8 +3,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
-
-import '../../services/firebase_service.dart';
+import 'package:lao_trust/services/firebase_service.dart';
 
 /// 홈 화면: 전문가 서비스 그리드 + 급구 알바 리스트. UI만 담당.
 class HomeScreen extends StatelessWidget {

@@ -46,5 +46,21 @@
   "expert_tutoring": "Tutoring",
   "expert_photo": "Photo",
   "expert_event": "Event",
-  "no_data_yet": "No registered data at the moment."
+  "no_data_yet": "No registered data at the moment.",
+  "application_complete_title": "Application Complete",
+  "application_complete_message": "Your application has been submitted to the expert.",
+  "settings_my_profile": "My Profile",
+  "settings_account": "Account Settings",
+  "settings_logout": "Log out",
+  "notif_system": "System Notices",
+  "notif_activity": "Activity Alerts",
+  "jobs_header": "Real-time Jobs Across Laos",
+  "chat_header": "1:1 Consult with Expert",
+  "profile_header": "My Account",
+  "profile_menu_payment": "Points / Payment Methods",
+  "profile_menu_my_requests": "My Applications",
+  "profile_menu_customer_service": "Customer Service",
+  "job_filter_region": "Region",
+  "job_filter_type": "Job Type",
+  "job_apply": "Apply"
 }

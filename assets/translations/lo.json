@@ -46,5 +46,21 @@
   "expert_tutoring": "ການສອນ",
   "expert_photo": "ຖ່າຍຮູບ",
   "expert_event": "ອີເວັນ",
-  "no_data_yet": "ປະຈຸບັນບໍ່ມີຂໍ້ມູນລົງທະບຽນ."
+  "no_data_yet": "ປະຈຸບັນບໍ່ມີຂໍ້ມູນລົງທະບຽນ.",
+  "application_complete_title": "ສະໝັກສຳເລັດ",
+  "application_complete_message": "ຄຳສະໝັກຂອງທ່ານຖືກສົ່ງໄປຫາຊ່ຽວຊານແລ້ວ.",
+  "settings_my_profile": "ໂປຣໄຟລ໌ຂອງຂ້ອຍ",
+  "settings_account": "ຕັ້ງຄ່າບັນຊີ",
+  "settings_logout": "ອອກຈາກລະບົບ",
+  "notif_system": "ແຈ້ງເຕືອນລະບົບ",
+  "notif_activity": "ແຈ້ງເຕືອນກິດຈະກຳ",
+  "jobs_header": "ວຽກທົດສັງຈິງທົ່ວລາວ",
+  "chat_header": "ປຶກສານອກຕົວກັບຊ່ຽວຊານ",
+  "profile_header": "ຈັດການຂໍ້ມູນຂອງຂ້ອຍ",
+  "profile_menu_payment": "ຄະແນນ / ວິທີຊຳລະ",
+  "profile_menu_my_requests": "ຄຳສະໝັກຂອງຂ້ອຍ",
+  "profile_menu_customer_service": "ບໍລິການລູກຄ້າ",
+  "job_filter_region": "ພາກພື້ນ",
+  "job_filter_type": "ປະເພດວຽກ",
+  "job_apply": "ສະໝັກ"
 }

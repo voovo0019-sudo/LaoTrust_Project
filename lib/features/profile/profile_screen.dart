@@ -1,6 +1,6 @@
 // =============================================================================
-// LT-09 Feature: profile — 내 정보, Verified 배지, 인증 신청/전문가 대시보드 진입
-// Trust-first: Verified 상태 표시. Handover: 한/영 주석.
+// LT-09 Feature: profile — 내 정보 관리, [포인트/결제], [나의 신청 현황], [고객센터]
+// Trust-first: Verified 상태 표시. 유지: 하단 내비에서 진입.
 // =============================================================================
 
 import 'package:flutter/material.dart';
@@ -38,14 +38,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
         title: Text(context.l10n('profile')),
+        centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
+          Text(
+            context.l10n('profile_header'),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
           _buildProfileHeader(theme, colorScheme),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          _buildMenuTile(
+            context,
+            icon: Icons.account_balance_wallet,
+            title: context.l10n('profile_menu_payment'),
+            subtitle: '포인트 충전 및 결제 수단 등록',
+            onTap: () => Navigator.pushNamed(context, bcelOnepayRouteName).then((_) => _loadVerified()),
+          ),
+          _buildMenuTile(
+            context,
+            icon: Icons.assignment,
+            title: context.l10n('profile_menu_my_requests'),
+            subtitle: '신청한 서비스 진행 현황',
+            onTap: () {},
+          ),
+          _buildMenuTile(
+            context,
+            icon: Icons.support_agent,
+            title: context.l10n('profile_menu_customer_service'),
+            subtitle: '문의 및 도움말',
+            onTap: () {},
+          ),
+          const SizedBox(height: 16),
           _buildMenuTile(
             context,
             icon: Icons.verified,
@@ -66,7 +100,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -115,8 +160,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     VoidCallback? onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ListTile(
         leading: Icon(icon, color: colorScheme.primary),
         title: Text(title),

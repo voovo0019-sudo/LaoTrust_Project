@@ -46,5 +46,21 @@
   "expert_tutoring": "과외",
   "expert_photo": "사진",
   "expert_event": "이벤트",
-  "no_data_yet": "현재 등록된 정보가 없습니다."
+  "no_data_yet": "현재 등록된 정보가 없습니다.",
+  "application_complete_title": "신청 완료",
+  "application_complete_message": "전문가에게 신청이 접수되었습니다.",
+  "settings_my_profile": "내 프로필",
+  "settings_account": "계정 설정",
+  "settings_logout": "로그아웃",
+  "notif_system": "시스템 공지",
+  "notif_activity": "활동 알림",
+  "jobs_header": "라오스 전역의 실시간 일자리",
+  "chat_header": "전문가와 1:1 상담",
+  "profile_header": "내 정보 관리",
+  "profile_menu_payment": "포인트/결제 수단 관리",
+  "profile_menu_my_requests": "나의 신청 현황",
+  "profile_menu_customer_service": "고객센터",
+  "job_filter_region": "지역",
+  "job_filter_type": "직종",
+  "job_apply": "지원하기"
 }

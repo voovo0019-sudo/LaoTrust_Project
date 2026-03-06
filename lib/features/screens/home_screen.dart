@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
+import '../../core/app_localizations.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -73,15 +74,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  /// 3단계 [다음 단계로] 클릭 시: 완료 다이얼로그 후 메인으로 복귀.
-  /// 향후 확장: 결제 단계, 위치 정보 입력 등 추가 가능.
+  /// 3단계 [다음 단계로] 클릭 시: 신청 완료 알림창 후 메인 복귀.
+  /// 확장성 코드 매립:
+  /// - [결제 시스템] 연동: 여기서 결제 단계 화면으로 이동하거나, 결제 API 호출 전 상태 저장.
+  /// - [GPS 위치 정보] 연동: 신청 전/후 사용자 위치 수집 및 서버 전송 로직 추가.
+  /// - [회원가입] 연동: 비로그인 사용자일 경우 로그인/회원가입 유도 후 신청 완료 처리.
   void _onStep3Submit() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('접수 완료'),
-        content: const Text('전문가에게 신청이 접수되었습니다.'),
+        title: Text(context.l10n('application_complete_title')),
+        content: Text(context.l10n('application_complete_message')),
         actions: [
           TextButton(
             onPressed: () {
@@ -94,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _etcController.clear();
               });
             },
-            child: const Text('확인'),
+            child: Text(context.l10n('confirm')),
           ),
         ],
       ),
@@ -128,22 +132,33 @@ class _HomeScreenState extends State<HomeScreen> {
         if (widget.onLocaleChanged != null)
           PopupMenuButton<Locale>(
             icon: const Icon(Icons.public, color: Colors.white),
-            tooltip: '언어 선택',
+            tooltip: context.l10n('language'),
             color: Colors.white,
             onSelected: widget.onLocaleChanged!,
             itemBuilder: (context) => [
-              const PopupMenuItem(value: Locale('ko'), child: Text('한국어')),
-              const PopupMenuItem(value: Locale('lo'), child: Text('ພາສາລາວ')),
-              const PopupMenuItem(value: Locale('en'), child: Text('English')),
+              PopupMenuItem(value: const Locale('ko'), child: Text(context.l10n('lang_ko'))),
+              PopupMenuItem(value: const Locale('lo'), child: Text(context.l10n('lang_lo'))),
+              PopupMenuItem(value: const Locale('en'), child: Text(context.l10n('lang_en'))),
             ],
           ),
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.settings, color: Colors.white),
-          onPressed: () {},
+          color: Colors.white,
+          onSelected: (_) {},
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'profile', child: Text(context.l10n('settings_my_profile'))),
+            PopupMenuItem(value: 'account', child: Text(context.l10n('settings_account'))),
+            PopupMenuItem(value: 'logout', child: Text(context.l10n('settings_logout'))),
+          ],
         ),
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.notifications_none, color: Colors.white),
-          onPressed: () {},
+          color: Colors.white,
+          onSelected: (_) {},
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'system', child: Text(context.l10n('notif_system'))),
+            PopupMenuItem(value: 'activity', child: Text(context.l10n('notif_activity'))),
+          ],
         ),
       ],
     );
@@ -172,14 +187,24 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '어떤 도움이 필요하세요?',
-                  style: TextStyle(
+                _buildSearchBar(context),
+                const SizedBox(height: 20),
+                Text(
+                  context.l10n('section_expert_headline'),
+                  style: const TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n('section_expert_services'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 15),
                 _buildCategoryGrid(),
                 const SizedBox(height: 40),
                 _buildQuickJobSection(),
@@ -188,12 +213,43 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        _buildMainApplyButton(),
+        _buildMainApplyButton(context),
       ],
     );
   }
 
-  Widget _buildMainApplyButton() {
+  /// 상단바 바로 아래 하얀색 배경 검색창 (유지)
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search, color: Colors.grey.shade600, size: 22),
+          const SizedBox(width: 10),
+          Text(
+            context.l10n('search_placeholder'),
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainApplyButton(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -209,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(28),
               ),
             ),
-            child: const Text('적용', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(context.l10n('apply'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ),
       ),
@@ -470,33 +526,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// 사령관 특별 지시: 데이터 부재 시에도 Mock 3종(식당 서버, 단순 노무, 카페 알바) 무조건 표시.
+  static const List<Map<String, String>> _mockQuickJobs = [
+    {'title': '식당 서버', 'loc': '비엔티안 시청 인근', 'tag': '급구'},
+    {'title': '단순 노무', 'loc': '타락광장 근처', 'tag': '협의'},
+    {'title': '카페 알바', 'loc': '시내 중심가', 'tag': '신규'},
+  ];
+
   Widget _buildQuickJobSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Text(
-            '급구 알바',
-            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+            context.l10n('section_quick_jobs'),
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 15),
         StreamBuilder<List<Map<String, dynamic>>>(
           stream: _firebaseService.getQuickJobs(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const SizedBox(
-                height: 180,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            final jobs = snapshot.data!;
-            if (jobs.isEmpty) {
-              return const SizedBox(
-                height: 180,
-                child: Center(child: Text('현재 급구 알바가 없습니다.')),
-              );
+            final List<Map<String, dynamic>> jobs;
+            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              jobs = snapshot.data!;
+            } else {
+              jobs = _mockQuickJobs.map((m) => {
+                'title': m['title'],
+                'loc': m['loc'],
+                'tag': m['tag'],
+              }).toList();
             }
             return Column(
               children: [
@@ -534,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                job['tag'] ?? '신규',
+                                job['tag']?.toString() ?? '신규',
                                 style: const TextStyle(
                                   color: Colors.red,
                                   fontWeight: FontWeight.bold,
@@ -543,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const Spacer(),
                               Text(
-                                job['title'] ?? '',
+                                job['title']?.toString() ?? '',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
@@ -578,7 +638,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: _currentPage == index
                             ? const Color(0xFF1E3A8A)
                             : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(28),
                       ),
                     ),
                   ),

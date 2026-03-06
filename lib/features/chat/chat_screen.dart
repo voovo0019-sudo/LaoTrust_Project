@@ -41,7 +41,7 @@ class ChatScreen extends StatelessWidget {
             onTap: () {},
           ),
           _ChatTile(
-            name: '배관 수리 김师傅',
+            name: '배관 수리 김',
             lastMessage: '내일 오전 가능합니다.',
             time: '어제',
             unreadCount: 0,

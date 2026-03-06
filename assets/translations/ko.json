@@ -100,5 +100,9 @@
 
   "job_title_cafe_part_time": "카페 알바",
   "job_detail_location": "위치",
-  "job_detail_salary": "급여"
+  "job_detail_salary": "급여",
+  "job_detail_description": "상세 내용",
+  "job_detail_restaurant_server": "주말 포함 가능자 우대, 초보 가능",
+  "job_detail_simple_labor": "단순 작업 보조, 안전화 착용",
+  "job_detail_cafe_part_time": "주문/서빙, 밝은 응대 가능자"
 }

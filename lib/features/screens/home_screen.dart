@@ -23,8 +23,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   // 유지(스와이프+Peeking): 폭은 UI Diet 목적에 맞게 조정 가능하지만,
-  // 기존 요구사항에 맞춰 peeking 감을 유지하기 위해 0.88을 유지.
-  final PageController _pageController = PageController(viewportFraction: 0.88);
+  // 사령관 지침(초슬림): viewportFraction을 0.65 정도로 조절.
+  final PageController _pageController = PageController(viewportFraction: 0.65);
 
   HomeView _currentView = HomeView.main;
   // 선택 상태는 "표시 문자열"이 아닌 "키/ID"로 보관하여 언어 변경 시에도 상태가 깨지지 않게 한다.
@@ -215,9 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 15),
                 _buildCategoryGrid(),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 _buildQuickJobSection(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -266,20 +266,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainApplyButton(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+        child: Center(
+          child: SizedBox(
+            width: 140,
+            height: 38,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: Text(
+                context.l10n('apply'),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
               ),
             ),
-            child: Text(context.l10n('apply'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ),
       ),
@@ -567,16 +576,19 @@ class _HomeScreenState extends State<HomeScreen> {
       'titleKey': 'job_title_restaurant_server',
       'locKey': 'location_near_vientiane_hall',
       'salaryKey': 'salary_15k_per_hour',
+      'detailKey': 'job_detail_restaurant_server',
     },
     {
       'titleKey': 'job_title_simple_labor',
       'locKey': 'location_near_that_luang',
       'salaryKey': 'salary_negotiable',
+      'detailKey': 'job_detail_simple_labor',
     },
     {
       'titleKey': 'job_title_cafe_part_time',
       'locKey': 'location_downtown',
       'salaryKey': 'salary_12k_per_hour',
+      'detailKey': 'job_detail_cafe_part_time',
     },
   ];
 
@@ -599,6 +611,11 @@ class _HomeScreenState extends State<HomeScreen> {
     '12,000 LAK/시간': 'salary_12k_per_hour',
     '협의': 'salary_negotiable',
   };
+  static const Map<String, String> _jobDetailValueToKey = {
+    '식당 서버': 'job_detail_restaurant_server',
+    '단순 노무': 'job_detail_simple_labor',
+    '카페 알바': 'job_detail_cafe_part_time',
+  };
 
   String _localizedFromMaybeKey(BuildContext context, Object? maybeKeyOrValue, Map<String, String> valueToKey) {
     if (maybeKeyOrValue == null) return '';
@@ -607,7 +624,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return key == null ? raw : context.l10n(key);
   }
 
-  void _showQuickJobDetailsDialog(BuildContext context, {required String title, required String location, required String salary}) {
+  void _showQuickJobDetailsDialog(BuildContext context, {required String title, required String location, required String salary, required String detail}) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -619,6 +636,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('${context.l10n('job_detail_location')}: $location'),
             const SizedBox(height: 8),
             Text('${context.l10n('job_detail_salary')}: $salary'),
+            const SizedBox(height: 8),
+            Text('${context.l10n('job_detail_description')}: $detail'),
           ],
         ),
         actions: [
@@ -654,13 +673,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 'titleKey': m['titleKey'],
                 'locKey': m['locKey'],
                 'salaryKey': m['salaryKey'],
+                'detailKey': m['detailKey'],
               }).toList();
             }
             return Column(
               children: [
                 SizedBox(
                   // UI Diet: 카드가 화면을 가리지 않도록 높이를 절반 수준으로 축소
-                  height: 92,
+                  height: 76,
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (page) {
@@ -678,6 +698,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       final salary = job.containsKey('salaryKey')
                           ? context.l10n(job['salaryKey']?.toString() ?? '')
                           : _localizedFromMaybeKey(context, job['salary'], _jobSalaryValueToKey);
+                      final detail = job.containsKey('detailKey')
+                          ? context.l10n(job['detailKey']?.toString() ?? '')
+                          : _localizedFromMaybeKey(context, title, _jobDetailValueToKey);
                       return AnimatedScale(
                         scale: _currentPage == index ? 1.0 : 0.94,
                         duration: const Duration(milliseconds: 300),
@@ -705,6 +728,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               title: title,
                               location: location,
                               salary: salary,
+                              detail: detail,
                             ),
                             child: Row(
                               children: [
@@ -732,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     title,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,

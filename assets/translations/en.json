@@ -100,5 +100,9 @@
 
   "job_title_cafe_part_time": "Cafe Part-time",
   "job_detail_location": "Location",
-  "job_detail_salary": "Salary"
+  "job_detail_salary": "Salary",
+  "job_detail_description": "Details",
+  "job_detail_restaurant_server": "Weekend availability preferred, no experience required",
+  "job_detail_simple_labor": "Simple work assistance, safety shoes required",
+  "job_detail_cafe_part_time": "Order/serving, friendly communication"
 }

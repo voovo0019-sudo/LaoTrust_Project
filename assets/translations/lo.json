@@ -100,5 +100,9 @@
 
   "job_title_cafe_part_time": "ວຽກພາດໄທມ໌ຮ້ານກາເຟ",
   "job_detail_location": "ສະຖານທີ່",
-  "job_detail_salary": "ຄ່າແຮງ"
+  "job_detail_salary": "ຄ່າແຮງ",
+  "job_detail_description": "ລາຍລະອຽດ",
+  "job_detail_restaurant_server": "ຖ້າວ່າງວັນສຸດສັບດາ ຈະໄດ້ຮັບພິຈາລະນາ, ມືໃໝ່ໄດ້",
+  "job_detail_simple_labor": "ຊ່ວຍວຽກງ່າຍໆ, ຕ້ອງໃສ່ຮອງເທົ້ານິລະໄພ",
+  "job_detail_cafe_part_time": "ຮັບອໍເດີ/ເສີບ, ຕ້ອງສື່ສານດີ"
 }

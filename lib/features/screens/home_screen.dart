@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
+/// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
 enum HomeView { main, subCategory, symptoms }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.locale,
+    this.onLocaleChanged,
+  });
+
+  final Locale? locale;
+  final ValueChanged<Locale>? onLocaleChanged;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -65,14 +73,45 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// 3단계 [다음 단계로] 클릭 시: 완료 다이얼로그 후 메인으로 복귀.
+  /// 향후 확장: 결제 단계, 위치 정보 입력 등 추가 가능.
+  void _onStep3Submit() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('접수 완료'),
+        content: const Text('전문가에게 신청이 접수되었습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _currentView = HomeView.main;
+                _selectedCategory = '';
+                _selectedSubCategory = '';
+                _selectedSymptoms.clear();
+                _etcController.clear();
+              });
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const Color _appBarBlue = Color(0xFF1E3A8A);
+
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.white,
+      backgroundColor: _appBarBlue,
+      foregroundColor: Colors.white,
+      surfaceTintColor: _appBarBlue,
       elevation: 0,
       leading: _currentView != HomeView.main
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
               onPressed: _goBack,
             )
           : null,
@@ -80,13 +119,30 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentView == HomeView.main ? 'LAO TRUST 🛡️' : _selectedCategory,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          color: Color(0xFF1E3A8A),
+          color: Colors.white,
+          fontSize: 18,
         ),
       ),
       centerTitle: true,
       actions: [
+        if (widget.onLocaleChanged != null)
+          PopupMenuButton<Locale>(
+            icon: const Icon(Icons.public, color: Colors.white),
+            tooltip: '언어 선택',
+            color: Colors.white,
+            onSelected: widget.onLocaleChanged!,
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: Locale('ko'), child: Text('한국어')),
+              const PopupMenuItem(value: Locale('lo'), child: Text('ພາສາລາວ')),
+              const PopupMenuItem(value: Locale('en'), child: Text('English')),
+            ],
+          ),
         IconButton(
-          icon: const Icon(Icons.notifications_none),
+          icon: const Icon(Icons.settings, color: Colors.white),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.notifications_none, color: Colors.white),
           onPressed: () {},
         ),
       ],
@@ -105,18 +161,57 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMainContent() {
-    return SingleChildScrollView(
+    return Column(
       key: const ValueKey('main'),
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          _buildCategoryGrid(),
-          const SizedBox(height: 40),
-          _buildQuickJobSection(),
-          const SizedBox(height: 40),
-        ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '어떤 도움이 필요하세요?',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildCategoryGrid(),
+                const SizedBox(height: 40),
+                _buildQuickJobSection(),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+        _buildMainApplyButton(),
+      ],
+    );
+  }
+
+  Widget _buildMainApplyButton() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E3A8A),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+            ),
+            child: const Text('적용', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+        ),
       ),
     );
   }
@@ -133,65 +228,52 @@ class _HomeScreenState extends State<HomeScreen> {
       {'name': '이벤트', 'icon': Icons.celebration, 'color': Colors.indigo},
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '전문가 서비스',
-            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 18,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: services.length,
-            itemBuilder: (context, index) {
-              final s = services[index];
-              final Color color = s['color'] as Color;
-              return InkWell(
-                onTap: () {
-                  if (s['name'] == '수리') {
-                    setState(() {
-                      _selectedCategory = '수리';
-                      _currentView = HomeView.subCategory;
-                    });
-                  }
-                },
-                borderRadius: BorderRadius.circular(22),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 65,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                      child: Icon(s['icon'] as IconData, color: color, size: 30),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      s['name'] as String,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 18,
+        crossAxisSpacing: 18,
+        childAspectRatio: 0.85,
       ),
+      itemCount: services.length,
+      itemBuilder: (context, index) {
+        final s = services[index];
+        final Color color = s['color'] as Color;
+        return InkWell(
+          onTap: () {
+            if (s['name'] == '수리') {
+              setState(() {
+                _selectedCategory = '수리';
+                _currentView = HomeView.subCategory;
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(28),
+          child: Column(
+            children: [
+              Container(
+                width: 65,
+                height: 65,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Icon(s['icon'] as IconData, color: color, size: 30),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                s['name'] as String,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -288,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 15),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(28),
                   child: const LinearProgressIndicator(
                     value: 0.33,
                     minHeight: 6,
@@ -316,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(28),
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xFF1E3A8A)
@@ -332,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: isSelected,
                 activeColor: const Color(0xFF1E3A8A),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(28),
                 ),
                 onChanged: (val) {
                   setState(() {
@@ -357,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(28),
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.all(20),
@@ -369,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             height: 60,
             child: ElevatedButton(
-              onPressed: _selectedSymptoms.isNotEmpty ? () {} : null,
+              onPressed: _selectedSymptoms.isNotEmpty ? _onStep3Submit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E3A8A),
                 foregroundColor: Colors.white,

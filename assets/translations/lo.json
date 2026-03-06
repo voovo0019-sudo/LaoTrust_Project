@@ -62,5 +62,43 @@
   "profile_menu_customer_service": "ບໍລິການລູກຄ້າ",
   "job_filter_region": "ພາກພື້ນ",
   "job_filter_type": "ປະເພດວຽກ",
-  "job_apply": "ສະໝັກ"
+  "job_apply": "ສະໝັກ",
+
+  "app_bar_title": "LAO TRUST 🛡️",
+
+  "repair_subcategory_title": "ເລືອກປະເພດຍ່ອຍ",
+  "repair_step_label": "Step 1 / 3",
+  "repair_select_all_hint": "ກະລຸນາເລືອກທຸກລາຍການທີ່ກ່ຽວຂ້ອງ.",
+  "repair_question_ac": "ແອກມີອາການຫຍັງ?",
+  "repair_question_household": "ອຸປະກອນໃນບ້ານມີອາການຫຍັງ?",
+  "repair_question_electric": "ໄຟຟ້າມີບັນຫາຫຍັງ?",
+  "repair_question_plumbing": "ທໍ່ນ້ຳມີບັນຫາຫຍັງ?",
+  "repair_question_generic": "ມີອາການຫຍັງ?",
+  "repair_other_hint": "ກະລຸນາອະທິບາຍລາຍລະອຽດ.",
+
+  "symptom_other": "ອື່ນໆ",
+
+  "symptom_ac_no_cold_air": "ບໍ່ອອກລົມເຢັນ",
+  "symptom_ac_noise": "ມີສຽງດັງ",
+  "symptom_ac_water_sound": "ມີສຽງນ້ຳຮົ່ວ",
+  "symptom_ac_not_cool": "ບໍ່ເຢັນ",
+
+  "symptom_household_power": "ໄຟບໍ່ເຂົ້າ",
+  "symptom_household_noise": "ສຽງຜິດປົກກະຕິ",
+  "symptom_household_stopped": "ຢຸດເຮັດວຽກ",
+  "symptom_household_broken": "ຊິ້ນສ່ວນແຕກ",
+
+  "symptom_electric_breaker": "ສະວິດຕັດໄຟຕົກ",
+  "symptom_electric_burn_smell": "ມີກິ່ນໄໝ້ຈາກປລັກ",
+  "symptom_electric_flicker": "ໄຟກະພິບ",
+  "symptom_electric_leak": "ສົງໄສໄຟຮົ່ວ",
+
+  "symptom_plumbing_leak": "ກອກນ້ຳຮົ່ວ",
+  "symptom_plumbing_clog": "ທໍ່ລະບາຍອຸດຕັນ",
+  "symptom_plumbing_backflow": "ສ້ວມຍ້ອນກັບ",
+  "symptom_plumbing_low_pressure": "ແຮງດັນນ້ຳອ່ອນ",
+
+  "job_title_cafe_part_time": "ວຽກພາດໄທມ໌ຮ້ານກາເຟ",
+  "job_detail_location": "ສະຖານທີ່",
+  "job_detail_salary": "ຄ່າແຮງ"
 }

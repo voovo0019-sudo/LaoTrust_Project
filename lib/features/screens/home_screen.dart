@@ -22,21 +22,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+  // 유지(스와이프+Peeking): 폭은 UI Diet 목적에 맞게 조정 가능하지만,
+  // 기존 요구사항에 맞춰 peeking 감을 유지하기 위해 0.88을 유지.
   final PageController _pageController = PageController(viewportFraction: 0.88);
 
   HomeView _currentView = HomeView.main;
-  String _selectedCategory = '';
-  String _selectedSubCategory = '';
+  // 선택 상태는 "표시 문자열"이 아닌 "키/ID"로 보관하여 언어 변경 시에도 상태가 깨지지 않게 한다.
+  String _selectedCategoryKey = '';
+  String _selectedSubCategoryId = '';
   int _currentPage = 0;
 
-  final List<String> _selectedSymptoms = [];
+  // 증상도 표시 문자열이 아닌 키로 보관 (다국어 100% 변환 보장)
+  final List<String> _selectedSymptomKeys = [];
   final TextEditingController _etcController = TextEditingController();
 
-  final Map<String, List<String>> _symptomData = {
-    '에어컨': ['찬바람 안 나옴', '소음 발생', '물 새는 소리', '시원하지 않음', '기타'],
-    '가전': ['전원 불량', '이상 소음', '작동 멈춤', '부품 파손', '기타'],
-    '전기': ['차단기 내려감', '콘센트 탄 냄새', '조명 깜빡임', '누전 의심', '기타'],
-    '배관': ['수도꼭지 누수', '하수구 막힘', '변기 역류', '수압 약함', '기타'],
+  static const String _symptomOtherKey = 'symptom_other';
+
+  // 서브카테고리 ID(언어 독립) -> 증상 키 리스트
+  final Map<String, List<String>> _symptomKeyData = {
+    'ac': ['symptom_ac_no_cold_air', 'symptom_ac_noise', 'symptom_ac_water_sound', 'symptom_ac_not_cool', _symptomOtherKey],
+    'household': ['symptom_household_power', 'symptom_household_noise', 'symptom_household_stopped', 'symptom_household_broken', _symptomOtherKey],
+    'electric': ['symptom_electric_breaker', 'symptom_electric_burn_smell', 'symptom_electric_flicker', 'symptom_electric_leak', _symptomOtherKey],
+    'plumbing': ['symptom_plumbing_leak', 'symptom_plumbing_clog', 'symptom_plumbing_backflow', 'symptom_plumbing_low_pressure', _symptomOtherKey],
   };
 
   @override
@@ -92,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.of(ctx).pop();
               setState(() {
                 _currentView = HomeView.main;
-                _selectedCategory = '';
-                _selectedSubCategory = '';
-                _selectedSymptoms.clear();
+                _selectedCategoryKey = '';
+                _selectedSubCategoryId = '';
+                _selectedSymptomKeys.clear();
                 _etcController.clear();
               });
             },
@@ -120,7 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : null,
       title: Text(
-        _currentView == HomeView.main ? 'LAO TRUST 🛡️' : _selectedCategory,
+        _currentView == HomeView.main
+            ? context.l10n('app_bar_title')
+            : context.l10n(_selectedCategoryKey),
         style: const TextStyle(
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -237,11 +246,16 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Icon(Icons.search, color: Colors.grey.shade600, size: 22),
           const SizedBox(width: 10),
-          Text(
-            context.l10n('search_placeholder'),
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 14,
+          Expanded(
+            child: Text(
+              context.l10n('search_placeholder'),
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
             ),
           ),
         ],
@@ -274,14 +288,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryGrid() {
     final List<Map<String, dynamic>> services = [
-      {'name': '청소', 'icon': Icons.cleaning_services, 'color': Colors.cyan},
-      {'name': '경비', 'icon': Icons.shield, 'color': const Color(0xFF1E3A8A)},
-      {'name': '수리', 'icon': Icons.build, 'color': Colors.orange},
-      {'name': '배달', 'icon': Icons.delivery_dining, 'color': Colors.green},
-      {'name': '뷰티', 'icon': Icons.face, 'color': Colors.pinkAccent},
-      {'name': '과외', 'icon': Icons.menu_book, 'color': Colors.purple},
-      {'name': '사진', 'icon': Icons.camera_alt, 'color': Colors.amber},
-      {'name': '이벤트', 'icon': Icons.celebration, 'color': Colors.indigo},
+      // 유지: 아이콘/색상/그리드 구성은 절대 변경하지 않음. (라벨만 i18n 키로 표시)
+      {'key': 'expert_cleaning', 'icon': Icons.cleaning_services, 'color': Colors.cyan},
+      {'key': 'expert_security', 'icon': Icons.shield, 'color': const Color(0xFF1E3A8A)},
+      {'key': 'expert_repair', 'icon': Icons.build, 'color': Colors.orange},
+      {'key': 'expert_delivery', 'icon': Icons.delivery_dining, 'color': Colors.green},
+      {'key': 'expert_beauty', 'icon': Icons.face, 'color': Colors.pinkAccent},
+      {'key': 'expert_tutoring', 'icon': Icons.menu_book, 'color': Colors.purple},
+      {'key': 'expert_photo', 'icon': Icons.camera_alt, 'color': Colors.amber},
+      {'key': 'expert_event', 'icon': Icons.celebration, 'color': Colors.indigo},
     ];
 
     return GridView.builder(
@@ -297,11 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (context, index) {
         final s = services[index];
         final Color color = s['color'] as Color;
+        final String labelKey = s['key'] as String;
         return InkWell(
           onTap: () {
-            if (s['name'] == '수리') {
+            if (labelKey == 'expert_repair') {
               setState(() {
-                _selectedCategory = '수리';
+                _selectedCategoryKey = 'expert_repair';
                 _currentView = HomeView.subCategory;
               });
             }
@@ -320,11 +336,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                s['name'] as String,
+                context.l10n(labelKey),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -335,10 +354,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSubCategoryContent() {
     final subItems = [
-      {'name': '에어컨', 'icon': Icons.ac_unit},
-      {'name': '가전', 'icon': Icons.settings},
-      {'name': '전기', 'icon': Icons.electric_bolt},
-      {'name': '배관', 'icon': Icons.plumbing},
+      // 서브카테고리도 ID로 보관하여 언어 변경 시 유지
+      {'id': 'ac', 'labelKey': 'service_ac', 'icon': Icons.ac_unit},
+      {'id': 'household', 'labelKey': 'service_household', 'icon': Icons.settings},
+      {'id': 'electric', 'labelKey': 'service_electric', 'icon': Icons.electric_bolt},
+      {'id': 'plumbing', 'labelKey': 'service_plumbing', 'icon': Icons.plumbing},
     ];
 
     return Padding(
@@ -347,9 +367,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '세부 종목 선택',
-            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+          Text(
+            context.l10n('repair_subcategory_title'),
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           GridView.builder(
@@ -364,12 +384,14 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: subItems.length,
             itemBuilder: (context, index) {
               final item = subItems[index];
+              final String id = item['id'] as String;
+              final String labelKey = item['labelKey'] as String;
               return InkWell(
                 onTap: () {
                   setState(() {
-                    _selectedSubCategory = item['name'] as String;
+                    _selectedSubCategoryId = id;
                     _currentView = HomeView.symptoms;
-                    _selectedSymptoms.clear();
+                    _selectedSymptomKeys.clear();
                     _etcController.clear();
                   });
                 },
@@ -391,8 +413,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: const Color(0xFF1E3A8A), size: 35),
                       const SizedBox(height: 10),
                       Text(
-                        item['name'] as String,
+                        context.l10n(labelKey),
                         style: const TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -406,7 +431,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSymptomContent() {
-    final symptoms = _symptomData[_selectedSubCategory] ?? ['기타'];
+    final symptomKeys = _symptomKeyData[_selectedSubCategoryId] ?? [_symptomOtherKey];
+    final String questionKey = switch (_selectedSubCategoryId) {
+      'ac' => 'repair_question_ac',
+      'household' => 'repair_question_household',
+      'electric' => 'repair_question_electric',
+      'plumbing' => 'repair_question_plumbing',
+      _ => 'repair_question_generic',
+    };
 
     return SingleChildScrollView(
       key: const ValueKey('symptoms'),
@@ -416,9 +448,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const Text(
-                'Step 1 / 3',
-                style: TextStyle(
+              Text(
+                context.l10n('repair_step_label'),
+                style: const TextStyle(
                   color: Color(0xFF1E3A8A),
                   fontWeight: FontWeight.bold,
                 ),
@@ -439,17 +471,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 30),
           Text(
-            '$_selectedSubCategory에 어떤 증상이 있나요?',
+            context.l10n(questionKey),
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           Text(
-            '해당하는 항목을 모두 선택해 주세요.',
+            context.l10n('repair_select_all_hint'),
             style: TextStyle(color: Colors.grey.shade600),
           ),
           const SizedBox(height: 25),
-          ...symptoms.map((symptom) {
-            final isSelected = _selectedSymptoms.contains(symptom);
+          ...symptomKeys.map((symptomKey) {
+            final isSelected = _selectedSymptomKeys.contains(symptomKey);
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
@@ -464,8 +496,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: CheckboxListTile(
                 title: Text(
-                  symptom,
+                  context.l10n(symptomKey),
                   style: const TextStyle(fontWeight: FontWeight.w500),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 value: isSelected,
                 activeColor: const Color(0xFF1E3A8A),
@@ -475,23 +509,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: (val) {
                   setState(() {
                     if (val == true) {
-                      _selectedSymptoms.add(symptom);
+                      _selectedSymptomKeys.add(symptomKey);
                     } else {
-                      _selectedSymptoms.remove(symptom);
+                      _selectedSymptomKeys.remove(symptomKey);
                     }
                   });
                 },
               ),
             );
           }),
-          if (_selectedSymptoms.contains('기타'))
+          if (_selectedSymptomKeys.contains(_symptomOtherKey))
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: TextField(
                 controller: _etcController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: '상세 증상을 자유롭게 적어주세요.',
+                  hintText: context.l10n('repair_other_hint'),
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(
@@ -507,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             height: 60,
             child: ElevatedButton(
-              onPressed: _selectedSymptoms.isNotEmpty ? _onStep3Submit : null,
+              onPressed: _selectedSymptomKeys.isNotEmpty ? _onStep3Submit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E3A8A),
                 foregroundColor: Colors.white,
@@ -515,9 +549,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              child: const Text(
-                '다음 단계로',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Text(
+                context.l10n('next_step'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -528,10 +562,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 사령관 특별 지시: 데이터 부재 시에도 Mock 3종(식당 서버, 단순 노무, 카페 알바) 무조건 표시.
   static const List<Map<String, String>> _mockQuickJobs = [
-    {'title': '식당 서버', 'loc': '비엔티안 시청 인근', 'tag': '급구'},
-    {'title': '단순 노무', 'loc': '타락광장 근처', 'tag': '협의'},
-    {'title': '카페 알바', 'loc': '시내 중심가', 'tag': '신규'},
+    // 키 기반으로 100% 번역 가능하게 구성
+    {
+      'titleKey': 'job_title_restaurant_server',
+      'locKey': 'location_near_vientiane_hall',
+      'salaryKey': 'salary_15k_per_hour',
+    },
+    {
+      'titleKey': 'job_title_simple_labor',
+      'locKey': 'location_near_that_luang',
+      'salaryKey': 'salary_negotiable',
+    },
+    {
+      'titleKey': 'job_title_cafe_part_time',
+      'locKey': 'location_downtown',
+      'salaryKey': 'salary_12k_per_hour',
+    },
   ];
+
+  // Firebase에서 문자열로 들어오는 경우(예: '식당 서버')도 가능한 한 키로 매핑하여 번역한다.
+  // 누락 방지용 사전(Map) — 요구사항(1) 준수.
+  static const Map<String, String> _jobTitleValueToKey = {
+    '식당 서버': 'job_title_restaurant_server',
+    '단순 노무': 'job_title_simple_labor',
+    '카페 알바': 'job_title_cafe_part_time',
+    '배달 도우미': 'job_title_delivery_helper',
+  };
+  static const Map<String, String> _jobLocValueToKey = {
+    '비엔티안 시청 인근': 'location_near_vientiane_hall',
+    '타락광장 근처': 'location_near_that_luang',
+    '시내 중심가': 'location_downtown',
+    '시내': 'location_downtown',
+  };
+  static const Map<String, String> _jobSalaryValueToKey = {
+    '15,000 LAK/시간': 'salary_15k_per_hour',
+    '12,000 LAK/시간': 'salary_12k_per_hour',
+    '협의': 'salary_negotiable',
+  };
+
+  String _localizedFromMaybeKey(BuildContext context, Object? maybeKeyOrValue, Map<String, String> valueToKey) {
+    if (maybeKeyOrValue == null) return '';
+    final raw = maybeKeyOrValue.toString();
+    final key = valueToKey[raw];
+    return key == null ? raw : context.l10n(key);
+  }
+
+  void _showQuickJobDetailsDialog(BuildContext context, {required String title, required String location, required String salary}) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${context.l10n('job_detail_location')}: $location'),
+            const SizedBox(height: 8),
+            Text('${context.l10n('job_detail_salary')}: $salary'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildQuickJobSection() {
     return Column(
@@ -553,15 +651,16 @@ class _HomeScreenState extends State<HomeScreen> {
               jobs = snapshot.data!;
             } else {
               jobs = _mockQuickJobs.map((m) => {
-                'title': m['title'],
-                'loc': m['loc'],
-                'tag': m['tag'],
+                'titleKey': m['titleKey'],
+                'locKey': m['locKey'],
+                'salaryKey': m['salaryKey'],
               }).toList();
             }
             return Column(
               children: [
                 SizedBox(
-                  height: 180,
+                  // UI Diet: 카드가 화면을 가리지 않도록 높이를 절반 수준으로 축소
+                  height: 92,
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (page) {
@@ -570,54 +669,80 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: jobs.length,
                     itemBuilder: (context, index) {
                       final job = jobs[index];
+                      final title = job.containsKey('titleKey')
+                          ? context.l10n(job['titleKey']?.toString() ?? '')
+                          : _localizedFromMaybeKey(context, job['title'], _jobTitleValueToKey);
+                      final location = job.containsKey('locKey')
+                          ? context.l10n(job['locKey']?.toString() ?? '')
+                          : _localizedFromMaybeKey(context, job['loc'], _jobLocValueToKey);
+                      final salary = job.containsKey('salaryKey')
+                          ? context.l10n(job['salaryKey']?.toString() ?? '')
+                          : _localizedFromMaybeKey(context, job['salary'], _jobSalaryValueToKey);
                       return AnimatedScale(
                         scale: _currentPage == index ? 1.0 : 0.94,
                         duration: const Duration(milliseconds: 300),
                         child: Container(
                           margin: const EdgeInsets.symmetric(
                             horizontal: 5,
-                            vertical: 8,
+                            vertical: 6,
                           ),
-                          padding: const EdgeInsets.all(22),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.04),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                job['tag']?.toString() ?? '신규',
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(28),
+                            onTap: () => _showQuickJobDetailsDialog(
+                              context,
+                              title: title,
+                              location: location,
+                              salary: salary,
+                            ),
+                            child: Row(
+                              children: [
+                                // 메인 카드 노출: [URGENT 태그] + [제목]만 (요구사항 2)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  child: Text(
+                                    context.l10n('tag_deadline_soon'),
+                                    style: const TextStyle(
+                                      color: Color(0xFF1E3A8A),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                job['title']?.toString() ?? '',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                '${job['loc'] ?? ''} | 일급 협의',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
+                                const SizedBox(width: 10),
+                                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+                              ],
+                            ),
                           ),
                         ),
                       );

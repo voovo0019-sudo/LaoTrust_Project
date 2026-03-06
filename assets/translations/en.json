@@ -62,5 +62,43 @@
   "profile_menu_customer_service": "Customer Service",
   "job_filter_region": "Region",
   "job_filter_type": "Job Type",
-  "job_apply": "Apply"
+  "job_apply": "Apply",
+
+  "app_bar_title": "LAO TRUST 🛡️",
+
+  "repair_subcategory_title": "Select Subcategory",
+  "repair_step_label": "Step 1 / 3",
+  "repair_select_all_hint": "Please select all that apply.",
+  "repair_question_ac": "What issues are you having with the AC?",
+  "repair_question_household": "What issues are you having with household appliances?",
+  "repair_question_electric": "What electrical issues are you experiencing?",
+  "repair_question_plumbing": "What plumbing issues are you experiencing?",
+  "repair_question_generic": "What symptoms are you experiencing?",
+  "repair_other_hint": "Please describe the issue in detail.",
+
+  "symptom_other": "Other",
+
+  "symptom_ac_no_cold_air": "No cold air",
+  "symptom_ac_noise": "Unusual noise",
+  "symptom_ac_water_sound": "Water leaking sound",
+  "symptom_ac_not_cool": "Not cooling enough",
+
+  "symptom_household_power": "Power issue",
+  "symptom_household_noise": "Unusual noise",
+  "symptom_household_stopped": "Stopped working",
+  "symptom_household_broken": "Part is broken",
+
+  "symptom_electric_breaker": "Breaker trips",
+  "symptom_electric_burn_smell": "Burning smell from outlet",
+  "symptom_electric_flicker": "Lights flicker",
+  "symptom_electric_leak": "Possible electrical leak",
+
+  "symptom_plumbing_leak": "Faucet leak",
+  "symptom_plumbing_clog": "Drain clogged",
+  "symptom_plumbing_backflow": "Toilet backflow",
+  "symptom_plumbing_low_pressure": "Low water pressure",
+
+  "job_title_cafe_part_time": "Cafe Part-time",
+  "job_detail_location": "Location",
+  "job_detail_salary": "Salary"
 }

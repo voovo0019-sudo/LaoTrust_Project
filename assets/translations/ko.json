@@ -62,5 +62,43 @@
   "profile_menu_customer_service": "고객센터",
   "job_filter_region": "지역",
   "job_filter_type": "직종",
-  "job_apply": "지원하기"
+  "job_apply": "지원하기",
+
+  "app_bar_title": "LAO TRUST 🛡️",
+
+  "repair_subcategory_title": "세부 종목 선택",
+  "repair_step_label": "Step 1 / 3",
+  "repair_select_all_hint": "해당하는 항목을 모두 선택해 주세요.",
+  "repair_question_ac": "에어컨에 어떤 증상이 있나요?",
+  "repair_question_household": "가전에 어떤 증상이 있나요?",
+  "repair_question_electric": "전기에 어떤 증상이 있나요?",
+  "repair_question_plumbing": "배관에 어떤 증상이 있나요?",
+  "repair_question_generic": "어떤 증상이 있나요?",
+  "repair_other_hint": "상세 증상을 자유롭게 적어주세요.",
+
+  "symptom_other": "기타",
+
+  "symptom_ac_no_cold_air": "찬바람 안 나옴",
+  "symptom_ac_noise": "소음 발생",
+  "symptom_ac_water_sound": "물 새는 소리",
+  "symptom_ac_not_cool": "시원하지 않음",
+
+  "symptom_household_power": "전원 불량",
+  "symptom_household_noise": "이상 소음",
+  "symptom_household_stopped": "작동 멈춤",
+  "symptom_household_broken": "부품 파손",
+
+  "symptom_electric_breaker": "차단기 내려감",
+  "symptom_electric_burn_smell": "콘센트 탄 냄새",
+  "symptom_electric_flicker": "조명 깜빡임",
+  "symptom_electric_leak": "누전 의심",
+
+  "symptom_plumbing_leak": "수도꼭지 누수",
+  "symptom_plumbing_clog": "하수구 막힘",
+  "symptom_plumbing_backflow": "변기 역류",
+  "symptom_plumbing_low_pressure": "수압 약함",
+
+  "job_title_cafe_part_time": "카페 알바",
+  "job_detail_location": "위치",
+  "job_detail_salary": "급여"
 }

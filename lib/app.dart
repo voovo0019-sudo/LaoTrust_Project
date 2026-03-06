@@ -15,7 +15,6 @@ import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
-import 'features/screens/home_screen.dart';
 
 class LaoTrustApp extends StatefulWidget {
   const LaoTrustApp({super.key});
@@ -92,7 +91,9 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
           child: child!,
         );
       },
-      home: HomeScreen(
+      home: MainTabScreen(
+        themeMode: _themeMode,
+        onThemeModeChanged: _setThemeMode,
         locale: _locale,
         onLocaleChanged: _setLocale,
       ),

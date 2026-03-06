@@ -92,7 +92,10 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
           child: child!,
         );
       },
-      home: const HomeScreen(),
+      home: HomeScreen(
+        locale: _locale,
+        onLocaleChanged: _setLocale,
+      ),
       routes: {
         MainTabScreen.routeName: (_) => MainTabScreen(
               themeMode: _themeMode,

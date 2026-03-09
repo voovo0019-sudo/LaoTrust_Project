@@ -677,7 +677,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: 3,
                             vertical: 6,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28),
@@ -702,7 +702,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 // 메인 카드 노출: [URGENT 태그] + [제목] (가로 다이어트: Expanded 제거, 아이콘 글자 바로 옆)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(28),
@@ -712,28 +712,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style: const TextStyle(
                                       color: Color(0xFF1E3A8A),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 11,
+                                      fontSize: 10,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 6),
                                 Flexible(
                                   fit: FlexFit.loose,
                                   child: Text(
                                     title,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 13,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: false,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A), size: 22),
+                                const SizedBox(width: 2),
+                                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A), size: 20),
                               ],
                             ),
                           ),

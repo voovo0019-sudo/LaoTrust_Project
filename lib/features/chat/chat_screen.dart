@@ -34,14 +34,14 @@ class ChatScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _ChatTile(
-            name: '김철수',
+            name: '에어컨 수리 전문가',
             lastMessage: '견적 보내드렸습니다.',
             time: '10:32',
             unreadCount: 2,
             onTap: () {},
           ),
           _ChatTile(
-            name: '배관 수리 김',
+            name: '배관 수리 김철수',
             lastMessage: '내일 오전 가능합니다.',
             time: '어제',
             unreadCount: 0,

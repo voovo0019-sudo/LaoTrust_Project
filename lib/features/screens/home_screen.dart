@@ -22,9 +22,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
-  // 유지(스와이프+Peeking): 폭은 UI Diet 목적에 맞게 조정 가능하지만,
-  // 사령관 지침(초슬림): viewportFraction을 0.65 정도로 조절.
-  final PageController _pageController = PageController(viewportFraction: 0.65);
+  // 유지(스와이프+Peeking): 사령관 월요일 특급 — viewportFraction 0.48 (카드 2개 완전 노출, 3번째 4~5% Peeking)
+  final PageController _pageController = PageController(viewportFraction: 0.48);
 
   HomeView _currentView = HomeView.main;
   // 선택 상태는 "표시 문자열"이 아닌 "키/ID"로 보관하여 언어 변경 시에도 상태가 깨지지 않게 한다.
@@ -222,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        _buildMainApplyButton(context),
+        // 사령관 지침: [적용] 버튼 영구 제거 — 하단 여백은 알바 섹션·도트 배치에 활용
       ],
     );
   }
@@ -259,38 +258,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMainApplyButton(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-        child: Center(
-          child: SizedBox(
-            width: 140,
-            height: 38,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              child: Text(
-                context.l10n('apply'),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -679,10 +646,11 @@ class _HomeScreenState extends State<HomeScreen> {
             return Column(
               children: [
                 SizedBox(
-                  // UI Diet: 카드가 화면을 가리지 않도록 높이를 절반 수준으로 축소
+                  // UI Diet: 카드 슬림 + 좌측 밀착(padEnds: false)
                   height: 76,
                   child: PageView.builder(
                     controller: _pageController,
+                    padEnds: false,
                     onPageChanged: (page) {
                       setState(() => _currentPage = page);
                     },
@@ -706,10 +674,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         duration: const Duration(milliseconds: 300),
                         child: Container(
                           margin: const EdgeInsets.symmetric(
-                            horizontal: 5,
+                            horizontal: 3,
                             vertical: 6,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28),
@@ -732,7 +700,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Row(
                               children: [
-                                // 메인 카드 노출: [URGENT 태그] + [제목]만 (요구사항 2)
+                                // 메인 카드 노출: [URGENT 태그] + [제목] (가로 다이어트: Expanded 제거, 아이콘 글자 바로 옆)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
@@ -750,8 +718,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  fit: FlexFit.loose,
                                   child: Text(
                                     title,
                                     style: const TextStyle(
@@ -763,8 +732,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     softWrap: false,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A), size: 22),
                               ],
                             ),
                           ),
@@ -773,21 +742,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     jobs.length,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: _currentPage == index ? 24 : 8,
-                      height: 8,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? const Color(0xFF1E3A8A)
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(28),
+                    (index) => GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                        setState(() => _currentPage = index);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: _currentPage == index ? 22 : 7,
+                        height: 7,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? const Color(0xFF1E3A8A)
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
                       ),
                     ),
                   ),

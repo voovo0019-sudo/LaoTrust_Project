@@ -105,4 +105,13 @@
   "job_detail_restaurant_server": "주말 포함 가능자 우대, 초보 가능",
   "job_detail_simple_labor": "단순 작업 보조, 안전화 착용",
   "job_detail_cafe_part_time": "주문/서빙, 밝은 응대 가능자"
+  ,
+  "cleaning_size_s": "S (30㎡↓)",
+  "cleaning_size_m": "M (30-60㎡)",
+  "cleaning_size_l": "L (60㎡↑)",
+  "cleaning_house_studio": "스튜디오",
+  "cleaning_house_1br": "1BR",
+  "cleaning_house_2br": "2BR",
+  "cleaning_house_house": "하우스",
+  "expert_garden": "정원/외부관리"
 }

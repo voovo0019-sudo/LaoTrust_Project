@@ -105,4 +105,13 @@
   "job_detail_restaurant_server": "Weekend availability preferred, no experience required",
   "job_detail_simple_labor": "Simple work assistance, safety shoes required",
   "job_detail_cafe_part_time": "Order/serving, friendly communication"
+  ,
+  "cleaning_size_s": "S (30㎡↓)",
+  "cleaning_size_m": "M (30-60㎡)",
+  "cleaning_size_l": "L (60㎡↑)",
+  "cleaning_house_studio": "Studio",
+  "cleaning_house_1br": "1BR",
+  "cleaning_house_2br": "2BR",
+  "cleaning_house_house": "House",
+  "expert_garden": "Garden / Outdoor"
 }

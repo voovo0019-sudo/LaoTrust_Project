@@ -105,4 +105,13 @@
   "job_detail_restaurant_server": "ຖ້າວ່າງວັນສຸດສັບດາ ຈະໄດ້ຮັບພິຈາລະນາ, ມືໃໝ່ໄດ້",
   "job_detail_simple_labor": "ຊ່ວຍວຽກງ່າຍໆ, ຕ້ອງໃສ່ຮອງເທົ້ານິລະໄພ",
   "job_detail_cafe_part_time": "ຮັບອໍເດີ/ເສີບ, ຕ້ອງສື່ສານດີ"
+  ,
+  "cleaning_size_s": "S (30㎡↓)",
+  "cleaning_size_m": "M (30-60㎡)",
+  "cleaning_size_l": "L (60㎡↑)",
+  "cleaning_house_studio": "ສະຕູດິໂອ",
+  "cleaning_house_1br": "1BR",
+  "cleaning_house_2br": "2BR",
+  "cleaning_house_house": "ບ້ານ",
+  "expert_garden": "ສວນ / ພື້ນທີ່ພາຍນອກ"
 }

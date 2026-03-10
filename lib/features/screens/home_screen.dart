@@ -4,7 +4,7 @@ import '../../core/app_localizations.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
-enum HomeView { main, subCategory, symptoms }
+enum HomeView { main, subCategory, symptoms, cleaningOptions }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -30,6 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategoryKey = '';
   String _selectedSubCategoryId = '';
   int _currentPage = 0;
+
+  // Cleaning 카테고리 전용 선택 상태 (S/M/L + 주거 형태)
+  String _selectedCleaningSize = '';
+  String _selectedCleaningHouseType = '';
 
   // 증상도 표시 문자열이 아닌 키로 보관 (다국어 100% 변환 보장)
   final List<String> _selectedSymptomKeys = [];
@@ -72,7 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _goBack() {
     setState(() {
-      if (_currentView == HomeView.symptoms) {
+      if (_currentView == HomeView.cleaningOptions) {
+        _currentView = HomeView.main;
+      } else if (_currentView == HomeView.symptoms) {
         _currentView = HomeView.subCategory;
       } else if (_currentView == HomeView.subCategory) {
         _currentView = HomeView.main;
@@ -152,7 +158,19 @@ class _HomeScreenState extends State<HomeScreen> {
         PopupMenuButton<String>(
           icon: const Icon(Icons.settings, color: Colors.white),
           color: Colors.white,
-          onSelected: (_) {},
+          onSelected: (value) {
+            final label = switch (value) {
+              'profile' => context.l10n('settings_my_profile'),
+              'account' => context.l10n('settings_account'),
+              'logout' => context.l10n('settings_logout'),
+              _ => '',
+            };
+            if (label.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(label)),
+              );
+            }
+          },
           itemBuilder: (context) => [
             PopupMenuItem(value: 'profile', child: Text(context.l10n('settings_my_profile'))),
             PopupMenuItem(value: 'account', child: Text(context.l10n('settings_account'))),
@@ -162,7 +180,18 @@ class _HomeScreenState extends State<HomeScreen> {
         PopupMenuButton<String>(
           icon: const Icon(Icons.notifications_none, color: Colors.white),
           color: Colors.white,
-          onSelected: (_) {},
+          onSelected: (value) {
+            final label = switch (value) {
+              'system' => context.l10n('notif_system'),
+              'activity' => context.l10n('notif_activity'),
+              _ => '',
+            };
+            if (label.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(label)),
+              );
+            }
+          },
           itemBuilder: (context) => [
             PopupMenuItem(value: 'system', child: Text(context.l10n('notif_system'))),
             PopupMenuItem(value: 'activity', child: Text(context.l10n('notif_activity'))),
@@ -180,6 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildSubCategoryContent();
       case HomeView.symptoms:
         return _buildSymptomContent();
+      case HomeView.cleaningOptions:
+        return _buildCleaningOptionsContent();
     }
   }
 
@@ -264,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryGrid() {
     final List<Map<String, dynamic>> services = [
-      // 유지: 아이콘/색상/그리드 구성은 절대 변경하지 않음. (라벨만 i18n 키로 표시)
+      // 9대 카테고리 (3x3 그리드). 라벨은 i18n 키로 표시.
       {'key': 'expert_cleaning', 'icon': Icons.cleaning_services, 'color': Colors.cyan},
       {'key': 'expert_security', 'icon': Icons.shield, 'color': const Color(0xFF1E3A8A)},
       {'key': 'expert_repair', 'icon': Icons.build, 'color': Colors.orange},
@@ -273,16 +304,17 @@ class _HomeScreenState extends State<HomeScreen> {
       {'key': 'expert_tutoring', 'icon': Icons.menu_book, 'color': Colors.purple},
       {'key': 'expert_photo', 'icon': Icons.camera_alt, 'color': Colors.amber},
       {'key': 'expert_event', 'icon': Icons.celebration, 'color': Colors.indigo},
+      {'key': 'expert_garden', 'icon': Icons.park_outlined, 'color': Colors.teal},
     ];
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
+        crossAxisCount: 3,
         mainAxisSpacing: 18,
         crossAxisSpacing: 18,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.9,
       ),
       itemCount: services.length,
       itemBuilder: (context, index) {
@@ -291,12 +323,16 @@ class _HomeScreenState extends State<HomeScreen> {
         final String labelKey = s['key'] as String;
         return InkWell(
           onTap: () {
-            if (labelKey == 'expert_repair') {
-              setState(() {
-                _selectedCategoryKey = 'expert_repair';
+            setState(() {
+              _selectedCategoryKey = labelKey;
+              if (labelKey == 'expert_repair') {
                 _currentView = HomeView.subCategory;
-              });
-            }
+              } else if (labelKey == 'expert_cleaning') {
+                _selectedCleaningSize = '';
+                _selectedCleaningHouseType = '';
+                _currentView = HomeView.cleaningOptions;
+              }
+            });
           },
           borderRadius: BorderRadius.circular(28),
           child: Column(
@@ -407,6 +443,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSymptomContent() {
+    // Cleaning 카테고리는 S/M/L 플로우로 분기하고, 나머지(수리 등)는 기존 증상 리스트를 유지한다.
+    if (_selectedCategoryKey == 'expert_cleaning') {
+      return _buildCleaningOptionsContent();
+    }
+
     final symptomKeys = _symptomKeyData[_selectedSubCategoryId] ?? [_symptomOtherKey];
     final String questionKey = switch (_selectedSubCategoryId) {
       'ac' => 'repair_question_ac',
@@ -777,6 +818,157 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ],
+    );
+  }
+
+  /// Cleaning 카테고리 전용 3뎁스: 공간 크기(S/M/L) + 주거 형태 버튼
+  Widget _buildCleaningOptionsContent() {
+    return SingleChildScrollView(
+      key: const ValueKey('cleaning_options'),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                context.l10n('repair_step_label'),
+                style: const TextStyle(
+                  color: Color(0xFF1E3A8A),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: const LinearProgressIndicator(
+                    value: 0.33,
+                    minHeight: 6,
+                    backgroundColor: Colors.white,
+                    color: Color(0xFF1E3A8A),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          Text(
+            context.l10n('expert_cleaning'),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            context.l10n('repair_select_all_hint'),
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 25),
+          Text(
+            context.l10n('cleaning_size_s'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_size_s',
+                isSelected: _selectedCleaningSize == 'S',
+                onTap: () => setState(() => _selectedCleaningSize = 'S'),
+              ),
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_size_m',
+                isSelected: _selectedCleaningSize == 'M',
+                onTap: () => setState(() => _selectedCleaningSize = 'M'),
+              ),
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_size_l',
+                isSelected: _selectedCleaningSize == 'L',
+                onTap: () => setState(() => _selectedCleaningSize = 'L'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          Text(
+            context.l10n('cleaning_house_studio'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_house_studio',
+                isSelected: _selectedCleaningHouseType == 'studio',
+                onTap: () => setState(() => _selectedCleaningHouseType = 'studio'),
+              ),
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_house_1br',
+                isSelected: _selectedCleaningHouseType == '1br',
+                onTap: () => setState(() => _selectedCleaningHouseType = '1br'),
+              ),
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_house_2br',
+                isSelected: _selectedCleaningHouseType == '2br',
+                onTap: () => setState(() => _selectedCleaningHouseType = '2br'),
+              ),
+              _buildCleaningChoiceChip(
+                labelKey: 'cleaning_house_house',
+                isSelected: _selectedCleaningHouseType == 'house',
+                onTap: () => setState(() => _selectedCleaningHouseType = 'house'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              onPressed: (_selectedCleaningSize.isNotEmpty && _selectedCleaningHouseType.isNotEmpty)
+                  ? _onStep3Submit
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: Text(
+                context.l10n('next_step'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCleaningChoiceChip({
+    required String labelKey,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: ChoiceChip(
+          label: Text(
+            context.l10n(labelKey),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          selected: isSelected,
+          selectedColor: const Color(0xFF1E3A8A),
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          onSelected: (_) => onTap(),
+        ),
+      ),
     );
   }
 }

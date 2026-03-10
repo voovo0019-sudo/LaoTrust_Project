@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
-import '../screens/home_screen.dart';
+import 'package:lao_trust/screens/home_screen_v44.dart';
 import '../jobs/jobs_screen.dart';
 import '../chat/chat_screen.dart';
 import '../profile/profile_screen.dart';
@@ -39,14 +39,11 @@ class _MainTabScreenState extends State<MainTabScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: [
-          HomeScreen(
-            locale: widget.locale,
-            onLocaleChanged: widget.onLocaleChanged,
-          ),
-          const JobsScreen(),
-          const ChatScreen(),
-          const ProfileScreen(),
+        children: const [
+          HomeScreenV44(),
+          JobsScreen(),
+          ChatScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: Container(

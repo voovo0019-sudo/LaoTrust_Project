@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lao_trust/services/firebase_service.dart';
 
 /// Project: LaoTrust / Supreme Commander: Jin hyeok 🛡️
 /// 작전명: 차세대 통합 고도화 최종 집행 (v44.0)
@@ -20,6 +21,7 @@ class HomeScreenV44 extends StatefulWidget {
 
 class _HomeScreenV44State extends State<HomeScreenV44> {
   final PageController _pageController = PageController(viewportFraction: 0.48);
+  final FirebaseService _firebaseService = FirebaseService();
 
   HomeView _currentView = HomeView.main;
   String _activeCategory = "";
@@ -292,14 +294,6 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
 
   // --- 급구 알바 섹션: 6종 확장 및 Peeking 전략 ---
   Widget _buildQuickJobSection() {
-    final jobs = [
-      {'t': 'job1', 'tags': ['#초보가능']},
-      {'t': 'job2', 'tags': ['#경력우대']},
-      {'t': 'job3', 'tags': ['#식사제공']},
-      {'t': 'job4', 'tags': ['#통역보조']},
-      {'t': 'job5', 'tags': ['#물류보조']},
-      {'t': 'job6', 'tags': ['#판촉알바']},
-    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -310,42 +304,86 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
         const SizedBox(height: 15),
         SizedBox(
           height: 100,
-          child: PageView.builder(
-            controller: _pageController,
-            padEnds: false,
-            itemCount: jobs.length,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(left: 20, right: 5, top: 5, bottom: 5),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: (jobs[index]['tags'] as List)
-                          .map(
-                            (tag) => Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: Text(
-                                tag.toString(),
-                                style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: _firebaseService.getQuickJobs(),
+            builder: (context, snapshot) {
+              final hasData = snapshot.hasData && snapshot.data!.isNotEmpty;
+
+              // Firestore 데이터가 없을 때 사용할 로컬 샘플 6종 (사령관 규격)
+              final fallbackJobs = [
+                {'title': t('job1'), 'tag': '#초보가능', 'tagColor': '0xFF1E3A8A'},
+                {'title': t('job2'), 'tag': '#경력우대', 'tagColor': '0xFF1E3A8A'},
+                {'title': t('job3'), 'tag': '#식사제공', 'tagColor': '0xFF1E3A8A'},
+                {'title': t('job4'), 'tag': '#통역보조', 'tagColor': '0xFF1E3A8A'},
+                {'title': t('job5'), 'tag': '#물류보조', 'tagColor': '0xFF1E3A8A'},
+                {'title': t('job6'), 'tag': '#판촉알바', 'tagColor': '0xFF1E3A8A'},
+              ];
+
+              final jobs = hasData ? snapshot.data! : fallbackJobs;
+
+              return PageView.builder(
+                controller: _pageController,
+                padEnds: false,
+                itemCount: jobs.length,
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  final isFromFirestore = hasData;
+                  final title = isFromFirestore
+                      ? (job['title']?.toString() ?? '')
+                      : (job['title']?.toString() ?? '');
+                  final tag = isFromFirestore
+                      ? (job['tag']?.toString() ?? '')
+                      : (job['tag']?.toString() ?? '');
+                  final tagColorString = job['tagColor']?.toString();
+                  Color tagColor;
+                  if (tagColorString != null) {
+                    try {
+                      tagColor = Color(int.parse(tagColorString));
+                    } catch (_) {
+                      tagColor = const Color(0xFF1E3A8A);
+                    }
+                  } else {
+                    tagColor = const Color(0xFF1E3A8A);
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.only(left: 20, right: 5, top: 5, bottom: 5),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (tag.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: tagColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              tag,
+                              style: TextStyle(
+                                color: tagColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        const Spacer(),
+                        Text(
+                          title,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    Text(
-                      t(jobs[index]['t'] as String),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),
@@ -412,8 +450,11 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ['S', 'M', 'L']
-                .map((s) => _buildChoiceChip(s, _selectedSize == s, (val) => setState(() => _selectedSize = s)))
+            children: [
+              _buildChoiceChip(t('size_s'), _selectedSize == 'S', (val) => setState(() => _selectedSize = 'S')),
+              _buildChoiceChip(t('size_m'), _selectedSize == 'M', (val) => setState(() => _selectedSize = 'M')),
+              _buildChoiceChip(t('size_l'), _selectedSize == 'L', (val) => setState(() => _selectedSize = 'L')),
+            ]
                 .toList(),
           ),
           const SizedBox(height: 30),
@@ -421,9 +462,12 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ['스튜디오', '1BR', '2BR', '하우스']
-                .map((h) => _buildChoiceChip(h, _selectedHouseType == h, (val) => setState(() => _selectedHouseType = h)))
-                .toList(),
+            children: [
+              _buildChoiceChip(t('h1'), _selectedHouseType == t('h1'), (val) => setState(() => _selectedHouseType = t('h1'))),
+              _buildChoiceChip(t('h2'), _selectedHouseType == t('h2'), (val) => setState(() => _selectedHouseType = t('h2'))),
+              _buildChoiceChip(t('h3'), _selectedHouseType == t('h3'), (val) => setState(() => _selectedHouseType = t('h3'))),
+              _buildChoiceChip(t('h4'), _selectedHouseType == t('h4'), (val) => setState(() => _selectedHouseType = t('h4'))),
+            ],
           ),
           const Spacer(),
           if (_selectedSubCategory.contains('지붕'))

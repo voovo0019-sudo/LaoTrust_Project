@@ -62,21 +62,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             icon: Icons.account_balance_wallet,
             title: context.l10n('profile_menu_payment'),
-            subtitle: '포인트 충전 및 결제 수단 등록',
+            subtitle: context.l10n('profile_menu_payment_sub'),
             onTap: () => Navigator.pushNamed(context, bcelOnepayRouteName).then((_) => _loadVerified()),
           ),
           _buildMenuTile(
             context,
             icon: Icons.assignment,
             title: context.l10n('profile_menu_my_requests'),
-            subtitle: '신청한 서비스 진행 현황',
+            subtitle: context.l10n('profile_menu_my_requests_sub'),
             onTap: () {},
           ),
           _buildMenuTile(
             context,
             icon: Icons.support_agent,
             title: context.l10n('profile_menu_customer_service'),
-            subtitle: '문의 및 도움말',
+            subtitle: context.l10n('profile_menu_customer_service_sub'),
             onTap: () {},
           ),
           const SizedBox(height: 16),
@@ -84,14 +84,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             icon: Icons.verified,
             title: context.l10n('verified_badge_apply'),
-            subtitle: _verified ? '인증 완료' : '4.5 USD 결제 후 파란 배지 활성화',
+            subtitle: _verified
+                ? context.l10n('profile_verified_done')
+                : context.l10n('profile_verified_todo'),
             onTap: _verified ? null : () => Navigator.pushNamed(context, bcelOnepayRouteName).then((_) => _loadVerified()),
           ),
           _buildMenuTile(
             context,
             icon: Icons.dashboard,
             title: context.l10n('expert_dashboard'),
-            subtitle: '수입·매칭 이력 보기',
+            subtitle: context.l10n('profile_expert_dashboard_sub'),
             onTap: () => Navigator.pushNamed(context, expertDashboardRouteName),
           ),
         ],
@@ -129,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     children: [
                       Text(
-                        '사용자',
+                        context.l10n('profile_user_name'),
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       if (_verified) ...[
@@ -140,7 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _verified ? 'Verified 전문가' : '인증 전',
+                    _verified
+                        ? context.l10n('profile_status_verified')
+                        : context.l10n('profile_status_unverified'),
                     style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],

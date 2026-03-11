@@ -34,23 +34,23 @@ class ChatScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _ChatTile(
-            name: '에어컨 수리 전문가',
-            lastMessage: '견적 보내드렸습니다.',
-            time: '10:32',
+            nameKey: 'chat_sample_name_1',
+            messageKey: 'chat_sample_message_1',
+            timeKey: 'chat_sample_time_1',
             unreadCount: 2,
             onTap: () {},
           ),
           _ChatTile(
-            name: '배관 수리 김철수',
-            lastMessage: '내일 오전 가능합니다.',
-            time: '어제',
+            nameKey: 'chat_sample_name_2',
+            messageKey: 'chat_sample_message_2',
+            timeKey: 'chat_sample_time_2',
             unreadCount: 0,
             onTap: () {},
           ),
           _ChatTile(
-            name: '전기 점검 서비스',
-            lastMessage: '사진 확인했습니다.',
-            time: '월',
+            nameKey: 'chat_sample_name_3',
+            messageKey: 'chat_sample_message_3',
+            timeKey: 'chat_sample_time_3',
             unreadCount: 1,
             onTap: () {},
           ),
@@ -62,15 +62,15 @@ class ChatScreen extends StatelessWidget {
 
 class _ChatTile extends StatelessWidget {
   const _ChatTile({
-    required this.name,
-    required this.lastMessage,
-    required this.time,
+    required this.nameKey,
+    required this.messageKey,
+    required this.timeKey,
     required this.unreadCount,
     required this.onTap,
   });
-  final String name;
-  final String lastMessage;
-  final String time;
+  final String nameKey;
+  final String messageKey;
+  final String timeKey;
   final int unreadCount;
   final VoidCallback onTap;
 
@@ -96,11 +96,11 @@ class _ChatTile extends StatelessWidget {
           child: const Icon(Icons.person, color: Color(0xFF1E3A8A)),
         ),
         title: Text(
-          name,
+          context.l10n(nameKey),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          lastMessage,
+          context.l10n(messageKey),
           style: TextStyle(
             color: Colors.grey.shade600,
             fontSize: 13,
@@ -113,7 +113,7 @@ class _ChatTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              time,
+              context.l10n(timeKey),
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,

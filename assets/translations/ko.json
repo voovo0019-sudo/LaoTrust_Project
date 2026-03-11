@@ -146,4 +146,29 @@
   "job_detail_event_staff": "행사 현장 스태프, 통역 보조 가능",
   "job_detail_logistics": "창고/물류 보조 작업",
   "job_detail_promotion": "판촉·홍보 알바"
+
+  ,
+  "job_type_service": "서비스",
+  "job_type_labor": "노무",
+  "job_type_delivery": "배달",
+
+  "profile_user_name": "사용자",
+  "profile_status_verified": "Verified 전문가",
+  "profile_status_unverified": "인증 전",
+  "profile_menu_payment_sub": "포인트 충전 및 결제 수단 등록",
+  "profile_menu_my_requests_sub": "신청한 서비스 진행 현황",
+  "profile_menu_customer_service_sub": "문의 및 도움말",
+  "profile_verified_done": "인증 완료",
+  "profile_verified_todo": "4.5 USD 결제 후 파란 배지 활성화",
+  "profile_expert_dashboard_sub": "수입·매칭 이력 보기",
+
+  "chat_sample_name_1": "에어컨 수리 전문가",
+  "chat_sample_message_1": "견적 보내드렸습니다.",
+  "chat_sample_time_1": "10:32",
+  "chat_sample_name_2": "배관 수리 김철수",
+  "chat_sample_message_2": "내일 오전 가능합니다.",
+  "chat_sample_time_2": "어제",
+  "chat_sample_name_3": "전기 점검 서비스",
+  "chat_sample_message_3": "사진 확인했습니다.",
+  "chat_sample_time_3": "월"
 }

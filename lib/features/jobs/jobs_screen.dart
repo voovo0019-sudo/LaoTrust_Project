@@ -16,27 +16,58 @@ class JobsScreen extends StatefulWidget {
 
 class _JobsScreenState extends State<JobsScreen> {
   static const Color _appBarBlue = Color(0xFF1E3A8A);
-  String? _selectedRegion;
-  String? _selectedType;
+  String? _selectedRegionKey;
+  String? _selectedTypeKey;
+
+  // 지역/직종/일자리 정보를 모두 번역 키로 관리하여 다국어 100% 적용.
+  static const List<String> _regionKeys = [
+    'location_near_vientiane_hall',
+    'location_downtown',
+    'location_near_that_luang',
+  ];
+
+  static const List<String> _typeKeys = [
+    'job_type_service',
+    'job_type_labor',
+    'job_type_delivery',
+  ];
 
   final List<Map<String, String>> _jobList = [
-    {'title': '식당 서버', 'location': '비엔티안 시청 인근', 'salary': '15,000 LAK/시간', 'type': '서비스'},
-    {'title': '단순 노무', 'location': '타락광장 근처', 'salary': '협의', 'type': '노무'},
-    {'title': '카페 알바', 'location': '시내 중심가', 'salary': '12,000 LAK/시간', 'type': '서비스'},
-    {'title': '배달 도우미', 'location': '시내', 'salary': '협의', 'type': '배달'},
+    {
+      'titleKey': 'job_title_restaurant_server',
+      'locationKey': 'location_near_vientiane_hall',
+      'salaryKey': 'salary_15k_per_hour',
+      'typeKey': 'job_type_service',
+    },
+    {
+      'titleKey': 'job_title_simple_labor',
+      'locationKey': 'location_near_that_luang',
+      'salaryKey': 'salary_negotiable',
+      'typeKey': 'job_type_labor',
+    },
+    {
+      'titleKey': 'job_title_cafe_part_time',
+      'locationKey': 'location_downtown',
+      'salaryKey': 'salary_12k_per_hour',
+      'typeKey': 'job_type_service',
+    },
+    {
+      'titleKey': 'job_title_delivery_helper',
+      'locationKey': 'location_downtown',
+      'salaryKey': 'salary_negotiable',
+      'typeKey': 'job_type_delivery',
+    },
   ];
 
   List<Map<String, String>> get _filteredJobs {
     var list = _jobList;
-    if (_selectedRegion != null) {
-      list = list.where((j) => j['location']?.contains(_selectedRegion ?? '') ?? false).toList();
-      if (list.isEmpty) list = _jobList;
+    if (_selectedRegionKey != null) {
+      list = list.where((j) => j['locationKey'] == _selectedRegionKey).toList();
     }
-    if (_selectedType != null) {
-      list = list.where((j) => j['type'] == _selectedType).toList();
-      if (list.isEmpty) list = _jobList;
+    if (_selectedTypeKey != null) {
+      list = list.where((j) => j['typeKey'] == _selectedTypeKey).toList();
     }
-    return list.isEmpty ? _jobList : list;
+    return list;
   }
 
   @override
@@ -64,16 +95,16 @@ class _JobsScreenState extends State<JobsScreen> {
             children: [
               _FilterChip(
                 label: context.l10n('job_filter_region'),
-                value: _selectedRegion,
-                options: const ['비엔티안', '시내', '타락광장'],
-                onSelected: (v) => setState(() => _selectedRegion = v),
+                value: _selectedRegionKey,
+                options: _regionKeys,
+                onSelected: (v) => setState(() => _selectedRegionKey = v),
               ),
               const SizedBox(width: 12),
               _FilterChip(
                 label: context.l10n('job_filter_type'),
-                value: _selectedType,
-                options: const ['서비스', '노무', '배달'],
-                onSelected: (v) => setState(() => _selectedType = v),
+                value: _selectedTypeKey,
+                options: _typeKeys,
+                onSelected: (v) => setState(() => _selectedTypeKey = v),
               ),
             ],
           ),
@@ -81,9 +112,9 @@ class _JobsScreenState extends State<JobsScreen> {
           ..._filteredJobs.map((job) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _JobCard(
-                  title: job['title']!,
-                  location: job['location']!,
-                  salary: job['salary']!,
+                  titleKey: job['titleKey']!,
+                  locationKey: job['locationKey']!,
+                  salaryKey: job['salaryKey']!,
                   onTap: () {},
                   onApply: () {},
                 ),
@@ -118,11 +149,11 @@ class _FilterChip extends StatelessWidget {
             spacing: 8,
             runSpacing: 6,
             children: [
-              for (final opt in options)
+              for (final optKey in options)
                 FilterChip(
-                  label: Text(opt),
-                  selected: value == opt,
-                  onSelected: (_) => onSelected(value == opt ? null : opt),
+                  label: Text(context.l10n(optKey)),
+                  selected: value == optKey,
+                  onSelected: (_) => onSelected(value == optKey ? null : optKey),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                 ),
             ],
@@ -135,15 +166,15 @@ class _FilterChip extends StatelessWidget {
 
 class _JobCard extends StatelessWidget {
   const _JobCard({
-    required this.title,
-    required this.location,
-    required this.salary,
+    required this.titleKey,
+    required this.locationKey,
+    required this.salaryKey,
     required this.onTap,
     required this.onApply,
   });
-  final String title;
-  final String location;
-  final String salary;
+  final String titleKey;
+  final String locationKey;
+  final String salaryKey;
   final VoidCallback onTap;
   final VoidCallback onApply;
 
@@ -164,7 +195,7 @@ class _JobCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                context.l10n(titleKey),
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
@@ -172,11 +203,11 @@ class _JobCard extends StatelessWidget {
                 children: [
                   Icon(Icons.location_on, size: 16, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 4),
-                  Text(location, style: theme.textTheme.bodySmall),
+                  Text(context.l10n(locationKey), style: theme.textTheme.bodySmall),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(salary, style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF1E3A8A))),
+              Text(context.l10n(salaryKey), style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF1E3A8A))),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,

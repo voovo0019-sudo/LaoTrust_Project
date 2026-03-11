@@ -146,4 +146,29 @@
   "job_detail_event_staff": "Event on-site staff, interpretation support",
   "job_detail_logistics": "Warehouse / logistics support",
   "job_detail_promotion": "Promotion and marketing"
+
+  ,
+  "job_type_service": "Service",
+  "job_type_labor": "Labor",
+  "job_type_delivery": "Delivery",
+
+  "profile_user_name": "User",
+  "profile_status_verified": "Verified Expert",
+  "profile_status_unverified": "Not verified",
+  "profile_menu_payment_sub": "Top up points and manage payment methods",
+  "profile_menu_my_requests_sub": "Track your service requests",
+  "profile_menu_customer_service_sub": "Contact support and help",
+  "profile_verified_done": "Verification completed",
+  "profile_verified_todo": "Activate blue badge after 4.5 USD payment",
+  "profile_expert_dashboard_sub": "View earnings and matching history",
+
+  "chat_sample_name_1": "AC Repair Expert",
+  "chat_sample_message_1": "I’ve sent you a quote.",
+  "chat_sample_time_1": "10:32",
+  "chat_sample_name_2": "Plumbing Repair Kim",
+  "chat_sample_message_2": "Tomorrow morning works for me.",
+  "chat_sample_time_2": "Yesterday",
+  "chat_sample_name_3": "Electrical Inspection Service",
+  "chat_sample_message_3": "I’ve checked the photos.",
+  "chat_sample_time_3": "Mon"
 }

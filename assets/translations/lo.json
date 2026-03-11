@@ -146,4 +146,29 @@
   "job_detail_event_staff": "ພະນັກງານງານອີເວັນ, ຊ່ວຍແປພາສາໄດ້",
   "job_detail_logistics": "ວຽກສາງ/ຂົນສົ່ງ",
   "job_detail_promotion": "ຕະຫຼາດ ແລະ ໂຄສະນາ"
+
+  ,
+  "job_type_service": "ບໍລິການ",
+  "job_type_labor": "ແຮງງານ",
+  "job_type_delivery": "ສົ່ງອາຫານ",
+
+  "profile_user_name": "ຜູ້ໃຊ້",
+  "profile_status_verified": "ຊ່ຽວຊານ Verified",
+  "profile_status_unverified": "ຍັງບໍ່ຢືນຢັນ",
+  "profile_menu_payment_sub": "ເຕີມຄະແນນ ແລະ ຈັດການວິທີຊຳລະ",
+  "profile_menu_my_requests_sub": "ຕິດຕາມສະຖານະຄຳສະໝັກ",
+  "profile_menu_customer_service_sub": "ຕິດຕໍ່ບໍລິການລູກຄ້າ",
+  "profile_verified_done": "ຢືນຢັນແລ້ວ",
+  "profile_verified_todo": "ຊຳລະ 4.5 USD ເພື່ອເປີດໃຊ້ badge ສີຟ້າ",
+  "profile_expert_dashboard_sub": "ເບິ່ງລາຍຮັບ ແລະ ປະຫວັດການຈັບຄູ່",
+
+  "chat_sample_name_1": "ຊ່າງແອກ",
+  "chat_sample_message_1": "ສົ່ງຄຳໃບສະເໜີໃຫ້ແລ້ວ.",
+  "chat_sample_time_1": "10:32",
+  "chat_sample_name_2": "ຊ່າງທໍ່ນ້ຳ ທ່ານຄິມ",
+  "chat_sample_message_2": "ພຸ່ງນີ້ເຊົ້າເຮັດໄດ້.",
+  "chat_sample_time_2": "ມື້ກ່ອນ",
+  "chat_sample_name_3": "ບໍລິການກວດໄຟຟ້າ",
+  "chat_sample_message_3": "ເບິ່ງຮູບແລ້ວ.",
+  "chat_sample_time_3": "ວັນຈັນ"
 }

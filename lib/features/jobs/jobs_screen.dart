@@ -116,9 +116,24 @@ class _JobsScreenState extends State<JobsScreen> {
                   locationKey: job['locationKey']!,
                   salaryKey: job['salaryKey']!,
                   onTap: () {},
-                  onApply: () {},
+                  onApply: () => _showApplySuccessDialog(context),
                 ),
               )),
+        ],
+      ),
+    );
+  }
+
+  void _showApplySuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(context.l10n('job_apply_success')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
+          ),
         ],
       ),
     );

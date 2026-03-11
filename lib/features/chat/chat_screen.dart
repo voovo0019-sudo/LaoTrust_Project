@@ -38,21 +38,38 @@ class ChatScreen extends StatelessWidget {
             messageKey: 'chat_sample_message_1',
             timeKey: 'chat_sample_time_1',
             unreadCount: 2,
-            onTap: () {},
+            onTap: () => _showEnterChatDialog(context, nameKey: 'chat_sample_name_1'),
           ),
           _ChatTile(
             nameKey: 'chat_sample_name_2',
             messageKey: 'chat_sample_message_2',
             timeKey: 'chat_sample_time_2',
             unreadCount: 0,
-            onTap: () {},
+            onTap: () => _showEnterChatDialog(context, nameKey: 'chat_sample_name_2'),
           ),
           _ChatTile(
             nameKey: 'chat_sample_name_3',
             messageKey: 'chat_sample_message_3',
             timeKey: 'chat_sample_time_3',
             unreadCount: 1,
-            onTap: () {},
+            onTap: () => _showEnterChatDialog(context, nameKey: 'chat_sample_name_3'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnterChatDialog(BuildContext context, {required String nameKey}) {
+    final name = context.l10n(nameKey);
+    final message = context.l10n('chat_enter_message').replaceAll('{name}', name);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
           ),
         ],
       ),

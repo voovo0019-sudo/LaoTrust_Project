@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // 증상도 표시 문자열이 아닌 키로 보관 (다국어 100% 변환 보장)
   final List<String> _selectedSymptomKeys = [];
   final TextEditingController _etcController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   static const String _symptomOtherKey = 'symptom_other';
 
@@ -58,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _pageController.dispose();
     _etcController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -271,38 +273,163 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 상단바 바로 아래 하얀색 배경 검색창 (유지)
   Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey.shade600, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              context.l10n('search_placeholder'),
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 14,
+        onTap: () => _openSearchDialog(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.search, color: Colors.grey.shade600, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.l10n('search_placeholder'),
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openSearchDialog(BuildContext context) {
+    _searchController.text = '';
+
+    final cityKeys = <String>[
+      'city_vientiane',
+      'city_luang_prabang',
+      'city_pakse',
+      'city_savannakhet',
+    ];
+    final recommendedKeys = <String>[
+      'search_keyword_move',
+      'search_keyword_cleaning',
+      'search_keyword_repair',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n('search_ready_title')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.l10n('search_ready_body')),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: context.l10n('search_placeholder'),
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (v) {
+                if (v.contains(context.l10n('search_keyword_move_trigger')) || v.contains('이사')) {
+                  Navigator.of(ctx).pop();
+                  _goToCleaningSubCategory();
+                }
+              },
+              onSubmitted: (v) {
+                Navigator.of(ctx).pop();
+                _handleSearchQuery(v);
+              },
             ),
+            const SizedBox(height: 16),
+            Text(context.l10n('search_recommended'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final k in recommendedKeys)
+                  ActionChip(
+                    label: Text(context.l10n(k)),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _handleSearchQuery(context.l10n(k));
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(context.l10n('search_city_hint'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final k in cityKeys)
+                  FilterChip(
+                    label: Text(context.l10n(k)),
+                    selected: false,
+                    onSelected: (_) {},
+                  ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
           ),
         ],
       ),
     );
+  }
+
+  void _handleSearchQuery(String query) {
+    if (query.contains(context.l10n('search_keyword_move_trigger')) || query.contains('이사')) {
+      _goToCleaningSubCategory();
+      return;
+    }
+    // 현재는 “준비 중” 단계로만 안내. (요구: AlertDialog 또는 추천어 노출)
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(context.l10n('search_not_ready_yet')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _goToCleaningSubCategory() {
+    setState(() {
+      _selectedCategoryKey = 'expert_cleaning';
+      _selectedCleaningSubCategoryId = '';
+      _selectedCleaningSubCategoryLabelKey = '';
+      _selectedOtherSubCategoryLabelKey = '';
+      _currentView = HomeView.subCategory;
+    });
   }
 
   Widget _buildCategoryGrid() {

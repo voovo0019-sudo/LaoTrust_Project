@@ -190,5 +190,24 @@
   "chat_sample_time_2": "ມື້ກ່ອນ",
   "chat_sample_name_3": "ບໍລິການກວດໄຟຟ້າ",
   "chat_sample_message_3": "ເບິ່ງຮູບແລ້ວ.",
-  "chat_sample_time_3": "ວັນຈັນ"
+  "chat_sample_time_3": "ວັນຈັນ",
+
+  "job_apply_success": "ຮັບໃບສະໝັກສຳເລັດແລ້ວ. ຊ່ຽວຊານຈະກວດແລະຕິດຕໍ່ກັບທ່ານ.",
+  "chat_enter_message": "ກຳລັງເຂົ້າຫ້ອງສົນທະນາ 1:1 ກັບ {name}. ກະລຸນາລໍຖ້າແປບໜຶ່ງ.",
+  "profile_my_requests_empty": "ຍັງບໍ່ມີສະຖານະການສະໝັກບໍລິການ.",
+  "profile_customer_service_ready": "ກຳລັງຈັດກຽມ.",
+
+  "search_ready_title": "ກຳລັງຈັດກຽມການຄົ້ນຫາ",
+  "search_ready_body": "ກຳລັງຈັດກຽມການຄົ້ນຫາບໍລິການ/ພື້ນທີ່. ເລືອກຄຳແນະນຳ ຫຼື ພິມເອງ.",
+  "search_recommended": "ຄຳແນະນຳ",
+  "search_city_hint": "ເມືອງສຳຄັນ (ຄົ້ນຫາໄດ້)",
+  "city_vientiane": "ວຽງຈັນ (ນະຄອນຫຼວງ)",
+  "city_luang_prabang": "ຫຼວງພະບາງ",
+  "city_pakse": "ປາກເຊ",
+  "city_savannakhet": "ສະຫວັນນະເຂດ",
+  "search_keyword_move": "ຍ້າຍເຂົ້າ",
+  "search_keyword_cleaning": "ການອະນາໄມ",
+  "search_keyword_repair": "ຊ່ອມແປງ",
+  "search_keyword_move_trigger": "ຍ້າຍ",
+  "search_not_ready_yet": "ກຳລັງຈັດກຽມການຄົ້ນຫາ."
 }

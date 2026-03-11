@@ -190,5 +190,24 @@
   "chat_sample_time_2": "어제",
   "chat_sample_name_3": "전기 점검 서비스",
   "chat_sample_message_3": "사진 확인했습니다.",
-  "chat_sample_time_3": "월"
+  "chat_sample_time_3": "월",
+
+  "job_apply_success": "지원서가 성공적으로 접수되었습니다. 전문가가 확인 후 연락드릴 예정입니다.",
+  "chat_enter_message": "{name} 전문가님과 1:1 채팅방에 입장합니다. 잠시만 기다려 주세요.",
+  "profile_my_requests_empty": "아직 신청된 서비스 현황이 없습니다",
+  "profile_customer_service_ready": "준비 중",
+
+  "search_ready_title": "검색 준비 중",
+  "search_ready_body": "서비스/지역 검색 기능을 준비 중입니다. 아래 추천어를 선택하거나 직접 입력해 보세요.",
+  "search_recommended": "추천 검색어",
+  "search_city_hint": "주요 도시(검색 안내)",
+  "city_vientiane": "비엔티안(수도)",
+  "city_luang_prabang": "루앙프라방",
+  "city_pakse": "팍세",
+  "city_savannakhet": "사완나케트",
+  "search_keyword_move": "이사",
+  "search_keyword_cleaning": "청소",
+  "search_keyword_repair": "수리",
+  "search_keyword_move_trigger": "이사",
+  "search_not_ready_yet": "검색 기능 준비 중입니다."
 }

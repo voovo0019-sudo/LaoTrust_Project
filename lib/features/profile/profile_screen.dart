@@ -37,6 +37,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified());
   }
 
+  void _showInfoDialog(BuildContext context, {required String messageKey}) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(context.l10n(messageKey)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n('confirm')),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -75,14 +90,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.assignment,
             title: context.l10n('profile_menu_my_requests'),
             subtitle: context.l10n('profile_menu_my_requests_sub'),
-            onTap: () {},
+            onTap: () => _showInfoDialog(context, messageKey: 'profile_my_requests_empty'),
           ),
           _buildMenuTile(
             context,
             icon: Icons.support_agent,
             title: context.l10n('profile_menu_customer_service'),
             subtitle: context.l10n('profile_menu_customer_service_sub'),
-            onTap: () {},
+            onTap: () => _showInfoDialog(context, messageKey: 'profile_customer_service_ready'),
           ),
           const SizedBox(height: 16),
           _buildMenuTile(

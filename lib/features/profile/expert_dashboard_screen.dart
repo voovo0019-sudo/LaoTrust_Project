@@ -4,6 +4,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 
 const String expertDashboardRouteName = '/expert-dashboard';
@@ -36,7 +37,7 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('전문가 대시보드'),
+        title: Text(context.l10n('expert_dashboard_title')),
       ),
       body: RefreshIndicator(
         onRefresh: _loadVerified,
@@ -46,17 +47,17 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildVerifiedCard(theme, colorScheme),
+              _buildVerifiedCard(context, theme, colorScheme),
               const SizedBox(height: 24),
-              _buildSectionTitle(theme, '수입 요약'),
+              _buildSectionTitle(theme, context.l10n('expert_dashboard_income_section')),
               const SizedBox(height: 8),
-              _buildPlaceholderCard(colorScheme, '총 수입', '0.00 USD', Icons.account_balance_wallet),
+              _buildPlaceholderCard(colorScheme, context.l10n('expert_dashboard_total_income'), context.l10n('expert_dashboard_usd_zero'), Icons.account_balance_wallet),
               const SizedBox(height: 16),
-              _buildSectionTitle(theme, '매칭 이력'),
+              _buildSectionTitle(theme, context.l10n('expert_dashboard_matching_section')),
               const SizedBox(height: 8),
-              _buildPlaceholderCard(colorScheme, '이번 달 매칭', '0건', Icons.handshake),
+              _buildPlaceholderCard(colorScheme, context.l10n('expert_dashboard_month_matching'), context.l10n('expert_dashboard_count_zero'), Icons.handshake),
               const SizedBox(height: 8),
-              _buildPlaceholderCard(colorScheme, '전체 완료 건수', '0건', Icons.check_circle_outline),
+              _buildPlaceholderCard(colorScheme, context.l10n('expert_dashboard_total_completed'), context.l10n('expert_dashboard_count_zero'), Icons.check_circle_outline),
             ],
           ),
         ),
@@ -64,7 +65,7 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
     );
   }
 
-  Widget _buildVerifiedCard(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildVerifiedCard(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -81,14 +82,14 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _verified ? 'Verified 전문가' : '인증 신청하기',
+                    _verified ? context.l10n('expert_dashboard_verified_label') : context.l10n('expert_dashboard_apply_label'),
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _verified
-                        ? '파란 배지가 프로필에 표시됩니다.'
-                        : '4.5 USD 결제 후 배지를 받을 수 있습니다.',
+                        ? context.l10n('expert_dashboard_badge_hint')
+                        : context.l10n('expert_dashboard_badge_todo'),
                     style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],

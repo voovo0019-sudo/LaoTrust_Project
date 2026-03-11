@@ -40,15 +40,15 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BCEL OnePay'),
+        title: Text(context.l10n('bcel_onepay_title')),
       ),
       body: SafeArea(
-        child: _paymentSuccess ? _buildSuccessBody(context, colorScheme) : _buildPaymentBody(theme, colorScheme),
+        child: _paymentSuccess ? _buildSuccessBody(context, colorScheme) : _buildPaymentBody(context, theme, colorScheme),
       ),
     );
   }
 
-  Widget _buildPaymentBody(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildPaymentBody(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -56,12 +56,12 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
         children: [
           const SizedBox(height: 16),
           Text(
-            'Verified Badge 인증 결제',
+            context.l10n('verified_payment_title'),
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            '인증의 혜택: 상단 노출, 신뢰 배지 등',
+            context.l10n('verified_benefits'),
             style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
@@ -97,14 +97,14 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
                     border: Border.all(color: colorScheme.outline),
                   ),
                   child: Text(
-                    'QR\n(시뮬)',
+                    context.l10n('verified_qr_placeholder'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'BCEL OnePay 앱으로 QR 스캔 후 결제',
+                  context.l10n('verified_bcel_scan_hint'),
                   style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -120,7 +120,7 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary),
                   )
                 : const Icon(Icons.check_circle_outline),
-            label: Text(_isProcessing ? '결제 처리 중...' : '결제 완료 (시뮬레이션)'),
+            label: Text(_isProcessing ? context.l10n('payment_processing') : context.l10n('payment_complete_simulation')),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),

@@ -32,6 +32,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() => _verified = v);
   }
 
+  /// PC 웹에서도 확실히 페이지 이동되도록 MaterialPageRoute 사용 (pushNamed 대신).
+  void _openBcelOnepay(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified());
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -63,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.account_balance_wallet,
             title: context.l10n('profile_menu_payment'),
             subtitle: context.l10n('profile_menu_payment_sub'),
-            onTap: () => Navigator.pushNamed(context, bcelOnepayRouteName).then((_) => _loadVerified()),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified()),
           ),
           _buildMenuTile(
             context,
@@ -87,14 +92,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: _verified
                 ? context.l10n('profile_verified_done')
                 : context.l10n('profile_verified_todo'),
-            onTap: _verified ? null : () => Navigator.pushNamed(context, bcelOnepayRouteName).then((_) => _loadVerified()),
+            onTap: _verified ? null : () => _openBcelOnepay(context),
           ),
           _buildMenuTile(
             context,
             icon: Icons.dashboard,
             title: context.l10n('expert_dashboard'),
             subtitle: context.l10n('profile_expert_dashboard_sub'),
-            onTap: () => Navigator.pushNamed(context, expertDashboardRouteName),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen())),
           ),
         ],
       ),

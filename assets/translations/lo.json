@@ -149,10 +149,10 @@
 
   "verified_payment_title": "ຊຳລະຢືນຢັນ Verified Badge",
   "verified_benefits": "ຜົນປະໂຫຍດ: ເບິ່ງເຫັນດີ, ໃບຢືນຢັນ ແລະ ອື່ນໆ",
-  "verified_qr_placeholder": "QR\n(ສະແດງ)",
+  "verified_qr_placeholder": "QR (ຈຳລອງ)",
   "verified_bcel_scan_hint": "ສະແກນ QR ດ້ວຍແອັບ BCEL OnePay ເພື່ອຊຳລະ",
   "payment_processing": "ກຳລັງປະມວນຜົນ...",
-  "payment_complete_simulation": "ຊຳລະແລ້ວ (ສະແດງ)",
+  "payment_complete_simulation": "✓ ຊຳລະແລ້ວ (ຈຳລອງ)",
   "bcel_onepay_title": "BCEL OnePay",
 
   "expert_dashboard_title": "ແດັຊບອດຊ່ຽວຊານ",

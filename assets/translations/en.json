@@ -149,10 +149,10 @@
 
   "verified_payment_title": "Verified Badge Payment",
   "verified_benefits": "Benefits: Top visibility, trust badge, and more",
-  "verified_qr_placeholder": "QR\n(Sim)",
+  "verified_qr_placeholder": "QR (simulation)",
   "verified_bcel_scan_hint": "Scan QR with BCEL OnePay app to pay",
   "payment_processing": "Processing...",
-  "payment_complete_simulation": "Complete payment (simulation)",
+  "payment_complete_simulation": "✓ Complete payment (simulation)",
   "bcel_onepay_title": "BCEL OnePay",
 
   "expert_dashboard_title": "Expert Dashboard",

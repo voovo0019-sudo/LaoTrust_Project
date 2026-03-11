@@ -107,7 +107,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: _verified
                 ? context.l10n('profile_verified_done')
                 : context.l10n('profile_verified_todo'),
-            onTap: _verified ? null : () => _openBcelOnepay(context),
+            // PC 웹에서도 먹통 방지: 인증 여부와 무관하게 항상 진입 가능
+            onTap: () => _openBcelOnepay(context),
           ),
           _buildMenuTile(
             context,
@@ -184,6 +185,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     VoidCallback? onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final tile = ListTile(
+      leading: Icon(icon, color: colorScheme.primary),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right),
+      // web에서 Container+ListTile 조합이 간헐적으로 클릭이 씹히는 케이스 방지:
+      // 실제 탭 핸들링은 InkWell에서만 처리한다.
+      onTap: null,
+    );
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -197,13 +208,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      child: ListTile(
-        leading: Icon(icon, color: colorScheme.primary),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
+      child: onTap == null
+          ? tile
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(28),
+                child: tile,
+              ),
+            ),
     );
   }
 }

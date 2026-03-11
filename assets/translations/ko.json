@@ -149,10 +149,10 @@
 
   "verified_payment_title": "Verified Badge 인증 결제",
   "verified_benefits": "인증의 혜택: 상단 노출, 신뢰 배지 등",
-  "verified_qr_placeholder": "QR\n(시뮬)",
+  "verified_qr_placeholder": "QR (시뮬레이션)",
   "verified_bcel_scan_hint": "BCEL OnePay 앱으로 QR 스캔 후 결제",
   "payment_processing": "결제 처리 중...",
-  "payment_complete_simulation": "결제 완료 (시뮬레이션)",
+  "payment_complete_simulation": "✓ 결제 완료 (시뮬레이션)",
   "bcel_onepay_title": "BCEL OnePay",
 
   "expert_dashboard_title": "전문가 대시보드",

@@ -20,6 +20,7 @@ class BcelOnepayScreen extends StatefulWidget {
 class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
   bool _isProcessing = false;
   bool _paymentSuccess = false;
+  static const Color _appBarBlue = Color(0xFF1E3A8A);
 
   Future<void> _simulatePaymentComplete() async {
     if (_isProcessing || _paymentSuccess) return;
@@ -40,6 +41,11 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: _appBarBlue,
+        foregroundColor: Colors.white,
+        surfaceTintColor: _appBarBlue,
+        elevation: 0,
+        centerTitle: true,
         title: Text(context.l10n('bcel_onepay_title')),
       ),
       body: SafeArea(
@@ -83,7 +89,7 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
                   '\$${kVerificationFeeUsd.toStringAsFixed(1)} USD',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                    color: _appBarBlue,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -122,6 +128,8 @@ class _BcelOnepayScreenState extends State<BcelOnepayScreen> {
                 : const Icon(Icons.check_circle_outline),
             label: Text(_isProcessing ? context.l10n('payment_processing') : context.l10n('payment_complete_simulation')),
             style: FilledButton.styleFrom(
+              backgroundColor: _appBarBlue,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),

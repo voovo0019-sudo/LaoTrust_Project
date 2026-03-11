@@ -728,6 +728,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Firebase에서 문자열로 들어오는 경우(예: '식당 서버')도 가능한 한 키로 매핑하여 번역한다.
   // 누락 방지용 사전(Map) — 요구사항(1) 준수.
+  /// 직종 표시 문자열(한/영/라오) → 번역 키. 시연 시 코드명 노출 방지.
   static const Map<String, String> _jobTitleValueToKey = {
     '식당 서버': 'job_title_restaurant_server',
     '단순 노무': 'job_title_simple_labor',
@@ -736,6 +737,18 @@ class _HomeScreenState extends State<HomeScreen> {
     '행사 스태프': 'job_title_event_staff',
     '물류 보조': 'job_title_logistics',
     '판촉 홍보': 'job_title_promotion',
+    'Restaurant Server': 'job_title_restaurant_server',
+    'Simple Labor': 'job_title_simple_labor',
+    'Cafe Part-time': 'job_title_cafe_part_time',
+    'Event Staff': 'job_title_event_staff',
+    'Logistics Assistant': 'job_title_logistics',
+    'Promotion': 'job_title_promotion',
+    'ພະນັກງານຮ້ານອາຫານ': 'job_title_restaurant_server',
+    'ແຮງງານທົ່ວໄປ': 'job_title_simple_labor',
+    'ວຽກພາດໄທມ໌ຮ້ານກາເຟ': 'job_title_cafe_part_time',
+    'ພະນັກງານງານອີເວັນ': 'job_title_event_staff',
+    'ຊ່ວຍວຽກຂົນສົ່ງ': 'job_title_logistics',
+    'ຕະຫຼາດ/ໂຄສະນາ': 'job_title_promotion',
   };
   static const Map<String, String> _jobLocValueToKey = {
     '비엔티안 시청 인근': 'location_near_vientiane_hall',
@@ -748,6 +761,7 @@ class _HomeScreenState extends State<HomeScreen> {
     '12,000 LAK/시간': 'salary_12k_per_hour',
     '협의': 'salary_negotiable',
   };
+  /// 제목 문자열(한/영/라오) → 상세 설명 키. 시연 시 영어/코드 노출 방지.
   static const Map<String, String> _jobDetailValueToKey = {
     '식당 서버': 'job_detail_restaurant_server',
     '단순 노무': 'job_detail_simple_labor',
@@ -755,6 +769,18 @@ class _HomeScreenState extends State<HomeScreen> {
     '행사 스태프': 'job_detail_event_staff',
     '물류 보조': 'job_detail_logistics',
     '판촉 홍보': 'job_detail_promotion',
+    'Restaurant Server': 'job_detail_restaurant_server',
+    'Simple Labor': 'job_detail_simple_labor',
+    'Cafe Part-time': 'job_detail_cafe_part_time',
+    'Event Staff': 'job_detail_event_staff',
+    'Logistics Assistant': 'job_detail_logistics',
+    'Promotion': 'job_detail_promotion',
+    'ພະນັກງານຮ້ານອາຫານ': 'job_detail_restaurant_server',
+    'ແຮງງານທົ່ວໄປ': 'job_detail_simple_labor',
+    'ວຽກພາດໄທມ໌ຮ້ານກາເຟ': 'job_detail_cafe_part_time',
+    'ພະນັກງານງານອີເວັນ': 'job_detail_event_staff',
+    'ຊ່ວຍວຽກຂົນສົ່ງ': 'job_detail_logistics',
+    'ຕະຫຼາດ/ໂຄສະນາ': 'job_detail_promotion',
   };
 
   String _localizedFromMaybeKey(BuildContext context, Object? maybeKeyOrValue, Map<String, String> valueToKey) {
@@ -850,7 +876,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: 3,
                             vertical: 6,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28),

@@ -396,7 +396,7 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
   Widget _buildSubCategoryContent() {
     final Map<String, List<String>> subData = {
       'repair': ['에어컨', '가전', '전기', '배관', '페인트 및 지붕 보수'],
-      'cleaning': ['이사/입주', '상업공간', '가전청소', '침구세척', '정기 방문'],
+      'cleaning': ['이사/입주', '상업공간', '가전청소', '침구세척', '정기 방문(주/월)'],
       'security': ['건물·상가(장기)', '공사장·창고', 'VIP 경호', '단기 행사 보안'],
       'delivery': ['음식 배달', '소형 화물', '마트 장보기 대행'],
       'tutor': ['언어(한/라/영)', 'IT/코딩', '음악'],

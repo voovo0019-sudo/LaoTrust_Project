@@ -4,7 +4,7 @@ import '../../core/app_localizations.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
-enum HomeView { main, subCategory, symptoms, cleaningOptions }
+enum HomeView { main, subCategory, symptoms, cleaningOptions, otherSummary }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -31,9 +31,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedSubCategoryId = '';
   int _currentPage = 0;
 
-  // Cleaning 카테고리 전용 선택 상태 (S/M/L + 주거 형태)
+  // Cleaning 카테고리 전용: 2단계 선택 후 3단계(S/M/L) 진입
+  String _selectedCleaningSubCategoryId = '';
+  String _selectedCleaningSubCategoryLabelKey = '';
   String _selectedCleaningSize = '';
   String _selectedCleaningHouseType = '';
+
+  // 경비/배달/기타 등 2단계 선택 후 요약 화면용
+  String _selectedOtherSubCategoryLabelKey = '';
 
   // 증상도 표시 문자열이 아닌 키로 보관 (다국어 100% 변환 보장)
   final List<String> _selectedSymptomKeys = [];
@@ -77,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _goBack() {
     setState(() {
       if (_currentView == HomeView.cleaningOptions) {
-        _currentView = HomeView.main;
+        _currentView = HomeView.subCategory;
+      } else if (_currentView == HomeView.otherSummary) {
+        _currentView = HomeView.subCategory;
       } else if (_currentView == HomeView.symptoms) {
         _currentView = HomeView.subCategory;
       } else if (_currentView == HomeView.subCategory) {
@@ -106,6 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _currentView = HomeView.main;
                 _selectedCategoryKey = '';
                 _selectedSubCategoryId = '';
+                _selectedCleaningSubCategoryId = '';
+                _selectedCleaningSubCategoryLabelKey = '';
+                _selectedOtherSubCategoryLabelKey = '';
                 _selectedSymptomKeys.clear();
                 _etcController.clear();
               });
@@ -211,6 +221,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildSymptomContent();
       case HomeView.cleaningOptions:
         return _buildCleaningOptionsContent();
+      case HomeView.otherSummary:
+        return _buildOtherSummaryContent();
     }
   }
 
@@ -325,13 +337,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             setState(() {
               _selectedCategoryKey = labelKey;
-              if (labelKey == 'expert_repair') {
-                _currentView = HomeView.subCategory;
-              } else if (labelKey == 'expert_cleaning') {
-                _selectedCleaningSize = '';
-                _selectedCleaningHouseType = '';
-                _currentView = HomeView.cleaningOptions;
-              }
+              _selectedCleaningSubCategoryId = '';
+              _selectedCleaningSubCategoryLabelKey = '';
+              _selectedOtherSubCategoryLabelKey = '';
+              _currentView = HomeView.subCategory;
             });
           },
           borderRadius: BorderRadius.circular(28),
@@ -364,17 +373,76 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// v44.0 복구: 전 카테고리 2단계(소분류) 리스트. 수리 로직은 기존 유지.
+  static List<Map<String, String>> _getSubCategoryItems(String categoryKey) {
+    switch (categoryKey) {
+      case 'expert_repair':
+        return [
+          {'id': 'ac', 'labelKey': 'service_ac'},
+          {'id': 'household', 'labelKey': 'service_household'},
+          {'id': 'electric', 'labelKey': 'service_electric'},
+          {'id': 'plumbing', 'labelKey': 'service_plumbing'},
+        ];
+      case 'expert_cleaning':
+        return [
+          {'id': 'move_in', 'labelKey': 'sub_cleaning_move_in'},
+          {'id': 'commercial', 'labelKey': 'sub_cleaning_commercial'},
+          {'id': 'appliance', 'labelKey': 'sub_cleaning_appliance'},
+          {'id': 'bedding', 'labelKey': 'sub_cleaning_bedding'},
+          {'id': 'regular_visit', 'labelKey': 'sub_cleaning_regular_visit'},
+        ];
+      case 'expert_security':
+        return [
+          {'id': 'building', 'labelKey': 'sub_security_building'},
+          {'id': 'site', 'labelKey': 'sub_security_site'},
+          {'id': 'vip', 'labelKey': 'sub_security_vip'},
+          {'id': 'event', 'labelKey': 'sub_security_event'},
+        ];
+      case 'expert_delivery':
+        return [
+          {'id': 'food', 'labelKey': 'sub_delivery_food'},
+          {'id': 'cargo', 'labelKey': 'sub_delivery_cargo'},
+          {'id': 'mart', 'labelKey': 'sub_delivery_mart'},
+        ];
+      case 'expert_beauty':
+        return [
+          {'id': 'general', 'labelKey': 'sub_beauty_general'},
+        ];
+      case 'expert_tutoring':
+        return [
+          {'id': 'lang', 'labelKey': 'sub_tutor_lang'},
+          {'id': 'it', 'labelKey': 'sub_tutor_it'},
+          {'id': 'music', 'labelKey': 'sub_tutor_music'},
+        ];
+      case 'expert_photo':
+        return [
+          {'id': 'studio', 'labelKey': 'sub_photo_studio'},
+          {'id': 'event', 'labelKey': 'sub_photo_event'},
+        ];
+      case 'expert_event':
+        return [
+          {'id': 'catering', 'labelKey': 'sub_event_catering'},
+          {'id': 'deco', 'labelKey': 'sub_event_deco'},
+          {'id': 'mc', 'labelKey': 'sub_event_mc'},
+          {'id': 'sound', 'labelKey': 'sub_event_sound'},
+        ];
+      case 'expert_garden':
+        return [
+          {'id': 'lawn', 'labelKey': 'sub_garden_lawn'},
+          {'id': 'trim', 'labelKey': 'sub_garden_trim'},
+          {'id': 'pest', 'labelKey': 'sub_garden_pest'},
+        ];
+      default:
+        return [{'id': 'general', 'labelKey': 'symptom_other'}];
+    }
+  }
+
   Widget _buildSubCategoryContent() {
-    final subItems = [
-      // 서브카테고리도 ID로 보관하여 언어 변경 시 유지
-      {'id': 'ac', 'labelKey': 'service_ac', 'icon': Icons.ac_unit},
-      {'id': 'household', 'labelKey': 'service_household', 'icon': Icons.settings},
-      {'id': 'electric', 'labelKey': 'service_electric', 'icon': Icons.electric_bolt},
-      {'id': 'plumbing', 'labelKey': 'service_plumbing', 'icon': Icons.plumbing},
-    ];
+    final subItems = _getSubCategoryItems(_selectedCategoryKey);
+    final isRepair = _selectedCategoryKey == 'expert_repair';
 
     return Padding(
-      key: const ValueKey('sub'),
+      key: ValueKey('sub_$_selectedCategoryKey'),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,59 +451,104 @@ class _HomeScreenState extends State<HomeScreen> {
             context.l10n('repair_subcategory_title'),
             style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n(_selectedCategoryKey),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
           const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 15,
-              crossAxisSpacing: 15,
-              childAspectRatio: 1.2,
-            ),
-            itemCount: subItems.length,
-            itemBuilder: (context, index) {
-              final item = subItems[index];
-              final String id = item['id'] as String;
-              final String labelKey = item['labelKey'] as String;
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedSubCategoryId = id;
-                    _currentView = HomeView.symptoms;
-                    _selectedSymptomKeys.clear();
-                    _etcController.clear();
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+          Expanded(
+            child: ListView.separated(
+              itemCount: subItems.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = subItems[index];
+                final String id = item['id']!;
+                final String labelKey = item['labelKey']!;
+                return ListTile(
+                  tileColor: Colors.white,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(item['icon'] as IconData,
-                          color: const Color(0xFF1E3A8A), size: 35),
-                      const SizedBox(height: 10),
-                      Text(
-                        context.l10n(labelKey),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
                   ),
+                  title: Text(
+                    context.l10n(labelKey),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: Color(0xFF1E3A8A),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      if (isRepair) {
+                        _selectedSubCategoryId = id;
+                        _selectedSymptomKeys.clear();
+                        _etcController.clear();
+                        _currentView = HomeView.symptoms;
+                      } else if (_selectedCategoryKey == 'expert_cleaning') {
+                        _selectedCleaningSubCategoryId = id;
+                        _selectedCleaningSubCategoryLabelKey = labelKey;
+                        _selectedCleaningSize = '';
+                        _selectedCleaningHouseType = '';
+                        _currentView = HomeView.cleaningOptions;
+                      } else {
+                        _selectedOtherSubCategoryLabelKey = labelKey;
+                        _currentView = HomeView.otherSummary;
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtherSummaryContent() {
+    return SingleChildScrollView(
+      key: const ValueKey('other_summary'),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n(_selectedCategoryKey),
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E3A8A),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n(_selectedOtherSubCategoryLabelKey),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 30),
+          SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              onPressed: _onStep3Submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
                 ),
-              );
-            },
+              ),
+              child: Text(
+                context.l10n('next_step'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         ],
       ),
@@ -443,11 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSymptomContent() {
-    // Cleaning 카테고리는 S/M/L 플로우로 분기하고, 나머지(수리 등)는 기존 증상 리스트를 유지한다.
-    if (_selectedCategoryKey == 'expert_cleaning') {
-      return _buildCleaningOptionsContent();
-    }
-
+    // 수리만 증상 선택. 청소는 2단계 선택 후 cleaningOptions으로 직행하므로 여기 오지 않음.
     final symptomKeys = _symptomKeyData[_selectedSubCategoryId] ?? [_symptomOtherKey];
     final String questionKey = switch (_selectedSubCategoryId) {
       'ac' => 'repair_question_ac',
@@ -577,9 +686,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 사령관 특별 지시: 데이터 부재 시에도 Mock 3종(식당 서버, 단순 노무, 카페 알바) 무조건 표시.
+  /// v44.0 복구: 급구 알바 6종 (식당 서버, 단순 노무, 카페 알바, 행사 스태프, 물류 보조, 판촉 홍보)
   static const List<Map<String, String>> _mockQuickJobs = [
-    // 키 기반으로 100% 번역 가능하게 구성
     {
       'titleKey': 'job_title_restaurant_server',
       'locKey': 'location_near_vientiane_hall',
@@ -598,6 +706,24 @@ class _HomeScreenState extends State<HomeScreen> {
       'salaryKey': 'salary_12k_per_hour',
       'detailKey': 'job_detail_cafe_part_time',
     },
+    {
+      'titleKey': 'job_title_event_staff',
+      'locKey': 'location_downtown',
+      'salaryKey': 'salary_negotiable',
+      'detailKey': 'job_detail_event_staff',
+    },
+    {
+      'titleKey': 'job_title_logistics',
+      'locKey': 'location_near_that_luang',
+      'salaryKey': 'salary_15k_per_hour',
+      'detailKey': 'job_detail_logistics',
+    },
+    {
+      'titleKey': 'job_title_promotion',
+      'locKey': 'location_downtown',
+      'salaryKey': 'salary_12k_per_hour',
+      'detailKey': 'job_detail_promotion',
+    },
   ];
 
   // Firebase에서 문자열로 들어오는 경우(예: '식당 서버')도 가능한 한 키로 매핑하여 번역한다.
@@ -607,6 +733,9 @@ class _HomeScreenState extends State<HomeScreen> {
     '단순 노무': 'job_title_simple_labor',
     '카페 알바': 'job_title_cafe_part_time',
     '배달 도우미': 'job_title_delivery_helper',
+    '행사 스태프': 'job_title_event_staff',
+    '물류 보조': 'job_title_logistics',
+    '판촉 홍보': 'job_title_promotion',
   };
   static const Map<String, String> _jobLocValueToKey = {
     '비엔티안 시청 인근': 'location_near_vientiane_hall',
@@ -623,6 +752,9 @@ class _HomeScreenState extends State<HomeScreen> {
     '식당 서버': 'job_detail_restaurant_server',
     '단순 노무': 'job_detail_simple_labor',
     '카페 알바': 'job_detail_cafe_part_time',
+    '행사 스태프': 'job_detail_event_staff',
+    '물류 보조': 'job_detail_logistics',
+    '판촉 홍보': 'job_detail_promotion',
   };
 
   String _localizedFromMaybeKey(BuildContext context, Object? maybeKeyOrValue, Map<String, String> valueToKey) {
@@ -687,8 +819,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return Column(
               children: [
                 SizedBox(
-                  // UI Diet: 카드 슬림 + 좌측 밀착(padEnds: false)
-                  height: 76,
+                  // Peeking: viewportFraction 0.48 유지, 내부 패딩 8~10px로 글자 잘림 방지
+                  height: 100,
                   child: PageView.builder(
                     controller: _pageController,
                     padEnds: false,
@@ -718,7 +850,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: 3,
                             vertical: 6,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28),
@@ -821,10 +953,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Cleaning 카테고리 전용 3뎁스: 공간 크기(S/M/L) + 주거 형태 버튼
+  /// Cleaning 카테고리 전용 3뎁스: 공간 크기(S/M/L) + 주거 형태 버튼 (2단계 선택 후에만 진입)
   Widget _buildCleaningOptionsContent() {
     return SingleChildScrollView(
-      key: const ValueKey('cleaning_options'),
+      key: ValueKey('cleaning_options_$_selectedCleaningSubCategoryId'),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -853,6 +985,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 30),
+          if (_selectedCleaningSubCategoryLabelKey.isNotEmpty)
+            Text(
+              context.l10n(_selectedCleaningSubCategoryLabelKey),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          if (_selectedCleaningSubCategoryLabelKey.isNotEmpty)
+            const SizedBox(height: 8),
           Text(
             context.l10n('expert_cleaning'),
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

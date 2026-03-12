@@ -199,10 +199,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bool isSending = false;
         bool isLoggingIn = false;
 
-        String _normalizeDigits(String input) =>
+        String normalizeDigits(String input) =>
             input.replaceAll(RegExp(r'\D'), '');
 
-        bool _isWhitelistKorea(String digits) {
+        bool isWhitelistKorea(String digits) {
           const whitelist = {
             '1027550019', // 사령관님
             '1056781452', // 동생분
@@ -211,8 +211,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return whitelist.contains(digits);
         }
 
-        Future<void> _sendCode(StateSetter setModalState) async {
-          final digits = _normalizeDigits(phone);
+        Future<void> sendCode(StateSetter setModalState) async {
+          final digits = normalizeDigits(phone);
           if (digits.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
@@ -223,10 +223,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           try {
             final fullNumber = '$countryCode$digits';
             await sendPhoneCode(fullNumber);
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('phone_auth_code_label'))),
             );
           } catch (_) {
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
             );
@@ -235,10 +237,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
 
-        Future<void> _login(StateSetter setModalState) async {
-          final digits = _normalizeDigits(phone);
+        Future<void> login(StateSetter setModalState) async {
+          final digits = normalizeDigits(phone);
           final inputCode = code.trim();
           if (digits.isEmpty || inputCode.isEmpty) {
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
             );
@@ -247,8 +250,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // 대한민국(+82) 화이트리스트 예외: 인증번호 123456으로 즉시 로그인 처리.
           if (countryCode == '+82' &&
-              _isWhitelistKorea(digits) &&
+              isWhitelistKorea(digits) &&
               inputCode == '123456') {
+            if (!context.mounted) return;
             Navigator.of(ctx).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('phone_auth_whitelist_success'))),
@@ -313,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: countryCode,
+                    initialValue: countryCode,
                     items: [
                       DropdownMenuItem(
                         value: '+856',
@@ -360,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: OutlinedButton(
                           onPressed: isSending
                               ? null
-                              : () => _sendCode(setModalState),
+                              : () => sendCode(setModalState),
                           child: isSending
                               ? const SizedBox(
                                   height: 16,
@@ -375,7 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: FilledButton(
                           onPressed: isLoggingIn
                               ? null
-                              : () => _login(setModalState),
+                              : () => login(setModalState),
                           style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xFF1E3A8A),
                             shape: RoundedRectangleBorder(

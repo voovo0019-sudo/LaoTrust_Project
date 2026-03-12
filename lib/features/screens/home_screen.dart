@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 import '../../core/app_localizations.dart';
+import '../../core/location_service.dart';
+import '../profile/profile_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -45,6 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _etcController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
+  LocationPoint? _userLocation;
+  bool _shownDefaultLocationInfo = false;
+
   static const String _symptomOtherKey = 'symptom_other';
 
   // 서브카테고리 ID(언어 독립) -> 증상 키 리스트
@@ -54,6 +59,30 @@ class _HomeScreenState extends State<HomeScreen> {
     'electric': ['symptom_electric_breaker', 'symptom_electric_burn_smell', 'symptom_electric_flicker', 'symptom_electric_leak', _symptomOtherKey],
     'plumbing': ['symptom_plumbing_leak', 'symptom_plumbing_clog', 'symptom_plumbing_backflow', 'symptom_plumbing_low_pressure', _symptomOtherKey],
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    final (loc, usedDefault) = await getUserLocationOrDefault();
+    if (!mounted) return;
+    setState(() {
+      _userLocation = loc;
+    });
+    if (usedDefault && !_shownDefaultLocationInfo) {
+      _shownDefaultLocationInfo = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n('location_permission_denied_vientiane_default'),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -155,6 +184,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       centerTitle: true,
       actions: [
+        if (_currentView == HomeView.main)
+          _HomePhoneLoginAction(
+            label: context.l10n('home_phone_login_hint'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
+                ),
+              );
+            },
+          ),
         if (widget.onLocaleChanged != null)
           PopupMenuButton<Locale>(
             icon: const Icon(Icons.public, color: Colors.white),
@@ -260,6 +301,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 15),
                 _buildCategoryGrid(),
                 const SizedBox(height: 20),
+                _buildNearbyExpertsSection(),
+                const SizedBox(height: 20),
                 _buildQuickJobSection(),
                 const SizedBox(height: 12),
               ],
@@ -267,6 +310,97 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         // 사령관 지침: [적용] 버튼 영구 제거 — 하단 여백은 알바 섹션·도트 배치에 활용
+      ],
+    );
+  }
+
+  Widget _buildNearbyExpertsSection() {
+    final experts = <({String nameKey, LocationPoint location, IconData icon})>[
+      (
+        nameKey: 'chat_sample_name_1',
+        location: const LocationPoint(17.9722, 102.6205),
+        icon: Icons.ac_unit,
+      ),
+      (
+        nameKey: 'chat_sample_name_2',
+        location: const LocationPoint(17.9790, 102.6350),
+        icon: Icons.plumbing,
+      ),
+      (
+        nameKey: 'chat_sample_name_3',
+        location: const LocationPoint(17.9650, 102.6100),
+        icon: Icons.electrical_services,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n('experts_nearby_title'),
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        ...experts.map((e) {
+          final userLoc = _userLocation;
+          String? distanceText;
+          if (userLoc != null) {
+            final km = distanceInKm(userLoc, e.location);
+            final displayKm = km < 10 ? km.toStringAsFixed(1) : km.toStringAsFixed(0);
+            distanceText = '${context.l10n('distance_from_here_prefix')} $displayKm km';
+          }
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                child: Icon(e.icon, color: const Color(0xFF1E3A8A)),
+              ),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n(e.nameKey),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (distanceText != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      distanceText,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1E3A8A),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              subtitle: Text(
+                context.l10n('experts_nearby_subtitle'),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+              onTap: () {},
+            ),
+          );
+        }),
       ],
     );
   }
@@ -1318,6 +1452,44 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 12,
           ),
           onSelected: (_) => onTap(),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomePhoneLoginAction extends StatelessWidget {
+  const _HomePhoneLoginAction({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.login, size: 18, color: Colors.white),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

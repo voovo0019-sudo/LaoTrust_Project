@@ -211,6 +211,10 @@
   "search_keyword_move_trigger": "Moving",
   "search_not_ready_yet": "Search is coming soon.",
 
+  "home_phone_login_hint": "Login with phone only",
+  "experts_nearby_title": "Nearby experts",
+  "experts_nearby_subtitle": "See experts you can connect with now",
+
   "search_ac_choice_title": "Choose AC service",
   "search_ac_choice_message": "Do you need AC repair or AC cleaning?",
   "search_ac_choice_repair": "Go to AC repair",

@@ -13,7 +13,12 @@ import 'expert_dashboard_screen.dart';
 const String profileRouteName = '/profile';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    this.openPhoneAuthOnStart = false,
+  });
+
+  final bool openPhoneAuthOnStart;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -26,6 +31,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadVerified();
+    if (widget.openPhoneAuthOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        _openPhoneAuthSheet(context);
+      });
+    }
   }
 
   Future<void> _loadVerified() async {
@@ -200,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bool isLoggingIn = false;
 
         String normalizeDigits(String input) =>
-            input.replaceAll(RegExp(r'\D'), '');
+            input.replaceAll(RegExp(r'[^0-9]'), '');
 
         bool isWhitelistKorea(String digits) {
           const whitelist = {

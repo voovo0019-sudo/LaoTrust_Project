@@ -211,6 +211,10 @@
   "search_keyword_move_trigger": "이사",
   "search_not_ready_yet": "검색 기능 준비 중입니다.",
 
+  "home_phone_login_hint": "전화번호만으로 로그인 가능",
+  "experts_nearby_title": "근처 전문가",
+  "experts_nearby_subtitle": "지금 바로 연결 가능한 전문가를 확인하세요",
+
   "search_ac_choice_title": "에어컨 서비스 선택",
   "search_ac_choice_message": "에어컨 수리와 세척 중 무엇을 원하시나요?",
   "search_ac_choice_repair": "에어컨 수리로 이동",

@@ -211,6 +211,10 @@
   "search_keyword_move_trigger": "ຍ້າຍ",
   "search_not_ready_yet": "ກຳລັງຈັດກຽມການຄົ້ນຫາ.",
 
+  "home_phone_login_hint": "ເຂົ້າລະບົບດ້ວຍເບີໂທເທົ່ານັ້ນ",
+  "experts_nearby_title": "ຊ່ຽວຊານໃກ້ຄຽງ",
+  "experts_nearby_subtitle": "ເບິ່ງຊ່ຽວຊານທີ່ພ້ອມເຊື່ອມຕໍ່ທັນທີ",
+
   "search_ac_choice_title": "ເລືອກບໍລິການແອກ",
   "search_ac_choice_message": "ທ່ານຕ້ອງການຊ່ອມແອກ ຫຼື ລ້າງແອກ?",
   "search_ac_choice_repair": "ໄປຫາການຊ່ອມແອກ",

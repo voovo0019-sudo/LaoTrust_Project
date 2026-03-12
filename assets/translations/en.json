@@ -209,5 +209,27 @@
   "search_keyword_cleaning": "Cleaning",
   "search_keyword_repair": "Repair",
   "search_keyword_move_trigger": "Moving",
-  "search_not_ready_yet": "Search is coming soon."
+  "search_not_ready_yet": "Search is coming soon.",
+
+  "search_ac_choice_title": "Choose AC service",
+  "search_ac_choice_message": "Do you need AC repair or AC cleaning?",
+  "search_ac_choice_repair": "Go to AC repair",
+  "search_ac_choice_cleaning": "Go to AC cleaning",
+
+  "distance_from_here_prefix": "From your location",
+  "location_permission_denied_vientiane_default": "Location permission denied. Showing distance from Vientiane City Hall.",
+
+  "phone_auth_title": "Login with phone number",
+  "phone_auth_country_label": "Country code",
+  "phone_auth_country_laos": "Laos (+856)",
+  "phone_auth_country_korea": "Korea (+82)",
+  "phone_auth_phone_label": "Phone number",
+  "phone_auth_phone_hint": "e.g. 10-1234-5678 (with or without dashes)",
+  "phone_auth_code_label": "Verification code",
+  "phone_auth_code_hint": "6-digit code from SMS",
+  "phone_auth_send_code": "Send code",
+  "phone_auth_login": "Login",
+  "phone_auth_whitelist_success": "Logged in with whitelisted agent number.",
+  "phone_auth_login_success": "Login completed.",
+  "phone_auth_error_invalid": "Please check your phone number or code."
 }

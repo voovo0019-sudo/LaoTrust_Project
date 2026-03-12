@@ -348,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 isDense: true,
               ),
               onChanged: (v) {
-                if (v.contains(context.l10n('search_keyword_move_trigger')) || v.contains('이사')) {
+                if (_isMoveQuery(context, v)) {
                   Navigator.of(ctx).pop();
                   _goToCleaningSubCategory();
                 }
@@ -403,8 +403,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleSearchQuery(String query) {
-    if (query.contains(context.l10n('search_keyword_move_trigger')) || query.contains('이사')) {
+    if (_isMoveQuery(context, query)) {
       _goToCleaningSubCategory();
+      return;
+    }
+    if (_isAcQuery(query)) {
+      _showAcChoiceDialog();
       return;
     }
     // 현재는 “준비 중” 단계로만 안내. (요구: AlertDialog 또는 추천어 노출)
@@ -416,6 +420,61 @@ class _HomeScreenState extends State<HomeScreen> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(context.l10n('confirm')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _isMoveQuery(BuildContext context, String raw) {
+    final q = raw.toLowerCase();
+    final trigger = context.l10n('search_keyword_move_trigger').toLowerCase();
+    return q.contains(trigger) || q.contains('이사') || q.contains('moving') || q.contains('move') || q.contains('ຍ້າຍ');
+  }
+
+  bool _isAcQuery(String raw) {
+    final q = raw.toLowerCase();
+    return q.contains('에어컨') ||
+        q.contains('aircon') ||
+        q.contains('air conditioner') ||
+        q.contains('ac ') ||
+        q == 'ac' ||
+        q.contains('ແອກ');
+  }
+
+  void _showAcChoiceDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n('search_ac_choice_title')),
+        content: Text(context.l10n('search_ac_choice_message')),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _selectedCategoryKey = 'expert_repair';
+                _selectedSubCategoryId = 'ac';
+                _selectedSymptomKeys.clear();
+                _etcController.clear();
+                _currentView = HomeView.symptoms;
+              });
+            },
+            child: Text(context.l10n('search_ac_choice_repair')),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _selectedCategoryKey = 'expert_cleaning';
+                _selectedCleaningSubCategoryId = 'appliance';
+                _selectedCleaningSubCategoryLabelKey = 'sub_cleaning_appliance';
+                _selectedCleaningSize = '';
+                _selectedCleaningHouseType = '';
+                _currentView = HomeView.cleaningOptions;
+              });
+            },
+            child: Text(context.l10n('search_ac_choice_cleaning')),
           ),
         ],
       ),

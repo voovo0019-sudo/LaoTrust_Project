@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
+import '../../core/location_service.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
@@ -18,6 +19,9 @@ class _JobsScreenState extends State<JobsScreen> {
   static const Color _appBarBlue = Color(0xFF1E3A8A);
   String? _selectedRegionKey;
   String? _selectedTypeKey;
+
+  LocationPoint? _userLocation;
+  bool _shownDefaultLocationInfo = false;
 
   // 지역/직종/일자리 정보를 모두 번역 키로 관리하여 다국어 100% 적용.
   static const List<String> _regionKeys = [
@@ -71,6 +75,30 @@ class _JobsScreenState extends State<JobsScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    final (loc, usedDefault) = await getUserLocationOrDefault();
+    if (!mounted) return;
+    setState(() {
+      _userLocation = loc;
+    });
+    if (usedDefault && !_shownDefaultLocationInfo) {
+      _shownDefaultLocationInfo = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n('location_permission_denied_vientiane_default'),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -115,6 +143,10 @@ class _JobsScreenState extends State<JobsScreen> {
                   titleKey: job['titleKey']!,
                   locationKey: job['locationKey']!,
                   salaryKey: job['salaryKey']!,
+                  distanceText: _distanceTextForLocationKey(
+                    context,
+                    job['locationKey']!,
+                  ),
                   onTap: () {},
                   onApply: () => _showApplySuccessDialog(context),
                 ),
@@ -122,6 +154,32 @@ class _JobsScreenState extends State<JobsScreen> {
         ],
       ),
     );
+  }
+
+  LocationPoint? _locationForKey(String locationKey) {
+    switch (locationKey) {
+      case 'location_near_vientiane_hall':
+        return kVientianeCityHall;
+      case 'location_near_that_luang':
+        return const LocationPoint(17.9765, 102.6334);
+      case 'location_downtown':
+        return const LocationPoint(17.9680, 102.6130);
+      default:
+        return null;
+    }
+  }
+
+  String? _distanceTextForLocationKey(
+    BuildContext context,
+    String locationKey,
+  ) {
+    final userLoc = _userLocation;
+    if (userLoc == null) return null;
+    final target = _locationForKey(locationKey);
+    if (target == null) return null;
+    final km = distanceInKm(userLoc, target);
+    final displayKm = km < 10 ? km.toStringAsFixed(1) : km.toStringAsFixed(0);
+    return '${context.l10n('distance_from_here_prefix')} $displayKm km';
   }
 
   void _showApplySuccessDialog(BuildContext context) {
@@ -184,12 +242,14 @@ class _JobCard extends StatelessWidget {
     required this.titleKey,
     required this.locationKey,
     required this.salaryKey,
+    required this.distanceText,
     required this.onTap,
     required this.onApply,
   });
   final String titleKey;
   final String locationKey;
   final String salaryKey;
+   final String? distanceText;
   final VoidCallback onTap;
   final VoidCallback onApply;
 
@@ -221,6 +281,16 @@ class _JobCard extends StatelessWidget {
                   Text(context.l10n(locationKey), style: theme.textTheme.bodySmall),
                 ],
               ),
+              if (distanceText != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  distanceText!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
               const SizedBox(height: 4),
               Text(context.l10n(salaryKey), style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF1E3A8A))),
               const SizedBox(height: 12),

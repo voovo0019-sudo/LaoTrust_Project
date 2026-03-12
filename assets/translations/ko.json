@@ -209,5 +209,27 @@
   "search_keyword_cleaning": "청소",
   "search_keyword_repair": "수리",
   "search_keyword_move_trigger": "이사",
-  "search_not_ready_yet": "검색 기능 준비 중입니다."
+  "search_not_ready_yet": "검색 기능 준비 중입니다.",
+
+  "search_ac_choice_title": "에어컨 서비스 선택",
+  "search_ac_choice_message": "에어컨 수리와 세척 중 무엇을 원하시나요?",
+  "search_ac_choice_repair": "에어컨 수리로 이동",
+  "search_ac_choice_cleaning": "에어컨 세척(청소)으로 이동",
+
+  "distance_from_here_prefix": "내 위치에서",
+  "location_permission_denied_vientiane_default": "GPS 권한이 없어 비엔티안 시청 기준으로 거리를 표시합니다.",
+
+  "phone_auth_title": "전화번호로 로그인",
+  "phone_auth_country_label": "국가 코드",
+  "phone_auth_country_laos": "라오스 (+856)",
+  "phone_auth_country_korea": "대한민국 (+82)",
+  "phone_auth_phone_label": "전화번호",
+  "phone_auth_phone_hint": "예: 10-1234-5678 (하이픈 포함/미포함 가능)",
+  "phone_auth_code_label": "인증번호",
+  "phone_auth_code_hint": "SMS로 받은 6자리 숫자",
+  "phone_auth_send_code": "인증번호 받기",
+  "phone_auth_login": "로그인",
+  "phone_auth_whitelist_success": "정예 요원 화이트리스트 번호로 로그인되었습니다.",
+  "phone_auth_login_success": "로그인이 완료되었습니다.",
+  "phone_auth_error_invalid": "전화번호 또는 인증번호를 다시 확인해 주세요."
 }

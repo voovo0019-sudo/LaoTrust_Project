@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
+import '../../core/firebase_service.dart';
 import 'bcel_onepay_screen.dart';
 import 'expert_dashboard_screen.dart';
 
@@ -117,6 +118,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: context.l10n('profile_expert_dashboard_sub'),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen())),
           ),
+          _buildMenuTile(
+            context,
+            icon: Icons.phone_iphone,
+            title: context.l10n('phone_auth_title'),
+            subtitle: context.l10n('phone_auth_phone_label'),
+            onTap: () => _openPhoneAuthSheet(context),
+          ),
         ],
       ),
     );
@@ -174,6 +182,226 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _openPhoneAuthSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        String countryCode = '+856';
+        String phone = '';
+        String code = '';
+        bool isSending = false;
+        bool isLoggingIn = false;
+
+        String _normalizeDigits(String input) =>
+            input.replaceAll(RegExp(r'\D'), '');
+
+        bool _isWhitelistKorea(String digits) {
+          const whitelist = {
+            '1027550019', // 사령관님
+            '1056781452', // 동생분
+            '1033889963', // 라오스 지사장님
+          };
+          return whitelist.contains(digits);
+        }
+
+        Future<void> _sendCode(StateSetter setModalState) async {
+          final digits = _normalizeDigits(phone);
+          if (digits.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
+            );
+            return;
+          }
+          setModalState(() => isSending = true);
+          try {
+            final fullNumber = '$countryCode$digits';
+            await sendPhoneCode(fullNumber);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('phone_auth_code_label'))),
+            );
+          } catch (_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
+            );
+          } finally {
+            setModalState(() => isSending = false);
+          }
+        }
+
+        Future<void> _login(StateSetter setModalState) async {
+          final digits = _normalizeDigits(phone);
+          final inputCode = code.trim();
+          if (digits.isEmpty || inputCode.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
+            );
+            return;
+          }
+
+          // 대한민국(+82) 화이트리스트 예외: 인증번호 123456으로 즉시 로그인 처리.
+          if (countryCode == '+82' &&
+              _isWhitelistKorea(digits) &&
+              inputCode == '123456') {
+            Navigator.of(ctx).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('phone_auth_whitelist_success'))),
+            );
+            return;
+          }
+
+          setModalState(() => isLoggingIn = true);
+          try {
+            await signInWithPhoneCode(inputCode);
+            if (context.mounted) {
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.l10n('phone_auth_login_success'))),
+              );
+            }
+          } catch (_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
+              );
+            }
+          } finally {
+            setModalState(() => isLoggingIn = false);
+          }
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    context.l10n('phone_auth_title'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.l10n('phone_auth_country_label'),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: countryCode,
+                    items: [
+                      DropdownMenuItem(
+                        value: '+856',
+                        child: Text(context.l10n('phone_auth_country_laos')),
+                      ),
+                      DropdownMenuItem(
+                        value: '+82',
+                        child: Text(context.l10n('phone_auth_country_korea')),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setModalState(() => countryCode = v);
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: context.l10n('phone_auth_phone_label'),
+                      hintText: context.l10n('phone_auth_phone_hint'),
+                      border: const OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    onChanged: (v) => setModalState(() => phone = v),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: context.l10n('phone_auth_code_label'),
+                      hintText: context.l10n('phone_auth_code_hint'),
+                      border: const OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => setModalState(() => code = v),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isSending
+                              ? null
+                              : () => _sendCode(setModalState),
+                          child: isSending
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(context.l10n('phone_auth_send_code')),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: isLoggingIn
+                              ? null
+                              : () => _login(setModalState),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF1E3A8A),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                          child: isLoggingIn
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(context.l10n('phone_auth_login')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 

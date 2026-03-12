@@ -214,6 +214,9 @@
   "home_phone_login_hint": "전화번호만으로 로그인 가능",
   "experts_nearby_title": "근처 전문가",
   "experts_nearby_subtitle": "지금 바로 연결 가능한 전문가를 확인하세요",
+  "distance_calculating": "거리 계산 중...",
+  "distance_from_me": "내 위치에서 {km}km",
+  "home_logged_in_greeting": "{last4}님",
 
   "search_ac_choice_title": "에어컨 서비스 선택",
   "search_ac_choice_message": "에어컨 수리와 세척 중 무엇을 원하시나요?",

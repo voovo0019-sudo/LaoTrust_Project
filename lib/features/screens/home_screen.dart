@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 import '../../core/app_localizations.dart';
 import '../../core/location_service.dart';
+import '../../core/firebase_service.dart';
 import '../profile/profile_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
@@ -47,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _etcController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
-  LocationPoint? _userLocation;
   bool _shownDefaultLocationInfo = false;
 
   static const String _symptomOtherKey = 'symptom_other';
@@ -69,9 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initLocation() async {
     final (loc, usedDefault) = await getUserLocationOrDefault();
     if (!mounted) return;
-    setState(() {
-      _userLocation = loc;
-    });
+    // ExpertCard 내부에서 거리 계산을 수행하므로, 여기서는 권한 안내만 유지한다.
     if (usedDefault && !_shownDefaultLocationInfo) {
       _shownDefaultLocationInfo = true;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -185,9 +183,8 @@ class _HomeScreenState extends State<HomeScreen> {
       centerTitle: true,
       actions: [
         if (_currentView == HomeView.main)
-          _HomePhoneLoginAction(
-            label: context.l10n('home_phone_login_hint'),
-            onTap: () {
+          _HomeAccountStatusAction(
+            onLoginTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -342,63 +339,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         ...experts.map((e) {
-          final userLoc = _userLocation;
-          String? distanceText;
-          if (userLoc != null) {
-            final km = distanceInKm(userLoc, e.location);
-            final displayKm = km < 10 ? km.toStringAsFixed(1) : km.toStringAsFixed(0);
-            distanceText = '${context.l10n('distance_from_here_prefix')} $displayKm km';
-          }
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
-                child: Icon(e.icon, color: const Color(0xFF1E3A8A)),
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n(e.nameKey),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (distanceText != null) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      distanceText,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E3A8A),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              subtitle: Text(
-                context.l10n('experts_nearby_subtitle'),
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
-              onTap: () {},
-            ),
+          return ExpertCard(
+            name: context.l10n(e.nameKey),
+            expertLocation: e.location,
+            icon: e.icon,
+            subtitle: context.l10n('experts_nearby_subtitle'),
+            onTap: () {},
           );
         }),
       ],
@@ -1458,39 +1404,162 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HomePhoneLoginAction extends StatelessWidget {
-  const _HomePhoneLoginAction({
-    required this.label,
-    required this.onTap,
-  });
+class _HomeAccountStatusAction extends StatelessWidget {
+  const _HomeAccountStatusAction({required this.onLoginTap});
+  final VoidCallback onLoginTap;
 
-  final String label;
-  final VoidCallback onTap;
+  String _digitsOnly(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            children: [
-              const Icon(Icons.login, size: 18, color: Colors.white),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
+    return StreamBuilder(
+      stream: auth.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final phone = user?.phoneNumber ?? '';
+        final digits = _digitsOnly(phone);
+        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
+
+        final bool isLoggedIn = user != null && last4.isNotEmpty;
+        final label = isLoggedIn
+            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+            : context.l10n('home_phone_login_hint');
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: InkWell(
+            onTap: isLoggedIn ? null : onLoginTap,
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.account_circle_outlined,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
+        );
+      },
+    );
+  }
+}
+
+class ExpertCard extends StatefulWidget {
+  const ExpertCard({
+    super.key,
+    required this.name,
+    required this.expertLocation,
+    required this.icon,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String name;
+  final LocationPoint expertLocation;
+  final IconData icon;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  State<ExpertCard> createState() => _ExpertCardState();
+}
+
+class _ExpertCardState extends State<ExpertCard> {
+  double? _distanceKm;
+  bool _isCalculating = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _calcDistance();
+  }
+
+  Future<void> _calcDistance() async {
+    setState(() => _isCalculating = true);
+    final (userLoc, _) = await getUserLocationOrDefault();
+    final km = distanceInKm(userLoc, widget.expertLocation);
+    if (!mounted) return;
+    setState(() {
+      _distanceKm = km;
+      _isCalculating = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final distanceText = _isCalculating
+        ? context.l10n('distance_calculating')
+        : context
+            .l10n('distance_from_me')
+            .replaceAll('{km}', (_distanceKm ?? 0).toStringAsFixed(1));
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+          child: Icon(widget.icon, color: const Color(0xFF1E3A8A)),
         ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 2),
+            Text(
+              distanceText,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.subtitle,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+        onTap: widget.onTap,
       ),
     );
   }

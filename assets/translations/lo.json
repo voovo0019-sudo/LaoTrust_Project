@@ -214,6 +214,9 @@
   "home_phone_login_hint": "ເຂົ້າລະບົບດ້ວຍເບີໂທເທົ່ານັ້ນ",
   "experts_nearby_title": "ຊ່ຽວຊານໃກ້ຄຽງ",
   "experts_nearby_subtitle": "ເບິ່ງຊ່ຽວຊານທີ່ພ້ອມເຊື່ອມຕໍ່ທັນທີ",
+  "distance_calculating": "ກຳລັງຄຳນວນໄລຍະທາງ...",
+  "distance_from_me": "ຈາກຕຳແໜ່ງຂອງທ່ານ {km}km",
+  "home_logged_in_greeting": "{last4}",
 
   "search_ac_choice_title": "ເລືອກບໍລິການແອກ",
   "search_ac_choice_message": "ທ່ານຕ້ອງການຊ່ອມແອກ ຫຼື ລ້າງແອກ?",

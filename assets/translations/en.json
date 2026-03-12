@@ -214,6 +214,9 @@
   "home_phone_login_hint": "Login with phone only",
   "experts_nearby_title": "Nearby experts",
   "experts_nearby_subtitle": "See experts you can connect with now",
+  "distance_calculating": "Calculating distance...",
+  "distance_from_me": "From your location {km}km",
+  "home_logged_in_greeting": "{last4}",
 
   "search_ac_choice_title": "Choose AC service",
   "search_ac_choice_message": "Do you need AC repair or AC cleaning?",

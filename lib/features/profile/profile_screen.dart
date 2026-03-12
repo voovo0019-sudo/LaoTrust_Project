@@ -27,6 +27,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _verified = false;
 
+  String _digitsOnly(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
+
   @override
   void initState() {
     super.initState();
@@ -142,6 +144,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
+    final user = auth.currentUser;
+    final digits = _digitsOnly(user?.phoneNumber ?? '');
+    final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
+    final displayName = last4.isNotEmpty
+        ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+        : context.l10n('profile_user_name');
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -171,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     children: [
                       Text(
-                        context.l10n('profile_user_name'),
+                        displayName,
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       if (_verified) ...[

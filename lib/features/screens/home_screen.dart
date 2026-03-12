@@ -170,15 +170,29 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: _goBack,
             )
           : null,
-      title: Text(
-        _currentView == HomeView.main
-            ? context.l10n('app_bar_title')
-            : context.l10n(_selectedCategoryKey),
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontSize: 18,
-        ),
+      title: LayoutBuilder(
+        builder: (context, constraints) {
+          final titleText = _currentView == HomeView.main
+              ? context.l10n('app_bar_title')
+              : context.l10n(_selectedCategoryKey);
+          final screenWidth = MediaQuery.sizeOf(context).width;
+          final fontSize = screenWidth < 380 ? 16.0 : 18.0;
+          return FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text(
+              titleText,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: fontSize,
+              ),
+            ),
+          );
+        },
       ),
       centerTitle: true,
       actions: [
@@ -1421,34 +1435,63 @@ class _HomeAccountStatusAction extends StatelessWidget {
         final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
 
         final bool isLoggedIn = user != null && last4.isNotEmpty;
-        final label = isLoggedIn
-            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+        final screenWidth = MediaQuery.sizeOf(context).width;
+        final bool isNarrow = screenWidth < 380;
+        final String loginLabel = isNarrow
+            ? context.l10n('home_phone_login_short')
             : context.l10n('home_phone_login_hint');
+        final String welcomeLabel = context.l10n('welcome_message_prefix') +
+            last4 +
+            context.l10n('welcome_message_suffix');
+        final label = isLoggedIn ? welcomeLabel : loginLabel;
 
-        return Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: InkWell(
-            onTap: isLoggedIn ? null : onLoginTap,
-            borderRadius: BorderRadius.circular(999),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.account_circle_outlined,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
+        final minTap = SizedBox(
+          height: 36,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.account_circle_outlined,
+                size: 18,
+                color: Colors.white,
+              ),
+              if (screenWidth >= 330) ...[
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
                     label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                ],
+                ),
+              ],
+            ],
+          ),
+        );
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isLoggedIn ? null : onLoginTap,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 36, minWidth: 44, maxWidth: 210),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: isLoggedIn ? 0.12 : 0.16),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.35),
+                    width: 1,
+                  ),
+                ),
+                child: minTap,
               ),
             ),
           ),

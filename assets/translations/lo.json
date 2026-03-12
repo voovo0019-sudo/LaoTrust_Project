@@ -212,6 +212,9 @@
   "search_not_ready_yet": "ກຳລັງຈັດກຽມການຄົ້ນຫາ.",
 
   "home_phone_login_hint": "ເຂົ້າລະບົບດ້ວຍເບີໂທເທົ່ານັ້ນ",
+  "home_phone_login_short": "ເຂົ້າລະບົບເບີ",
+  "welcome_message_prefix": "ຍິນດີຕ້ອນຮັບ ",
+  "welcome_message_suffix": "",
   "experts_nearby_title": "ຊ່ຽວຊານໃກ້ຄຽງ",
   "experts_nearby_subtitle": "ເບິ່ງຊ່ຽວຊານທີ່ພ້ອມເຊື່ອມຕໍ່ທັນທີ",
   "distance_calculating": "ກຳລັງຄຳນວນໄລຍະທາງ...",

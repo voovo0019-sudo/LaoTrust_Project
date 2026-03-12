@@ -19,6 +19,8 @@ dependencies:
   connectivity_plus: ^6.0.5
   # LT-08 미션05: 실시간 푸시(긴급 출동) — FCM
   firebase_messaging: ^15.1.3
+  # LT-10 확장: GPS 기반 거리 계산 (Geolocator)
+  geolocator: ^13.0.1
 
 dev_dependencies:
   flutter_test:

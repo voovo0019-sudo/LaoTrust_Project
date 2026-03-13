@@ -1471,8 +1471,26 @@ class _HomeAccountStatusAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: onLoginTap,
-      icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
       tooltip: context.l10n('home_phone_login_short'),
+      icon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.account_circle_outlined, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            context.l10n('home_phone_login_short'),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ) ??
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

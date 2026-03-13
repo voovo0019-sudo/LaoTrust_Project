@@ -144,15 +144,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
-    return StreamBuilder(
-      stream: auth.authStateChanges(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
-        final digits = _digitsOnly(user?.phoneNumber ?? '');
-        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-        final displayName = last4.isNotEmpty
-            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
-            : context.l10n('profile_user_name');
+    return ListenableBuilder(
+      listenable: whitelistDisplayPhoneNotifier,
+      builder: (context, _) {
+        return StreamBuilder(
+          stream: auth.authStateChanges(),
+          builder: (context, snapshot) {
+            final user = snapshot.data;
+            final phone = user?.phoneNumber ?? whitelistDisplayPhoneNotifier.value ?? '';
+            final digits = _digitsOnly(phone);
+            final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
+            final displayName = last4.isNotEmpty
+                ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+                : context.l10n('profile_user_name');
 
         return Container(
           decoration: BoxDecoration(
@@ -206,6 +210,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -337,6 +343,7 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
     // 대한민국(+82) 화이트리스트 예외: 인증번호 123456으로 즉시 로그인 처리.
     if (selectedCountryCode == '+82' && _isWhitelistKorea(digits) && inputCode == '123456') {
       if (!currentContext.mounted) return;
+      whitelistDisplayPhoneNotifier.value = '$selectedCountryCode$digits';
       widget.onClose();
       return;
     }

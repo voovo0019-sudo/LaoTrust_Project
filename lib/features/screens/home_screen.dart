@@ -376,31 +376,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// 상단바 바로 아래 하얀색 배경 검색창 (유지)
+  /// 상단바 바로 아래 하얀색 배경 검색창 (유지). StreamBuilder + 화이트리스트 전화번호 감시.
   Widget _buildWelcomeBanner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: StreamBuilder(
-        stream: auth.authStateChanges(),
-        builder: (context, snapshot) {
-          final user = snapshot.data;
-          if (user == null) return const SizedBox.shrink();
-          final phone = user.phoneNumber ?? '';
-          final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
-          if (digits.length < 4) return const SizedBox.shrink();
-          final last4 = digits.substring(digits.length - 4);
-          final text = context.l10n('welcome_message_prefix') +
-              last4 +
-              context.l10n('welcome_message_suffix');
-          return Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Color(0xFF1E3A8A),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+      child: ListenableBuilder(
+        listenable: whitelistDisplayPhoneNotifier,
+        builder: (context, _) {
+          return StreamBuilder(
+            stream: auth.authStateChanges(),
+            builder: (context, snapshot) {
+              final user = snapshot.data;
+              final phone = user?.phoneNumber ?? whitelistDisplayPhoneNotifier.value ?? '';
+              final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+              if (digits.length < 4) return const SizedBox.shrink();
+              final last4 = digits.substring(digits.length - 4);
+              final text = context.l10n('welcome_message_prefix') +
+                  last4 +
+                  context.l10n('welcome_message_suffix');
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -1463,50 +1467,12 @@ class _HomeAccountStatusAction extends StatelessWidget {
   const _HomeAccountStatusAction({required this.onLoginTap});
   final VoidCallback onLoginTap;
 
-  String _digitsOnly(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
-
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: auth.authStateChanges(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
-        final phone = user?.phoneNumber ?? '';
-        final digits = _digitsOnly(phone);
-        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-        final bool isLoggedIn = user != null && last4.isNotEmpty;
-        final String loginLabel = context.l10n('home_phone_login_short');
-        final String label = isLoggedIn ? '' : loginLabel;
-
-        return IconButton(
-          onPressed: onLoginTap,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          icon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.account_circle_outlined,
-                size: 22,
-                color: Colors.white,
-              ),
-              if (label.isNotEmpty) ...[
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          tooltip: label.isNotEmpty ? label : null,
-        );
-      },
+    return IconButton(
+      onPressed: onLoginTap,
+      icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+      tooltip: context.l10n('home_phone_login_short'),
     );
   }
 }

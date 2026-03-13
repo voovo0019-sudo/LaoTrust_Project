@@ -63,9 +63,7 @@
   "job_filter_region": "ພາກພື້ນ",
   "job_filter_type": "ປະເພດວຽກ",
   "job_apply": "ສະໝັກ",
-
   "app_bar_title": "LAO TRUST 🛡️",
-
   "repair_subcategory_title": "ເລືອກປະເພດຍ່ອຍ",
   "repair_step_label": "Step 1 / 3",
   "repair_select_all_hint": "ກະລຸນາເລືອກທຸກລາຍການທີ່ກ່ຽວຂ້ອງ.",
@@ -75,29 +73,23 @@
   "repair_question_plumbing": "ທໍ່ນ້ຳມີບັນຫາຫຍັງ?",
   "repair_question_generic": "ມີອາການຫຍັງ?",
   "repair_other_hint": "ກະລຸນາອະທິບາຍລາຍລະອຽດ.",
-
   "symptom_other": "ອື່ນໆ",
-
   "symptom_ac_no_cold_air": "ບໍ່ອອກລົມເຢັນ",
   "symptom_ac_noise": "ມີສຽງດັງ",
   "symptom_ac_water_sound": "ມີສຽງນ້ຳຮົ່ວ",
   "symptom_ac_not_cool": "ບໍ່ເຢັນ",
-
   "symptom_household_power": "ໄຟບໍ່ເຂົ້າ",
   "symptom_household_noise": "ສຽງຜິດປົກກະຕິ",
   "symptom_household_stopped": "ຢຸດເຮັດວຽກ",
   "symptom_household_broken": "ຊິ້ນສ່ວນແຕກ",
-
   "symptom_electric_breaker": "ສະວິດຕັດໄຟຕົກ",
   "symptom_electric_burn_smell": "ມີກິ່ນໄໝ້ຈາກປລັກ",
   "symptom_electric_flicker": "ໄຟກະພິບ",
   "symptom_electric_leak": "ສົງໄສໄຟຮົ່ວ",
-
   "symptom_plumbing_leak": "ກອກນ້ຳຮົ່ວ",
   "symptom_plumbing_clog": "ທໍ່ລະບາຍອຸດຕັນ",
   "symptom_plumbing_backflow": "ສ້ວມຍ້ອນກັບ",
   "symptom_plumbing_low_pressure": "ແຮງດັນນ້ຳອ່ອນ",
-
   "job_title_cafe_part_time": "ວຽກພາດໄທມ໌ຮ້ານກາເຟ",
   "job_detail_location": "ສະຖານທີ່",
   "job_detail_salary": "ຄ່າແຮງ",
@@ -113,7 +105,6 @@
   "cleaning_house_2br": "2BR",
   "cleaning_house_house": "ບ້ານ",
   "expert_garden": "ສວນ / ພື້ນທີ່ພາຍນອກ",
-
   "sub_cleaning_move_in": "ຍ້າຍເຂົ້າ/ຍ້າຍອອກ",
   "sub_cleaning_commercial": "ພື້ນທີ່ຄ້າ",
   "sub_cleaning_appliance": "ລ້າງເຄື່ອງໃຊ້",
@@ -139,14 +130,12 @@
   "sub_garden_lawn": "ຕັດຫຍ້າ",
   "sub_garden_trim": "ຕັດກິ່ງ",
   "sub_garden_pest": "ປ້ອງກັນແມງໄມ້",
-
   "job_title_event_staff": "ພະນັກງານງານອີເວັນ",
   "job_title_logistics": "ຊ່ວຍວຽກຂົນສົ່ງ",
   "job_title_promotion": "ຕະຫຼາດ/ໂຄສະນາ",
   "job_detail_event_staff": "ພະນັກງານງານອີເວັນ, ຊ່ວຍແປພາສາໄດ້",
   "job_detail_logistics": "ວຽກສາງ/ຂົນສົ່ງ",
   "job_detail_promotion": "ຕະຫຼາດ ແລະ ໂຄສະນາ",
-
   "verified_payment_title": "ຊຳລະຢືນຢັນ Verified Badge",
   "verified_benefits": "ຜົນປະໂຫຍດ: ເບິ່ງເຫັນດີ, ໃບຢືນຢັນ ແລະ ອື່ນໆ",
   "verified_qr_placeholder": "QR (ຈຳລອງ)",
@@ -154,7 +143,6 @@
   "payment_processing": "ກຳລັງປະມວນຜົນ...",
   "payment_complete_simulation": "✓ ຊຳລະແລ້ວ (ຈຳລອງ)",
   "bcel_onepay_title": "BCEL OnePay",
-
   "expert_dashboard_title": "ແດັຊບອດຊ່ຽວຊານ",
   "expert_dashboard_verified_label": "ຊ່ຽວຊານ Verified",
   "expert_dashboard_apply_label": "ສະໝັກຢືນຢັນ",
@@ -167,11 +155,9 @@
   "expert_dashboard_total_completed": "ສຳເລັດທັງໝົດ",
   "expert_dashboard_count_zero": "0 ກໍລະນີ",
   "expert_dashboard_usd_zero": "0.00 USD",
-
   "job_type_service": "ບໍລິການ",
   "job_type_labor": "ແຮງງານ",
   "job_type_delivery": "ສົ່ງອາຫານ",
-
   "profile_user_name": "ຜູ້ໃຊ້",
   "profile_status_verified": "ຊ່ຽວຊານ Verified",
   "profile_status_unverified": "ຍັງບໍ່ຢືນຢັນ",
@@ -181,7 +167,6 @@
   "profile_verified_done": "ຢືນຢັນແລ້ວ",
   "profile_verified_todo": "ຊຳລະ 4.5 USD ເພື່ອເປີດໃຊ້ badge ສີຟ້າ",
   "profile_expert_dashboard_sub": "ເບິ່ງລາຍຮັບ ແລະ ປະຫວັດການຈັບຄູ່",
-
   "chat_sample_name_1": "ຊ່າງແອກ",
   "chat_sample_message_1": "ສົ່ງຄຳໃບສະເໜີໃຫ້ແລ້ວ.",
   "chat_sample_time_1": "10:32",
@@ -191,12 +176,10 @@
   "chat_sample_name_3": "ບໍລິການກວດໄຟຟ້າ",
   "chat_sample_message_3": "ເບິ່ງຮູບແລ້ວ.",
   "chat_sample_time_3": "ວັນຈັນ",
-
   "job_apply_success": "ຮັບໃບສະໝັກສຳເລັດແລ້ວ. ຊ່ຽວຊານຈະກວດແລະຕິດຕໍ່ກັບທ່ານ.",
   "chat_enter_message": "ກຳລັງເຂົ້າຫ້ອງສົນທະນາ 1:1 ກັບ {name}. ກະລຸນາລໍຖ້າແປບໜຶ່ງ.",
   "profile_my_requests_empty": "ຍັງບໍ່ມີສະຖານະການສະໝັກບໍລິການ.",
   "profile_customer_service_ready": "ກຳລັງຈັດກຽມ.",
-
   "search_ready_title": "ກຳລັງຈັດກຽມການຄົ້ນຫາ",
   "search_ready_body": "ກຳລັງຈັດກຽມການຄົ້ນຫາບໍລິການ/ພື້ນທີ່. ເລືອກຄຳແນະນຳ ຫຼື ພິມເອງ.",
   "search_recommended": "ຄຳແນະນຳ",
@@ -210,9 +193,8 @@
   "search_keyword_repair": "ຊ່ອມແປງ",
   "search_keyword_move_trigger": "ຍ້າຍ",
   "search_not_ready_yet": "ກຳລັງຈັດກຽມການຄົ້ນຫາ.",
-
-  "home_phone_login_hint": "ເຂົ້າລະບົບດ້ວຍເບີໂທເທົ່ານັ້ນ",
-  "home_phone_login_short": "ເຂົ້າລະບົບເບີ",
+  "home_phone_login_hint": "ເຂົ້າລະບົບ",
+  "home_phone_login_short": "ເຂົ້າລະບົບ",
   "welcome_message_prefix": "ຍິນດີຕ້ອນຮັບ ",
   "welcome_message_suffix": "",
   "experts_nearby_title": "ຊ່ຽວຊານໃກ້ຄຽງ",
@@ -220,15 +202,12 @@
   "distance_calculating": "ກຳລັງຄຳນວນໄລຍະທາງ...",
   "distance_from_me": "ຈາກຕຳແໜ່ງຂອງທ່ານ {km}km",
   "home_logged_in_greeting": "{last4}",
-
   "search_ac_choice_title": "ເລືອກບໍລິການແອກ",
   "search_ac_choice_message": "ທ່ານຕ້ອງການຊ່ອມແອກ ຫຼື ລ້າງແອກ?",
   "search_ac_choice_repair": "ໄປຫາການຊ່ອມແອກ",
   "search_ac_choice_cleaning": "ໄປຫາການລ້າງແອກ",
-
   "distance_from_here_prefix": "ຈາກຕຳແໜ່ງຂອງທ່ານ",
   "location_permission_denied_vientiane_default": "ບໍ່ມີສິດເຂົ້າເຖິງຕຳແໜ່ງ, ຈະສະແດງໄລຍະທາງຈາກກົມເມືອງວຽງຈັນ.",
-
   "phone_auth_title": "ເຂົ້າລະບົບດ້ວຍເບີໂທ",
   "phone_auth_country_label": "ລະຫັດປະເທດ",
   "phone_auth_country_laos": "ລາວ (+856)",

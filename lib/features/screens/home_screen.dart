@@ -177,36 +177,46 @@ class _HomeScreenState extends State<HomeScreen> {
               : context.l10n(_selectedCategoryKey);
           final screenWidth = MediaQuery.sizeOf(context).width;
           final fontSize = screenWidth < 380 ? 16.0 : 18.0;
-          return FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text(
-              titleText,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: fontSize,
+          return Row(
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      titleText,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: fontSize,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const Spacer(),
+              if (_currentView == HomeView.main)
+                _HomeAccountStatusAction(
+                  onLoginTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const ProfileScreen(openPhoneAuthOnStart: true),
+                      ),
+                    );
+                  },
+                ),
+            ],
           );
         },
       ),
-      centerTitle: true,
+      centerTitle: false,
       actions: [
-        if (_currentView == HomeView.main)
-          _HomeAccountStatusAction(
-            onLoginTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
-                ),
-              );
-            },
-          ),
         if (widget.onLocaleChanged != null)
           PopupMenuButton<Locale>(
             icon: const Icon(Icons.public, color: Colors.white),
@@ -1433,13 +1443,9 @@ class _HomeAccountStatusAction extends StatelessWidget {
         final phone = user?.phoneNumber ?? '';
         final digits = _digitsOnly(phone);
         final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-
         final bool isLoggedIn = user != null && last4.isNotEmpty;
         final screenWidth = MediaQuery.sizeOf(context).width;
-        final bool isNarrow = screenWidth < 380;
-        final String loginLabel = isNarrow
-            ? context.l10n('home_phone_login_short')
-            : context.l10n('home_phone_login_hint');
+        final String loginLabel = context.l10n('home_phone_login_short');
         final String welcomeLabel = context.l10n('welcome_message_prefix') +
             last4 +
             context.l10n('welcome_message_suffix');
@@ -1481,8 +1487,9 @@ class _HomeAccountStatusAction extends StatelessWidget {
               onTap: isLoggedIn ? null : onLoginTap,
               borderRadius: BorderRadius.circular(999),
               child: Container(
-                constraints: const BoxConstraints(minHeight: 36, minWidth: 44, maxWidth: 210),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                constraints:
+                    const BoxConstraints(minHeight: 32, minWidth: 40, maxWidth: 140),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: isLoggedIn ? 0.12 : 0.16),
                   borderRadius: BorderRadius.circular(999),

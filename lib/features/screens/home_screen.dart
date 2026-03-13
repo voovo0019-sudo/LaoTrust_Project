@@ -178,22 +178,28 @@ class _HomeScreenState extends State<HomeScreen> {
               : context.l10n(_selectedCategoryKey);
           final screenWidth = MediaQuery.sizeOf(context).width;
           final fontSize = screenWidth < 380 ? 16.0 : 18.0;
-          return Align(
-            alignment: Alignment.centerLeft,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                titleText,
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: fontSize,
+          return Row(
+            children: [
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      titleText,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: fontSize,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           );
         },
       ),
@@ -387,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
               last4 +
               context.l10n('welcome_message_suffix');
           return Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: Text(
               text,
               style: const TextStyle(

@@ -338,9 +338,6 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
     if (selectedCountryCode == '+82' && _isWhitelistKorea(digits) && inputCode == '123456') {
       if (!currentContext.mounted) return;
       widget.onClose();
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(currentContext.l10n('phone_auth_whitelist_success'))),
-      );
       return;
     }
 
@@ -349,9 +346,6 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
       await signInWithPhoneCode(inputCode);
       if (!currentContext.mounted) return;
       widget.onClose();
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(currentContext.l10n('phone_auth_login_success'))),
-      );
     } catch (_) {
       if (!currentContext.mounted) return;
       ScaffoldMessenger.of(currentContext).showSnackBar(

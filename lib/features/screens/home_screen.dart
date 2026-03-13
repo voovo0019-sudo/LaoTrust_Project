@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               text,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1E3A8A),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1472,53 +1472,33 @@ class _HomeAccountStatusAction extends StatelessWidget {
         final String loginLabel = context.l10n('home_phone_login_short');
         final String label = isLoggedIn ? '' : loginLabel;
 
-        final minTap = SizedBox(
-          height: 32,
-          child: Row(
+        return IconButton(
+          onPressed: onLoginTap,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          icon: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 Icons.account_circle_outlined,
-                size: 20,
+                size: 22,
                 color: Colors.white,
               ),
               if (label.isNotEmpty) ...[
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ],
           ),
-        );
-
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onLoginTap,
-              borderRadius: BorderRadius.circular(999),
-              child: Container(
-                constraints:
-                    const BoxConstraints(minHeight: 32, minWidth: 40, maxWidth: 140),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: minTap,
-              ),
-            ),
-          ),
+          tooltip: label.isNotEmpty ? label : null,
         );
       },
     );

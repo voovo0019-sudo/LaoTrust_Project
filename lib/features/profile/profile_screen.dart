@@ -144,64 +144,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
-    final user = auth.currentUser;
-    final digits = _digitsOnly(user?.phoneNumber ?? '');
-    final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-    final displayName = last4.isNotEmpty
-        ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
-        : context.l10n('profile_user_name');
+    return StreamBuilder(
+      stream: auth.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final digits = _digitsOnly(user?.phoneNumber ?? '');
+        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
+        final displayName = last4.isNotEmpty
+            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+            : context.l10n('profile_user_name');
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 32,
-              backgroundColor: colorScheme.primaryContainer,
-              child: Icon(Icons.person, size: 36, color: colorScheme.onPrimaryContainer),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: colorScheme.primaryContainer,
+                  child: Icon(Icons.person, size: 36, color: colorScheme.onPrimaryContainer),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        displayName,
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          Text(
+                            displayName,
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          if (_verified) ...[
+                            const SizedBox(width: 6),
+                            Icon(Icons.verified, size: 22, color: colorScheme.primary),
+                          ],
+                        ],
                       ),
-                      if (_verified) ...[
-                        const SizedBox(width: 6),
-                        Icon(Icons.verified, size: 22, color: colorScheme.primary),
-                      ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _verified
+                            ? context.l10n('profile_status_verified')
+                            : context.l10n('profile_status_unverified'),
+                        style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _verified
-                        ? context.l10n('profile_status_verified')
-                        : context.l10n('profile_status_unverified'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

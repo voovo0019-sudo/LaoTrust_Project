@@ -3,6 +3,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 /// Firebase 초기화 여부. main()에서 초기화 실패 시 false.
 bool get isFirebaseEnabled => _firebaseEnabled;
@@ -17,6 +18,9 @@ FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
 /// Auth 인스턴스 (전화번호 인증 등).
 FirebaseAuth get auth => FirebaseAuth.instance;
+
+/// 화이트리스트 로그인 시 Firebase signIn 없이 표시용 전화번호만 저장. 배너/프로필에서 last4 노출용.
+final ValueNotifier<String?> whitelistDisplayPhoneNotifier = ValueNotifier<String?>(null);
 
 /// Firestore 오프라인 우선: 기기에 먼저 캐시하고 연결 시 서버와 동기화.
 /// 앱 시작 시 한 번 호출. (미션02: 인터넷 불안정 지역 대비)

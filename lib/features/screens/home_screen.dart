@@ -164,6 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
       foregroundColor: Colors.white,
       surfaceTintColor: _appBarBlue,
       elevation: 0,
+      titleSpacing: 20,
       leading: _currentView != HomeView.main
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
@@ -177,46 +178,39 @@ class _HomeScreenState extends State<HomeScreen> {
               : context.l10n(_selectedCategoryKey);
           final screenWidth = MediaQuery.sizeOf(context).width;
           final fontSize = screenWidth < 380 ? 16.0 : 18.0;
-          return Row(
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      titleText,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: fontSize,
-                      ),
-                    ),
-                  ),
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                titleText,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: fontSize,
                 ),
               ),
-              const Spacer(),
-              if (_currentView == HomeView.main)
-                _HomeAccountStatusAction(
-                  onLoginTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const ProfileScreen(openPhoneAuthOnStart: true),
-                      ),
-                    );
-                  },
-                ),
-            ],
+            ),
           );
         },
       ),
       centerTitle: false,
       actions: [
+        if (_currentView == HomeView.main)
+          _HomeAccountStatusAction(
+            onLoginTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const ProfileScreen(openPhoneAuthOnStart: true),
+                ),
+              );
+            },
+          ),
         if (widget.onLocaleChanged != null)
           PopupMenuButton<Locale>(
             icon: const Icon(Icons.public, color: Colors.white),
@@ -295,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
       key: const ValueKey('main'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_currentView == HomeView.main) _buildWelcomeBanner(),
         Expanded(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -376,6 +371,36 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// 상단바 바로 아래 하얀색 배경 검색창 (유지)
+  Widget _buildWelcomeBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: StreamBuilder(
+        stream: auth.authStateChanges(),
+        builder: (context, snapshot) {
+          final user = snapshot.data;
+          if (user == null) return const SizedBox.shrink();
+          final phone = user.phoneNumber ?? '';
+          final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+          if (digits.length < 4) return const SizedBox.shrink();
+          final last4 = digits.substring(digits.length - 4);
+          final text = context.l10n('welcome_message_prefix') +
+              last4 +
+              context.l10n('welcome_message_suffix');
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildSearchBar(BuildContext context) {
     return Material(
       color: Colors.transparent,
@@ -1444,23 +1469,19 @@ class _HomeAccountStatusAction extends StatelessWidget {
         final digits = _digitsOnly(phone);
         final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
         final bool isLoggedIn = user != null && last4.isNotEmpty;
-        final screenWidth = MediaQuery.sizeOf(context).width;
         final String loginLabel = context.l10n('home_phone_login_short');
-        final String welcomeLabel = context.l10n('welcome_message_prefix') +
-            last4 +
-            context.l10n('welcome_message_suffix');
-        final label = isLoggedIn ? welcomeLabel : loginLabel;
+        final String label = isLoggedIn ? '' : loginLabel;
 
         final minTap = SizedBox(
-          height: 36,
+          height: 32,
           child: Row(
             children: [
               const Icon(
                 Icons.account_circle_outlined,
-                size: 18,
+                size: 20,
                 color: Colors.white,
               ),
-              if (screenWidth >= 330) ...[
+              if (label.isNotEmpty) ...[
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -1484,19 +1505,15 @@ class _HomeAccountStatusAction extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: isLoggedIn ? null : onLoginTap,
+              onTap: onLoginTap,
               borderRadius: BorderRadius.circular(999),
               child: Container(
                 constraints:
                     const BoxConstraints(minHeight: 32, minWidth: 40, maxWidth: 140),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: isLoggedIn ? 0.12 : 0.16),
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.35),
-                    width: 1,
-                  ),
                 ),
                 child: minTap,
               ),

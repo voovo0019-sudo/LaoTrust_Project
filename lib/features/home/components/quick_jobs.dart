@@ -204,7 +204,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         StreamBuilder<List<Map<String, dynamic>>>(
           stream: widget.firebaseService.getQuickJobs(),
           builder: (context, snapshot) {
@@ -226,7 +226,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             return Column(
               children: [
                 SizedBox(
-                  height: 90,
+                  height: 78,
                   child: PageView.builder(
                     controller: _pageController,
                     padEnds: false,
@@ -269,8 +269,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                         scale: _currentPage == index ? 1.0 : 0.96,
                         duration: const Duration(milliseconds: 300),
                         child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(28.0),

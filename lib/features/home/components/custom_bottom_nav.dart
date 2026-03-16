@@ -29,7 +29,7 @@ class CustomBottomNav extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 2),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -93,7 +93,7 @@ class _NavItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(28.0),
       splashColor: colorScheme.primary.withValues(alpha: 0.1),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

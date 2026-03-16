@@ -298,12 +298,12 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSearchBar(context),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 Text(
                   context.l10n('section_expert_headline'),
                   style: const TextStyle(
@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   context.l10n('section_expert_services'),
                   style: const TextStyle(
@@ -323,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 CategoryGrid(
                   onCategorySelected: (labelKey) {
                     setState(() {
@@ -335,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 _buildNearbyExpertsSection(),
                 const SizedBox(height: 8),
                 QuickJobsSection(firebaseService: _firebaseService),
@@ -380,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
             letterSpacing: 0.1,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         ...experts.map((e) {
           return ExpertCard(
             name: context.l10n(e.nameKey),

@@ -93,7 +93,7 @@ class _NavItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(28.0),
       splashColor: colorScheme.primary.withValues(alpha: 0.1),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

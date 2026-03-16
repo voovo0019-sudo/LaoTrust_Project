@@ -27,13 +27,14 @@ class CategoryGrid extends StatelessWidget {
     ];
 
     return GridView.builder(
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        // 상하·좌우 여백을 초밀도로 조정 (4px 미만 세로 간격)
-        mainAxisSpacing: 3,
-        crossAxisSpacing: 6,
+        // 상하·좌우 여백을 초밀도로 조정 (mainAxisSpacing ≤ 2, crossAxisSpacing ≤ 4)
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 4,
         childAspectRatio: 0.9,
       ),
       itemCount: services.length,
@@ -49,8 +50,8 @@ class CategoryGrid extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(28.0),
@@ -66,10 +67,10 @@ class CategoryGrid extends StatelessWidget {
                 child: Icon(
                   s['icon'] as IconData,
                   color: color,
-                  size: 20,
+                  size: 18,
                 ),
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 0),
               Text(
                 context.l10n(labelKey),
                 style: const TextStyle(

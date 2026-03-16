@@ -162,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
       foregroundColor: Colors.white,
       surfaceTintColor: _appBarBlue,
       elevation: 0,
-      toolbarHeight: 48,
+      toolbarHeight: 40,
       titleSpacing: 20,
       leading: _currentView != HomeView.main
           ? IconButton(
@@ -298,22 +298,22 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 12, bottom: 12),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSearchBar(context),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 Text(
                   context.l10n('section_expert_headline'),
                   style: const TextStyle(
-                    fontSize: 24.0,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Noto Sans',
                     letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   context.l10n('section_expert_services'),
                   style: const TextStyle(
@@ -323,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 CategoryGrid(
                   onCategorySelected: (labelKey) {
                     setState(() {
@@ -335,11 +335,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 _buildNearbyExpertsSection(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 QuickJobsSection(firebaseService: _firebaseService),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -401,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(28.0),
         onTap: () => _openSearchDialog(context),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(28.0),

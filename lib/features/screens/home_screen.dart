@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
       surfaceTintColor: _appBarBlue,
       elevation: 0,
       toolbarHeight: 40,
-      titleSpacing: 20,
+      titleSpacing: 12,
       leading: _currentView != HomeView.main
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
@@ -323,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 CategoryGrid(
                   onCategorySelected: (labelKey) {
                     setState(() {
@@ -335,7 +335,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 4),
                 _buildNearbyExpertsSection(),
                 const SizedBox(height: 8),
                 QuickJobsSection(firebaseService: _firebaseService),
@@ -374,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           context.l10n('experts_nearby_title'),
           style: const TextStyle(
-            fontSize: 19,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Noto Sans',
             letterSpacing: 0.1,

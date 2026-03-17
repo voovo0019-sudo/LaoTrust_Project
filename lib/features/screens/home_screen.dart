@@ -11,6 +11,7 @@ import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
 import '../profile/widgets/digital_partner_id_card.dart';
 import '../../services/expert_availability_service.dart';
+import '../../core/search_trigger_bus.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -1099,16 +1100,32 @@ class _NearbyExpertsSectionBody extends StatefulWidget {
 
 class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
   LocationPoint? _userLocation;
-  List<ExpertProfile> _experts = [];
-  bool _loading = true;
+  List<ExpertProfile> _realExperts = <ExpertProfile>[];
+  bool _loading = false;
+  int _lastTriggerCounter = 0;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _lastTriggerCounter = SearchTriggerBus.listenable.value;
+    SearchTriggerBus.listenable.addListener(_onTriggered);
   }
 
-  Future<void> _load() async {
+  @override
+  void dispose() {
+    SearchTriggerBus.listenable.removeListener(_onTriggered);
+    super.dispose();
+  }
+
+  Future<void> _onTriggered() async {
+    final current = SearchTriggerBus.listenable.value;
+    if (current == _lastTriggerCounter) return;
+    _lastTriggerCounter = current;
+    await _startSearch();
+  }
+
+  Future<void> _startSearch() async {
+    if (!mounted) return;
     setState(() => _loading = true);
     final (loc, _) = await getUserLocationOrDefault();
     if (!mounted) return;
@@ -1116,7 +1133,7 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
     if (!mounted) return;
     setState(() {
       _userLocation = loc;
-      _experts = result.experts;
+      _realExperts = result.experts;
       _loading = false;
     });
   }
@@ -1130,10 +1147,7 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadarScanningWidget(
-                size: 100,
-                label: context.l10n('radar_expand_label'),
-              ),
+              const RadarScanningWidget(size: 100),
               const SizedBox(height: 8),
               Text(
                 context.l10n('radar_searching'),
@@ -1144,20 +1158,34 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
         ),
       );
     }
-    if (_experts.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Text(
-          '근처에 대기 중인 전문가가 없습니다.',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-        ),
-      );
-    }
-    return Column(
-      children: _experts.map((e) {
-        final loc = e.location!;
-        final km = _userLocation != null ? distanceInKm(_userLocation!, loc) : 0.0;
-        return ExpertCard(
+
+    // v2.2: 홈 초기 진입은 레이더 금지 → 샘플 전문가 3인 즉시 노출
+    const sampleExperts = <({String nameKey, LocationPoint location, IconData icon})>[
+      (
+        nameKey: 'chat_sample_name_1',
+        location: LocationPoint(17.9722, 102.6205),
+        icon: Icons.ac_unit,
+      ),
+      (
+        nameKey: 'chat_sample_name_2',
+        location: LocationPoint(17.9790, 102.6350),
+        icon: Icons.plumbing,
+      ),
+      (
+        nameKey: 'chat_sample_name_3',
+        location: LocationPoint(17.9650, 102.6100),
+        icon: Icons.electrical_services,
+      ),
+    ];
+
+    final tiles = <Widget>[];
+
+    // 실데이터(파트너 등록 전문가)가 있으면 무조건 앞자리에 배치
+    for (final e in _realExperts) {
+      final loc = e.location!;
+      final km = _userLocation != null ? distanceInKm(_userLocation!, loc) : null;
+      tiles.add(
+        ExpertCard(
           name: e.displayName,
           expertLocation: loc,
           icon: Icons.person,
@@ -1186,8 +1214,25 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
           partnerSerialId: e.partnerSerialId,
           photoUrl: e.photoUrl,
           distanceKm: km,
-        );
-      }).toList(),
+        ),
+      );
+    }
+
+    // 샘플 데이터는 실데이터 뒤에 배치
+    for (final e in sampleExperts) {
+      tiles.add(
+        ExpertCard(
+          name: context.l10n(e.nameKey),
+          expertLocation: e.location,
+          icon: e.icon,
+          subtitle: context.l10n('experts_nearby_subtitle'),
+          onTap: () {},
+        ),
+      );
+    }
+
+    return Column(
+      children: tiles,
     );
   }
 }

@@ -298,12 +298,13 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 8),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 4),
                 _buildSearchBar(context),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   context.l10n('section_expert_headline'),
                   style: const TextStyle(
@@ -317,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   context.l10n('section_expert_services'),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Noto Sans',
                     letterSpacing: 0.1,

@@ -163,6 +163,9 @@ class _HomeScreenV44State extends State<HomeScreenV44> {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: const Color(0xFF1E3A8A),
       unselectedItemColor: _slate400,
+      iconSize: 22,
+      selectedFontSize: 11,
+      unselectedFontSize: 11,
       items: [
         BottomNavigationBarItem(icon: const Icon(Icons.home), label: t('tab_home')),
         BottomNavigationBarItem(icon: const Icon(Icons.business_center_outlined), label: t('tab_job')),

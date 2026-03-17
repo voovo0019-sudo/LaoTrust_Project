@@ -1,13 +1,17 @@
 // =============================================================================
 // LT-09 Feature: profile — 전문가 전용 대시보드 (수입·매칭 이력 뼈대)
+// v1.3: 출동 준비 토글(Duty Toggle). OFF 시 Firestore lat/lng 즉시 null(잠복).
 // Trust-first: Verified 카드. Firestore 연동 시 data/firestore_schema 참고. 한/영 주석.
 // =============================================================================
 
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
+import '../../core/location_service.dart';
+import '../../services/expert_availability_service.dart';
 
 const String expertDashboardRouteName = '/expert-dashboard';
+const Color _royalNavy = Color(0xFF1E293B);
 
 class ExpertDashboardScreen extends StatefulWidget {
   const ExpertDashboardScreen({super.key});
@@ -18,6 +22,8 @@ class ExpertDashboardScreen extends StatefulWidget {
 
 class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
   bool _verified = false;
+  bool _dutyOn = false;
+  bool _dutyLoading = false;
 
   @override
   void initState() {
@@ -27,7 +33,40 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
 
   Future<void> _loadVerified() async {
     final v = await isVerifiedBadgeActive();
-    if (mounted) setState(() => _verified = v);
+    final duty = await getExpertDutyStatus();
+    if (mounted) {
+      setState(() {
+        _verified = v;
+        _dutyOn = duty;
+      });
+    }
+  }
+
+  Future<void> _toggleDuty(bool value) async {
+    setState(() => _dutyLoading = true);
+    try {
+      if (value) {
+        final (loc, _) = await getUserLocationOrDefault();
+        await setExpertDuty(true, lat: loc.latitude, lng: loc.longitude);
+        if (mounted) {
+          setState(() => _dutyOn = true);
+        }
+      } else {
+        await setExpertDuty(false);
+        if (mounted) {
+          setState(() => _dutyOn = false);
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _dutyOn = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('가용성 설정에 실패했습니다. 위치 권한을 확인하세요.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _dutyLoading = false);
+    }
   }
 
   @override
@@ -37,6 +76,8 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: _royalNavy,
+        foregroundColor: Colors.white,
         title: Text(context.l10n('expert_dashboard_title')),
       ),
       body: RefreshIndicator(
@@ -47,6 +88,8 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              _buildDutyToggleCard(context),
+              const SizedBox(height: 16),
               _buildVerifiedCard(context, theme, colorScheme),
               const SizedBox(height: 24),
               _buildSectionTitle(theme, context.l10n('expert_dashboard_income_section')),
@@ -65,8 +108,57 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
     );
   }
 
+  Widget _buildDutyToggleCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: _royalNavy.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.radar, color: _royalNavy, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '지금 의뢰 받기',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _royalNavy),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _dutyOn ? '고객이 나를 찾을 수 있어요' : 'OFF 시 위치 잠복·리스트에서 숨김',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          if (_dutyLoading)
+            const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+          else
+            Switch(
+              value: _dutyOn,
+              onChanged: _toggleDuty,
+              activeTrackColor: _royalNavy.withValues(alpha: 0.5),
+              activeThumbColor: _royalNavy,
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVerifiedCard(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

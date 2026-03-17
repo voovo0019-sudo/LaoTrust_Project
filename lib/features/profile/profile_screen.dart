@@ -9,6 +9,7 @@ import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
 import 'bcel_onepay_screen.dart';
 import 'expert_dashboard_screen.dart';
+import 'partner_support_center_screen.dart';
 
 const String profileRouteName = '/profile';
 
@@ -130,6 +131,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: context.l10n('expert_dashboard'),
             subtitle: context.l10n('profile_expert_dashboard_sub'),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen())),
+          ),
+          _buildMenuTile(
+            context,
+            icon: Icons.shield,
+            title: context.l10n('partner_support_center_title'),
+            subtitle: context.l10n('partner_support_center_info'),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartnerSupportCenterScreen())),
           ),
           _buildMenuTile(
             context,

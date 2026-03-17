@@ -7,6 +7,10 @@ import '../home/components/welcome_banner.dart';
 import '../home/components/category_grid.dart';
 import '../home/components/quick_jobs.dart';
 import '../home/components/section_title_style.dart';
+import '../home/components/radar_scanning_widget.dart';
+import '../profile/widgets/commander_verified_badge.dart';
+import '../profile/widgets/digital_partner_id_card.dart';
+import '../../services/expert_availability_service.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -346,24 +350,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNearbyExpertsSection() {
-    final experts = <({String nameKey, LocationPoint location, IconData icon})>[
-      (
-        nameKey: 'chat_sample_name_1',
-        location: const LocationPoint(17.9722, 102.6205),
-        icon: Icons.ac_unit,
-      ),
-      (
-        nameKey: 'chat_sample_name_2',
-        location: const LocationPoint(17.9790, 102.6350),
-        icon: Icons.plumbing,
-      ),
-      (
-        nameKey: 'chat_sample_name_3',
-        location: const LocationPoint(17.9650, 102.6100),
-        icon: Icons.electrical_services,
-      ),
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -372,15 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: kHomeSectionTitleTextStyle,
         ),
         const SizedBox(height: 4),
-        ...experts.map((e) {
-          return ExpertCard(
-            name: context.l10n(e.nameKey),
-            expertLocation: e.location,
-            icon: e.icon,
-            subtitle: context.l10n('experts_nearby_subtitle'),
-            onTap: () {},
-          );
-        }),
+        _NearbyExpertsSectionBody(),
       ],
     );
   }
@@ -1113,6 +1091,107 @@ class _HomeAccountStatusAction extends StatelessWidget {
   }
 }
 
+/// 근처 전문가 섹션 본문: 5km→15km→전역 Elastic 수색 + 레이더 애니메이션
+class _NearbyExpertsSectionBody extends StatefulWidget {
+  @override
+  State<_NearbyExpertsSectionBody> createState() => _NearbyExpertsSectionBodyState();
+}
+
+class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
+  LocationPoint? _userLocation;
+  List<ExpertProfile> _experts = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final (loc, _) = await getUserLocationOrDefault();
+    if (!mounted) return;
+    final result = await fetchExpertsElastic(loc);
+    if (!mounted) return;
+    setState(() {
+      _userLocation = loc;
+      _experts = result.experts;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadarScanningWidget(
+                size: 100,
+                label: context.l10n('radar_expand_label'),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n('radar_searching'),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_experts.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          '근처에 대기 중인 전문가가 없습니다.',
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+        ),
+      );
+    }
+    return Column(
+      children: _experts.map((e) {
+        final loc = e.location!;
+        final km = _userLocation != null ? distanceInKm(_userLocation!, loc) : 0.0;
+        return ExpertCard(
+          name: e.displayName,
+          expertLocation: loc,
+          icon: Icons.person,
+          subtitle: context.l10n('experts_nearby_subtitle'),
+          onTap: () {
+            if (e.partnerSerialId != null && e.partnerSerialId!.isNotEmpty) {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  content: DigitalPartnerIdCard(
+                    serialId: e.partnerSerialId!,
+                    displayName: e.displayName,
+                    photoUrl: e.photoUrl,
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(context.l10n('confirm')),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+          commanderApproved: e.commanderApproved,
+          partnerSerialId: e.partnerSerialId,
+          photoUrl: e.photoUrl,
+          distanceKm: km,
+        );
+      }).toList(),
+    );
+  }
+}
+
 class ExpertCard extends StatefulWidget {
   const ExpertCard({
     super.key,
@@ -1121,6 +1200,10 @@ class ExpertCard extends StatefulWidget {
     required this.icon,
     required this.subtitle,
     required this.onTap,
+    this.commanderApproved = false,
+    this.partnerSerialId,
+    this.photoUrl,
+    this.distanceKm,
   });
 
   final String name;
@@ -1128,6 +1211,11 @@ class ExpertCard extends StatefulWidget {
   final IconData icon;
   final String subtitle;
   final VoidCallback onTap;
+  final bool commanderApproved;
+  final String? partnerSerialId;
+  final String? photoUrl;
+  /// 미제공 시 내부에서 계산
+  final double? distanceKm;
 
   @override
   State<ExpertCard> createState() => _ExpertCardState();
@@ -1140,7 +1228,12 @@ class _ExpertCardState extends State<ExpertCard> {
   @override
   void initState() {
     super.initState();
-    _calcDistance();
+    if (widget.distanceKm != null) {
+      _distanceKm = widget.distanceKm;
+      _isCalculating = false;
+    } else {
+      _calcDistance();
+    }
   }
 
   Future<void> _calcDistance() async {
@@ -1162,6 +1255,29 @@ class _ExpertCardState extends State<ExpertCard> {
             .l10n('distance_from_me')
             .replaceAll('{km}', (_distanceKm ?? 0).toStringAsFixed(1));
 
+    Widget avatar = CircleAvatar(
+      radius: 26,
+      backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+      child: widget.photoUrl != null && widget.photoUrl!.isNotEmpty
+          ? ClipOval(
+              child: Image.network(widget.photoUrl!, fit: BoxFit.cover, width: 52, height: 52),
+            )
+          : Icon(widget.icon, color: const Color(0xFF1E3A8A)),
+    );
+    if (widget.commanderApproved) {
+      avatar = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          avatar,
+          const Positioned(
+            right: -2,
+            bottom: -2,
+            child: CommanderVerifiedBadgeChip(size: 22),
+          ),
+        ],
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1177,10 +1293,7 @@ class _ExpertCardState extends State<ExpertCard> {
         ],
       ),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
-          child: Icon(widget.icon, color: const Color(0xFF1E3A8A)),
-        ),
+        leading: avatar,
         title: Row(
           children: [
             Expanded(

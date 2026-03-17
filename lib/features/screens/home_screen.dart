@@ -6,6 +6,7 @@ import '../profile/profile_screen.dart';
 import '../home/components/welcome_banner.dart';
 import '../home/components/category_grid.dart';
 import '../home/components/quick_jobs.dart';
+import '../home/components/section_title_style.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -317,12 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 4),
                 Text(
                   context.l10n('section_expert_services'),
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Noto Sans',
-                    letterSpacing: 0.1,
-                  ),
+                  style: kHomeSectionTitleTextStyle,
                 ),
                 const SizedBox(height: 2),
                 CategoryGrid(
@@ -373,12 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           context.l10n('experts_nearby_title'),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Noto Sans',
-            letterSpacing: 0.1,
-          ),
+          style: kHomeSectionTitleTextStyle,
         ),
         const SizedBox(height: 4),
         ...experts.map((e) {

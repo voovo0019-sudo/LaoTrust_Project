@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
+import '../../core/search_trigger_bus.dart';
 import 'universal_wizard_config.dart';
 import 'universal_wizard_state.dart';
 import 'widgets/settlement_guide_widget.dart';
@@ -106,6 +107,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
+              // v2.2: 레이더는 오직 신청 완료 시점에만 트리거
+              SearchTriggerBus.trigger();
               Navigator.of(context).pop();
             },
             child: Text(context.l10n('confirm')),

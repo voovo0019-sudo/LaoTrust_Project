@@ -18,6 +18,7 @@ class QuickJobsSection extends StatefulWidget {
 }
 
 class _QuickJobsSectionState extends State<QuickJobsSection> {
+  final List<Map<String, dynamic>> _localJobs = <Map<String, dynamic>>[];
   static const List<Map<String, String>> _mockQuickJobs = [
     {
       'titleKey': 'job_title_restaurant_server',
@@ -196,40 +197,27 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n('section_quick_jobs'),
-                  style: kHomeSectionTitleTextStyle,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, quickJobPostRouteName);
-                },
-                icon: const Icon(Icons.add_circle_outline, size: 20, color: Color(0xFF1E293B)),
-                label: Text(
-                  context.l10n('quick_job_post_btn'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            context.l10n('section_quick_jobs'),
+            style: kHomeSectionTitleTextStyle,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
+        _buildPremiumPostCard(context),
+        const SizedBox(height: 10),
         StreamBuilder<List<Map<String, dynamic>>>(
           stream: widget.firebaseService.getQuickJobs(),
           builder: (context, snapshot) {
-            final List<Map<String, dynamic>> jobs;
-            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              jobs = snapshot.data!;
+            final List<Map<String, dynamic>> jobs = <Map<String, dynamic>>[
+              ..._localJobs,
+              ...(snapshot.data ?? const <Map<String, dynamic>>[]),
+            ];
+
+            if (jobs.isNotEmpty) {
+              // pass
             } else {
-              jobs = _mockQuickJobs
+              jobs.addAll(
+                _mockQuickJobs
                   .map(
                     (m) => {
                       'titleKey': m['titleKey'],
@@ -238,7 +226,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       'detailKey': m['detailKey'],
                     },
                   )
-                  .toList();
+                  .toList(),
+              );
             }
             return Column(
               children: [
@@ -448,6 +437,59 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildPremiumPostCard(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(28),
+      onTap: () async {
+        final result = await Navigator.pushNamed(context, quickJobPostRouteName);
+        if (!mounted) return;
+        if (result is Map<String, dynamic>) {
+          setState(() {
+            _localJobs.insert(0, result);
+          });
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          ),
+          borderRadius: BorderRadius.circular(28.0),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+              blurRadius: 15,
+              spreadRadius: -5,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.add_task, color: Colors.white, size: 26),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                '알바 구인 등록',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.9)),
+          ],
+        ),
+      ),
     );
   }
 }

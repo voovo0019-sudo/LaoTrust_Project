@@ -1,5 +1,5 @@
 // =============================================================================
-// v1.3: 확대 수색 레이더 — 5km → 15km → 전역 시각적 스캐닝 애니메이션
+// v2.2: 확대 수색 레이더 — 1km → 3km → 5km 이상 시각적 스캐닝 애니메이션
 // =============================================================================
 
 import 'dart:math' as math;
@@ -11,11 +11,11 @@ class RadarScanningWidget extends StatefulWidget {
   const RadarScanningWidget({
     super.key,
     this.size = 120,
-    this.label,
+    this.stageLabels = const ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
   });
 
   final double size;
-  final String? label;
+  final List<String> stageLabels;
 
   @override
   State<RadarScanningWidget> createState() => _RadarScanningWidgetState();
@@ -42,6 +42,9 @@ class _RadarScanningWidgetState extends State<RadarScanningWidget>
 
   @override
   Widget build(BuildContext context) {
+    final stageLabels = widget.stageLabels.isEmpty
+        ? const ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중']
+        : widget.stageLabels;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -60,18 +63,22 @@ class _RadarScanningWidgetState extends State<RadarScanningWidget>
             },
           ),
         ),
-        if (widget.label != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            widget.label!,
-            style: TextStyle(
-              color: _royalNavy.withValues(alpha: 0.8),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        const SizedBox(height: 12),
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final idx = (_controller.value * stageLabels.length).floor().clamp(0, stageLabels.length - 1);
+            return Text(
+              stageLabels[idx],
+              style: TextStyle(
+                color: _royalNavy.withValues(alpha: 0.8),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            );
+          },
+        ),
       ],
     );
   }

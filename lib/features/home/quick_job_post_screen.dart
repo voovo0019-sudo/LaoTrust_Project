@@ -38,13 +38,15 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
     setState(() => _saving = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n('partner_upload_success')),
-        backgroundColor: _royalNavy,
-      ),
-    );
-    Navigator.of(context).pop();
+    final job = <String, dynamic>{
+      'title': _titleController.text.trim().isEmpty ? '알바 공고' : _titleController.text.trim(),
+      'loc': _locationController.text.trim().isEmpty ? '미정' : _locationController.text.trim(),
+      'salary': _salaryController.text.trim().isEmpty ? '협의' : _salaryController.text.trim(),
+      'detail': _descriptionController.text.trim(),
+      'deadlineAt': _deadline,
+      'createdAt': DateTime.now().millisecondsSinceEpoch,
+    };
+    Navigator.of(context).pop(job);
   }
 
   @override
@@ -53,7 +55,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       appBar: AppBar(
         backgroundColor: _royalNavy,
         foregroundColor: Colors.white,
-        title: Text(context.l10n('quick_job_post_btn')),
+        title: const Text('알바 구인 등록'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

@@ -58,6 +58,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     },
   ];
 
+  static const int _sampleBaseCreatedAt = 1;
+
   static const Map<String, String> _jobTitleValueToKey = {
     '식당 서버': 'job_title_restaurant_server',
     '단순 노무': 'job_title_simple_labor',
@@ -208,27 +210,38 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         StreamBuilder<List<Map<String, dynamic>>>(
           stream: widget.firebaseService.getQuickJobs(),
           builder: (context, snapshot) {
-            final List<Map<String, dynamic>> jobs = <Map<String, dynamic>>[
-              ..._localJobs,
-              ...(snapshot.data ?? const <Map<String, dynamic>>[]),
+            final remote = snapshot.data ?? const <Map<String, dynamic>>[];
+
+            final realJobs = <Map<String, dynamic>>[
+              ..._localJobs.map((e) => {...e, 'isSample': false}),
+              ...remote.map((e) => {...e, 'isSample': false}),
             ];
 
-            if (jobs.isNotEmpty) {
-              // pass
-            } else {
-              jobs.addAll(
-                _mockQuickJobs
-                  .map(
-                    (m) => {
-                      'titleKey': m['titleKey'],
-                      'locKey': m['locKey'],
-                      'salaryKey': m['salaryKey'],
-                      'detailKey': m['detailKey'],
-                    },
-                  )
-                  .toList(),
-              );
-            }
+            realJobs.sort((a, b) {
+              final aCreated = a['createdAt'];
+              final bCreated = b['createdAt'];
+              final aNum = aCreated is num ? aCreated.toInt() : (aCreated is DateTime ? aCreated.millisecondsSinceEpoch : 0);
+              final bNum = bCreated is num ? bCreated.toInt() : (bCreated is DateTime ? bCreated.millisecondsSinceEpoch : 0);
+              return bNum.compareTo(aNum);
+            });
+
+            final sampleJobs = _mockQuickJobs.asMap().entries.map((entry) {
+              final i = entry.key;
+              final m = entry.value;
+              return <String, dynamic>{
+                'titleKey': m['titleKey'],
+                'locKey': m['locKey'],
+                'salaryKey': m['salaryKey'],
+                'detailKey': m['detailKey'],
+                'isSample': true,
+                'createdAt': _sampleBaseCreatedAt + i,
+              };
+            }).toList();
+
+            final jobs = <Map<String, dynamic>>[
+              ...realJobs,
+              ...sampleJobs,
+            ];
             return Column(
               children: [
                 SizedBox(
@@ -242,6 +255,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                     itemCount: jobs.length,
                     itemBuilder: (context, index) {
                       final job = jobs[index];
+                      final bool isSample = job['isSample'] == true;
                       DateTime? deadlineAt;
                       if (job['deadlineAt'] != null) {
                         final t = job['deadlineAt'];
@@ -251,7 +265,11 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                           deadlineAt = DateTime.fromMillisecondsSinceEpoch(t);
                         }
                       }
-                      deadlineAt ??= DateTime.now().add(Duration(hours: 2 + index * 3));
+                      if (deadlineAt == null && isSample) {
+                        deadlineAt = DateTime.now().add(Duration(hours: 2 + (index % 6) * 3));
+                      } else {
+                        deadlineAt ??= DateTime.now().add(Duration(hours: 2 + index * 3));
+                      }
                       final now = DateTime.now();
                       final remaining = deadlineAt.difference(now);
                       const totalHours = 24.0;
@@ -448,47 +466,72 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         if (!mounted) return;
         if (result is Map<String, dynamic>) {
           setState(() {
-            _localJobs.insert(0, result);
+            _localJobs.insert(0, {...result, 'isSample': false});
           });
         }
       },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-          ),
-          borderRadius: BorderRadius.circular(28.0),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1.0),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.2),
-              blurRadius: 15,
-              spreadRadius: -5,
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1E293B), Color(0xFF334155)],
+              ),
+              borderRadius: BorderRadius.circular(28.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                  blurRadius: 15,
+                  spreadRadius: -5,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.add_task, color: Colors.white, size: 26),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                '알바 구인 등록',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+            child: Row(
+              children: [
+                const Icon(Icons.add_circle_outline, color: Color(0xFFFFD700), size: 32),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    '알바 구인 등록',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.9)),
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.transparent,
+                        Colors.white.withValues(alpha: 0.05),
+                      ],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
+                  ),
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.9)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

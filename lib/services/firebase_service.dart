@@ -41,11 +41,18 @@ class FirebaseService {
         .map((snapshot) {
       return snapshot.docs.map((doc) {
         final data = doc.data();
+        final createdAt = data[JobFields.createdAt];
+        final deadlineAt = data[JobFields.deadlineAt];
         return {
           'title': data[JobFields.title],
           'loc': data[JobFields.location],
+          'salary': data[JobFields.salary],
+          'detail': data[JobFields.description],
           'tag': data[JobFields.jobType] ?? '알바',
           'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
+          'createdAt': createdAt,
+          'deadlineAt': deadlineAt,
+          'isSample': false,
         };
       }).toList();
     });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../services/firebase_service.dart';
+import '../quick_job_post_screen.dart';
 import 'section_title_style.dart';
 
 class QuickJobsSection extends StatefulWidget {
@@ -195,9 +196,29 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Text(
-            context.l10n('section_quick_jobs'),
-            style: kHomeSectionTitleTextStyle,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n('section_quick_jobs'),
+                  style: kHomeSectionTitleTextStyle,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, quickJobPostRouteName);
+                },
+                icon: const Icon(Icons.add_circle_outline, size: 20, color: Color(0xFF1E293B)),
+                label: Text(
+                  context.l10n('quick_job_post_btn'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E293B),
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 6),
@@ -232,6 +253,21 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                     itemCount: jobs.length,
                     itemBuilder: (context, index) {
                       final job = jobs[index];
+                      DateTime? deadlineAt;
+                      if (job['deadlineAt'] != null) {
+                        final t = job['deadlineAt'];
+                        if (t is DateTime) {
+                          deadlineAt = t;
+                        } else if (t is int) {
+                          deadlineAt = DateTime.fromMillisecondsSinceEpoch(t);
+                        }
+                      }
+                      deadlineAt ??= DateTime.now().add(Duration(hours: 2 + index * 3));
+                      final now = DateTime.now();
+                      final remaining = deadlineAt.difference(now);
+                      const totalHours = 24.0;
+                      final remainingHours = remaining.inMinutes / 60.0;
+                      final progress = (remainingHours / totalHours).clamp(0.0, 1.0);
                       final title = job.containsKey('titleKey')
                           ? context.l10n(job['titleKey']?.toString() ?? '')
                           : _localizedFromMaybeKey(
@@ -288,50 +324,88 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                               salary: salary,
                               detail: detail,
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(28.0),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(28.0),
+                                        ),
+                                        child: Text(
+                                          context.l10n('tag_deadline_soon'),
+                                          style: const TextStyle(
+                                            color: Color(0xFF1E3A8A),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                            fontFamily: 'Noto Sans',
+                                            letterSpacing: 0.1,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        fit: FlexFit.loose,
+                                        child: Text(
+                                          title,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            fontFamily: 'Noto Sans',
+                                            letterSpacing: 0.1,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: false,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      const Icon(
+                                        Icons.chevron_right,
+                                        color: Color(0xFF1E3A8A),
+                                        size: 20,
+                                      ),
+                                    ],
                                   ),
-                                  child: Text(
-                                    context.l10n('tag_deadline_soon'),
-                                    style: const TextStyle(
-                                      color: Color(0xFF1E3A8A),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                      fontFamily: 'Noto Sans',
-                                      letterSpacing: 0.1,
+                                  const SizedBox(height: 6),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(4),
+                                          child: LinearProgressIndicator(
+                                            value: progress,
+                                            minHeight: 4,
+                                            backgroundColor: Colors.grey.shade300,
+                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          remaining.isNegative
+                                              ? context.l10n('job_deadline_passed')
+                                              : context.l10n('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.grey.shade600,
+                                            fontFamily: 'Noto Sans',
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      fontFamily: 'Noto Sans',
-                                      letterSpacing: 0.1,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Color(0xFF1E3A8A),
-                                  size: 20,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

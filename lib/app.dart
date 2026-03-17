@@ -15,6 +15,9 @@ import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
+import 'features/profile/partner_support_center_screen.dart';
+import 'features/universal_wizard/universal_wizard_screen.dart';
+import 'features/home/quick_job_post_screen.dart';
 
 class LaoTrustApp extends StatefulWidget {
   const LaoTrustApp({super.key});
@@ -108,6 +111,16 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
         profileRouteName: (_) => const ProfileScreen(),
         bcelOnepayRouteName: (_) => const BcelOnepayScreen(),
         expertDashboardRouteName: (_) => const ExpertDashboardScreen(),
+        partnerSupportCenterRouteName: (_) => const PartnerSupportCenterScreen(),
+        quickJobPostRouteName: (_) => const QuickJobPostScreen(),
+        UniversalWizardScreen.routeName: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return UniversalWizardScreen(
+            categoryKey: args?['categoryKey'] as String? ?? 'repair',
+            initialSubTypeId: args?['initialSubTypeId'] as String?,
+            initialSubTypeLabel: args?['initialSubTypeLabel'] as String?,
+          );
+        },
       },
     );
   }

@@ -11,6 +11,7 @@ const String kColJobs = 'jobs';
 // -----------------------------------------------------------------------------
 // 1. users 컬렉션 (LT-10 필수: is_verified, user_type)
 // 문서 ID: Firebase Auth UID 권장.
+// v1.3: 전문가 가용성·잠복·파트너 인증 필드 추가.
 // -----------------------------------------------------------------------------
 abstract class UserFields {
   static const String phone = 'phone';
@@ -22,6 +23,16 @@ abstract class UserFields {
   static const String userType = 'user_type';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
+  /// 전문가: 지금 의뢰 받기 ON/OFF. OFF 시 위치 잠복(Clear).
+  static const String dutyOn = 'duty_on';
+  /// 전문가: 실시간 위치 위도. duty_on==false 이면 null로 갱신.
+  static const String lat = 'lat';
+  /// 전문가: 실시간 위치 경도. duty_on==false 이면 null로 갱신.
+  static const String lng = 'lng';
+  /// 사령관 검수 완료 시 true. Verified by Commander.
+  static const String commanderApproved = 'commander_approved';
+  /// 디지털 파트너 고유 시리얼 번호 (예: LT-P-2024-00001).
+  static const String partnerSerialId = 'partner_serial_id';
 }
 
 /// user_type 값 / User type values
@@ -69,4 +80,6 @@ abstract class JobFields {
   static const String status = 'status';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
+  /// 급구 알바: 마감 시각 (Timestamp). 퀵 데드라인 바 계산용.
+  static const String deadlineAt = 'deadline_at';
 }

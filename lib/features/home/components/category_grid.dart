@@ -35,6 +35,8 @@ class CategoryGrid extends StatelessWidget {
         // 상하·좌우 여백을 초밀도로 조정 (mainAxisSpacing ≤ 2, crossAxisSpacing ≤ 4)
         mainAxisSpacing: 2,
         crossAxisSpacing: 4,
+        // 카테고리 셀의 물리적 세로 높이를 직접 고정
+        mainAxisExtent: 88.0,
         childAspectRatio: 0.9,
       ),
       itemCount: services.length,
@@ -50,24 +52,24 @@ class CategoryGrid extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(28.0),
+                  borderRadius: BorderRadius.circular(24.0),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 15,
+                      blurRadius: 12,
                       spreadRadius: 1,
-                      offset: const Offset(0, 4),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Icon(
                   s['icon'] as IconData,
                   color: color,
-                  size: 18,
+                  size: 16,
                 ),
               ),
               const SizedBox(height: 0),

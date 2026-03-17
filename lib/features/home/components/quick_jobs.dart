@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../services/firebase_service.dart';
+import 'section_title_style.dart';
 
 class QuickJobsSection extends StatefulWidget {
   const QuickJobsSection({
@@ -196,12 +197,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Text(
             context.l10n('section_quick_jobs'),
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Noto Sans',
-              letterSpacing: 0.1,
-            ),
+            style: kHomeSectionTitleTextStyle,
           ),
         ),
         const SizedBox(height: 6),

@@ -28,6 +28,9 @@ class UniversalWizardScreen extends StatefulWidget {
   State<UniversalWizardScreen> createState() => _UniversalWizardScreenState();
 }
 
+/// 지침 v3.9: 알바 구인 등록과 동일한 선명한 로얄 블루 (아웃라인 버튼용)
+const Color _kRoyalBlue = Color(0xFF1E3A8A);
+
 class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   static const int totalSteps = 4;
   late PageController _pageController;
@@ -122,9 +125,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   Widget build(BuildContext context) {
     final config = _config ?? kUniversalWizardConfigs['expert_repair']!;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: UniversalWizardConfig.royalNavy,
+        backgroundColor: _kRoyalBlue,
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -170,7 +173,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: UniversalWizardConfig.royalNavy,
+              color: _kRoyalBlue,
             ),
           ),
           const SizedBox(width: 12),
@@ -179,8 +182,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               borderRadius: BorderRadius.circular(28),
               child: LinearProgressIndicator(
                 value: (_currentStep + 1) / totalSteps,
-                backgroundColor: UniversalWizardConfig.royalNavy.withValues(alpha: 0.2),
-                valueColor: const AlwaysStoppedAnimation<Color>(UniversalWizardConfig.royalNavy),
+                backgroundColor: _kRoyalBlue.withValues(alpha: 0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(_kRoyalBlue),
                 minHeight: 6,
               ),
             ),
@@ -198,7 +201,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '세부 서비스 유형을 선택하세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           ...config.step1SubTypes.map((e) {
@@ -213,10 +216,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
-                      color: selected ? UniversalWizardConfig.royalNavy.withValues(alpha: 0.1) : Colors.white,
+                      color: selected ? _kRoyalBlue.withValues(alpha: 0.1) : Colors.white,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: selected ? UniversalWizardConfig.royalNavy : Colors.grey.shade300,
+                        color: selected ? _kRoyalBlue : Colors.grey.shade300,
                         width: selected ? 2 : 1,
                       ),
                     ),
@@ -224,11 +227,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                       children: [
                         Icon(
                           selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: selected ? UniversalWizardConfig.royalNavy : Colors.grey,
+                          color: selected ? _kRoyalBlue : Colors.grey,
                           size: 24,
                         ),
                         const SizedBox(width: 12),
-                        Expanded(child: Text(e.value, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: UniversalWizardConfig.royalNavy))),
+                        Expanded(child: Text(e.value, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: _kRoyalBlue))),
                       ],
                     ),
                   ),
@@ -260,7 +263,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '규모 또는 대상을 선택하세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           ...List.generate(config.step2Ids.length, (i) {
@@ -277,10 +280,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
-                      color: selected ? UniversalWizardConfig.royalNavy.withValues(alpha: 0.1) : Colors.white,
+                      color: selected ? _kRoyalBlue.withValues(alpha: 0.1) : Colors.white,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: selected ? UniversalWizardConfig.royalNavy : Colors.grey.shade300,
+                        color: selected ? _kRoyalBlue : Colors.grey.shade300,
                         width: selected ? 2 : 1,
                       ),
                     ),
@@ -288,11 +291,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                       children: [
                         Icon(
                           selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: selected ? UniversalWizardConfig.royalNavy : Colors.grey,
+                          color: selected ? _kRoyalBlue : Colors.grey,
                           size: 24,
                         ),
                         const SizedBox(width: 12),
-                        Expanded(child: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: UniversalWizardConfig.royalNavy))),
+                        Expanded(child: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: _kRoyalBlue))),
                       ],
                     ),
                   ),
@@ -327,7 +330,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '원하는 스타일 또는 고장 부위 사진을 올려주세요 (증거 가치)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 12),
           Text(
@@ -356,12 +359,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   width: 88,
                   height: 88,
                   decoration: BoxDecoration(
-                    color: hasPhoto ? UniversalWizardConfig.royalNavy.withValues(alpha: 0.15) : Colors.grey.shade200,
+                    color: hasPhoto ? _kRoyalBlue.withValues(alpha: 0.15) : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.3)),
+                    border: Border.all(color: _kRoyalBlue.withValues(alpha: 0.3)),
                   ),
                   child: hasPhoto
-                      ? const Icon(Icons.check_circle, color: UniversalWizardConfig.royalNavy, size: 36)
+                      ? const Icon(Icons.check_circle, color: _kRoyalBlue, size: 36)
                       : Icon(Icons.add_photo_alternate, color: Colors.grey.shade600, size: 36),
                 ),
               );
@@ -392,7 +395,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '출발지와 도착지를 지도에서 찍어주세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 12),
           Text(
@@ -405,15 +408,15 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.3)),
+              border: Border.all(color: _kRoyalBlue.withValues(alpha: 0.3)),
             ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.map_outlined, size: 48, color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.6)),
+                  Icon(Icons.map_outlined, size: 48, color: _kRoyalBlue.withValues(alpha: 0.6)),
                   const SizedBox(height: 8),
-                  Text('지도 터치로 출발/도착 지정', style: TextStyle(color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.8), fontSize: 14)),
+                  Text('지도 터치로 출발/도착 지정', style: TextStyle(color: _kRoyalBlue.withValues(alpha: 0.8), fontSize: 14)),
                 ],
               ),
             ),
@@ -427,8 +430,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   icon: const Icon(Icons.trip_origin, size: 20),
                   label: const Text('출발지'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: UniversalWizardConfig.royalNavy,
-                    side: const BorderSide(color: UniversalWizardConfig.royalNavy),
+                    foregroundColor: _kRoyalBlue,
+                    side: const BorderSide(color: _kRoyalBlue),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                   ),
                 ),
@@ -440,8 +443,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   icon: const Icon(Icons.location_on, size: 20),
                   label: const Text('도착지'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: UniversalWizardConfig.royalNavy,
-                    side: const BorderSide(color: UniversalWizardConfig.royalNavy),
+                    foregroundColor: _kRoyalBlue,
+                    side: const BorderSide(color: _kRoyalBlue),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                   ),
                 ),
@@ -461,7 +464,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '학습 목표와 희망 스케줄을 입력하세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           TextField(
@@ -500,7 +503,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '요구사항 및 추가 메모',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           TextField(
@@ -527,7 +530,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           const Text(
             '요청 요약 확인',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: UniversalWizardConfig.royalNavy),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           _summaryRow('카테고리', context.l10n(config.categoryKey)),
@@ -548,7 +551,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 100, child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700))),
-          Expanded(child: Text(value, style: const TextStyle(color: UniversalWizardConfig.royalNavy))),
+          Expanded(child: Text(value, style: const TextStyle(color: _kRoyalBlue))),
         ],
       ),
     );
@@ -577,12 +580,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         child: SizedBox(
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
+          child: OutlinedButton(
             onPressed: canProceed ? _goNext : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: UniversalWizardConfig.royalNavy,
-              foregroundColor: Colors.white,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: _kRoyalBlue,
               disabledBackgroundColor: Colors.grey.shade300,
+              disabledForegroundColor: Colors.grey.shade600,
+              side: BorderSide(color: canProceed ? _kRoyalBlue : Colors.grey.shade400, width: 1.2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             ),
             child: Text(isLast ? context.l10n('apply_final') : context.l10n('next_step')),

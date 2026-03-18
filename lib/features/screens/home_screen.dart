@@ -409,7 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
                 ),
                 child: const Text(
-                  '요청 전달 완료',
+                  '전송 완료',
                   style: TextStyle(
                     color: Color(0xFF1E293B),
                     fontWeight: FontWeight.w600,

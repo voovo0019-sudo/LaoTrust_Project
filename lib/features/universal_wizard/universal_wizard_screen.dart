@@ -109,7 +109,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               Navigator.of(ctx).pop();
               // v2.2: 레이더는 오직 신청 완료 시점에만 트리거
               SearchTriggerBus.trigger();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
             },
             child: Text(context.l10n('confirm')),
           ),

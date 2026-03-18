@@ -315,10 +315,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                             borderRadius: BorderRadius.circular(28.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 15,
-                                spreadRadius: 1,
-                                offset: const Offset(0, 6),
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 4,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -342,13 +342,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                                          color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(28.0),
                                         ),
                                         child: Text(
                                           context.l10n('tag_deadline_soon'),
                                           style: const TextStyle(
-                                            color: Color(0xFF1E3A8A),
+                                            color: Color(0xFF7C3AED),
                                             fontWeight: FontWeight.bold,
                                             fontSize: 10,
                                             fontFamily: 'Noto Sans',
@@ -377,7 +377,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                       const SizedBox(width: 2),
                                       const Icon(
                                         Icons.chevron_right,
-                                        color: Color(0xFF1E3A8A),
+                                        color: Color(0xFF7C3AED),
                                         size: 20,
                                       ),
                                     ],
@@ -394,7 +394,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                             value: progress,
                                             minHeight: 4,
                                             backgroundColor: Colors.grey.shade300,
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
+                                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7C3AED)),
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -442,7 +442,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? const Color(0xFF1E3A8A)
+                              ? const Color(0xFF7C3AED)
                               : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(28.0),
                         ),
@@ -470,68 +470,40 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
           });
         }
       },
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF1E293B), Color(0xFF334155)],
-              ),
-              borderRadius: BorderRadius.circular(28.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-                  blurRadius: 15,
-                  spreadRadius: -5,
-                ),
-              ],
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28.0),
+          border: Border.all(color: const Color(0xFF7C3AED), width: 1.0),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              spreadRadius: 0,
+              offset: Offset(0, 2),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.add_circle_outline, color: Color(0xFFFFD700), size: 32),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    '알바 구인 등록',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.9)),
-              ],
-            ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.12),
-                        Colors.transparent,
-                        Colors.white.withValues(alpha: 0.05),
-                      ],
-                      stops: const [0.0, 0.55, 1.0],
-                    ),
-                  ),
+          ],
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.add_circle_outline, color: Color(0xFF7C3AED), size: 32),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '알바 구인 등록',
+                style: TextStyle(
+                  color: Color(0xFF7C3AED),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),
-          ),
-        ],
+            Icon(Icons.chevron_right, color: Color(0xFF7C3AED)),
+          ],
+        ),
       ),
     );
   }

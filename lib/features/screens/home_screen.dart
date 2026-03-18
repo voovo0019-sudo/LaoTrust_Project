@@ -1292,12 +1292,12 @@ class _ExpertCardState extends State<ExpertCard> {
 
     Widget avatar = CircleAvatar(
       radius: 26,
-      backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+      backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
       child: widget.photoUrl != null && widget.photoUrl!.isNotEmpty
           ? ClipOval(
               child: Image.network(widget.photoUrl!, fit: BoxFit.cover, width: 52, height: 52),
             )
-          : Icon(widget.icon, color: const Color(0xFF7C3AED)),
+          : Icon(widget.icon, color: const Color(0xFF1E3A8A)),
     );
     if (widget.commanderApproved) {
       avatar = Stack(
@@ -1354,7 +1354,7 @@ class _ExpertCardState extends State<ExpertCard> {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF7C3AED),
+                color: Color(0xFF1E3A8A),
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
               ),
@@ -1373,7 +1373,7 @@ class _ExpertCardState extends State<ExpertCard> {
             ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right, color: Color(0xFF7C3AED)),
+        trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
         onTap: widget.onTap,
       ),
     );

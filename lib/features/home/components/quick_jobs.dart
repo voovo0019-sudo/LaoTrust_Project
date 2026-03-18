@@ -342,13 +342,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(28.0),
                                         ),
                                         child: Text(
                                           context.l10n('tag_deadline_soon'),
                                           style: const TextStyle(
-                                            color: Color(0xFF7C3AED),
+                                            color: Color(0xFF1E3A8A),
                                             fontWeight: FontWeight.bold,
                                             fontSize: 10,
                                             fontFamily: 'Noto Sans',
@@ -377,7 +377,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                       const SizedBox(width: 2),
                                       const Icon(
                                         Icons.chevron_right,
-                                        color: Color(0xFF7C3AED),
+                                        color: Color(0xFF1E3A8A),
                                         size: 20,
                                       ),
                                     ],
@@ -394,7 +394,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                             value: progress,
                                             minHeight: 4,
                                             backgroundColor: Colors.grey.shade300,
-                                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7C3AED)),
+                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -442,7 +442,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? const Color(0xFF7C3AED)
+                              ? const Color(0xFF1E3A8A)
                               : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(28.0),
                         ),
@@ -476,7 +476,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28.0),
-          border: Border.all(color: const Color(0xFF7C3AED), width: 1.0),
+          border: Border.all(color: const Color(0xFF1E3A8A), width: 1.0),
           boxShadow: const [
             BoxShadow(
               color: Colors.black12,
@@ -488,20 +488,20 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         ),
         child: const Row(
           children: [
-            Icon(Icons.add_circle_outline, color: Color(0xFF7C3AED), size: 32),
+            Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A), size: 32),
             SizedBox(width: 12),
             Expanded(
               child: Text(
                 '알바 구인 등록',
                 style: TextStyle(
-                  color: Color(0xFF7C3AED),
+                  color: Color(0xFF1E3A8A),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.2,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: Color(0xFF7C3AED)),
+            Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
           ],
         ),
       ),

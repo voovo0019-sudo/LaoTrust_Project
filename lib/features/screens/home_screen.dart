@@ -9,7 +9,7 @@ import '../home/components/quick_jobs.dart';
 import '../home/components/section_title_style.dart';
 import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
-import '../../core/search_trigger_bus.dart';
+import '../universal_wizard/universal_wizard_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -52,6 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   bool _shownDefaultLocationInfo = false;
+
+  /// 레이더 강제 제어: 위저드 복귀 시 result==true 이면 여기서 시퀀스 구동
+  bool _isSearching = false;
+  bool _showCompletionMessage = false;
 
   static const String _symptomOtherKey = 'symptom_other';
 
@@ -325,15 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 2),
                 CategoryGrid(
-                  onCategorySelected: (labelKey) {
-                    setState(() {
-                      _selectedCategoryKey = labelKey;
-                      _selectedCleaningSubCategoryId = '';
-                      _selectedCleaningSubCategoryLabelKey = '';
-                      _selectedOtherSubCategoryLabelKey = '';
-                      _currentView = HomeView.subCategory;
-                    });
-                  },
+                  onCategorySelected: (labelKey) => _openWizard(labelKey),
                 ),
                 _buildNearbyExpertsSection(),
                 const SizedBox(height: 8),
@@ -348,6 +344,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// 셋째 지침: 위저드 이동 함수 — result==true 시 레이더 강제 구동
+  Future<void> _openWizard(String categoryKey) async {
+    final result = await Navigator.pushNamed(
+      context,
+      UniversalWizardScreen.routeName,
+      arguments: <String, dynamic>{
+        'categoryKey': categoryKey,
+      },
+    );
+    if (result == true) {
+      setState(() => _isSearching = true);
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
+        setState(() {
+          _isSearching = false;
+          _showCompletionMessage = true;
+        });
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) setState(() => _showCompletionMessage = false);
+        });
+      });
+    }
+  }
+
   Widget _buildNearbyExpertsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,7 +377,49 @@ class _HomeScreenState extends State<HomeScreen> {
           style: kHomeSectionTitleTextStyle,
         ),
         const SizedBox(height: 4),
-        _NearbyExpertsSectionBody(),
+        if (_isSearching)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const RadarScanningWidget(
+                    size: 100,
+                    stageLabels: ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.l10n('radar_searching'),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else if (_showCompletionMessage)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                ),
+                child: const Text(
+                  '요청 전달 완료',
+                  style: TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          )
+        else
+          _NearbyExpertsSectionBody(),
       ],
     );
   }
@@ -1090,104 +1152,10 @@ class _HomeAccountStatusAction extends StatelessWidget {
   }
 }
 
-/// 근처 전문가 섹션 본문: 5km→15km→전역 Elastic 수색 + 레이더 애니메이션
-class _NearbyExpertsSectionBody extends StatefulWidget {
-  @override
-  State<_NearbyExpertsSectionBody> createState() => _NearbyExpertsSectionBodyState();
-}
-
-class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
-  bool _isScanning = false;
-  bool _showCompleteMessage = false;
-  int _lastTriggerCounter = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _lastTriggerCounter = SearchTriggerBus.listenable.value;
-    SearchTriggerBus.listenable.addListener(_onTriggered);
-  }
-
-  @override
-  void dispose() {
-    SearchTriggerBus.listenable.removeListener(_onTriggered);
-    super.dispose();
-  }
-
-  Future<void> _onTriggered() async {
-    final current = SearchTriggerBus.listenable.value;
-    if (current == _lastTriggerCounter) return;
-    _lastTriggerCounter = current;
-    await _startSearch();
-  }
-
-  Future<void> _startSearch() async {
-    if (!mounted) return;
-    setState(() {
-      _isScanning = true;
-      _showCompleteMessage = false;
-    });
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    setState(() {
-      _isScanning = false;
-      _showCompleteMessage = true;
-    });
-    await Future.delayed(const Duration(seconds: 1));
-    if (!mounted) return;
-    setState(() {
-      _showCompleteMessage = false;
-    });
-  }
-
+/// 근처 전문가 섹션 본문: 샘플 3인 노출 (레이더/완료 메시지는 HomeScreen에서 제어)
+class _NearbyExpertsSectionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (_isScanning) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const RadarScanningWidget(
-                size: 100,
-                stageLabels: ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n('radar_searching'),
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_showCompleteMessage) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-            ),
-            child: const Text(
-              '요청 전달 완료',
-              style: TextStyle(
-                color: Color(0xFF1E293B),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // v2.2: 홈 초기 진입은 레이더 금지 → 샘플 전문가 3인 즉시 노출
     const sampleExperts = <({String nameKey, LocationPoint location, IconData icon})>[
       (
         nameKey: 'chat_sample_name_1',

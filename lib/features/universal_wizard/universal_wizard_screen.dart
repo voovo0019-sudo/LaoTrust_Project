@@ -5,6 +5,9 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../core/app_localizations.dart';
 import '../../core/search_trigger_bus.dart';
 import 'universal_wizard_config.dart';
@@ -38,6 +41,40 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   UniversalWizardConfig? _config;
   int _currentStep = 0;
 
+  final ImagePicker _imagePicker = ImagePicker();
+  final List<XFile> _pickedImages = <XFile>[];
+
+  final Set<String> _step2Selections = <String>{};
+  bool _step2OtherSelected = false;
+  final TextEditingController _step2OtherController = TextEditingController();
+
+  // Delivery / numeric inputs etc.
+  final TextEditingController _weightKgController = TextEditingController();
+  final TextEditingController _distanceKmController = TextEditingController();
+  String _cargoSize = '';
+
+  // Cleaning
+  final TextEditingController _cleaningAreaController = TextEditingController();
+  String _cleaningScale = '';
+
+  // Tutoring
+  final Set<String> _tutoringLevels = <String>{};
+
+  // Security
+  final TextEditingController _securityPeopleController = TextEditingController();
+  final TextEditingController _securityTimeController = TextEditingController();
+
+  // Garden
+  String _gardenScale = '';
+  final Set<String> _gardenScopes = <String>{};
+
+  // Event
+  final TextEditingController _eventPeopleController = TextEditingController();
+
+  // Photo
+  final TextEditingController _photoTimeController = TextEditingController();
+  final Set<String> _photoPlaceSelections = <String>{};
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +98,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _step2OtherController.dispose();
+    _weightKgController.dispose();
+    _distanceKmController.dispose();
+    _cleaningAreaController.dispose();
+    _securityPeopleController.dispose();
+    _securityTimeController.dispose();
+    _eventPeopleController.dispose();
+    _photoTimeController.dispose();
     super.dispose();
   }
 
@@ -89,11 +134,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
-  bool _canProceedStep2() {
-    if (_config == null) return true;
-    if (_config!.step2ChoiceType == Step2ChoiceType.none) return true;
-    return _state.step2SelectedId.isNotEmpty;
-  }
+  bool _canProceedStep2() => _isStep2Complete();
   bool _canProceedStep3() => true;
   bool _canProceedStep4() => true;
 
@@ -107,13 +148,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         content: Text(context.l10n('application_complete_message')),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               // v2.2: 레이더는 오직 신청 완료 시점에만 트리거
               SearchTriggerBus.trigger();
               Navigator.of(context).pop(true);
             },
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: _kRoyalBlue,
+              side: const BorderSide(color: _kRoyalBlue, width: 1.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            ),
             child: Text(context.l10n('confirm')),
           ),
         ],
@@ -160,6 +207,151 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         ],
       ),
     );
+  }
+
+  bool _isStep2Complete() {
+    final categoryKey = _state.categoryKey;
+    switch (categoryKey) {
+      case 'expert_delivery':
+        return _weightKgController.text.trim().isNotEmpty &&
+            _distanceKmController.text.trim().isNotEmpty &&
+            _cargoSize.isNotEmpty;
+      case 'expert_cleaning':
+        return _cleaningAreaController.text.trim().isNotEmpty || _cleaningScale.isNotEmpty;
+      case 'expert_tutoring':
+        return _tutoringLevels.isNotEmpty;
+      case 'expert_security':
+        return _securityPeopleController.text.trim().isNotEmpty &&
+            _securityTimeController.text.trim().isNotEmpty;
+      case 'expert_garden':
+        return _gardenScale.isNotEmpty || _gardenScopes.isNotEmpty;
+      case 'expert_event':
+        return _eventPeopleController.text.trim().isNotEmpty;
+      case 'expert_photo':
+        return _photoTimeController.text.trim().isNotEmpty && _photoPlaceSelections.isNotEmpty;
+      case 'expert_beauty':
+      case 'expert_repair':
+        return _step2Selections.isNotEmpty || _step2OtherSelected;
+      default:
+        return _step2Selections.isNotEmpty || _step2OtherSelected;
+    }
+  }
+
+  InputDecoration _outlineFieldDecoration(String label, {String? hint}) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(28),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(28),
+        borderSide: const BorderSide(color: _kRoyalBlue, width: 1.2),
+      ),
+    );
+  }
+
+  Widget _outlineToggleTile({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: selected ? _kRoyalBlue : Colors.grey.shade300,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: selected ? _kRoyalBlue : Colors.grey,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                    color: _kRoyalBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _photoPromptForCategory() {
+    switch (_state.categoryKey) {
+      case 'expert_repair':
+        return '고장 부위 또는 모델명 사진을 올려주세요';
+      case 'expert_delivery':
+        return '운송할 물품 또는 목록 사진을 올려주세요';
+      case 'expert_beauty':
+        return '원하는 스타일의 참고 사진을 올려주세요';
+      case 'expert_photo':
+        return '원하는 촬영 컨셉의 참고 사진을 올려주세요';
+      case 'expert_cleaning':
+        return '청소가 필요한 현장의 사진을 올려주세요';
+      case 'expert_tutoring':
+        return '교재 또는 학습 목표 사진을 올려주세요';
+      case 'expert_security':
+        return '배치 장소 또는 관련 서류 사진을 올려주세요';
+      case 'expert_garden':
+        return '정원 현장의 상태를 알 수 있는 사진을 올려주세요';
+      case 'expert_event':
+        return '행사 장소 또는 기획안 사진을 올려주세요';
+      default:
+        return '관련 사진을 올려주세요';
+    }
+  }
+
+  Future<void> _pickImagesFromGallery({required int maxCount}) async {
+    final remaining = (maxCount - _pickedImages.length).clamp(0, maxCount);
+    if (remaining <= 0) return;
+    final images = await _imagePicker.pickMultiImage(imageQuality: 85);
+    if (!mounted) return;
+    if (images.isEmpty) return;
+    setState(() {
+      _pickedImages.addAll(images.take(remaining));
+      _state = _state.copyWith(step3PhotoPaths: _pickedImages.map((e) => e.path).toList());
+    });
+  }
+
+  Future<void> _pickImageFromCamera({required int maxCount}) async {
+    if (_pickedImages.length >= maxCount) return;
+    final image = await _imagePicker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    if (!mounted) return;
+    if (image == null) return;
+    setState(() {
+      _pickedImages.add(image);
+      _state = _state.copyWith(step3PhotoPaths: _pickedImages.map((e) => e.path).toList());
+    });
+  }
+
+  void _removePickedImageAt(int index) {
+    if (index < 0 || index >= _pickedImages.length) return;
+    setState(() {
+      _pickedImages.removeAt(index);
+      _state = _state.copyWith(step3PhotoPaths: _pickedImages.map((e) => e.path).toList());
+    });
   }
 
   Widget _buildProgressBar() {
@@ -245,67 +437,477 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Widget _buildStep2(UniversalWizardConfig config) {
-    if (config.step2ChoiceType == Step2ChoiceType.none || config.step2Ids.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text(
-            '이 카테고리는 규모 선택을 건너뜁니다.',
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-          ),
-        ),
-      );
-    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '규모 또는 대상을 선택하세요',
+            '상세 선택 및 추가 정보',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
-          const SizedBox(height: 20),
-          ...List.generate(config.step2Ids.length, (i) {
-            final id = config.step2Ids[i];
-            final label = i < config.step2Labels.length ? config.step2Labels[i] : id;
-            final selected = _state.step2SelectedId == id;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => setState(() => _state = _state.copyWith(step2SelectedId: id, step2SelectedLabel: label)),
-                  borderRadius: BorderRadius.circular(28),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: selected ? _kRoyalBlue.withValues(alpha: 0.1) : Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: selected ? _kRoyalBlue : Colors.grey.shade300,
-                        width: selected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: selected ? _kRoyalBlue : Colors.grey,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: _kRoyalBlue))),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
+          const SizedBox(height: 12),
+          ..._buildStep2FieldsByCategory(),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildStep2FieldsByCategory() {
+    final categoryKey = _state.categoryKey;
+    switch (categoryKey) {
+      case 'expert_delivery':
+        return _buildStep2Delivery();
+      case 'expert_cleaning':
+        return _buildStep2Cleaning();
+      case 'expert_tutoring':
+        return _buildStep2Tutoring();
+      case 'expert_security':
+        return _buildStep2Security();
+      case 'expert_garden':
+        return _buildStep2Garden();
+      case 'expert_event':
+        return _buildStep2Event();
+      case 'expert_photo':
+        return _buildStep2Photo();
+      case 'expert_beauty':
+        return _buildStep2Beauty();
+      case 'expert_repair':
+        return _buildStep2Repair();
+      default:
+        return _buildStep2GenericMultiSelect();
+    }
+  }
+
+  List<Widget> _buildStep2Repair() {
+    final sub = _state.step1SubTypeId;
+    final options = switch (sub) {
+      'ac' => ['찬바람 안 나옴', '소음', '물 떨어짐', '냉방 약함'],
+      'electric' => ['차단기 내려감', '탄 냄새', '전등 깜빡임', '누전 의심'],
+      'plumbing' => ['누수', '막힘', '역류', '수압 약함'],
+      'roof' => ['페인트 벗겨짐', '누수/방수', '균열/보수'],
+      _ => ['증상 선택'],
+    };
+    return [
+      for (final o in options)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: o,
+            selected: _step2Selections.contains(o),
+            onTap: () => setState(() {
+              if (_step2Selections.contains(o)) {
+                _step2Selections.remove(o);
+              } else {
+                _step2Selections.add(o);
+              }
+            }),
+          ),
+        ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: _outlineToggleTile(
+          label: '기타',
+          selected: _step2OtherSelected,
+          onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        ),
+      ),
+      if (_step2OtherSelected)
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '증상/요구사항을 입력하세요'),
+          maxLines: 2,
+        ),
+    ];
+  }
+
+  List<Widget> _buildStep2Delivery() {
+    return [
+      TextField(
+        controller: _weightKgController,
+        keyboardType: TextInputType.number,
+        decoration: _outlineFieldDecoration('무게(kg)', hint: '예: 3'),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _distanceKmController,
+        keyboardType: TextInputType.number,
+        decoration: _outlineFieldDecoration('거리(km)', hint: '예: 5'),
+      ),
+      const SizedBox(height: 12),
+      const Text('짐 크기(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'S',
+              selected: _cargoSize == 'S',
+              onTap: () => setState(() => _cargoSize = _cargoSize == 'S' ? '' : 'S'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'M',
+              selected: _cargoSize == 'M',
+              onTap: () => setState(() => _cargoSize = _cargoSize == 'M' ? '' : 'M'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'L',
+              selected: _cargoSize == 'L',
+              onTap: () => setState(() => _cargoSize = _cargoSize == 'L' ? '' : 'L'),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 장보기 목록, 특이사항'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Beauty() {
+    const options = ['컷', '펌', '관리', '네일', '메이크업'];
+    return [
+      for (final o in options)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: o,
+            selected: _step2Selections.contains(o),
+            onTap: () => setState(() {
+              if (_step2Selections.contains(o)) {
+                _step2Selections.remove(o);
+              } else {
+                _step2Selections.add(o);
+              }
+            }),
+          ),
+        ),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 염색, 두피 케어 등'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Photo() {
+    return [
+      TextField(
+        controller: _photoTimeController,
+        decoration: _outlineFieldDecoration('촬영 시간', hint: '예: 2시간 / 반나절 / 1일'),
+        maxLines: 1,
+      ),
+      const SizedBox(height: 12),
+      const Text('촬영 장소', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '실내',
+        selected: _photoPlaceSelections.contains('실내'),
+        onTap: () => setState(() {
+          if (_photoPlaceSelections.contains('실내')) {
+            _photoPlaceSelections.remove('실내');
+          } else {
+            _photoPlaceSelections.add('실내');
+          }
+        }),
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '야외',
+        selected: _photoPlaceSelections.contains('야외'),
+        onTap: () => setState(() {
+          if (_photoPlaceSelections.contains('야외')) {
+            _photoPlaceSelections.remove('야외');
+          } else {
+            _photoPlaceSelections.add('야외');
+          }
+        }),
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 스튜디오/야외 특정 장소'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Cleaning() {
+    return [
+      TextField(
+        controller: _cleaningAreaController,
+        keyboardType: TextInputType.number,
+        decoration: _outlineFieldDecoration('평수/면적(m² 또는 평)', hint: '예: 30평 / 60㎡'),
+      ),
+      const SizedBox(height: 12),
+      const Text('규모 선택(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'S',
+              selected: _cleaningScale == 'S',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'S' ? '' : 'S'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'M',
+              selected: _cleaningScale == 'M',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'M' ? '' : 'M'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'L',
+              selected: _cleaningScale == 'L',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'L' ? '' : 'L'),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 특정 오염/특이사항'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Tutoring() {
+    const levels = ['초등', '중등', '고등', '성인'];
+    return [
+      const Text('학습 레벨(복수 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      for (final l in levels) ...[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: l,
+            selected: _tutoringLevels.contains(l),
+            onTap: () => setState(() {
+              if (_tutoringLevels.contains(l)) {
+                _tutoringLevels.remove(l);
+              } else {
+                _tutoringLevels.add(l);
+              }
+            }),
+          ),
+        ),
+      ],
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 대학/직장인/자격증 대비'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Security() {
+    return [
+      TextField(
+        controller: _securityPeopleController,
+        keyboardType: TextInputType.number,
+        decoration: _outlineFieldDecoration('투입 인원(명)', hint: '예: 2'),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _securityTimeController,
+        decoration: _outlineFieldDecoration('희망 시간', hint: '예: 09:00~18:00 / 3시간'),
+        maxLines: 1,
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 복장/장비/특이사항'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Garden() {
+    const scopes = ['잔디', '조경/식재', '나무 전지', '전체'];
+    return [
+      const Text('정원 크기(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'S',
+              selected: _gardenScale == 'S',
+              onTap: () => setState(() => _gardenScale = _gardenScale == 'S' ? '' : 'S'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'M',
+              selected: _gardenScale == 'M',
+              onTap: () => setState(() => _gardenScale = _gardenScale == 'M' ? '' : 'M'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _outlineToggleTile(
+              label: 'L',
+              selected: _gardenScale == 'L',
+              onTap: () => setState(() => _gardenScale = _gardenScale == 'L' ? '' : 'L'),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      const Text('작업 범위(복수 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      const SizedBox(height: 10),
+      for (final s in scopes)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: s,
+            selected: _gardenScopes.contains(s),
+            onTap: () => setState(() {
+              if (_gardenScopes.contains(s)) {
+                _gardenScopes.remove(s);
+              } else {
+                _gardenScopes.add(s);
+              }
+            }),
+          ),
+        ),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 특정 구역/특이사항'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2Event() {
+    return [
+      TextField(
+        controller: _eventPeopleController,
+        keyboardType: TextInputType.number,
+        decoration: _outlineFieldDecoration('예상 인원수', hint: '예: 30'),
+      ),
+      const SizedBox(height: 10),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 예산/컨셉/특이사항'),
+          maxLines: 2,
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildStep2GenericMultiSelect() {
+    const options = ['옵션 1', '옵션 2', '옵션 3'];
+    return [
+      for (final o in options)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: o,
+            selected: _step2Selections.contains(o),
+            onTap: () => setState(() {
+              if (_step2Selections.contains(o)) {
+                _step2Selections.remove(o);
+              } else {
+                _step2Selections.add(o);
+              }
+            }),
+          ),
+        ),
+      _outlineToggleTile(
+        label: '기타',
+        selected: _step2OtherSelected,
+        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+      ),
+      if (_step2OtherSelected) ...[
+        const SizedBox(height: 10),
+        TextField(
+          controller: _step2OtherController,
+          decoration: _outlineFieldDecoration('기타(직접 입력)'),
+          maxLines: 2,
+        ),
+      ],
+    ];
   }
 
   Widget _buildStep3(UniversalWizardConfig config) {
@@ -322,15 +924,15 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Widget _buildStep3PhotoUpload(UniversalWizardConfig config) {
-    final slots = config.photoSlotCount.clamp(1, 10);
+    final slots = config.photoSlotCount.clamp(1, 5);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '원하는 스타일 또는 고장 부위 사진을 올려주세요 (증거 가치)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            _photoPromptForCategory(),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 12),
           Text(
@@ -338,35 +940,84 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _pickImagesFromGallery(maxCount: slots),
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: const Text('갤러리'),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: _kRoyalBlue,
+                    side: const BorderSide(color: _kRoyalBlue, width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _pickImageFromCamera(maxCount: slots),
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: const Text('카메라'),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: _kRoyalBlue,
+                    side: const BorderSide(color: _kRoyalBlue, width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: List.generate(slots, (i) {
-              final hasPhoto = i < _state.step3PhotoPaths.length;
-              return InkWell(
-                onTap: () {
-                  final paths = List<String>.from(_state.step3PhotoPaths);
-                  if (hasPhoto) {
-                    paths.removeAt(i);
-                  } else {
-                    paths.add('placeholder_$i');
-                    if (paths.length > slots) paths.removeLast();
-                  }
-                  setState(() => _state = _state.copyWith(step3PhotoPaths: paths));
-                },
-                borderRadius: BorderRadius.circular(28),
-                child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    color: hasPhoto ? _kRoyalBlue.withValues(alpha: 0.15) : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: _kRoyalBlue.withValues(alpha: 0.3)),
+              final hasPhoto = i < _pickedImages.length;
+              final image = hasPhoto ? _pickedImages[i] : null;
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _kRoyalBlue.withValues(alpha: 0.4), width: 1.2),
+                    ),
+                    child: hasPhoto
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(18),
+                            child: kIsWeb
+                                ? Image.network(image!.path, fit: BoxFit.cover)
+                                : Image.file(File(image!.path), fit: BoxFit.cover),
+                          )
+                        : Icon(Icons.add_photo_alternate_outlined, color: Colors.grey.shade600, size: 34),
                   ),
-                  child: hasPhoto
-                      ? const Icon(Icons.check_circle, color: _kRoyalBlue, size: 36)
-                      : Icon(Icons.add_photo_alternate, color: Colors.grey.shade600, size: 36),
-                ),
+                  if (hasPhoto)
+                    Positioned(
+                      top: -8,
+                      right: -8,
+                      child: InkWell(
+                        onTap: () => _removePickedImageAt(i),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: _kRoyalBlue, width: 1.2),
+                          ),
+                          child: const Icon(Icons.close, size: 16, color: _kRoyalBlue),
+                        ),
+                      ),
+                    ),
+                ],
               );
             }),
           ),

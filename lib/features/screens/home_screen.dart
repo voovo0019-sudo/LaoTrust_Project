@@ -9,8 +9,6 @@ import '../home/components/quick_jobs.dart';
 import '../home/components/section_title_style.dart';
 import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
-import '../profile/widgets/digital_partner_id_card.dart';
-import '../../services/expert_availability_service.dart';
 import '../../core/search_trigger_bus.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
@@ -97,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: _buildAppBar(),
       body: PopScope(
         canPop: _currentView == HomeView.main,
@@ -164,15 +162,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: _appBarBlue,
-      foregroundColor: Colors.white,
-      surfaceTintColor: _appBarBlue,
+      backgroundColor: Colors.white,
+      foregroundColor: _appBarBlue,
+      surfaceTintColor: Colors.white,
       elevation: 0,
       toolbarHeight: 40,
       titleSpacing: 12,
       leading: _currentView != HomeView.main
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Color(0xFF1E293B)),
               onPressed: _goBack,
             )
           : null,
@@ -197,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       softWrap: false,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: _appBarBlue,
                         fontSize: fontSize,
                       ),
                     ),
@@ -224,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         if (widget.onLocaleChanged != null)
           PopupMenuButton<Locale>(
-            icon: const Icon(Icons.public, color: Colors.white),
+            icon: const Icon(Icons.public, color: Color(0xFF1E293B)),
             tooltip: context.l10n('language'),
             color: Colors.white,
             onSelected: widget.onLocaleChanged!,
@@ -235,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.settings, color: Colors.white),
+          icon: const Icon(Icons.settings, color: Color(0xFF1E293B)),
           color: Colors.white,
           onSelected: (value) {
             final label = switch (value) {
@@ -257,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.notifications_none, color: Colors.white),
+          icon: const Icon(Icons.notifications_none, color: Color(0xFF1E293B)),
           color: Colors.white,
           onSelected: (value) {
             final label = switch (value) {
@@ -377,10 +375,10 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(28.0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 15,
-                spreadRadius: 1,
-                offset: const Offset(0, 4),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 4,
+                spreadRadius: 0,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -736,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: const TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1E3A8A),
+              color: Color(0xFF7C3AED),
             ),
           ),
           const SizedBox(height: 8),
@@ -751,7 +749,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ElevatedButton(
               onPressed: _onStep3Submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
+                backgroundColor: const Color(0xFF7C3AED),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
@@ -790,7 +788,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 context.l10n('repair_step_label'),
                 style: const TextStyle(
-                  color: Color(0xFF1E3A8A),
+                  color: Color(0xFF7C3AED),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -802,7 +800,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: 0.33,
                     minHeight: 6,
                     backgroundColor: Colors.white,
-                    color: Color(0xFF1E3A8A),
+                    color: Color(0xFF7C3AED),
                   ),
                 ),
               ),
@@ -828,7 +826,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF1E3A8A)
+                      ? const Color(0xFF7C3AED)
                       : Colors.transparent,
                   width: 2,
                 ),
@@ -841,7 +839,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 value: isSelected,
-                activeColor: const Color(0xFF1E3A8A),
+                activeColor: const Color(0xFF7C3AED),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
                 ),
@@ -882,7 +880,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ElevatedButton(
               onPressed: _selectedSymptomKeys.isNotEmpty ? _onStep3Submit : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
+                backgroundColor: const Color(0xFF7C3AED),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
@@ -914,7 +912,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 context.l10n('repair_step_label'),
                 style: const TextStyle(
-                  color: Color(0xFF1E3A8A),
+              color: Color(0xFF7C3AED),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -926,7 +924,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: 0.33,
                     minHeight: 6,
                     backgroundColor: Colors.white,
-                    color: Color(0xFF1E3A8A),
+                color: Color(0xFF7C3AED),
                   ),
                 ),
               ),
@@ -1015,7 +1013,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? _onStep3Submit
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
+                backgroundColor: const Color(0xFF7C3AED),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
@@ -1047,7 +1045,7 @@ class _HomeScreenState extends State<HomeScreen> {
             overflow: TextOverflow.ellipsis,
           ),
           selected: isSelected,
-          selectedColor: const Color(0xFF1E3A8A),
+          selectedColor: const Color(0xFF7C3AED),
           labelStyle: TextStyle(
             color: isSelected ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
@@ -1072,16 +1070,16 @@ class _HomeAccountStatusAction extends StatelessWidget {
       icon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.account_circle_outlined, color: Colors.white),
+          const Icon(Icons.account_circle_outlined, color: Color(0xFF1E293B)),
           const SizedBox(width: 4),
           Text(
             context.l10n('home_phone_login_short'),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFF1E293B),
                   fontWeight: FontWeight.w600,
                 ) ??
                 const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1E293B),
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
@@ -1099,9 +1097,8 @@ class _NearbyExpertsSectionBody extends StatefulWidget {
 }
 
 class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
-  LocationPoint? _userLocation;
-  List<ExpertProfile> _realExperts = <ExpertProfile>[];
-  bool _loading = false;
+  bool _isScanning = false;
+  bool _showCompleteMessage = false;
   int _lastTriggerCounter = 0;
 
   @override
@@ -1126,34 +1123,65 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
 
   Future<void> _startSearch() async {
     if (!mounted) return;
-    setState(() => _loading = true);
-    final (loc, _) = await getUserLocationOrDefault();
-    if (!mounted) return;
-    final result = await fetchExpertsElastic(loc);
+    setState(() {
+      _isScanning = true;
+      _showCompleteMessage = false;
+    });
+    await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
     setState(() {
-      _userLocation = loc;
-      _realExperts = result.experts;
-      _loading = false;
+      _isScanning = false;
+      _showCompleteMessage = true;
+    });
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+    setState(() {
+      _showCompleteMessage = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
+    if (_isScanning) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const RadarScanningWidget(size: 100),
+              const RadarScanningWidget(
+                size: 100,
+                stageLabels: ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
+              ),
               const SizedBox(height: 8),
               Text(
                 context.l10n('radar_searching'),
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             ],
+          ),
+        ),
+      );
+    }
+
+    if (_showCompleteMessage) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+            ),
+            child: const Text(
+              '요청 전달 완료',
+              style: TextStyle(
+                color: Color(0xFF1E293B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
       );
@@ -1180,45 +1208,7 @@ class _NearbyExpertsSectionBodyState extends State<_NearbyExpertsSectionBody> {
 
     final tiles = <Widget>[];
 
-    // 실데이터(파트너 등록 전문가)가 있으면 무조건 앞자리에 배치
-    for (final e in _realExperts) {
-      final loc = e.location!;
-      final km = _userLocation != null ? distanceInKm(_userLocation!, loc) : null;
-      tiles.add(
-        ExpertCard(
-          name: e.displayName,
-          expertLocation: loc,
-          icon: Icons.person,
-          subtitle: context.l10n('experts_nearby_subtitle'),
-          onTap: () {
-            if (e.partnerSerialId != null && e.partnerSerialId!.isNotEmpty) {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  content: DigitalPartnerIdCard(
-                    serialId: e.partnerSerialId!,
-                    displayName: e.displayName,
-                    photoUrl: e.photoUrl,
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text(context.l10n('confirm')),
-                    ),
-                  ],
-                ),
-              );
-            }
-          },
-          commanderApproved: e.commanderApproved,
-          partnerSerialId: e.partnerSerialId,
-          photoUrl: e.photoUrl,
-          distanceKm: km,
-        ),
-      );
-    }
-
-    // 샘플 데이터는 실데이터 뒤에 배치
+    // 샘플 데이터는 항상 고정 3인 노출
     for (final e in sampleExperts) {
       tiles.add(
         ExpertCard(
@@ -1302,12 +1292,12 @@ class _ExpertCardState extends State<ExpertCard> {
 
     Widget avatar = CircleAvatar(
       radius: 26,
-      backgroundColor: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+      backgroundColor: const Color(0xFF7C3AED).withValues(alpha: 0.12),
       child: widget.photoUrl != null && widget.photoUrl!.isNotEmpty
           ? ClipOval(
               child: Image.network(widget.photoUrl!, fit: BoxFit.cover, width: 52, height: 52),
             )
-          : Icon(widget.icon, color: const Color(0xFF1E3A8A)),
+          : Icon(widget.icon, color: const Color(0xFF7C3AED)),
     );
     if (widget.commanderApproved) {
       avatar = Stack(
@@ -1330,10 +1320,10 @@ class _ExpertCardState extends State<ExpertCard> {
         borderRadius: BorderRadius.circular(28.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1364,7 +1354,7 @@ class _ExpertCardState extends State<ExpertCard> {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E3A8A),
+                color: Color(0xFF7C3AED),
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
               ),
@@ -1383,7 +1373,7 @@ class _ExpertCardState extends State<ExpertCard> {
             ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+        trailing: const Icon(Icons.chevron_right, color: Color(0xFF7C3AED)),
         onTap: widget.onTap,
       ),
     );

@@ -22,6 +22,20 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
   bool _portfolioUploaded = false;
   bool _saving = false;
 
+  void _toggleOffIfUploaded(String type) {
+    setState(() {
+      if (type == 'id') _idUploaded = false;
+      if (type == 'cert') _certUploaded = false;
+      if (type == 'portfolio') _portfolioUploaded = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n('partner_upload_removed')),
+        backgroundColor: _royalNavy,
+      ),
+    );
+  }
+
   Future<void> _pickAndUpload(String type) async {
     setState(() => _saving = true);
     await Future.delayed(const Duration(milliseconds: 800));
@@ -62,7 +76,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               context.l10n('partner_upload_id_hint'),
               Icons.badge,
               _idUploaded,
-              () => _pickAndUpload('id'),
+              type: 'id',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
@@ -70,7 +84,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               context.l10n('partner_upload_cert_hint'),
               Icons.card_membership,
               _certUploaded,
-              () => _pickAndUpload('cert'),
+              type: 'cert',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
@@ -78,7 +92,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               context.l10n('partner_upload_portfolio_hint'),
               Icons.photo_library,
               _portfolioUploaded,
-              () => _pickAndUpload('portfolio'),
+              type: 'portfolio',
             ),
             const SizedBox(height: 32),
             if (_idUploaded && _certUploaded)
@@ -141,10 +155,19 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     String hint,
     IconData icon,
     bool uploaded,
-    VoidCallback onTap,
+    {required String type}
   ) {
+    final VoidCallback? onTap = _saving
+        ? null
+        : () {
+            if (uploaded) {
+              _toggleOffIfUploaded(type);
+              return;
+            }
+            _pickAndUpload(type);
+          };
     return InkWell(
-      onTap: _saving ? null : onTap,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(28),
       child: Container(
         padding: const EdgeInsets.all(16),

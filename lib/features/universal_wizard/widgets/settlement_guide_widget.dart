@@ -4,6 +4,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../../core/app_localizations.dart';
 import '../universal_wizard_config.dart';
 
 class SettlementGuideWidget extends StatelessWidget {
@@ -24,13 +25,13 @@ class SettlementGuideWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.qr_code_2, color: UniversalWizardConfig.royalNavy, size: 24),
-              SizedBox(width: 8),
+              const Icon(Icons.qr_code_2, color: UniversalWizardConfig.royalNavy, size: 24),
+              const SizedBox(width: 8),
               Text(
-                '정산 안내',
-                style: TextStyle(
+                context.l10n('wizard_settlement_title'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: UniversalWizardConfig.royalNavy,
@@ -40,7 +41,7 @@ class SettlementGuideWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '• 라오스 현지 BCEL One QR 결제 또는 현금으로 전문가에게 직접 지불할 수 있습니다.',
+            context.l10n('wizard_settlement_line1'),
             style: TextStyle(
               fontSize: 13,
               color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.9),
@@ -49,7 +50,7 @@ class SettlementGuideWidget extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '• 서비스 확정 후 전문가와 만나 계약금·잔금을 정산하세요.',
+            context.l10n('wizard_settlement_line2'),
             style: TextStyle(
               fontSize: 13,
               color: UniversalWizardConfig.royalNavy.withValues(alpha: 0.9),

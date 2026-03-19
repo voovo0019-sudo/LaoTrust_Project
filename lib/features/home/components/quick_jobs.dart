@@ -486,14 +486,14 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A), size: 32),
-            SizedBox(width: 12),
+            const Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A), size: 32),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                '알바 구인 등록',
-                style: TextStyle(
+                context.l10n('quick_job_post_card_title'),
+                style: const TextStyle(
                   color: Color(0xFF1E3A8A),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -501,7 +501,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+            const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
           ],
         ),
       ),

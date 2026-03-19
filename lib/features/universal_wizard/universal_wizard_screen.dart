@@ -301,25 +301,25 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   String _photoPromptForCategory() {
     switch (_state.categoryKey) {
       case 'expert_repair':
-        return '고장 부위 또는 모델명 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_repair');
       case 'expert_delivery':
-        return '운송할 물품 또는 목록 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_delivery');
       case 'expert_beauty':
-        return '원하는 스타일의 참고 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_style_concept');
       case 'expert_photo':
-        return '원하는 촬영 컨셉의 참고 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_style_concept');
       case 'expert_cleaning':
-        return '청소가 필요한 현장의 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_cleaning');
       case 'expert_tutoring':
-        return '교재 또는 학습 목표 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_tutoring');
       case 'expert_security':
-        return '배치 장소 또는 관련 서류 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_security');
       case 'expert_garden':
-        return '정원 현장의 상태를 알 수 있는 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_garden');
       case 'expert_event':
-        return '행사 장소 또는 기획안 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_event');
       default:
-        return '관련 사진을 올려주세요';
+        return context.l10n('wizard_photo_prompt_generic');
     }
   }
 
@@ -361,7 +361,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Row(
         children: [
           Text(
-            'Step ${_currentStep + 1} / $totalSteps',
+            context
+                .l10n('wizard_step_progress')
+                .replaceAll('{current}', '${_currentStep + 1}')
+                .replaceAll('{total}', '$totalSteps'),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -391,19 +394,26 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '세부 서비스 유형을 선택하세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_step1_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           ...config.step1SubTypes.map((e) {
             final selected = _state.step1SubTypeId == e.key;
+            final label = context.l10n(e.value);
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () => setState(() => _state = _state.copyWith(step1SubTypeId: e.key, step1SubTypeLabel: e.value)),
+                  onTap: () => setState(() {
+                    if (selected) {
+                      _state = _state.copyWith(step1SubTypeId: '', step1SubTypeLabel: '');
+                      return;
+                    }
+                    _state = _state.copyWith(step1SubTypeId: e.key, step1SubTypeLabel: e.value);
+                  }),
                   borderRadius: BorderRadius.circular(28),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -423,7 +433,15 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                           size: 24,
                         ),
                         const SizedBox(width: 12),
-                        Expanded(child: Text(e.value, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal, color: _kRoyalBlue))),
+                        Expanded(
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                              color: _kRoyalBlue,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -442,9 +460,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '상세 선택 및 추가 정보',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_step2_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 12),
           ..._buildStep2FieldsByCategory(),
@@ -482,18 +500,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   List<Widget> _buildStep2Repair() {
     final sub = _state.step1SubTypeId;
     final options = switch (sub) {
-      'ac' => ['찬바람 안 나옴', '소음', '물 떨어짐', '냉방 약함'],
-      'electric' => ['차단기 내려감', '탄 냄새', '전등 깜빡임', '누전 의심'],
-      'plumbing' => ['누수', '막힘', '역류', '수압 약함'],
-      'roof' => ['페인트 벗겨짐', '누수/방수', '균열/보수'],
-      _ => ['증상 선택'],
+      'ac' => ['symptom_ac_no_cold_air', 'symptom_ac_noise', 'wizard_symptom_ac_water_drop', 'symptom_ac_not_cool'],
+      'household' => ['symptom_household_power', 'symptom_household_noise', 'symptom_household_stopped', 'symptom_household_broken'],
+      'electric' => ['symptom_electric_breaker', 'symptom_electric_burn_smell', 'symptom_electric_flicker', 'symptom_electric_leak'],
+      'plumbing' => ['symptom_plumbing_leak', 'symptom_plumbing_clog', 'symptom_plumbing_backflow', 'symptom_plumbing_low_pressure'],
+      'roof' => ['wizard_symptom_roof_peeling', 'wizard_symptom_roof_leak_proof', 'wizard_symptom_roof_crack_repair'],
+      _ => <String>[],
     };
     return [
       for (final o in options)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
-            label: o,
+            label: context.l10n(o),
             selected: _step2Selections.contains(o),
             onTap: () => setState(() {
               if (_step2Selections.contains(o)) {
@@ -507,15 +526,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: _outlineToggleTile(
-          label: '기타',
+          label: context.l10n('symptom_other'),
           selected: _step2OtherSelected,
-          onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+          onTap: () => setState(() {
+            _step2OtherSelected = !_step2OtherSelected;
+            if (!_step2OtherSelected) _step2OtherController.clear();
+          }),
         ),
       ),
       if (_step2OtherSelected)
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '증상/요구사항을 입력하세요'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_other_direct_input_hint'),
+          ),
           maxLines: 2,
         ),
     ];
@@ -526,16 +551,25 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       TextField(
         controller: _weightKgController,
         keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration('무게(kg)', hint: '예: 3'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_delivery_weight_label'),
+          hint: context.l10n('wizard_delivery_weight_hint'),
+        ),
       ),
       const SizedBox(height: 12),
       TextField(
         controller: _distanceKmController,
         keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration('거리(km)', hint: '예: 5'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_delivery_distance_label'),
+          hint: context.l10n('wizard_delivery_distance_hint'),
+        ),
       ),
       const SizedBox(height: 12),
-      const Text('짐 크기(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_delivery_cargo_size_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -566,15 +600,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 장보기 목록, 특이사항'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_delivery_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -582,13 +622,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   List<Widget> _buildStep2Beauty() {
-    const options = ['컷', '펌', '관리', '네일', '메이크업'];
+    const options = [
+      'wizard_beauty_option_cut',
+      'wizard_beauty_option_perm',
+      'wizard_beauty_option_care',
+      'wizard_beauty_option_nail',
+      'wizard_beauty_option_makeup',
+    ];
     return [
       for (final o in options)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
-            label: o,
+            label: context.l10n(o),
             selected: _step2Selections.contains(o),
             onTap: () => setState(() {
               if (_step2Selections.contains(o)) {
@@ -600,15 +646,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         ),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 염색, 두피 케어 등'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_beauty_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -619,46 +671,58 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     return [
       TextField(
         controller: _photoTimeController,
-        decoration: _outlineFieldDecoration('촬영 시간', hint: '예: 2시간 / 반나절 / 1일'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_photo_time_label'),
+          hint: context.l10n('wizard_photo_time_hint'),
+        ),
         maxLines: 1,
       ),
       const SizedBox(height: 12),
-      const Text('촬영 장소', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_photo_place_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '실내',
-        selected: _photoPlaceSelections.contains('실내'),
+        label: context.l10n('wizard_photo_place_indoor'),
+        selected: _photoPlaceSelections.contains('wizard_photo_place_indoor'),
         onTap: () => setState(() {
-          if (_photoPlaceSelections.contains('실내')) {
-            _photoPlaceSelections.remove('실내');
+          if (_photoPlaceSelections.contains('wizard_photo_place_indoor')) {
+            _photoPlaceSelections.remove('wizard_photo_place_indoor');
           } else {
-            _photoPlaceSelections.add('실내');
+            _photoPlaceSelections.add('wizard_photo_place_indoor');
           }
         }),
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '야외',
-        selected: _photoPlaceSelections.contains('야외'),
+        label: context.l10n('wizard_photo_place_outdoor'),
+        selected: _photoPlaceSelections.contains('wizard_photo_place_outdoor'),
         onTap: () => setState(() {
-          if (_photoPlaceSelections.contains('야외')) {
-            _photoPlaceSelections.remove('야외');
+          if (_photoPlaceSelections.contains('wizard_photo_place_outdoor')) {
+            _photoPlaceSelections.remove('wizard_photo_place_outdoor');
           } else {
-            _photoPlaceSelections.add('야외');
+            _photoPlaceSelections.add('wizard_photo_place_outdoor');
           }
         }),
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 스튜디오/야외 특정 장소'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_photo_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -670,10 +734,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       TextField(
         controller: _cleaningAreaController,
         keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration('평수/면적(m² 또는 평)', hint: '예: 30평 / 60㎡'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_cleaning_area_label'),
+          hint: context.l10n('wizard_cleaning_area_hint'),
+        ),
       ),
       const SizedBox(height: 12),
-      const Text('규모 선택(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_cleaning_scale_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -704,15 +774,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 특정 오염/특이사항'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_cleaning_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -720,15 +796,23 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   List<Widget> _buildStep2Tutoring() {
-    const levels = ['초등', '중등', '고등', '성인'];
+    const levels = [
+      'wizard_level_elem',
+      'wizard_level_mid',
+      'wizard_level_high',
+      'wizard_level_adult',
+    ];
     return [
-      const Text('학습 레벨(복수 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_tutoring_level_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       for (final l in levels) ...[
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
-            label: l,
+            label: context.l10n(l),
             selected: _tutoringLevels.contains(l),
             onTap: () => setState(() {
               if (_tutoringLevels.contains(l)) {
@@ -741,15 +825,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         ),
       ],
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 대학/직장인/자격증 대비'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_tutoring_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -761,25 +851,37 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       TextField(
         controller: _securityPeopleController,
         keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration('투입 인원(명)', hint: '예: 2'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_security_people_label'),
+          hint: context.l10n('wizard_security_people_hint'),
+        ),
       ),
       const SizedBox(height: 12),
       TextField(
         controller: _securityTimeController,
-        decoration: _outlineFieldDecoration('희망 시간', hint: '예: 09:00~18:00 / 3시간'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_security_time_label'),
+          hint: context.l10n('wizard_security_time_hint'),
+        ),
         maxLines: 1,
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 복장/장비/특이사항'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_security_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -787,9 +889,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   List<Widget> _buildStep2Garden() {
-    const scopes = ['잔디', '조경/식재', '나무 전지', '전체'];
+    const scopes = [
+      'wizard_garden_scope_lawn',
+      'wizard_garden_scope_landscape',
+      'wizard_garden_scope_tree_trim',
+      'wizard_garden_scope_all',
+    ];
     return [
-      const Text('정원 크기(S/M/L)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_garden_scale_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -819,13 +929,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         ],
       ),
       const SizedBox(height: 12),
-      const Text('작업 범위(복수 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+      Text(
+        context.l10n('wizard_garden_scope_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
       const SizedBox(height: 10),
       for (final s in scopes)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
-            label: s,
+            label: context.l10n(s),
             selected: _gardenScopes.contains(s),
             onTap: () => setState(() {
               if (_gardenScopes.contains(s)) {
@@ -837,15 +950,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         ),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 특정 구역/특이사항'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_garden_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -857,19 +976,28 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       TextField(
         controller: _eventPeopleController,
         keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration('예상 인원수', hint: '예: 30'),
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_event_people_label'),
+          hint: context.l10n('wizard_event_people_hint'),
+        ),
       ),
       const SizedBox(height: 10),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)', hint: '예: 예산/컨셉/특이사항'),
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_direct_input_label'),
+            hint: context.l10n('wizard_event_other_hint'),
+          ),
           maxLines: 2,
         ),
       ],
@@ -877,13 +1005,13 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   List<Widget> _buildStep2GenericMultiSelect() {
-    const options = ['옵션 1', '옵션 2', '옵션 3'];
+    const options = ['wizard_generic_option_1', 'wizard_generic_option_2', 'wizard_generic_option_3'];
     return [
       for (final o in options)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
-            label: o,
+            label: context.l10n(o),
             selected: _step2Selections.contains(o),
             onTap: () => setState(() {
               if (_step2Selections.contains(o)) {
@@ -895,15 +1023,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         ),
       _outlineToggleTile(
-        label: '기타',
+        label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
-        onTap: () => setState(() => _step2OtherSelected = !_step2OtherSelected),
+        onTap: () => setState(() {
+          _step2OtherSelected = !_step2OtherSelected;
+          if (!_step2OtherSelected) _step2OtherController.clear();
+        }),
       ),
       if (_step2OtherSelected) ...[
         const SizedBox(height: 10),
         TextField(
           controller: _step2OtherController,
-          decoration: _outlineFieldDecoration('기타(직접 입력)'),
+          decoration: _outlineFieldDecoration(context.l10n('wizard_other_direct_input_label')),
           maxLines: 2,
         ),
       ],
@@ -936,7 +1067,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            '최대 $slots장까지 업로드할 수 있습니다.',
+            context
+                .l10n('wizard_photo_upload_max')
+                .replaceAll('{n}', '$slots'),
             style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 20),
@@ -946,7 +1079,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _pickImagesFromGallery(maxCount: slots),
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('갤러리'),
+                  label: Text(context.l10n('wizard_photo_pick_gallery')),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: _kRoyalBlue,
@@ -960,7 +1093,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _pickImageFromCamera(maxCount: slots),
                   icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('카메라'),
+                  label: Text(context.l10n('wizard_photo_pick_camera')),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: _kRoyalBlue,
@@ -1025,8 +1158,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           TextField(
             onChanged: (v) => setState(() => _state = _state.copyWith(step3ExtraNote: v)),
             decoration: InputDecoration(
-              labelText: '추가 요청사항',
-              hintText: '전문가에게 전달할 메모',
+              labelText: context.l10n('wizard_extra_request_label'),
+              hintText: context.l10n('wizard_extra_request_hint'),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
               filled: true,
               fillColor: Colors.white,
@@ -1044,13 +1177,13 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '출발지와 도착지를 지도에서 찍어주세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_map_pick_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 12),
           Text(
-            '지도 연동은 추후 구현됩니다. 아래 버튼으로 위치를 선택할 수 있습니다.',
+            context.l10n('wizard_map_pick_desc'),
             style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 24),
@@ -1067,7 +1200,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 children: [
                   Icon(Icons.map_outlined, size: 48, color: _kRoyalBlue.withValues(alpha: 0.6)),
                   const SizedBox(height: 8),
-                  Text('지도 터치로 출발/도착 지정', style: TextStyle(color: _kRoyalBlue.withValues(alpha: 0.8), fontSize: 14)),
+                  Text(
+                    context.l10n('wizard_map_pick_hint'),
+                    style: TextStyle(color: _kRoyalBlue.withValues(alpha: 0.8), fontSize: 14),
+                  ),
                 ],
               ),
             ),
@@ -1079,7 +1215,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 child: OutlinedButton.icon(
                   onPressed: null,
                   icon: const Icon(Icons.trip_origin, size: 20),
-                  label: const Text('출발지'),
+                  label: Text(context.l10n('wizard_origin')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _kRoyalBlue,
                     side: const BorderSide(color: _kRoyalBlue),
@@ -1092,7 +1228,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 child: OutlinedButton.icon(
                   onPressed: null,
                   icon: const Icon(Icons.location_on, size: 20),
-                  label: const Text('도착지'),
+                  label: Text(context.l10n('wizard_destination')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _kRoyalBlue,
                     side: const BorderSide(color: _kRoyalBlue),
@@ -1113,16 +1249,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '학습 목표와 희망 스케줄을 입력하세요',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_tutoring_textfields_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           TextField(
             onChanged: (v) => setState(() => _state = _state.copyWith(step3LearningGoal: v)),
             decoration: InputDecoration(
-              labelText: '학습 목표',
-              hintText: '예: 기초 회화, 시험 대비',
+              labelText: context.l10n('wizard_learning_goal_label'),
+              hintText: context.l10n('wizard_learning_goal_hint'),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
               filled: true,
               fillColor: Colors.white,
@@ -1133,8 +1269,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           TextField(
             onChanged: (v) => setState(() => _state = _state.copyWith(step3Schedule: v)),
             decoration: InputDecoration(
-              labelText: '희망 스케줄',
-              hintText: '예: 주말 오전, 평일 저녁',
+              labelText: context.l10n('wizard_schedule_label'),
+              hintText: context.l10n('wizard_schedule_hint'),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
               filled: true,
               fillColor: Colors.white,
@@ -1152,16 +1288,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '요구사항 및 추가 메모',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_note_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
           TextField(
             onChanged: (v) => setState(() => _state = _state.copyWith(step3ExtraNote: v)),
             decoration: InputDecoration(
-              labelText: '추가 요청사항',
-              hintText: '전문가에게 전달할 메모',
+              labelText: context.l10n('wizard_extra_request_label'),
+              hintText: context.l10n('wizard_extra_request_hint'),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
               filled: true,
               fillColor: Colors.white,
@@ -1179,15 +1315,23 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '요청 요약 확인',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          Text(
+            context.l10n('wizard_summary_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
           const SizedBox(height: 20),
-          _summaryRow('카테고리', context.l10n(config.categoryKey)),
-          _summaryRow('세부 유형', _state.step1SubTypeLabel),
-          if (_state.step2SelectedLabel.isNotEmpty) _summaryRow('규모/대상', _state.step2SelectedLabel),
-          if (_state.step3ExtraNote.isNotEmpty) _summaryRow('추가 메모', _state.step3ExtraNote),
+          _summaryRow(context.l10n('wizard_summary_category'), context.l10n(config.categoryKey)),
+          _summaryRow(
+            context.l10n('wizard_summary_subtype'),
+            _state.step1SubTypeLabel.isEmpty ? '' : context.l10n(_state.step1SubTypeLabel),
+          ),
+          if (_state.step2SelectedLabel.isNotEmpty)
+            _summaryRow(
+              context.l10n('wizard_summary_detail'),
+              context.l10n(_state.step2SelectedLabel),
+            ),
+          if (_state.step3ExtraNote.isNotEmpty)
+            _summaryRow(context.l10n('wizard_summary_note'), _state.step3ExtraNote),
           const SizedBox(height: 24),
           const SettlementGuideWidget(),
         ],

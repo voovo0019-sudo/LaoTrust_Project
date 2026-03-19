@@ -54,13 +54,18 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     if (!isFirebaseEnabled) return null;
     final ref = _refFor(type: type, index: index);
     final metadata = SettableMetadata(contentType: 'image/jpeg');
-    if (kIsWeb) {
-      final bytes = await file.readAsBytes();
-      await ref.putData(bytes, metadata);
-    } else {
-      await ref.putFile(File(file.path), metadata);
+    try {
+      if (kIsWeb) {
+        final bytes = await file.readAsBytes();
+        await ref.putData(bytes, metadata).timeout(const Duration(seconds: 15));
+      } else {
+        await ref.putFile(File(file.path), metadata).timeout(const Duration(seconds: 15));
+      }
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 10));
+    } catch (_) {
+      // Keep local preview even when cloud upload is delayed/failed.
+      return null;
     }
-    return ref.getDownloadURL();
   }
 
   Future<void> _deleteFromStorageByUrl(String? url) async {

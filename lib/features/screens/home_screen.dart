@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
   HomeView _currentView = HomeView.main;
-  // 선택 상태는 "표시 문자열"이 아닌 "키/ID"로 보관하여 언어 변경 시에도 상태가 깨지지 않게 한다.
+  // Keep selections as stable ids/keys (not localized labels).
   String _selectedCategoryKey = '';
   String _selectedSubCategoryId = '';
 
@@ -575,12 +575,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isMoveQuery(BuildContext context, String raw) {
     final q = raw.toLowerCase();
     final trigger = context.l10n('search_keyword_move_trigger').toLowerCase();
-    return q.contains(trigger) || q.contains('이사') || q.contains('moving') || q.contains('move') || q.contains('ຍ້າຍ');
+    return q.contains(trigger) || q.contains('\uC774\uC0AC') || q.contains('moving') || q.contains('move') || q.contains('ຍ້າຍ');
   }
 
   bool _isAcQuery(String raw) {
     final q = raw.toLowerCase();
-    return q.contains('에어컨') ||
+    return q.contains('\uC5D0\uC5B4\uCEE8') ||
         q.contains('aircon') ||
         q.contains('air conditioner') ||
         q.contains('ac ') ||

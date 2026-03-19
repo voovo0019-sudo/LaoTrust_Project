@@ -61,7 +61,7 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
       if (mounted) {
         setState(() => _dutyOn = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('가용성 설정에 실패했습니다. 위치 권한을 확인하세요.')),
+          SnackBar(content: Text(context.l10n('expert_duty_toggle_error'))),
         );
       }
     } finally {
@@ -130,13 +130,15 @@ class _ExpertDashboardScreenState extends State<ExpertDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '지금 의뢰 받기',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _royalNavy),
+                Text(
+                  context.l10n('expert_duty_toggle_title'),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _royalNavy),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _dutyOn ? '고객이 나를 찾을 수 있어요' : 'OFF 시 위치 잠복·리스트에서 숨김',
+                  _dutyOn
+                      ? context.l10n('expert_duty_toggle_on_desc')
+                      : context.l10n('expert_duty_toggle_off_desc'),
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],

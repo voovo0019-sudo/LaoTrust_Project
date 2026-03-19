@@ -223,6 +223,21 @@
   "phone_auth_error_invalid": "Please check your phone number or code.",
 
   "quick_job_post_card_title": "Post a quick job",
+  "quick_job_post_title": "Post a quick job",
+  "quick_job_field_title": "Title",
+  "quick_job_field_location": "Location",
+  "quick_job_field_salary": "Salary",
+  "quick_job_field_detail": "Details",
+  "quick_job_title_hint": "e.g. Event staff",
+  "quick_job_location_hint": "e.g. Downtown",
+  "quick_job_salary_hint": "e.g. Negotiable / 15,000 LAK/hour",
+  "quick_job_detail_hint": "Describe the job details",
+  "quick_job_deadline_title": "Deadline",
+  "quick_job_deadline_pick_date": "Pick date",
+  "quick_job_default_title": "Job posting",
+  "quick_job_default_location": "TBD",
+  "quick_job_tag_part_time": "Urgent",
+  "quick_job_tag_label": "Status",
 
   "radar_stage_1km": "Searching 1km",
   "radar_stage_3km": "Searching 3km",
@@ -230,6 +245,8 @@
   "radar_complete_delivered": "Delivered",
 
   "partner_upload_removed": "Deselected",
+  "partner_pick_gallery": "Choose from gallery",
+  "partner_pick_camera": "Take a photo",
 
   "wizard_step_progress": "Step {current} / {total}",
   "wizard_step1_title": "Select a detailed service type",

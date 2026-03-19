@@ -223,6 +223,21 @@
   "phone_auth_error_invalid": "ກະລຸນາກວດເບິ່ງເບີໂທ ຫຼື ລະຫັດອີກຄັ້ງ.",
 
   "quick_job_post_card_title": "ລົງປະກາດວຽກດ່ວນ",
+  "quick_job_post_title": "ລົງປະກາດວຽກດ່ວນ",
+  "quick_job_field_title": "ຫົວຂໍ້",
+  "quick_job_field_location": "ສະຖານທີ່",
+  "quick_job_field_salary": "ຄ່າແຮງ",
+  "quick_job_field_detail": "ລາຍລະອຽດວຽກ",
+  "quick_job_title_hint": "ຕົວຢ່າງ: ພະນັກງານງານອີເວັນ",
+  "quick_job_location_hint": "ຕົວຢ່າງ: ໃຈກາງເມືອງ",
+  "quick_job_salary_hint": "ຕົວຢ່າງ: ເຈລະຈາໄດ້ / 15,000 LAK/ຊົ່ວໂມງ",
+  "quick_job_detail_hint": "ກະລຸນາລະບຸລາຍລະອຽດວຽກ",
+  "quick_job_deadline_title": "ເວລາປິດຮັບ",
+  "quick_job_deadline_pick_date": "ເລືອກວັນທີ",
+  "quick_job_default_title": "ປະກາດວຽກ",
+  "quick_job_default_location": "ຍັງບໍ່ກຳນົດ",
+  "quick_job_tag_part_time": "ດ່ວນ",
+  "quick_job_tag_label": "ສະຖານະ",
 
   "radar_stage_1km": "ກຳລັງຄົ້ນຫາ 1km",
   "radar_stage_3km": "ກຳລັງຄົ້ນຫາ 3km",
@@ -230,6 +245,8 @@
   "radar_complete_delivered": "ສົ່ງສຳເລັດ",
 
   "partner_upload_removed": "ຍົກເລີກການເລືອກແລ້ວ",
+  "partner_pick_gallery": "ເລືອກຈາກຄັງຮູບ",
+  "partner_pick_camera": "ຖ່າຍຮູບດ້ວຍກ້ອງ",
 
   "wizard_step_progress": "Step {current} / {total}",
   "wizard_step1_title": "ເລືອກປະເພດບໍລິການລະອຽດ",

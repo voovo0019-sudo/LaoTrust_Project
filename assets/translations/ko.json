@@ -244,6 +244,21 @@
   "phone_auth_error_invalid": "전화번호 또는 인증번호를 다시 확인해 주세요.",
 
   "quick_job_post_card_title": "알바 구인 등록",
+  "quick_job_post_title": "알바 구인 등록",
+  "quick_job_field_title": "제목",
+  "quick_job_field_location": "장소",
+  "quick_job_field_salary": "급여",
+  "quick_job_field_detail": "업무 상세",
+  "quick_job_title_hint": "예: 행사 스태프",
+  "quick_job_location_hint": "예: 시내 중심가",
+  "quick_job_salary_hint": "예: 협의 / 15,000 LAK/시간",
+  "quick_job_detail_hint": "업무 내용을 입력하세요",
+  "quick_job_deadline_title": "마감 시각",
+  "quick_job_deadline_pick_date": "날짜 선택",
+  "quick_job_default_title": "알바 공고",
+  "quick_job_default_location": "미정",
+  "quick_job_tag_part_time": "급구",
+  "quick_job_tag_label": "상태",
 
   "radar_stage_1km": "1km 수색 중",
   "radar_stage_3km": "3km 수색 중",
@@ -251,6 +266,8 @@
   "radar_complete_delivered": "전달 완료",
 
   "partner_upload_removed": "선택 해제 완료",
+  "partner_pick_gallery": "갤러리에서 선택",
+  "partner_pick_camera": "카메라로 촬영",
 
   "wizard_step_progress": "Step {current} / {total}",
   "wizard_step1_title": "세부 서비스 유형을 선택하세요",

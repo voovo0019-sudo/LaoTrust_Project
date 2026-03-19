@@ -136,12 +136,22 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     return key == null ? raw : context.l10n(key);
   }
 
+  String _localizedIfKeyOrRaw(BuildContext context, Object? maybeKeyOrValue) {
+    if (maybeKeyOrValue == null) return '';
+    final raw = maybeKeyOrValue.toString();
+    // If it's a known translation key, localize it; otherwise use raw user-entered text.
+    // (AppLocalizations returns key itself if missing, so this is safe.)
+    final localized = context.l10n(raw);
+    return localized == raw ? raw : localized;
+  }
+
   void _showQuickJobDetailsDialog({
     required BuildContext context,
     required String title,
     required String location,
     required String salary,
     required String detail,
+    required String tag,
   }) {
     showDialog(
       context: context,
@@ -157,6 +167,14 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              '${context.l10n('quick_job_tag_label')}: $tag',
+              style: const TextStyle(
+                fontFamily: 'Noto Sans',
+                letterSpacing: 0.1,
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               '${context.l10n('job_detail_location')}: $location',
               style: const TextStyle(
@@ -303,6 +321,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                               title,
                               _jobDetailValueToKey,
                             );
+                      final tag = _localizedIfKeyOrRaw(context, job['tag']);
 
                       return AnimatedScale(
                         scale: _currentPage == index ? 1.0 : 0.96,
@@ -330,6 +349,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                               location: location,
                               salary: salary,
                               detail: detail,
+                              tag: tag,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 6),
@@ -346,7 +366,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                           borderRadius: BorderRadius.circular(28.0),
                                         ),
                                         child: Text(
-                                          context.l10n('tag_deadline_soon'),
+                                          tag,
                                           style: const TextStyle(
                                             color: Color(0xFF1E3A8A),
                                             fontWeight: FontWeight.bold,

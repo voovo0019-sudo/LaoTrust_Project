@@ -4,6 +4,9 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../core/app_localizations.dart';
 
 const String partnerSupportCenterRouteName = '/partner-support-center';
@@ -17,16 +20,23 @@ class PartnerSupportCenterScreen extends StatefulWidget {
 }
 
 class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen> {
-  bool _idUploaded = false;
-  bool _certUploaded = false;
-  bool _portfolioUploaded = false;
   bool _saving = false;
+
+  final ImagePicker _picker = ImagePicker();
+
+  XFile? _idImage;
+  XFile? _certImage;
+  final List<XFile> _portfolioImages = <XFile>[];
+
+  bool get _idUploaded => _idImage != null;
+  bool get _certUploaded => _certImage != null;
+  bool get _portfolioUploaded => _portfolioImages.isNotEmpty;
 
   void _toggleOffIfUploaded(String type) {
     setState(() {
-      if (type == 'id') _idUploaded = false;
-      if (type == 'cert') _certUploaded = false;
-      if (type == 'portfolio') _portfolioUploaded = false;
+      if (type == 'id') _idImage = null;
+      if (type == 'cert') _certImage = null;
+      if (type == 'portfolio') _portfolioImages.clear();
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -36,24 +46,133 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     );
   }
 
-  Future<void> _pickAndUpload(String type) async {
+  Future<void> _pickFromGallery(String type) async {
+    if (_saving) return;
     setState(() => _saving = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-    setState(() {
-      _saving = false;
-      if (type == 'id') _idUploaded = true;
-      if (type == 'cert') _certUploaded = true;
-      if (type == 'portfolio') _portfolioUploaded = true;
-    });
-    if (mounted) {
+    try {
+      if (type == 'portfolio') {
+        final remaining = (5 - _portfolioImages.length).clamp(0, 5);
+        if (remaining <= 0) return;
+        final images = await _picker.pickMultiImage(imageQuality: 85);
+        if (!mounted) return;
+        if (images.isEmpty) return;
+        setState(() => _portfolioImages.addAll(images.take(remaining)));
+      } else {
+        final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+        if (!mounted) return;
+        if (image == null) return;
+        setState(() {
+          if (type == 'id') _idImage = image;
+          if (type == 'cert') _certImage = image;
+        });
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n('partner_upload_success')),
           backgroundColor: _royalNavy,
         ),
       );
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Future<void> _pickFromCamera(String type) async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      if (type == 'portfolio' && _portfolioImages.length >= 5) return;
+      final image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+      if (!mounted) return;
+      if (image == null) return;
+      setState(() {
+        if (type == 'id') _idImage = image;
+        if (type == 'cert') _certImage = image;
+        if (type == 'portfolio') _portfolioImages.add(image);
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n('partner_upload_success')),
+          backgroundColor: _royalNavy,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _showPickMenu(String type) async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(context.l10n('partner_pick_gallery')),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickFromGallery(type);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(context.l10n('partner_pick_camera')),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickFromCamera(type);
+                },
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(context.l10n('confirm')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _thumb(XFile file, {required VoidCallback onRemove}) {
+    final img = kIsWeb ? Image.network(file.path, fit: BoxFit.cover) : Image.file(File(file.path), fit: BoxFit.cover);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(width: 44, height: 44, child: img),
+        ),
+        Positioned(
+          right: -6,
+          top: -6,
+          child: InkWell(
+            onTap: onRemove,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _royalNavy, width: 1.2),
+              ),
+              child: const Icon(Icons.close, size: 14, color: _royalNavy),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -164,8 +283,13 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               _toggleOffIfUploaded(type);
               return;
             }
-            _pickAndUpload(type);
+            _showPickMenu(type);
           };
+    final preview = switch (type) {
+      'id' => _idImage,
+      'cert' => _certImage,
+      _ => null,
+    };
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(28),
@@ -217,13 +341,44 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                 ],
               ),
             ),
-            if (uploaded)
-              const Icon(Icons.check_circle, color: Color(0xFF2E7D32), size: 28)
-            else if (_saving)
+            if (_saving)
               const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else if (type == 'portfolio' && _portfolioImages.isNotEmpty)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final f in _portfolioImages.take(2))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: _thumb(
+                        f,
+                        onRemove: () {
+                          setState(() => _portfolioImages.remove(f));
+                          if (_portfolioImages.isEmpty) _toggleOffIfUploaded('portfolio');
+                        },
+                      ),
+                    ),
+                  if (_portfolioImages.length > 2)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(
+                        '+${_portfolioImages.length - 2}',
+                        style: const TextStyle(color: _royalNavy, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                ],
+              )
+            else if (preview != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: _thumb(
+                  preview,
+                  onRemove: () => _toggleOffIfUploaded(type),
+                ),
               )
             else
               const Icon(Icons.upload_file, color: _royalNavy, size: 26),

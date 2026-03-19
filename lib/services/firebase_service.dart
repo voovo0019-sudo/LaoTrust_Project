@@ -48,7 +48,8 @@ class FirebaseService {
           'loc': data[JobFields.location],
           'salary': data[JobFields.salary],
           'detail': data[JobFields.description],
-          'tag': data[JobFields.jobType] ?? '알바',
+          // Store as translation key when possible (fallback handled in UI).
+          'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
           'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
           'createdAt': createdAt,
           'deadlineAt': deadlineAt,

@@ -241,5 +241,134 @@
   "phone_auth_login": "로그인",
   "phone_auth_whitelist_success": "정예 요원 화이트리스트 번호로 로그인되었습니다.",
   "phone_auth_login_success": "로그인이 완료되었습니다.",
-  "phone_auth_error_invalid": "전화번호 또는 인증번호를 다시 확인해 주세요."
+  "phone_auth_error_invalid": "전화번호 또는 인증번호를 다시 확인해 주세요.",
+
+  "quick_job_post_card_title": "알바 구인 등록",
+
+  "radar_stage_1km": "1km 수색 중",
+  "radar_stage_3km": "3km 수색 중",
+  "radar_stage_5km_plus": "5km 이상 수색 중",
+  "radar_complete_delivered": "전달 완료",
+
+  "partner_upload_removed": "선택 해제 완료",
+
+  "wizard_step_progress": "Step {current} / {total}",
+  "wizard_step1_title": "세부 서비스 유형을 선택하세요",
+  "wizard_step2_title": "상세 선택 및 추가 정보",
+
+  "wizard_repair_sub_roof_paint": "페인트 및 지붕 보수",
+  "wizard_beauty_sub_care": "헬스/케어",
+  "wizard_beauty_sub_nail_makeup": "네일/메이크업",
+  "wizard_tutor_sub_math_sci": "수학/과학",
+  "wizard_tutor_sub_it_computer": "IT/컴퓨터",
+  "wizard_photo_sub_wedding": "웨딩",
+  "wizard_photo_sub_snap": "스냅",
+  "wizard_photo_sub_product_ad": "상품/광고 촬영",
+  "wizard_event_sub_party_planning": "파티 기획",
+  "wizard_event_sub_sound_light_rental": "음향/조명 렌탈",
+  "wizard_event_sub_helper": "도우미",
+  "wizard_garden_sub_landscape": "조경/식재",
+
+  "wizard_symptom_ac_water_drop": "물 떨어짐",
+  "wizard_symptom_roof_peeling": "페인트 벗겨짐",
+  "wizard_symptom_roof_leak_proof": "누수/방수",
+  "wizard_symptom_roof_crack_repair": "균열/보수",
+
+  "wizard_other_direct_input_label": "기타(직접 입력)",
+  "wizard_other_direct_input_hint": "증상/요구사항을 입력하세요",
+
+  "wizard_delivery_weight_label": "무게(kg)",
+  "wizard_delivery_weight_hint": "예: 3",
+  "wizard_delivery_distance_label": "거리(km)",
+  "wizard_delivery_distance_hint": "예: 5",
+  "wizard_delivery_cargo_size_title": "짐 크기(S/M/L)",
+  "wizard_delivery_other_hint": "예: 장보기 목록, 특이사항",
+
+  "wizard_beauty_option_cut": "컷",
+  "wizard_beauty_option_perm": "펌",
+  "wizard_beauty_option_care": "관리",
+  "wizard_beauty_option_nail": "네일",
+  "wizard_beauty_option_makeup": "메이크업",
+  "wizard_beauty_other_hint": "예: 염색, 두피 케어 등",
+
+  "wizard_photo_time_label": "촬영 시간",
+  "wizard_photo_time_hint": "예: 2시간 / 반나절 / 1일",
+  "wizard_photo_place_title": "촬영 장소",
+  "wizard_photo_place_indoor": "실내",
+  "wizard_photo_place_outdoor": "야외",
+  "wizard_photo_other_hint": "예: 스튜디오/야외 특정 장소",
+
+  "wizard_cleaning_area_label": "평수/면적(m² 또는 평)",
+  "wizard_cleaning_area_hint": "예: 30평 / 60㎡",
+  "wizard_cleaning_scale_title": "규모 선택(S/M/L)",
+  "wizard_cleaning_other_hint": "예: 특정 오염/특이사항",
+
+  "wizard_level_elem": "초등",
+  "wizard_level_mid": "중등",
+  "wizard_level_high": "고등",
+  "wizard_level_adult": "성인",
+  "wizard_tutoring_level_title": "학습 레벨(복수 선택 가능)",
+  "wizard_tutoring_other_hint": "예: 대학/직장인/자격증 대비",
+
+  "wizard_security_people_label": "투입 인원(명)",
+  "wizard_security_people_hint": "예: 2",
+  "wizard_security_time_label": "희망 시간",
+  "wizard_security_time_hint": "예: 09:00~18:00 / 3시간",
+  "wizard_security_other_hint": "예: 복장/장비/특이사항",
+
+  "wizard_garden_scale_title": "정원 크기(S/M/L)",
+  "wizard_garden_scope_title": "작업 범위(복수 선택 가능)",
+  "wizard_garden_scope_lawn": "잔디",
+  "wizard_garden_scope_landscape": "조경/식재",
+  "wizard_garden_scope_tree_trim": "나무 전지",
+  "wizard_garden_scope_all": "전체",
+  "wizard_garden_other_hint": "예: 특정 구역/특이사항",
+
+  "wizard_event_people_label": "예상 인원수",
+  "wizard_event_people_hint": "예: 30",
+  "wizard_event_other_hint": "예: 예산/컨셉/특이사항",
+
+  "wizard_generic_option_1": "옵션 1",
+  "wizard_generic_option_2": "옵션 2",
+  "wizard_generic_option_3": "옵션 3",
+
+  "wizard_photo_prompt_repair": "고장 부위 또는 모델명 사진을 올려주세요",
+  "wizard_photo_prompt_delivery": "운송할 물품 또는 목록 사진을 올려주세요",
+  "wizard_photo_prompt_style_concept": "참고할 스타일/컨셉 사진을 올려주세요",
+  "wizard_photo_prompt_cleaning": "청소가 필요한 현장의 사진을 올려주세요",
+  "wizard_photo_prompt_tutoring": "교재 또는 학습 목표 사진을 올려주세요",
+  "wizard_photo_prompt_security": "배치 장소 또는 관련 서류 사진을 올려주세요",
+  "wizard_photo_prompt_garden": "정원 현장의 상태를 알 수 있는 사진을 올려주세요",
+  "wizard_photo_prompt_event": "행사 장소 또는 기획안 사진을 올려주세요",
+  "wizard_photo_prompt_generic": "관련 사진을 올려주세요",
+  "wizard_photo_upload_max": "최대 {n}장까지 업로드할 수 있습니다.",
+  "wizard_photo_pick_gallery": "갤러리",
+  "wizard_photo_pick_camera": "카메라",
+
+  "wizard_extra_request_label": "추가 요청사항",
+  "wizard_extra_request_hint": "전문가에게 전달할 메모",
+
+  "wizard_map_pick_title": "출발지와 도착지를 지도에서 찍어주세요",
+  "wizard_map_pick_desc": "지도 연동은 추후 구현됩니다. 아래 버튼으로 위치를 선택할 수 있습니다.",
+  "wizard_map_pick_hint": "지도 터치로 출발/도착 지정",
+  "wizard_origin": "출발지",
+  "wizard_destination": "도착지",
+
+  "wizard_tutoring_textfields_title": "학습 목표와 희망 스케줄을 입력하세요",
+  "wizard_learning_goal_label": "학습 목표",
+  "wizard_learning_goal_hint": "예: 기초 회화, 시험 대비",
+  "wizard_schedule_label": "희망 스케줄",
+  "wizard_schedule_hint": "예: 주말 오전, 평일 저녁",
+
+  "wizard_note_title": "요구사항 및 추가 메모",
+
+  "wizard_summary_title": "요청 요약 확인",
+  "wizard_summary_category": "카테고리",
+  "wizard_summary_subtype": "세부 유형",
+  "wizard_summary_detail": "규모/대상",
+  "wizard_summary_note": "추가 메모",
+
+  "wizard_settlement_title": "정산 안내",
+  "wizard_settlement_line1": "• 라오스 현지 BCEL One QR 결제 또는 현금으로 전문가에게 직접 지불할 수 있습니다.",
+  "wizard_settlement_line2": "• 서비스 확정 후 전문가와 만나 계약금·잔금을 정산하세요."
 }

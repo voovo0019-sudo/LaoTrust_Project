@@ -220,5 +220,134 @@
   "phone_auth_login": "ເຂົ້າລະບົບ",
   "phone_auth_whitelist_success": "ເຂົ້າລະບົບດ້ວຍເບີຊ່ຽວຊານທີ່ຢູ່ໃນລາຍຊື່ພິເສດ.",
   "phone_auth_login_success": "ເຂົ້າລະບົບສຳເລັດ.",
-  "phone_auth_error_invalid": "ກະລຸນາກວດເບິ່ງເບີໂທ ຫຼື ລະຫັດອີກຄັ້ງ."
+  "phone_auth_error_invalid": "ກະລຸນາກວດເບິ່ງເບີໂທ ຫຼື ລະຫັດອີກຄັ້ງ.",
+
+  "quick_job_post_card_title": "ລົງປະກາດວຽກດ່ວນ",
+
+  "radar_stage_1km": "ກຳລັງຄົ້ນຫາ 1km",
+  "radar_stage_3km": "ກຳລັງຄົ້ນຫາ 3km",
+  "radar_stage_5km_plus": "ກຳລັງຄົ້ນຫາ 5km+",
+  "radar_complete_delivered": "ສົ່ງສຳເລັດ",
+
+  "partner_upload_removed": "ຍົກເລີກການເລືອກແລ້ວ",
+
+  "wizard_step_progress": "Step {current} / {total}",
+  "wizard_step1_title": "ເລືອກປະເພດບໍລິການລະອຽດ",
+  "wizard_step2_title": "ລາຍລະອຽດ ແລະ ຂໍ້ມູນເພີ່ມ",
+
+  "wizard_repair_sub_roof_paint": "ທາສີ ແລະ ຊ່ອມຫຼັງຄາ",
+  "wizard_beauty_sub_care": "ສຸຂະພາບ/ການດູແລ",
+  "wizard_beauty_sub_nail_makeup": "ເລັບ/ແຕ່ງໜ້າ",
+  "wizard_tutor_sub_math_sci": "ຄະນິດ/ວິທະຍາສາດ",
+  "wizard_tutor_sub_it_computer": "IT/ຄອມພິວເຕີ",
+  "wizard_photo_sub_wedding": "ແຕ່ງງານ",
+  "wizard_photo_sub_snap": "ສແນັບ",
+  "wizard_photo_sub_product_ad": "ສິນຄ້າ/ໂຄສະນາ",
+  "wizard_event_sub_party_planning": "ວາງແຜນປາຕີ້",
+  "wizard_event_sub_sound_light_rental": "ເຄື່ອງສຽງ/ໄຟ (ເຊົ່າ)",
+  "wizard_event_sub_helper": "ຜູ້ຊ່ວຍ",
+  "wizard_garden_sub_landscape": "ຈັດສວນ/ປູກຕົ້ນໄມ້",
+
+  "wizard_symptom_ac_water_drop": "ນ້ຳຢອດ",
+  "wizard_symptom_roof_peeling": "ສີລອກ",
+  "wizard_symptom_roof_leak_proof": "ນ້ຳຮົ່ວ/ກັນນ້ຳ",
+  "wizard_symptom_roof_crack_repair": "ແຕກ/ຊ່ອມແປງ",
+
+  "wizard_other_direct_input_label": "ອື່ນໆ (ພິມເອງ)",
+  "wizard_other_direct_input_hint": "ກະລຸນາອະທິບາຍອາການ/ຄວາມຕ້ອງການ",
+
+  "wizard_delivery_weight_label": "ນ້ຳໜັກ (kg)",
+  "wizard_delivery_weight_hint": "ຕົວຢ່າງ: 3",
+  "wizard_delivery_distance_label": "ໄລຍະທາງ (km)",
+  "wizard_delivery_distance_hint": "ຕົວຢ່າງ: 5",
+  "wizard_delivery_cargo_size_title": "ຂະໜາດຂອງ (S/M/L)",
+  "wizard_delivery_other_hint": "ຕົວຢ່າງ: ລາຍການຊື້, ບັນທຶກ",
+
+  "wizard_beauty_option_cut": "ຕັດຜົມ",
+  "wizard_beauty_option_perm": "ດັດຜົມ",
+  "wizard_beauty_option_care": "ດູແລ",
+  "wizard_beauty_option_nail": "ເລັບ",
+  "wizard_beauty_option_makeup": "ແຕ່ງໜ້າ",
+  "wizard_beauty_other_hint": "ຕົວຢ່າງ: ຍ້ອມສີ, ດູແລໜັງຫົວ",
+
+  "wizard_photo_time_label": "ເວລາຖ່າຍຮູບ",
+  "wizard_photo_time_hint": "ຕົວຢ່າງ: 2 ຊົ່ວໂມງ / ຄຶ່ງມື້ / 1 ມື້",
+  "wizard_photo_place_title": "ສະຖານທີ່ຖ່າຍ",
+  "wizard_photo_place_indoor": "ໃນອາຄານ",
+  "wizard_photo_place_outdoor": "ນອກອາຄານ",
+  "wizard_photo_other_hint": "ຕົວຢ່າງ: ສະຕູດິໂອ/ສະຖານທີ່ນອກອາຄານ",
+
+  "wizard_cleaning_area_label": "ເນື້ອທີ່ (m² ຫຼື 평)",
+  "wizard_cleaning_area_hint": "ຕົວຢ່າງ: 30평 / 60㎡",
+  "wizard_cleaning_scale_title": "ຂະໜາດ (S/M/L)",
+  "wizard_cleaning_other_hint": "ຕົວຢ່າງ: ຄວາມເປື້ອນ/ບັນທຶກພິເສດ",
+
+  "wizard_level_elem": "ປະຖົມ",
+  "wizard_level_mid": "ມັດທະຍົມຕົ້ນ",
+  "wizard_level_high": "ມັດທະຍົມປາຍ",
+  "wizard_level_adult": "ຜູ້ໃຫຍ່",
+  "wizard_tutoring_level_title": "ລະດັບ (ເລືອກໄດ້ຫຼາຍ)",
+  "wizard_tutoring_other_hint": "ຕົວຢ່າງ: ມະຫາວິທະຍາໄລ/ທຳງານ/ໃບຢືນຢັນ",
+
+  "wizard_security_people_label": "ຈຳນວນຄົນ",
+  "wizard_security_people_hint": "ຕົວຢ່າງ: 2",
+  "wizard_security_time_label": "ເວລາທີ່ຕ້ອງການ",
+  "wizard_security_time_hint": "ຕົວຢ່າງ: 09:00-18:00 / 3 ຊົ່ວໂມງ",
+  "wizard_security_other_hint": "ຕົວຢ່າງ: ເຄື່ອງແບບ/ອຸປະກອນ/ບັນທຶກ",
+
+  "wizard_garden_scale_title": "ຂະໜາດສວນ (S/M/L)",
+  "wizard_garden_scope_title": "ຂອບເຂດວຽກ (ເລືອກໄດ້ຫຼາຍ)",
+  "wizard_garden_scope_lawn": "ຫຍ້າ",
+  "wizard_garden_scope_landscape": "ຈັດສວນ",
+  "wizard_garden_scope_tree_trim": "ຕັດກິ່ງໄມ້",
+  "wizard_garden_scope_all": "ທັງໝົດ",
+  "wizard_garden_other_hint": "ຕົວຢ່າງ: ພື້ນທີ່/ບັນທຶກພິເສດ",
+
+  "wizard_event_people_label": "ຈຳນວນຄົນຄາດຄະເນ",
+  "wizard_event_people_hint": "ຕົວຢ່າງ: 30",
+  "wizard_event_other_hint": "ຕົວຢ່າງ: ງົບ/ແນວຄິດ/ບັນທຶກ",
+
+  "wizard_generic_option_1": "ຕົວເລືອກ 1",
+  "wizard_generic_option_2": "ຕົວເລືອກ 2",
+  "wizard_generic_option_3": "ຕົວເລືອກ 3",
+
+  "wizard_photo_prompt_repair": "ກະລຸນາອັບໂຫຼດຮູບຈຸດເສຍ ຫຼື ລຸ້ນ",
+  "wizard_photo_prompt_delivery": "ກະລຸນາອັບໂຫຼດຮູບຂອງທີ່ຈະຂົນສົ່ງ ຫຼື ລາຍການ",
+  "wizard_photo_prompt_style_concept": "ກະລຸນາອັບໂຫຼດຮູບອ້າງອີງແນວ/ຄອນເຊັບ",
+  "wizard_photo_prompt_cleaning": "ກະລຸນາອັບໂຫຼດຮູບພື້ນທີ່ທີ່ຕ້ອງການອະນາໄມ",
+  "wizard_photo_prompt_tutoring": "ກະລຸນາອັບໂຫຼດຮູບປື້ມ ຫຼື ເປົ້າໝາຍການຮຽນ",
+  "wizard_photo_prompt_security": "ກະລຸນາອັບໂຫຼດຮູບສະຖານທີ່ ຫຼື ເອກະສານທີ່ກ່ຽວຂ້ອງ",
+  "wizard_photo_prompt_garden": "ກະລຸນາອັບໂຫຼດຮູບສະພາບສວນ",
+  "wizard_photo_prompt_event": "ກະລຸນາອັບໂຫຼດຮູບສະຖານທີ່ງານ ຫຼື ແຜນງານ",
+  "wizard_photo_prompt_generic": "ກະລຸນາອັບໂຫຼດຮູບທີ່ກ່ຽວຂ້ອງ",
+  "wizard_photo_upload_max": "ອັບໂຫຼດໄດ້ສູງສຸດ {n} ຮູບ.",
+  "wizard_photo_pick_gallery": "ຄັງຮູບ",
+  "wizard_photo_pick_camera": "ກ້ອງ",
+
+  "wizard_extra_request_label": "ຄຳຂໍເພີ່ມເຕີມ",
+  "wizard_extra_request_hint": "ບັນທຶກສົ່ງໃຫ້ຊ່ຽວຊານ",
+
+  "wizard_map_pick_title": "ເລືອກຈຸດເລີ່ມ ແລະ ຈຸດປາຍທາງໃນແຜນທີ່",
+  "wizard_map_pick_desc": "ການເຊື່ອມຕໍ່ແຜນທີ່ຈະພັດທະນາພາຍຫຼັງ. ໃຊ້ປຸ່ມດ້ານລຸ່ມເພື່ອເລືອກຕຳແໜ່ງ.",
+  "wizard_map_pick_hint": "ແຕະແຜນທີ່ເພື່ອກຳນົດເລີ່ມ/ປາຍທາງ",
+  "wizard_origin": "ຈຸດເລີ່ມ",
+  "wizard_destination": "ປາຍທາງ",
+
+  "wizard_tutoring_textfields_title": "ກະລຸນາປ້ອນເປົ້າໝາຍ ແລະ ຕາຕະລາງທີ່ຕ້ອງການ",
+  "wizard_learning_goal_label": "ເປົ້າໝາຍການຮຽນ",
+  "wizard_learning_goal_hint": "ຕົວຢ່າງ: ສົນທະນາພື້ນຖານ, ຕຽມສອບເສັງ",
+  "wizard_schedule_label": "ຕາຕະລາງທີ່ຕ້ອງການ",
+  "wizard_schedule_hint": "ຕົວຢ່າງ: ສຸດສັບດາເຊົ້າ, ວັນທຳມະດາແລງ",
+
+  "wizard_note_title": "ຄວາມຕ້ອງການ ແລະ ບັນທຶກ",
+
+  "wizard_summary_title": "ກວດສອບສະຫຼຸບ",
+  "wizard_summary_category": "ໝວດໝູ່",
+  "wizard_summary_subtype": "ປະເພດຍ່ອຍ",
+  "wizard_summary_detail": "ລາຍລະອຽດ",
+  "wizard_summary_note": "ບັນທຶກ",
+
+  "wizard_settlement_title": "ຄຳແນະນຳການຊຳລະ",
+  "wizard_settlement_line1": "• ທ່ານສາມາດຈ່າຍໃຫ້ຊ່ຽວຊານໂດຍກົງຜ່ານ BCEL One QR ຫຼື ເງິນສົດໃນລາວ.",
+  "wizard_settlement_line2": "• ຫຼັງຈາກຢືນຢັນບໍລິການ ໃຫ້ຊຳລະຄ່າມັດຈຳ ແລະ ຍອດຄົງເຫຼືອກັບຊ່ຽວຊານ."
 }

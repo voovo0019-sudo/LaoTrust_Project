@@ -220,5 +220,134 @@
   "phone_auth_login": "Login",
   "phone_auth_whitelist_success": "Logged in with whitelisted agent number.",
   "phone_auth_login_success": "Login completed.",
-  "phone_auth_error_invalid": "Please check your phone number or code."
+  "phone_auth_error_invalid": "Please check your phone number or code.",
+
+  "quick_job_post_card_title": "Post a quick job",
+
+  "radar_stage_1km": "Searching 1km",
+  "radar_stage_3km": "Searching 3km",
+  "radar_stage_5km_plus": "Searching 5km+",
+  "radar_complete_delivered": "Delivered",
+
+  "partner_upload_removed": "Deselected",
+
+  "wizard_step_progress": "Step {current} / {total}",
+  "wizard_step1_title": "Select a detailed service type",
+  "wizard_step2_title": "Details and extra info",
+
+  "wizard_repair_sub_roof_paint": "Paint & roof repair",
+  "wizard_beauty_sub_care": "Health / care",
+  "wizard_beauty_sub_nail_makeup": "Nails / makeup",
+  "wizard_tutor_sub_math_sci": "Math / science",
+  "wizard_tutor_sub_it_computer": "IT / computer",
+  "wizard_photo_sub_wedding": "Wedding",
+  "wizard_photo_sub_snap": "Snap",
+  "wizard_photo_sub_product_ad": "Product / advertising",
+  "wizard_event_sub_party_planning": "Party planning",
+  "wizard_event_sub_sound_light_rental": "Sound / light rental",
+  "wizard_event_sub_helper": "Helper",
+  "wizard_garden_sub_landscape": "Landscaping / planting",
+
+  "wizard_symptom_ac_water_drop": "Water dripping",
+  "wizard_symptom_roof_peeling": "Paint peeling",
+  "wizard_symptom_roof_leak_proof": "Leak / waterproofing",
+  "wizard_symptom_roof_crack_repair": "Crack repair",
+
+  "wizard_other_direct_input_label": "Other (type in)",
+  "wizard_other_direct_input_hint": "Describe your symptom/request",
+
+  "wizard_delivery_weight_label": "Weight (kg)",
+  "wizard_delivery_weight_hint": "e.g. 3",
+  "wizard_delivery_distance_label": "Distance (km)",
+  "wizard_delivery_distance_hint": "e.g. 5",
+  "wizard_delivery_cargo_size_title": "Cargo size (S/M/L)",
+  "wizard_delivery_other_hint": "e.g. grocery list, notes",
+
+  "wizard_beauty_option_cut": "Cut",
+  "wizard_beauty_option_perm": "Perm",
+  "wizard_beauty_option_care": "Care",
+  "wizard_beauty_option_nail": "Nails",
+  "wizard_beauty_option_makeup": "Makeup",
+  "wizard_beauty_other_hint": "e.g. dye, scalp care",
+
+  "wizard_photo_time_label": "Shoot time",
+  "wizard_photo_time_hint": "e.g. 2 hours / half day / 1 day",
+  "wizard_photo_place_title": "Shoot location",
+  "wizard_photo_place_indoor": "Indoor",
+  "wizard_photo_place_outdoor": "Outdoor",
+  "wizard_photo_other_hint": "e.g. studio / specific outdoor spot",
+
+  "wizard_cleaning_area_label": "Area (m² or 평)",
+  "wizard_cleaning_area_hint": "e.g. 30평 / 60㎡",
+  "wizard_cleaning_scale_title": "Scale (S/M/L)",
+  "wizard_cleaning_other_hint": "e.g. stains, special notes",
+
+  "wizard_level_elem": "Elementary",
+  "wizard_level_mid": "Middle",
+  "wizard_level_high": "High",
+  "wizard_level_adult": "Adult",
+  "wizard_tutoring_level_title": "Level (multi-select)",
+  "wizard_tutoring_other_hint": "e.g. college / work / certificates",
+
+  "wizard_security_people_label": "People (count)",
+  "wizard_security_people_hint": "e.g. 2",
+  "wizard_security_time_label": "Preferred time",
+  "wizard_security_time_hint": "e.g. 09:00-18:00 / 3 hours",
+  "wizard_security_other_hint": "e.g. uniform/equipment/notes",
+
+  "wizard_garden_scale_title": "Garden size (S/M/L)",
+  "wizard_garden_scope_title": "Scope (multi-select)",
+  "wizard_garden_scope_lawn": "Lawn",
+  "wizard_garden_scope_landscape": "Landscaping",
+  "wizard_garden_scope_tree_trim": "Tree trimming",
+  "wizard_garden_scope_all": "All",
+  "wizard_garden_other_hint": "e.g. area, special notes",
+
+  "wizard_event_people_label": "Expected people",
+  "wizard_event_people_hint": "e.g. 30",
+  "wizard_event_other_hint": "e.g. budget/concept/notes",
+
+  "wizard_generic_option_1": "Option 1",
+  "wizard_generic_option_2": "Option 2",
+  "wizard_generic_option_3": "Option 3",
+
+  "wizard_photo_prompt_repair": "Upload a photo of the broken part or model",
+  "wizard_photo_prompt_delivery": "Upload a photo of the items or list to deliver",
+  "wizard_photo_prompt_style_concept": "Upload reference style/concept photos",
+  "wizard_photo_prompt_cleaning": "Upload photos of the area that needs cleaning",
+  "wizard_photo_prompt_tutoring": "Upload photos of textbooks or goals",
+  "wizard_photo_prompt_security": "Upload photos of the site or related documents",
+  "wizard_photo_prompt_garden": "Upload photos showing the garden condition",
+  "wizard_photo_prompt_event": "Upload photos of the venue or plan",
+  "wizard_photo_prompt_generic": "Upload related photos",
+  "wizard_photo_upload_max": "You can upload up to {n} photos.",
+  "wizard_photo_pick_gallery": "Gallery",
+  "wizard_photo_pick_camera": "Camera",
+
+  "wizard_extra_request_label": "Additional requests",
+  "wizard_extra_request_hint": "Note to the expert",
+
+  "wizard_map_pick_title": "Pick origin and destination on the map",
+  "wizard_map_pick_desc": "Map integration will be added later. Use the buttons below to select locations.",
+  "wizard_map_pick_hint": "Tap map to set origin/destination",
+  "wizard_origin": "Origin",
+  "wizard_destination": "Destination",
+
+  "wizard_tutoring_textfields_title": "Enter your learning goal and preferred schedule",
+  "wizard_learning_goal_label": "Learning goal",
+  "wizard_learning_goal_hint": "e.g. basic conversation, exam prep",
+  "wizard_schedule_label": "Preferred schedule",
+  "wizard_schedule_hint": "e.g. weekend mornings, weekday evenings",
+
+  "wizard_note_title": "Requirements and notes",
+
+  "wizard_summary_title": "Review summary",
+  "wizard_summary_category": "Category",
+  "wizard_summary_subtype": "Subtype",
+  "wizard_summary_detail": "Details",
+  "wizard_summary_note": "Note",
+
+  "wizard_settlement_title": "Settlement guide",
+  "wizard_settlement_line1": "• You can pay the expert directly via BCEL One QR or cash in Laos.",
+  "wizard_settlement_line2": "• After confirming the service, settle the deposit and balance with the expert."
 }

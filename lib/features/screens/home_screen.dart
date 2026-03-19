@@ -55,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 레이더 강제 제어: 위저드 복귀 시 result==true 이면 여기서 시퀀스 구동
   bool _isSearching = false;
-  bool _showCompletionMessage = false;
 
   static const String _symptomOtherKey = 'symptom_other';
 
@@ -359,11 +358,20 @@ class _HomeScreenState extends State<HomeScreen> {
         if (!mounted) return;
         setState(() {
           _isSearching = false;
-          _showCompletionMessage = true;
         });
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) setState(() => _showCompletionMessage = false);
-        });
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            content: Text(context.l10n('radar_complete_delivered')),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(context.l10n('confirm')),
+              ),
+            ],
+          ),
+        );
       });
     }
   }
@@ -384,9 +392,13 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const RadarScanningWidget(
+                  RadarScanningWidget(
                     size: 100,
-                    stageLabels: ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
+                    stageLabels: [
+                      context.l10n('radar_stage_1km'),
+                      context.l10n('radar_stage_3km'),
+                      context.l10n('radar_stage_5km_plus'),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -394,27 +406,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
                 ],
-              ),
-            ),
-          )
-        else if (_showCompletionMessage)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-                ),
-                child: const Text(
-                  '전송 완료',
-                  style: TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ),
             ),
           )

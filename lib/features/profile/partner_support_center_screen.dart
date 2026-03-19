@@ -116,11 +116,11 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
         setState(() => _portfolioImages.addAll(picked));
         if (isFirebaseEnabled) {
           for (final f in picked) {
-            final url = await _uploadToStorage(f, type: 'portfolio', index: _portfolioImages.indexOf(f));
-            if (!mounted) return;
-            if (url != null) {
+            final idx = _portfolioImages.indexOf(f);
+            _uploadToStorage(f, type: 'portfolio', index: idx).then((url) {
+              if (!mounted || url == null) return;
               setState(() => _portfolioDownloadUrls.add(url));
-            }
+            });
           }
         }
       } else {
@@ -129,15 +129,17 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
         if (image == null) return;
         if (type == 'id') {
           setState(() => _idImage = image);
-          final url = await _uploadToStorage(image, type: 'id');
-          if (!mounted) return;
-          if (url != null) setState(() => _idDownloadUrl = url);
+          _uploadToStorage(image, type: 'id').then((url) {
+            if (!mounted || url == null) return;
+            setState(() => _idDownloadUrl = url);
+          });
         }
         if (type == 'cert') {
           setState(() => _certImage = image);
-          final url = await _uploadToStorage(image, type: 'cert');
-          if (!mounted) return;
-          if (url != null) setState(() => _certDownloadUrl = url);
+          _uploadToStorage(image, type: 'cert').then((url) {
+            if (!mounted || url == null) return;
+            setState(() => _certDownloadUrl = url);
+          });
         }
       }
       if (!mounted) return;
@@ -162,21 +164,25 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
       if (image == null) return;
       if (type == 'id') {
         setState(() => _idImage = image);
-        final url = await _uploadToStorage(image, type: 'id');
-        if (!mounted) return;
-        if (url != null) setState(() => _idDownloadUrl = url);
+        _uploadToStorage(image, type: 'id').then((url) {
+          if (!mounted || url == null) return;
+          setState(() => _idDownloadUrl = url);
+        });
       }
       if (type == 'cert') {
         setState(() => _certImage = image);
-        final url = await _uploadToStorage(image, type: 'cert');
-        if (!mounted) return;
-        if (url != null) setState(() => _certDownloadUrl = url);
+        _uploadToStorage(image, type: 'cert').then((url) {
+          if (!mounted || url == null) return;
+          setState(() => _certDownloadUrl = url);
+        });
       }
       if (type == 'portfolio') {
         setState(() => _portfolioImages.add(image));
-        final url = await _uploadToStorage(image, type: 'portfolio', index: _portfolioImages.length - 1);
-        if (!mounted) return;
-        if (url != null) setState(() => _portfolioDownloadUrls.add(url));
+        final idx = _portfolioImages.length - 1;
+        _uploadToStorage(image, type: 'portfolio', index: idx).then((url) {
+          if (!mounted || url == null) return;
+          setState(() => _portfolioDownloadUrls.add(url));
+        });
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

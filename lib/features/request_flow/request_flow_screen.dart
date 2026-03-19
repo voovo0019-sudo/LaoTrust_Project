@@ -174,7 +174,10 @@ class _ProgressBar extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'Step $current / $total',
+            context
+                .t('request_step_progress')
+                .replaceAll('{current}', '$current')
+                .replaceAll('{total}', '$total'),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,

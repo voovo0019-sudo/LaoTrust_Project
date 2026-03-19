@@ -1,6 +1,7 @@
 // Step 2: 위치·희망 시간 (70% 동선). / Location and preferred time.
 
 import 'package:flutter/material.dart';
+import '../../../core/app_localizations.dart';
 import '../request_flow_state.dart';
 
 class Step2LocationTimeStep extends StatelessWidget {
@@ -19,27 +20,27 @@ class Step2LocationTimeStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '위치 및 희망 시간',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            context.t('request_step2_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           TextFormField(
             initialValue: state.location,
-            decoration: const InputDecoration(
-              labelText: '주소 또는 지역',
-              hintText: '예: 비엔티안 시청 인근',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.t('request_location_label'),
+              hintText: context.t('request_location_hint'),
+              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => onChanged(state.copyWith(location: v)),
           ),
           const SizedBox(height: 20),
           TextFormField(
             initialValue: state.wishedTime,
-            decoration: const InputDecoration(
-              labelText: '희망 방문 시간',
-              hintText: '예: 오후 2시 이후',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.t('request_wished_time_label'),
+              hintText: context.t('request_wished_time_hint'),
+              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => onChanged(state.copyWith(wishedTime: v)),
           ),

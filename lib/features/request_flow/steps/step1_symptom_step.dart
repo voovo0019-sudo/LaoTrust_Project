@@ -1,6 +1,7 @@
 // Step 1: 증상 선택 (70% 동선). 객관식, 중복 선택, 파란 테두리 강조. / Symptom selection.
 
 import 'package:flutter/material.dart';
+import '../../../core/app_localizations.dart';
 import '../request_flow_state.dart';
 
 class Step1SymptomStep extends StatelessWidget {
@@ -13,11 +14,11 @@ class Step1SymptomStep extends StatelessWidget {
   final ValueChanged<RequestFlowState> onChanged;
 
   static const List<MapEntry<String, String>> _symptoms = [
-    MapEntry('cold_off', '찬바람 안 나옴'),
-    MapEntry('noise', '소음'),
-    MapEntry('water_leak', '물 새는 소리'),
-    MapEntry('not_cool', '시원하지 않음'),
-    MapEntry('other', '기타'),
+    MapEntry('cold_off', 'symptom_ac_no_cold_air'),
+    MapEntry('noise', 'symptom_ac_noise'),
+    MapEntry('water_leak', 'symptom_ac_water_sound'),
+    MapEntry('not_cool', 'symptom_ac_not_cool'),
+    MapEntry('other', 'symptom_other'),
   ];
 
   void _toggle(String id) {
@@ -37,13 +38,13 @@ class Step1SymptomStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '어떤 증상이 있나요?',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            context.t('request_step1_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            '해당하는 항목을 모두 선택해 주세요.',
+            context.t('request_step1_desc'),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
@@ -53,7 +54,7 @@ class Step1SymptomStep extends StatelessWidget {
           ..._symptoms.map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: _ChoiceChip(
-                  label: e.value,
+                  label: context.t(e.value),
                   selected: state.selectedSymptomIds.contains(e.key),
                   onTap: () => _toggle(e.key),
                 ),

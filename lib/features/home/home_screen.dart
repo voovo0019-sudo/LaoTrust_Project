@@ -36,9 +36,9 @@ class HomeScreen extends StatelessWidget {
               tooltip: context.l10n('language'),
               onSelected: onLocaleChanged,
               itemBuilder: (context) => [
-                const PopupMenuItem(value: Locale('ko'), child: Text('한국어')),
-                const PopupMenuItem(value: Locale('en'), child: Text('English')),
-                const PopupMenuItem(value: Locale('lo'), child: Text('ພາສາລາວ')),
+                PopupMenuItem(value: const Locale('ko'), child: Text(context.l10n('lang_ko'))),
+                PopupMenuItem(value: const Locale('en'), child: Text(context.l10n('lang_en'))),
+                PopupMenuItem(value: const Locale('lo'), child: Text(context.l10n('lang_lo'))),
               ],
             ),
           if (onThemeModeChanged != null)
@@ -230,9 +230,9 @@ class _QuickJobCardsSection extends StatelessWidget {
   final ColorScheme colorScheme;
 
   static const List<Map<String, String>> _cards = [
-    {'title': '식당 서버', 'location': '비엔티안 시청 인근', 'salary': '15,000 LAK/시간'},
-    {'title': '단순 노무', 'location': '타락광장 근처', 'salary': '협의'},
-    {'title': '배달 도우미', 'location': '시내 중심가', 'salary': '12,000 LAK/시간'},
+    {'titleKey': 'job_title_restaurant_server', 'locKey': 'location_near_vientiane_hall', 'salaryKey': 'salary_15k_per_hour'},
+    {'titleKey': 'job_title_simple_labor', 'locKey': 'location_near_that_luang', 'salaryKey': 'salary_negotiable'},
+    {'titleKey': 'job_title_delivery_helper', 'locKey': 'location_downtown', 'salaryKey': 'salary_12k_per_hour'},
   ];
 
   @override
@@ -247,9 +247,9 @@ class _QuickJobCardsSection extends StatelessWidget {
         itemBuilder: (context, index) {
           final c = _cards[index];
           return _QuickJobCard(
-            title: c['title']!,
-            location: c['location']!,
-            salary: c['salary']!,
+            title: context.l10n(c['titleKey']!),
+            location: context.l10n(c['locKey']!),
+            salary: context.l10n(c['salaryKey']!),
             onTap: () {},
           );
         },

@@ -36,7 +36,7 @@ Future<void> enableFirestoreOfflinePersistence() async {
 /// 전화번호 인증: 번호로 인증 코드 발송 후, 코드 입력으로 로그인.
 /// (실제 사용 시 reCAPTCHA 등 플랫폼별 설정 필요.)
 Future<void> sendPhoneCode(String phoneNumber) async {
-  if (!_firebaseEnabled) throw StateError('Firebase 미연동 상태');
+  if (!_firebaseEnabled) throw StateError('Firebase is not enabled');
   await auth.verifyPhoneNumber(
     phoneNumber: phoneNumber,
     verificationCompleted: (PhoneAuthCredential credential) async {
@@ -60,7 +60,7 @@ String? _lastVerificationId;
 /// 발송된 인증 코드로 로그인.
 Future<UserCredential> signInWithPhoneCode(String smsCode) async {
   if (!_firebaseEnabled || _lastVerificationId == null) {
-    throw StateError('Firebase 미연동이거나 인증 코드가 발송되지 않음');
+    throw StateError('Firebase is not enabled or verification not started');
   }
   final credential = PhoneAuthProvider.credential(
     verificationId: _lastVerificationId!,

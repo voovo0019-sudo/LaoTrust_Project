@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/app_localizations.dart';
 
 const Color _royalNavy = Color(0xFF1E293B);
 
@@ -11,7 +12,7 @@ class RadarScanningWidget extends StatefulWidget {
   const RadarScanningWidget({
     super.key,
     this.size = 120,
-    this.stageLabels = const ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중'],
+    this.stageLabels = const ['radar_stage_1km', 'radar_stage_3km', 'radar_stage_5km_plus'],
   });
 
   final double size;
@@ -43,7 +44,7 @@ class _RadarScanningWidgetState extends State<RadarScanningWidget>
   @override
   Widget build(BuildContext context) {
     final stageLabels = widget.stageLabels.isEmpty
-        ? const ['1km 수색 중', '3km 수색 중', '5km 이상 수색 중']
+        ? const ['radar_stage_1km', 'radar_stage_3km', 'radar_stage_5km_plus']
         : widget.stageLabels;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -69,7 +70,7 @@ class _RadarScanningWidgetState extends State<RadarScanningWidget>
           builder: (context, child) {
             final idx = (_controller.value * stageLabels.length).floor().clamp(0, stageLabels.length - 1);
             return Text(
-              stageLabels[idx],
+              context.t(stageLabels[idx]),
               style: TextStyle(
                 color: _royalNavy.withValues(alpha: 0.8),
                 fontSize: 13,

@@ -60,7 +60,7 @@ class ExpertProfile {
 /// 현재 사용자 UID (전문가일 때만 사용)
 String? get currentUserId => auth.currentUser?.uid;
 
-/// 전문가 '지금 의뢰 받기' 토글. ON 시 위치 저장, OFF 시 즉시 lat/lng null(잠복).
+/// Expert duty toggle. When OFF, clear lat/lng immediately.
 Future<void> setExpertDuty(bool on, {double? lat, double? lng}) async {
   if (!isFirebaseEnabled) return;
   final uid = currentUserId;

@@ -17,7 +17,7 @@ Future<bool> isVerifiedBadgeActive() async {
 }
 
 /// 4.5 USD 결제 완료 후 호출. Verified 배지를 즉시 활성화.
-/// (미션03: BCEL OnePay 시뮬레이션에서 '결제 완료' 시 이 함수 호출)
+/// (Mission03: call after simulated payment completion)
 Future<void> setVerifiedBadgeActive(bool value) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(_keyVerified, value);

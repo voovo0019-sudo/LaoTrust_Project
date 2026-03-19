@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../core/app_localizations.dart';
+import '../../core/firebase_service.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 const String partnerSupportCenterRouteName = '/partner-support-center';
 const Color _royalNavy = Color(0xFF1E293B);
@@ -28,15 +30,64 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
   XFile? _certImage;
   final List<XFile> _portfolioImages = <XFile>[];
 
+  String? _idDownloadUrl;
+  String? _certDownloadUrl;
+  final List<String> _portfolioDownloadUrls = <String>[];
+
   bool get _idUploaded => _idImage != null;
   bool get _certUploaded => _certImage != null;
   bool get _portfolioUploaded => _portfolioImages.isNotEmpty;
 
+  String? get _uid => auth.currentUser?.uid;
+
+  Reference _refFor({required String type, int? index}) {
+    final uid = _uid ?? 'anonymous';
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    if (type == 'portfolio') {
+      final i = index ?? _portfolioImages.length;
+      return FirebaseStorage.instance.ref('partner_support/$uid/portfolio_${i}_$ts.jpg');
+    }
+    return FirebaseStorage.instance.ref('partner_support/$uid/${type}_$ts.jpg');
+  }
+
+  Future<String?> _uploadToStorage(XFile file, {required String type, int? index}) async {
+    if (!isFirebaseEnabled) return null;
+    final ref = _refFor(type: type, index: index);
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    if (kIsWeb) {
+      final bytes = await file.readAsBytes();
+      await ref.putData(bytes, metadata);
+    } else {
+      await ref.putFile(File(file.path), metadata);
+    }
+    return ref.getDownloadURL();
+  }
+
+  Future<void> _deleteFromStorageByUrl(String? url) async {
+    if (!isFirebaseEnabled) return;
+    if (url == null || url.isEmpty) return;
+    try {
+      final ref = FirebaseStorage.instance.refFromURL(url);
+      await ref.delete();
+    } catch (_) {
+      // Ignore: file may already be deleted or URL invalid.
+    }
+  }
+
   void _toggleOffIfUploaded(String type) {
     setState(() {
-      if (type == 'id') _idImage = null;
-      if (type == 'cert') _certImage = null;
-      if (type == 'portfolio') _portfolioImages.clear();
+      if (type == 'id') {
+        _idImage = null;
+        _idDownloadUrl = null;
+      }
+      if (type == 'cert') {
+        _certImage = null;
+        _certDownloadUrl = null;
+      }
+      if (type == 'portfolio') {
+        _portfolioImages.clear();
+        _portfolioDownloadUrls.clear();
+      }
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -56,15 +107,33 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
         final images = await _picker.pickMultiImage(imageQuality: 85);
         if (!mounted) return;
         if (images.isEmpty) return;
-        setState(() => _portfolioImages.addAll(images.take(remaining)));
+        final picked = images.take(remaining).toList();
+        setState(() => _portfolioImages.addAll(picked));
+        if (isFirebaseEnabled) {
+          for (final f in picked) {
+            final url = await _uploadToStorage(f, type: 'portfolio', index: _portfolioImages.indexOf(f));
+            if (!mounted) return;
+            if (url != null) {
+              setState(() => _portfolioDownloadUrls.add(url));
+            }
+          }
+        }
       } else {
         final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
         if (!mounted) return;
         if (image == null) return;
-        setState(() {
-          if (type == 'id') _idImage = image;
-          if (type == 'cert') _certImage = image;
-        });
+        if (type == 'id') {
+          setState(() => _idImage = image);
+          final url = await _uploadToStorage(image, type: 'id');
+          if (!mounted) return;
+          if (url != null) setState(() => _idDownloadUrl = url);
+        }
+        if (type == 'cert') {
+          setState(() => _certImage = image);
+          final url = await _uploadToStorage(image, type: 'cert');
+          if (!mounted) return;
+          if (url != null) setState(() => _certDownloadUrl = url);
+        }
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -86,11 +155,24 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
       final image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
       if (!mounted) return;
       if (image == null) return;
-      setState(() {
-        if (type == 'id') _idImage = image;
-        if (type == 'cert') _certImage = image;
-        if (type == 'portfolio') _portfolioImages.add(image);
-      });
+      if (type == 'id') {
+        setState(() => _idImage = image);
+        final url = await _uploadToStorage(image, type: 'id');
+        if (!mounted) return;
+        if (url != null) setState(() => _idDownloadUrl = url);
+      }
+      if (type == 'cert') {
+        setState(() => _certImage = image);
+        final url = await _uploadToStorage(image, type: 'cert');
+        if (!mounted) return;
+        if (url != null) setState(() => _certDownloadUrl = url);
+      }
+      if (type == 'portfolio') {
+        setState(() => _portfolioImages.add(image));
+        final url = await _uploadToStorage(image, type: 'portfolio', index: _portfolioImages.length - 1);
+        if (!mounted) return;
+        if (url != null) setState(() => _portfolioDownloadUrls.add(url));
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -219,10 +301,26 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                 onPressed: _saving
                     ? null
                     : () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.l10n('partner_submit_for_review')),
-                            backgroundColor: _royalNavy,
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            content: Text(
+                              context.l10n('partner_review_complete_message'),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  Navigator.of(context).popUntil(
+                                    (route) => route.isFirst,
+                                  );
+                                },
+                                child: Text(context.l10n('confirm')),
+                              ),
+                            ],
                           ),
                         );
                       },
@@ -357,7 +455,18 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                       child: _thumb(
                         f,
                         onRemove: () {
-                          setState(() => _portfolioImages.remove(f));
+                          final idx = _portfolioImages.indexOf(f);
+                          String? urlToDelete;
+                          if (idx >= 0 && idx < _portfolioDownloadUrls.length) {
+                            urlToDelete = _portfolioDownloadUrls[idx];
+                          }
+                          setState(() {
+                            _portfolioImages.remove(f);
+                            if (idx >= 0 && idx < _portfolioDownloadUrls.length) {
+                              _portfolioDownloadUrls.removeAt(idx);
+                            }
+                          });
+                          _deleteFromStorageByUrl(urlToDelete);
                           if (_portfolioImages.isEmpty) _toggleOffIfUploaded('portfolio');
                         },
                       ),
@@ -377,7 +486,11 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                 padding: const EdgeInsets.only(left: 8),
                 child: _thumb(
                   preview,
-                  onRemove: () => _toggleOffIfUploaded(type),
+                  onRemove: () {
+                    final urlToDelete = type == 'id' ? _idDownloadUrl : _certDownloadUrl;
+                    _toggleOffIfUploaded(type);
+                    _deleteFromStorageByUrl(urlToDelete);
+                  },
                 ),
               )
             else

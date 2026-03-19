@@ -1,6 +1,7 @@
 // Step 3: 사진·추가 요청 (70% 동선). 갤러리/카메라 연동 추후. / Photo upload & extra note.
 
 import 'package:flutter/material.dart';
+import '../../../core/app_localizations.dart';
 import '../request_flow_state.dart';
 
 class Step3PhotoDetailStep extends StatelessWidget {
@@ -20,13 +21,13 @@ class Step3PhotoDetailStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '사진 및 추가 요청',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            context.t('request_step3_title'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            '현장 사진을 올리면 전문가가 더 정확한 견적을 드립니다.',
+            context.t('request_step3_desc'),
             style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
           ),
           const SizedBox(height: 20),
@@ -47,7 +48,7 @@ class Step3PhotoDetailStep extends StatelessWidget {
                         children: [
                           Icon(Icons.check_circle, color: colorScheme.primary, size: 48),
                           const SizedBox(height: 8),
-                          Text('사진이 첨부되었습니다', style: TextStyle(color: colorScheme.onSurface)),
+                          Text(context.t('request_photo_attached'), style: TextStyle(color: colorScheme.onSurface)),
                         ],
                       ),
                     )
@@ -57,7 +58,7 @@ class Step3PhotoDetailStep extends StatelessWidget {
                         children: [
                           Icon(Icons.camera_alt, size: 48, color: colorScheme.onSurfaceVariant),
                           const SizedBox(height: 8),
-                          Text('사진 추가 (탭)', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                          Text(context.t('request_photo_add_tap'), style: TextStyle(color: colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     ),
@@ -66,10 +67,10 @@ class Step3PhotoDetailStep extends StatelessWidget {
           const SizedBox(height: 24),
           TextFormField(
             initialValue: state.extraNote,
-            decoration: const InputDecoration(
-              labelText: '추가 요청사항',
-              hintText: '전문가에게 전달할 메모를 입력하세요',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.t('wizard_extra_request_label'),
+              hintText: context.t('wizard_extra_request_hint'),
+              border: const OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
             maxLines: 4,

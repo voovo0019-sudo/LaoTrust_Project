@@ -61,13 +61,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
   static const int _sampleBaseCreatedAt = 1;
 
   static const Map<String, String> _jobTitleValueToKey = {
-    '식당 서버': 'job_title_restaurant_server',
-    '단순 노무': 'job_title_simple_labor',
-    '카페 알바': 'job_title_cafe_part_time',
-    '배달 도우미': 'job_title_delivery_helper',
-    '행사 스태프': 'job_title_event_staff',
-    '물류 보조': 'job_title_logistics',
-    '판촉 홍보': 'job_title_promotion',
+    '\uC2DD\uB2F9 \uC11C\uBC84': 'job_title_restaurant_server',
+    '\uB2E8\uC21C \uB178\uBB34': 'job_title_simple_labor',
+    '\uCE74\uD398 \uC54C\uBC14': 'job_title_cafe_part_time',
+    '\uBC30\uB2EC \uB3C4\uC6B0\uBBF8': 'job_title_delivery_helper',
+    '\uD589\uC0AC \uC2A4\uD0DC\uD504': 'job_title_event_staff',
+    '\uBB3C\uB958 \uBCF4\uC870': 'job_title_logistics',
+    '\uD310\uCD09 \uD64D\uBCF4': 'job_title_promotion',
     'Restaurant Server': 'job_title_restaurant_server',
     'Simple Labor': 'job_title_simple_labor',
     'Cafe Part-time': 'job_title_cafe_part_time',
@@ -83,25 +83,25 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
   };
 
   static const Map<String, String> _jobLocValueToKey = {
-    '비엔티안 시청 인근': 'location_near_vientiane_hall',
-    '타락광장 근처': 'location_near_that_luang',
-    '시내 중심가': 'location_downtown',
-    '시내': 'location_downtown',
+    '\uBE44\uC5D4\uD2F0\uC548 \uC2DC\uCCAD \uC778\uADFC': 'location_near_vientiane_hall',
+    '\uD0C0\uB77D\uAD11\uC7A5 \uADFC\uCC98': 'location_near_that_luang',
+    '\uC2DC\uB0B4 \uC911\uC2EC\uAC00': 'location_downtown',
+    '\uC2DC\uB0B4': 'location_downtown',
   };
 
   static const Map<String, String> _jobSalaryValueToKey = {
-    '15,000 LAK/시간': 'salary_15k_per_hour',
-    '12,000 LAK/시간': 'salary_12k_per_hour',
-    '협의': 'salary_negotiable',
+    '15,000 LAK/\uC2DC\uAC04': 'salary_15k_per_hour',
+    '12,000 LAK/\uC2DC\uAC04': 'salary_12k_per_hour',
+    '\uD611\uC758': 'salary_negotiable',
   };
 
   static const Map<String, String> _jobDetailValueToKey = {
-    '식당 서버': 'job_detail_restaurant_server',
-    '단순 노무': 'job_detail_simple_labor',
-    '카페 알바': 'job_detail_cafe_part_time',
-    '행사 스태프': 'job_detail_event_staff',
-    '물류 보조': 'job_detail_logistics',
-    '판촉 홍보': 'job_detail_promotion',
+    '\uC2DD\uB2F9 \uC11C\uBC84': 'job_detail_restaurant_server',
+    '\uB2E8\uC21C \uB178\uBB34': 'job_detail_simple_labor',
+    '\uCE74\uD398 \uC54C\uBC14': 'job_detail_cafe_part_time',
+    '\uD589\uC0AC \uC2A4\uD0DC\uD504': 'job_detail_event_staff',
+    '\uBB3C\uB958 \uBCF4\uC870': 'job_detail_logistics',
+    '\uD310\uCD09 \uD64D\uBCF4': 'job_detail_promotion',
     'Restaurant Server': 'job_detail_restaurant_server',
     'Simple Labor': 'job_detail_simple_labor',
     'Cafe Part-time': 'job_detail_cafe_part_time',

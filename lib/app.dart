@@ -13,6 +13,7 @@ import 'core/app_localizations.dart';
 import 'features/main_tab/main_tab_screen.dart';
 import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
+import 'features/profile/login_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
 import 'features/profile/partner_support_center_screen.dart';
@@ -109,6 +110,7 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
             ),
         RequestFlowScreen.routeName: (_) => const RequestFlowScreen(),
         profileRouteName: (_) => const ProfileScreen(),
+        loginScreenRouteName: (_) => const LoginScreen(),
         bcelOnepayRouteName: (_) => const BcelOnepayScreen(),
         expertDashboardRouteName: (_) => const ExpertDashboardScreen(),
         partnerSupportCenterRouteName: (_) => const PartnerSupportCenterScreen(),

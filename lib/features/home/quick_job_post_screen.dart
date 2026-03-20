@@ -5,12 +5,15 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
+import '../../services/auth_service.dart';
 import '../profile/profile_screen.dart';
+import 'quick_job_title_catalog.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
@@ -55,6 +58,12 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     _salaryController = TextEditingController(text: widget.initialSalary);
     _descriptionController = TextEditingController(text: widget.initialDetail);
     _deadline = widget.initialDeadline ?? DateTime.now().add(const Duration(hours: 24));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _primeAuthOnEntry());
+  }
+
+  Future<void> _primeAuthOnEntry() async {
+    await finalizeAppAuthState();
+    if (mounted) setState(() {});
   }
 
   @override
@@ -89,13 +98,18 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     if (goProfile == true) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
+          builder: (_) => const ProfileScreen(
+            openPhoneAuthOnStart: true,
+            popToHomeOnAuthSuccess: true,
+          ),
         ),
       );
     }
   }
 
   Future<void> _submit() async {
+    await finalizeAppAuthState();
+    if (!mounted) return;
     if (isFirebaseEnabled && !hasRecognizedUserSession) {
       await _showLoginRequiredDialog();
       return;
@@ -116,8 +130,21 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         );
         final geo = GeoPoint(p.latitude, p.longitude);
 
-        final titleValue = title.isEmpty ? null : title;
-        final titleKey = title.isEmpty ? 'quick_job_default_title' : null;
+        final String? titleKey;
+        final String? titleValue;
+        if (title.isEmpty) {
+          titleKey = 'quick_job_default_title';
+          titleValue = null;
+        } else {
+          final mapped = quickJobTitleStorageKeyForInput(title);
+          if (mapped != null) {
+            titleKey = mapped;
+            titleValue = null;
+          } else {
+            titleKey = null;
+            titleValue = title;
+          }
+        }
         final locValue = locText.isEmpty ? null : locText;
         final locKey = locText.isEmpty ? 'quick_job_default_location' : null;
         final salaryValue = salary.isEmpty ? null : salary;
@@ -134,14 +161,19 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           JobFields.jobType: 'quick_job_tag_part_time',
         };
 
+        const opTimeout = Duration(seconds: 25);
         if (widget.isEditMode) {
-          await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
+          await firestore
+              .collection(kColJobs)
+              .doc(widget.editDocumentId)
+              .update(payload)
+              .timeout(opTimeout);
         } else {
           await firestore.collection(kColJobs).add({
             ...payload,
             JobFields.createdAt: FieldValue.serverTimestamp(),
             JobFields.employerId: employerIdForCurrentSession(),
-          });
+          }).timeout(opTimeout);
         }
         success = true;
       } else {
@@ -158,9 +190,12 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     }
 
     if (!mounted || !success) return;
-    Navigator.of(context).pop(
-      isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult(),
-    );
+    final result =
+        isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(result);
+    });
   }
 
   Map<String, dynamic> _buildOfflineResult() {

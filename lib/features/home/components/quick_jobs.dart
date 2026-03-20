@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/firebase_service.dart';
 import '../../profile/profile_screen.dart';
 import '../quick_job_post_screen.dart';
+import '../quick_job_title_catalog.dart';
 import 'section_title_style.dart';
 
 class QuickJobsSection extends StatefulWidget {
@@ -63,7 +65,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   static const int _sampleBaseCreatedAt = 1;
 
-  static const Map<String, String> _jobTitleValueToKey = {
+  static final Map<String, String> _jobTitleValueToKey = {
+    ...kQuickJobTitlePhraseToKey,
     '\uC2DD\uB2F9 \uC11C\uBC84': 'job_title_restaurant_server',
     '\uB2E8\uC21C \uB178\uBB34': 'job_title_simple_labor',
     '\uCE74\uD398 \uC54C\uBC14': 'job_title_cafe_part_time',
@@ -84,6 +87,17 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     'ຊ່ວຍວຽກຂົນສົ່ງ': 'job_title_logistics',
     'ຕະຫຼາດ/ໂຄສະນາ': 'job_title_promotion',
   };
+
+  String _jobCardTitle(BuildContext context, Map<String, dynamic> job) {
+    if (job.containsKey('titleKey')) {
+      return context.t(job['titleKey']!.toString());
+    }
+    final raw = job['title']?.toString() ?? '';
+    if (raw.isEmpty) return '';
+    final direct = context.t(raw);
+    if (direct != raw) return direct;
+    return _localizedFromMaybeKey(context, raw, _jobTitleValueToKey);
+  }
 
   static const Map<String, String> _jobLocValueToKey = {
     '\uBE44\uC5D4\uD2F0\uC548 \uC2DC\uCCAD \uC778\uADFC': 'location_near_vientiane_hall',
@@ -162,7 +176,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (goProfile == true) {
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
-          builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
+          builder: (_) => const ProfileScreen(
+            openPhoneAuthOnStart: true,
+            popToHomeOnAuthSuccess: true,
+          ),
         ),
       );
     }
@@ -403,13 +420,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       const totalHours = 24.0;
                       final remainingHours = remaining.inMinutes / 60.0;
                       final progress = (remainingHours / totalHours).clamp(0.0, 1.0);
-                      final title = job.containsKey('titleKey')
-                          ? context.l10n(job['titleKey']?.toString() ?? '')
-                          : _localizedFromMaybeKey(
-                              context,
-                              job['title'],
-                              _jobTitleValueToKey,
-                            );
+                      final title = _jobCardTitle(context, job);
                       final location = job.containsKey('locKey')
                           ? context.l10n(job['locKey']?.toString() ?? '')
                           : _localizedFromMaybeKey(
@@ -637,12 +648,14 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             return InkWell(
               borderRadius: BorderRadius.circular(28),
               onTap: () async {
+                await finalizeAppAuthState();
+                if (!context.mounted) return;
                 if (isFirebaseEnabled && !hasRecognizedUserSession) {
                   await _promptLoginRequired(context);
                   return;
                 }
                 final result = await Navigator.pushNamed(context, quickJobPostRouteName);
-                if (!mounted) return;
+                if (!context.mounted) return;
                 if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
                   return;
                 }

@@ -135,8 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildMenuTile(
             context,
             icon: Icons.shield,
-            title: context.l10n('partner_support_center_title'),
-            subtitle: context.l10n('partner_support_center_info'),
+            title: context.t('partner_support_center_title'),
+            subtitle: context.t('partner_support_center_info'),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartnerSupportCenterScreen())),
           ),
           _buildMenuTile(

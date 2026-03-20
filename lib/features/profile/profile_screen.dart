@@ -17,9 +17,12 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
     this.openPhoneAuthOnStart = false,
+    this.popToHomeOnAuthSuccess = false,
   });
 
   final bool openPhoneAuthOnStart;
+  /// v7.9: 전화 인증(또는 화이트리스트) 성공 직후 루트(홈 탭)까지 복귀.
+  final bool popToHomeOnAuthSuccess;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -231,7 +234,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => _PhoneAuthSheet(onClose: () => Navigator.of(ctx).pop()),
+      builder: (ctx) => _PhoneAuthSheet(
+        onClose: () => Navigator.of(ctx).pop(),
+        popToHomeOnAuthSuccess: widget.popToHomeOnAuthSuccess,
+      ),
     );
   }
 
@@ -281,8 +287,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 class _PhoneAuthSheet extends StatefulWidget {
-  const _PhoneAuthSheet({required this.onClose});
+  const _PhoneAuthSheet({
+    required this.onClose,
+    this.popToHomeOnAuthSuccess = false,
+  });
   final VoidCallback onClose;
+  final bool popToHomeOnAuthSuccess;
 
   @override
   State<_PhoneAuthSheet> createState() => _PhoneAuthSheetState();
@@ -336,6 +346,15 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
     }
   }
 
+  void _finishAuthSuccessNavigate() {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    widget.onClose();
+    if (!widget.popToHomeOnAuthSuccess) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigator.popUntil((route) => route.isFirst);
+    });
+  }
+
   Future<void> _login() async {
     final digits = _normalizeDigits(phone);
     final inputCode = code.trim();
@@ -352,7 +371,7 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
     if (selectedCountryCode == '+82' && _isWhitelistKorea(digits) && inputCode == '123456') {
       if (!currentContext.mounted) return;
       whitelistDisplayPhoneNotifier.value = '$selectedCountryCode$digits';
-      widget.onClose();
+      _finishAuthSuccessNavigate();
       return;
     }
 
@@ -360,7 +379,7 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
     try {
       await signInWithPhoneCode(inputCode);
       if (!currentContext.mounted) return;
-      widget.onClose();
+      _finishAuthSuccessNavigate();
     } catch (_) {
       if (!currentContext.mounted) return;
       ScaffoldMessenger.of(currentContext).showSnackBar(

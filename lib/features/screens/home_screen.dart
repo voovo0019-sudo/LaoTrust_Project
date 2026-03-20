@@ -219,7 +219,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) =>
-                      const ProfileScreen(openPhoneAuthOnStart: true),
+                      const ProfileScreen(
+                        openPhoneAuthOnStart: true,
+                        popToHomeOnAuthSuccess: true,
+                      ),
                 ),
               );
             },

@@ -1385,7 +1385,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               side: BorderSide(color: canProceed ? _kRoyalBlue : Colors.grey.shade400, width: 1.2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             ),
-            child: Text(isLast ? context.l10n('apply_final') : context.l10n('next_step')),
+            child: Text(isLast ? context.t('apply_final') : context.t('next_step')),
           ),
         ),
       ),

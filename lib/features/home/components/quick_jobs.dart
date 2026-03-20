@@ -421,7 +421,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                         Text(
                                           remaining.isNegative
                                               ? context.l10n('job_deadline_passed')
-                                              : context.l10n('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
+                                              : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
                                           style: TextStyle(
                                             fontSize: 10,
                                             color: Colors.grey.shade600,

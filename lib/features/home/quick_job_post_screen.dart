@@ -180,7 +180,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : Text(context.l10n('quick_job_post_submit')),
+                  : Text(context.t('quick_job_post_submit')),
             ),
           ],
         ),

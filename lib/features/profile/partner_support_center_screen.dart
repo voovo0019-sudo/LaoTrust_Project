@@ -22,8 +22,6 @@ class PartnerSupportCenterScreen extends StatefulWidget {
 }
 
 class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen> {
-  bool _saving = false;
-
   final ImagePicker _picker = ImagePicker();
 
   XFile? _idImage;
@@ -37,6 +35,8 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
   bool get _idUploaded => _idImage != null;
   bool get _certUploaded => _certImage != null;
   bool get _portfolioUploaded => _portfolioImages.isNotEmpty;
+
+  bool get _canSubmitForReview => _idUploaded || _certUploaded || _portfolioUploaded;
 
   String? get _uid => auth.currentUser?.uid;
 
@@ -96,104 +96,97 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.l10n('partner_upload_removed')),
+        content: Text(context.t('partner_upload_removed')),
         backgroundColor: _royalNavy,
       ),
     );
   }
 
+  /// 위저드와 동일: 네이티브 피커만 await, 로컬 프리뷰는 즉시 setState. 스토리지 업로드는 백그라운드.
   Future<void> _pickFromGallery(String type) async {
-    if (_saving) return;
-    setState(() => _saving = true);
-    try {
-      if (type == 'portfolio') {
-        final remaining = (5 - _portfolioImages.length).clamp(0, 5);
-        if (remaining <= 0) return;
-        final images = await _picker.pickMultiImage(imageQuality: 85);
-        if (!mounted) return;
-        if (images.isEmpty) return;
-        final picked = images.take(remaining).toList();
-        setState(() => _portfolioImages.addAll(picked));
-        if (isFirebaseEnabled) {
-          for (final f in picked) {
-            final idx = _portfolioImages.indexOf(f);
-            _uploadToStorage(f, type: 'portfolio', index: idx).then((url) {
-              if (!mounted || url == null) return;
-              setState(() => _portfolioDownloadUrls.add(url));
-            });
-          }
-        }
-      } else {
-        final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
-        if (!mounted) return;
-        if (image == null) return;
-        if (type == 'id') {
-          setState(() => _idImage = image);
-          _uploadToStorage(image, type: 'id').then((url) {
+    if (type == 'portfolio') {
+      final remaining = (5 - _portfolioImages.length).clamp(0, 5);
+      if (remaining <= 0) return;
+      final images = await _picker.pickMultiImage(imageQuality: 85);
+      if (!mounted) return;
+      if (images.isEmpty) return;
+      final picked = images.take(remaining).toList();
+      setState(() => _portfolioImages.addAll(picked));
+      if (isFirebaseEnabled) {
+        for (final f in picked) {
+          final idx = _portfolioImages.indexOf(f);
+          _uploadToStorage(f, type: 'portfolio', index: idx).then((url) {
             if (!mounted || url == null) return;
-            setState(() => _idDownloadUrl = url);
-          });
-        }
-        if (type == 'cert') {
-          setState(() => _certImage = image);
-          _uploadToStorage(image, type: 'cert').then((url) {
-            if (!mounted || url == null) return;
-            setState(() => _certDownloadUrl = url);
+            setState(() => _portfolioDownloadUrls.add(url));
           });
         }
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n('partner_upload_success')),
+          content: Text(context.t('partner_upload_success')),
           backgroundColor: _royalNavy,
         ),
       );
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      return;
     }
+    final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (!mounted) return;
+    if (image == null) return;
+    if (type == 'id') {
+      setState(() => _idImage = image);
+      _uploadToStorage(image, type: 'id').then((url) {
+        if (!mounted || url == null) return;
+        setState(() => _idDownloadUrl = url);
+      });
+    } else if (type == 'cert') {
+      setState(() => _certImage = image);
+      _uploadToStorage(image, type: 'cert').then((url) {
+        if (!mounted || url == null) return;
+        setState(() => _certDownloadUrl = url);
+      });
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.t('partner_upload_success')),
+        backgroundColor: _royalNavy,
+      ),
+    );
   }
 
   Future<void> _pickFromCamera(String type) async {
-    if (_saving) return;
-    setState(() => _saving = true);
-    try {
-      if (type == 'portfolio' && _portfolioImages.length >= 5) return;
-      final image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
-      if (!mounted) return;
-      if (image == null) return;
-      if (type == 'id') {
-        setState(() => _idImage = image);
-        _uploadToStorage(image, type: 'id').then((url) {
-          if (!mounted || url == null) return;
-          setState(() => _idDownloadUrl = url);
-        });
-      }
-      if (type == 'cert') {
-        setState(() => _certImage = image);
-        _uploadToStorage(image, type: 'cert').then((url) {
-          if (!mounted || url == null) return;
-          setState(() => _certDownloadUrl = url);
-        });
-      }
-      if (type == 'portfolio') {
-        setState(() => _portfolioImages.add(image));
-        final idx = _portfolioImages.length - 1;
-        _uploadToStorage(image, type: 'portfolio', index: idx).then((url) {
-          if (!mounted || url == null) return;
-          setState(() => _portfolioDownloadUrls.add(url));
-        });
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n('partner_upload_success')),
-          backgroundColor: _royalNavy,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _saving = false);
+    if (type == 'portfolio' && _portfolioImages.length >= 5) return;
+    final image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    if (!mounted) return;
+    if (image == null) return;
+    if (type == 'id') {
+      setState(() => _idImage = image);
+      _uploadToStorage(image, type: 'id').then((url) {
+        if (!mounted || url == null) return;
+        setState(() => _idDownloadUrl = url);
+      });
+    } else if (type == 'cert') {
+      setState(() => _certImage = image);
+      _uploadToStorage(image, type: 'cert').then((url) {
+        if (!mounted || url == null) return;
+        setState(() => _certDownloadUrl = url);
+      });
+    } else if (type == 'portfolio') {
+      setState(() => _portfolioImages.add(image));
+      final idx = _portfolioImages.length - 1;
+      _uploadToStorage(image, type: 'portfolio', index: idx).then((url) {
+        if (!mounted || url == null) return;
+        setState(() => _portfolioDownloadUrls.add(url));
+      });
     }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.t('partner_upload_success')),
+        backgroundColor: _royalNavy,
+      ),
+    );
   }
 
   Future<void> _showPickMenu(String type) async {
@@ -211,7 +204,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: Text(context.l10n('partner_pick_gallery')),
+                title: Text(context.t('partner_pick_gallery')),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickFromGallery(type);
@@ -219,7 +212,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.photo_camera_outlined),
-                title: Text(context.l10n('partner_pick_camera')),
+                title: Text(context.t('partner_pick_camera')),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickFromCamera(type);
@@ -228,7 +221,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               const SizedBox(height: 6),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(context.l10n('confirm')),
+                child: Text(context.t('confirm')),
               ),
             ],
           ),
@@ -274,7 +267,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
       appBar: AppBar(
         backgroundColor: _royalNavy,
         foregroundColor: Colors.white,
-        title: Text(context.l10n('partner_support_center_title')),
+        title: Text(context.t('partner_support_center_title')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -284,57 +277,55 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
             _buildInfoCard(),
             const SizedBox(height: 24),
             _buildUploadSection(
-              context.l10n('partner_upload_id'),
-              context.l10n('partner_upload_id_hint'),
+              context.t('partner_upload_id'),
+              context.t('partner_upload_id_hint'),
               Icons.badge,
               _idUploaded,
               type: 'id',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
-              context.l10n('partner_upload_cert'),
-              context.l10n('partner_upload_cert_hint'),
+              context.t('partner_upload_cert'),
+              context.t('partner_upload_cert_hint'),
               Icons.card_membership,
               _certUploaded,
               type: 'cert',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
-              context.l10n('partner_upload_portfolio'),
-              context.l10n('partner_upload_portfolio_hint'),
+              context.t('partner_upload_portfolio'),
+              context.t('partner_upload_portfolio_hint'),
               Icons.photo_library,
               _portfolioUploaded,
               type: 'portfolio',
             ),
             const SizedBox(height: 32),
-            if (_idUploaded && _certUploaded)
+            if (_canSubmitForReview)
               ElevatedButton(
-                onPressed: _saving
-                    ? null
-                    : () {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                            content: Text(
-                              context.l10n('partner_review_complete_message'),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(ctx).pop();
-                                  Navigator.of(context).popUntil(
-                                    (route) => route.isFirst,
-                                  );
-                                },
-                                child: Text(context.l10n('confirm')),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      content: Text(
+                        context.t('partner_review_complete_message'),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            Navigator.of(context).popUntil(
+                              (route) => route.isFirst,
+                            );
+                          },
+                          child: Text(context.t('confirm')),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _royalNavy,
                   foregroundColor: Colors.white,
@@ -343,7 +334,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
-                child: Text(context.l10n('partner_submit_for_review')),
+                child: Text(context.t('partner_submit_for_review')),
               ),
           ],
         ),
@@ -365,7 +356,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              context.l10n('partner_support_center_info'),
+              context.t('partner_support_center_info'),
               style: const TextStyle(
                 color: _royalNavy,
                 fontSize: 13,
@@ -385,22 +376,19 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     bool uploaded,
     {required String type}
   ) {
-    final VoidCallback? onTap = _saving
-        ? null
-        : () {
-            if (uploaded) {
-              _toggleOffIfUploaded(type);
-              return;
-            }
-            _showPickMenu(type);
-          };
     final preview = switch (type) {
       'id' => _idImage,
       'cert' => _certImage,
       _ => null,
     };
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        if (uploaded) {
+          _toggleOffIfUploaded(type);
+          return;
+        }
+        _showPickMenu(type);
+      },
       borderRadius: BorderRadius.circular(28),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -450,13 +438,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                 ],
               ),
             ),
-            if (_saving)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else if (type == 'portfolio' && _portfolioImages.isNotEmpty)
+            if (type == 'portfolio' && _portfolioImages.isNotEmpty)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

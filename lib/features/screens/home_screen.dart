@@ -1,3 +1,4 @@
+// 메인 탭 진입: `features/home/home_screen.dart`에서 re-export. v7.5 실시간 알바는 QuickJobsSection.
 import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 import '../../core/app_localizations.dart';

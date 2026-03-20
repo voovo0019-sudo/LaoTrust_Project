@@ -266,6 +266,11 @@
   "quick_job_dyn_beauty": "ຄວາມງາມ",
   "quick_job_dyn_photo": "ຖ່າຍຮູບ",
   "quick_job_dyn_garden": "ສວນ/ພາຍນອກ",
+  "quick_job_dyn_desc_order": "ຮັກສາລະບຽບ",
+  "status": "ສະຖານະ",
+  "location": "ສະຖານທີ່",
+  "salary": "ຄ່າແຮງ",
+  "detail": "ລາຍລະອຽດ",
 
   "radar_stage_1km": "ກຳລັງຄົ້ນຫາ 1km",
   "radar_stage_3km": "ກຳລັງຄົ້ນຫາ 3km",

@@ -266,6 +266,11 @@
   "quick_job_dyn_beauty": "Beauty",
   "quick_job_dyn_photo": "Photo",
   "quick_job_dyn_garden": "Garden / exterior",
+  "quick_job_dyn_desc_order": "Maintaining order",
+  "status": "Status",
+  "location": "Location",
+  "salary": "Salary",
+  "detail": "Details",
 
   "radar_stage_1km": "Searching 1km",
   "radar_stage_3km": "Searching 3km",

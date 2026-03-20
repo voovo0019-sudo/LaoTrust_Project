@@ -287,6 +287,11 @@
   "quick_job_dyn_beauty": "뷰티",
   "quick_job_dyn_photo": "사진",
   "quick_job_dyn_garden": "정원/외부관리",
+  "quick_job_dyn_desc_order": "질서 유지",
+  "status": "상태",
+  "location": "장소",
+  "salary": "급여",
+  "detail": "업무 상세",
 
   "radar_stage_1km": "1km 수색 중",
   "radar_stage_3km": "3km 수색 중",

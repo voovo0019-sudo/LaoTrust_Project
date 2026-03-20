@@ -7,8 +7,23 @@
 
 import 'package:flutter/material.dart';
 
-/// Fallback map kept empty to prevent hardcoded locale strings in source.
-const Map<String, String> _kFallbackKo = {};
+/// JSON 로드 실패·웹 캐시 등으로 맵이 비어도 `quick_job_dyn_*` 키가 그대로 노출되지 않도록 한국어 폴백.
+const Map<String, String> _kFallbackKo = {
+  'quick_job_dyn_event': '행사',
+  'quick_job_dyn_delivery': '배달',
+  'quick_job_dyn_cleaning': '청소',
+  'quick_job_dyn_repair': '수리',
+  'quick_job_dyn_security': '경비',
+  'quick_job_dyn_tutoring': '과외',
+  'quick_job_dyn_beauty': '뷰티',
+  'quick_job_dyn_photo': '사진',
+  'quick_job_dyn_garden': '정원/외부관리',
+  'quick_job_dyn_desc_order': '질서 유지',
+  'status': '상태',
+  'location': '장소',
+  'salary': '급여',
+  'detail': '업무 상세',
+};
 
 class AppLocalizations {
   const AppLocalizations._({required this.locale, required this.data});
@@ -25,8 +40,11 @@ class AppLocalizations {
 
 /// 지사 인계용: context.l10n('key') — 번역 없으면 한국어 폴백, 코드명 노출 방지.
 extension L10nContext on BuildContext {
-  String l10n(String key) =>
-      AppLocalizations.of(this)?.s(key) ?? _kFallbackKo[key] ?? key;
+  String l10n(String key) {
+    final loc = AppLocalizations.of(this);
+    if (loc != null) return loc.s(key);
+    return _kFallbackKo[key] ?? key;
+  }
 
   /// v6.3 directive alias: enforce `t('key')` usage in UI.
   String t(String key) => l10n(key);

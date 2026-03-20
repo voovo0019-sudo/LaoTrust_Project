@@ -112,7 +112,20 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
         bcelOnepayRouteName: (_) => const BcelOnepayScreen(),
         expertDashboardRouteName: (_) => const ExpertDashboardScreen(),
         partnerSupportCenterRouteName: (_) => const PartnerSupportCenterScreen(),
-        quickJobPostRouteName: (_) => const QuickJobPostScreen(),
+        quickJobPostRouteName: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          if (args == null || args.isEmpty) {
+            return const QuickJobPostScreen();
+          }
+          return QuickJobPostScreen(
+            editDocumentId: args['documentId'] as String?,
+            initialTitle: args['title'] as String? ?? '',
+            initialLocation: args['location'] as String? ?? '',
+            initialSalary: args['salary'] as String? ?? '',
+            initialDetail: args['detail'] as String? ?? '',
+            initialDeadline: args['deadline'] as DateTime?,
+          );
+        },
         UniversalWizardScreen.routeName: (context) {
           final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
           return UniversalWizardScreen(

@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
+import '../../../core/firebase_service.dart';
 import '../../../services/firebase_service.dart';
+import '../../profile/profile_screen.dart';
 import '../quick_job_post_screen.dart';
 import 'section_title_style.dart';
 
@@ -118,6 +121,106 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   final PageController _pageController = PageController(viewportFraction: 0.48);
   int _currentPage = 0;
+
+  int _createdAtMillis(dynamic v) {
+    if (v is Timestamp) return v.millisecondsSinceEpoch;
+    if (v is DateTime) return v.millisecondsSinceEpoch;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return 0;
+  }
+
+  bool _isOwnJob(Map<String, dynamic> job) {
+    if (job['isSample'] == true) return false;
+    final docId = job['documentId']?.toString();
+    if (docId == null || docId.isEmpty) return false;
+    final uid = auth.currentUser?.uid;
+    if (uid == null) return false;
+    return job['employerId']?.toString() == uid;
+  }
+
+  Future<void> _promptLoginRequired(BuildContext context) async {
+    final goProfile = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(context.t('quick_job_login_required_title')),
+        content: Text(context.t('quick_job_login_required_message')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(context.t('quick_job_dialog_cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(context.t('quick_job_go_to_profile')),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted) return;
+    if (goProfile == true) {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteJobAfterConfirm(BuildContext context, String documentId) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(context.t('quick_job_delete_confirm_title')),
+        content: Text(context.t('quick_job_delete_confirm_message')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(context.t('quick_job_dialog_cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(context.t('quick_job_delete_action')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await widget.firebaseService.deleteQuickJobDocument(documentId);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.t('quick_job_save_failed'))),
+        );
+      }
+    }
+  }
+
+  void _openEditJob(
+    BuildContext context, {
+    required Map<String, dynamic> job,
+    required String title,
+    required String location,
+    required String salary,
+    required String detail,
+    required DateTime deadlineAt,
+  }) {
+    Navigator.pushNamed(
+      context,
+      quickJobPostRouteName,
+      arguments: <String, dynamic>{
+        'documentId': job['documentId'],
+        'title': title,
+        'location': location,
+        'salary': salary,
+        'detail': detail,
+        'deadline': deadlineAt,
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -236,10 +339,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ];
 
             realJobs.sort((a, b) {
-              final aCreated = a['createdAt'];
-              final bCreated = b['createdAt'];
-              final aNum = aCreated is num ? aCreated.toInt() : (aCreated is DateTime ? aCreated.millisecondsSinceEpoch : 0);
-              final bNum = bCreated is num ? bCreated.toInt() : (bCreated is DateTime ? bCreated.millisecondsSinceEpoch : 0);
+              final aNum = _createdAtMillis(a['createdAt']);
+              final bNum = _createdAtMillis(b['createdAt']);
               return bNum.compareTo(aNum);
             });
 
@@ -279,6 +380,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                         final t = job['deadlineAt'];
                         if (t is DateTime) {
                           deadlineAt = t;
+                        } else if (t is Timestamp) {
+                          deadlineAt = t.toDate();
                         } else if (t is int) {
                           deadlineAt = DateTime.fromMillisecondsSinceEpoch(t);
                         }
@@ -288,8 +391,9 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       } else {
                         deadlineAt ??= DateTime.now().add(Duration(hours: 2 + index * 3));
                       }
+                      final DateTime deadlineResolved = deadlineAt;
                       final now = DateTime.now();
-                      final remaining = deadlineAt.difference(now);
+                      final remaining = deadlineResolved.difference(now);
                       const totalHours = 24.0;
                       final remainingHours = remaining.inMinutes / 60.0;
                       final progress = (remainingHours / totalHours).clamp(0.0, 1.0);
@@ -322,6 +426,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                               _jobDetailValueToKey,
                             );
                       final tag = _localizedIfKeyOrRaw(context, job['tag']);
+                      final bool ownJob = _isOwnJob(job);
 
                       return AnimatedScale(
                         scale: _currentPage == index ? 1.0 : 0.96,
@@ -395,11 +500,45 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                         ),
                                       ),
                                       const SizedBox(width: 2),
-                                      const Icon(
-                                        Icons.chevron_right,
-                                        color: Color(0xFF1E3A8A),
-                                        size: 20,
-                                      ),
+                                      if (ownJob)
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E3A8A), size: 20),
+                                              tooltip: context.t('quick_job_edit_action'),
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                              onPressed: () => _openEditJob(
+                                                context,
+                                                job: job,
+                                                title: title,
+                                                location: location,
+                                                salary: salary,
+                                                detail: detail,
+                                                deadlineAt: deadlineResolved,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete_outline, color: Color(0xFF1E3A8A), size: 20),
+                                              tooltip: context.t('quick_job_delete_action'),
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                              onPressed: () {
+                                                final id = job['documentId']?.toString();
+                                                if (id != null && id.isNotEmpty) {
+                                                  _deleteJobAfterConfirm(context, id);
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        )
+                                      else
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          color: Color(0xFF1E3A8A),
+                                          size: 20,
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 6),
@@ -482,8 +621,15 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     return InkWell(
       borderRadius: BorderRadius.circular(28),
       onTap: () async {
+        if (isFirebaseEnabled && auth.currentUser == null) {
+          await _promptLoginRequired(context);
+          return;
+        }
         final result = await Navigator.pushNamed(context, quickJobPostRouteName);
         if (!mounted) return;
+        if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
+          return;
+        }
         if (result is Map<String, dynamic>) {
           setState(() {
             _localJobs.insert(0, {...result, 'isSample': false});

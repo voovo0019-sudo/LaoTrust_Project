@@ -5,7 +5,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
+import '../home/home_screen.dart';
 import '../jobs/jobs_screen.dart';
 import '../chat/chat_screen.dart';
 import '../profile/profile_screen.dart';

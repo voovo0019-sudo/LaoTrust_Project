@@ -1,5 +1,6 @@
 // =============================================================================
 // v1.3: 급구 알바 구인 등록 UI — [알바 구인+] 진입
+// v7.5: 인증 가드, 위치 타임아웃, 수정 모드, Firestore 완료 후 즉시 복귀.
 // 디자인: 곡률 28px, 로얄 네이비 #1E293B.
 // =============================================================================
 
@@ -9,24 +10,52 @@ import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
+import '../profile/profile_screen.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
 
 class QuickJobPostScreen extends StatefulWidget {
-  const QuickJobPostScreen({super.key});
+  const QuickJobPostScreen({
+    super.key,
+    this.editDocumentId,
+    this.initialTitle = '',
+    this.initialLocation = '',
+    this.initialSalary = '',
+    this.initialDetail = '',
+    this.initialDeadline,
+  });
+
+  final String? editDocumentId;
+  final String initialTitle;
+  final String initialLocation;
+  final String initialSalary;
+  final String initialDetail;
+  final DateTime? initialDeadline;
+
+  bool get isEditMode => editDocumentId != null && editDocumentId!.isNotEmpty;
 
   @override
   State<QuickJobPostScreen> createState() => _QuickJobPostScreenState();
 }
 
 class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
-  final _titleController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _salaryController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  DateTime _deadline = DateTime.now().add(const Duration(hours: 24));
+  late final TextEditingController _titleController;
+  late final TextEditingController _locationController;
+  late final TextEditingController _salaryController;
+  late final TextEditingController _descriptionController;
+  late DateTime _deadline;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _locationController = TextEditingController(text: widget.initialLocation);
+    _salaryController = TextEditingController(text: widget.initialSalary);
+    _descriptionController = TextEditingController(text: widget.initialDetail);
+    _deadline = widget.initialDeadline ?? DateTime.now().add(const Duration(hours: 24));
+  }
 
   @override
   void dispose() {
@@ -37,18 +66,110 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    setState(() => _saving = true);
-    await Future.delayed(const Duration(milliseconds: 200));
+  Future<void> _showLoginRequiredDialog() async {
+    final goProfile = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(context.t('quick_job_login_required_title')),
+        content: Text(context.t('quick_job_login_required_message')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(context.t('quick_job_dialog_cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(context.t('quick_job_go_to_profile')),
+          ),
+        ],
+      ),
+    );
     if (!mounted) return;
+    if (goProfile == true) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const ProfileScreen(openPhoneAuthOnStart: true),
+        ),
+      );
+    }
+  }
+
+  Future<void> _submit() async {
+    if (isFirebaseEnabled && auth.currentUser == null) {
+      await _showLoginRequiredDialog();
+      return;
+    }
+
+    setState(() => _saving = true);
+    var success = false;
+    try {
+      final title = _titleController.text.trim();
+      final locText = _locationController.text.trim();
+      final salary = _salaryController.text.trim();
+      final detail = _descriptionController.text.trim();
+
+      if (isFirebaseEnabled) {
+        final (p, _) = await getUserLocationOrDefault().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => (kVientianeCityHall, true),
+        );
+        final geo = GeoPoint(p.latitude, p.longitude);
+
+        final titleValue = title.isEmpty ? null : title;
+        final titleKey = title.isEmpty ? 'quick_job_default_title' : null;
+        final locValue = locText.isEmpty ? null : locText;
+        final locKey = locText.isEmpty ? 'quick_job_default_location' : null;
+        final salaryValue = salary.isEmpty ? null : salary;
+        final salaryKey = salary.isEmpty ? 'salary_negotiable' : null;
+
+        final payload = <String, dynamic>{
+          JobFields.title: titleValue ?? titleKey,
+          JobFields.location: locValue ?? locKey,
+          JobFields.salary: salaryValue ?? salaryKey,
+          JobFields.description: detail,
+          JobFields.deadlineAt: Timestamp.fromDate(_deadline),
+          JobFields.updatedAt: FieldValue.serverTimestamp(),
+          JobFields.locationGeo: geo,
+          JobFields.jobType: 'quick_job_tag_part_time',
+        };
+
+        if (widget.isEditMode) {
+          await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
+        } else {
+          await firestore.collection(kColJobs).add({
+            ...payload,
+            JobFields.createdAt: FieldValue.serverTimestamp(),
+            JobFields.employerId: auth.currentUser?.uid,
+          });
+        }
+        success = true;
+      } else {
+        success = true;
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.t('quick_job_save_failed'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+
+    if (!mounted || !success) return;
+    Navigator.of(context).pop(
+      isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult(),
+    );
+  }
+
+  Map<String, dynamic> _buildOfflineResult() {
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     final title = _titleController.text.trim();
     final locText = _locationController.text.trim();
     final salary = _salaryController.text.trim();
     final detail = _descriptionController.text.trim();
-
-    // UI 즉시 반영용(로컬) 데이터
-    final jobForUi = <String, dynamic>{
+    return <String, dynamic>{
       'title': title.isEmpty ? context.l10n('quick_job_default_title') : title,
       'loc': locText.isEmpty ? context.l10n('quick_job_default_location') : locText,
       'salary': salary.isEmpty ? context.l10n('salary_negotiable') : salary,
@@ -57,41 +178,6 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       'createdAt': nowMs,
       'tag': 'quick_job_tag_part_time',
     };
-
-    // Firestore 실시간 동기화(웹/모바일 공통)
-    if (isFirebaseEnabled) {
-      try {
-        final (p, _) = await getUserLocationOrDefault();
-        final geo = GeoPoint(p.latitude, p.longitude);
-
-        // Store language-neutral keys for defaults so UI can localize dynamically.
-        final titleValue = title.isEmpty ? null : title;
-        final titleKey = title.isEmpty ? 'quick_job_default_title' : null;
-        final locValue = locText.isEmpty ? null : locText;
-        final locKey = locText.isEmpty ? 'quick_job_default_location' : null;
-        final salaryValue = salary.isEmpty ? null : salary;
-        final salaryKey = salary.isEmpty ? 'salary_negotiable' : null;
-
-        await firestore.collection(kColJobs).add({
-          JobFields.title: titleValue ?? titleKey,
-          JobFields.location: locValue ?? locKey,
-          JobFields.salary: salaryValue ?? salaryKey,
-          JobFields.description: detail,
-          JobFields.deadlineAt: Timestamp.fromDate(_deadline),
-          JobFields.createdAt: FieldValue.serverTimestamp(),
-          JobFields.updatedAt: FieldValue.serverTimestamp(),
-          JobFields.locationGeo: geo,
-          JobFields.jobType: 'quick_job_tag_part_time',
-          JobFields.employerId: auth.currentUser?.uid,
-        });
-      } catch (_) {
-        // 동기화 실패해도 UI는 먼저 완료 처리(오프라인/권한 등 케이스)
-      }
-    }
-
-    if (!mounted) return;
-    setState(() => _saving = false);
-    Navigator.of(context).pop(jobForUi);
   }
 
   @override
@@ -100,7 +186,11 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       appBar: AppBar(
         backgroundColor: _royalNavy,
         foregroundColor: Colors.white,
-        title: Text(context.l10n('quick_job_post_title')),
+        title: Text(
+          widget.isEditMode
+              ? context.t('quick_job_post_edit_title')
+              : context.l10n('quick_job_post_title'),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -180,7 +270,11 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : Text(context.t('quick_job_post_submit')),
+                  : Text(
+                      widget.isEditMode
+                          ? context.t('quick_job_post_save_edit')
+                          : context.t('quick_job_post_submit'),
+                    ),
             ),
           ],
         ),

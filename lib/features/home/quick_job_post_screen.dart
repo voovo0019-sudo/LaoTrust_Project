@@ -150,30 +150,41 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         final salaryValue = salary.isEmpty ? null : salary;
         final salaryKey = salary.isEmpty ? 'salary_negotiable' : null;
 
+        final String? detailKey;
+        final String? detailValue;
+        if (detail.isEmpty) {
+          detailKey = null;
+          detailValue = null;
+        } else {
+          final mappedDetail = quickJobDetailStorageKeyForInput(detail);
+          if (mappedDetail != null) {
+            detailKey = mappedDetail;
+            detailValue = null;
+          } else {
+            detailKey = null;
+            detailValue = detail;
+          }
+        }
+
         final payload = <String, dynamic>{
           JobFields.title: titleValue ?? titleKey,
           JobFields.location: locValue ?? locKey,
           JobFields.salary: salaryValue ?? salaryKey,
-          JobFields.description: detail,
+          JobFields.description: detailValue ?? detailKey ?? '',
           JobFields.deadlineAt: Timestamp.fromDate(_deadline),
           JobFields.updatedAt: FieldValue.serverTimestamp(),
           JobFields.locationGeo: geo,
           JobFields.jobType: 'quick_job_tag_part_time',
         };
 
-        const opTimeout = Duration(seconds: 25);
         if (widget.isEditMode) {
-          await firestore
-              .collection(kColJobs)
-              .doc(widget.editDocumentId)
-              .update(payload)
-              .timeout(opTimeout);
+          await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
         } else {
           await firestore.collection(kColJobs).add({
             ...payload,
             JobFields.createdAt: FieldValue.serverTimestamp(),
             JobFields.employerId: employerIdForCurrentSession(),
-          }).timeout(opTimeout);
+          });
         }
         success = true;
       } else {

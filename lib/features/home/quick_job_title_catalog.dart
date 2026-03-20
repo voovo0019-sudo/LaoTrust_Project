@@ -12,6 +12,7 @@ const Map<String, String> kQuickJobTitlePhraseToKey = {
   '청소': 'quick_job_dyn_cleaning',
   '수리': 'quick_job_dyn_repair',
   '경비': 'quick_job_dyn_security',
+  '경호': 'quick_job_dyn_security',
   '과외': 'quick_job_dyn_tutoring',
   '뷰티': 'quick_job_dyn_beauty',
   '사진': 'quick_job_dyn_photo',
@@ -31,4 +32,17 @@ const Map<String, String> kQuickJobTitlePhraseToKey = {
 String? quickJobTitleStorageKeyForInput(String trimmedTitle) {
   if (trimmedTitle.isEmpty) return null;
   return kQuickJobTitlePhraseToKey[trimmedTitle];
+}
+
+/// 업무 상세(짧은 한글 등) → 저장용 i18n 키
+const Map<String, String> kQuickJobDetailPhraseToKey = {
+  '질서유지': 'quick_job_dyn_desc_order',
+  '질서 유지': 'quick_job_dyn_desc_order',
+  '질서정리': 'quick_job_dyn_desc_order',
+  '질서 정리': 'quick_job_dyn_desc_order',
+};
+
+String? quickJobDetailStorageKeyForInput(String trimmedDetail) {
+  if (trimmedDetail.isEmpty) return null;
+  return kQuickJobDetailPhraseToKey[trimmedDetail];
 }

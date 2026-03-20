@@ -90,13 +90,26 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   String _jobCardTitle(BuildContext context, Map<String, dynamic> job) {
     if (job.containsKey('titleKey')) {
-      return context.t(job['titleKey']!.toString());
+      return context.t(job['titleKey']!.toString().trim());
     }
-    final raw = job['title']?.toString() ?? '';
+    final raw = (job['title']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final direct = context.t(raw);
-    if (direct != raw) return direct;
+    final viaT = context.t(raw);
+    if (viaT != raw) return viaT;
     return _localizedFromMaybeKey(context, raw, _jobTitleValueToKey);
+  }
+
+  String _jobCardDetail(BuildContext context, Map<String, dynamic> job) {
+    if (job.containsKey('detailKey')) {
+      return context.t(job['detailKey']!.toString().trim());
+    }
+    final raw = (job['detail']?.toString() ?? '').trim();
+    if (raw.isEmpty) return '';
+    final viaT = context.t(raw);
+    if (viaT != raw) return viaT;
+    final phraseKey = kQuickJobDetailPhraseToKey[raw];
+    if (phraseKey != null) return context.t(phraseKey);
+    return _localizedFromMaybeKey(context, raw, _jobDetailValueToKey);
   }
 
   static const Map<String, String> _jobLocValueToKey = {
@@ -112,7 +125,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     '\uD611\uC758': 'salary_negotiable',
   };
 
-  static const Map<String, String> _jobDetailValueToKey = {
+  static final Map<String, String> _jobDetailValueToKey = {
+    ...kQuickJobDetailPhraseToKey,
     '\uC2DD\uB2F9 \uC11C\uBC84': 'job_detail_restaurant_server',
     '\uB2E8\uC21C \uB178\uBB34': 'job_detail_simple_labor',
     '\uCE74\uD398 \uC54C\uBC14': 'job_detail_cafe_part_time',
@@ -251,7 +265,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     Map<String, String> valueToKey,
   ) {
     if (maybeKeyOrValue == null) return '';
-    final raw = maybeKeyOrValue.toString();
+    final raw = maybeKeyOrValue.toString().trim();
+    if (raw.isEmpty) return '';
     final key = valueToKey[raw];
     return key == null ? raw : context.l10n(key);
   }
@@ -288,7 +303,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${context.l10n('quick_job_tag_label')}: $tag',
+              '${context.t('status')}: $tag',
               style: const TextStyle(
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
@@ -296,7 +311,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${context.l10n('job_detail_location')}: $location',
+              '${context.t('location')}: $location',
               style: const TextStyle(
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
@@ -304,7 +319,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${context.l10n('job_detail_salary')}: $salary',
+              '${context.t('salary')}: $salary',
               style: const TextStyle(
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
@@ -312,7 +327,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${context.l10n('job_detail_description')}: $detail',
+              '${context.t('detail')}: $detail',
               style: const TextStyle(
                 fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
@@ -435,13 +450,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                               job['salary'],
                               _jobSalaryValueToKey,
                             );
-                      final detail = job.containsKey('detailKey')
-                          ? context.l10n(job['detailKey']?.toString() ?? '')
-                          : _localizedFromMaybeKey(
-                              context,
-                              title,
-                              _jobDetailValueToKey,
-                            );
+                      final detail = _jobCardDetail(context, job);
                       final tag = _localizedIfKeyOrRaw(context, job['tag']);
                       final bool ownJob = _isOwnJob(job);
 

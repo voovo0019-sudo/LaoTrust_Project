@@ -22,6 +22,25 @@ FirebaseAuth get auth => FirebaseAuth.instance;
 /// 화이트리스트 로그인 시 Firebase signIn 없이 표시용 전화번호만 저장. 배너/프로필에서 last4 노출용.
 final ValueNotifier<String?> whitelistDisplayPhoneNotifier = ValueNotifier<String?>(null);
 
+/// Firebase Auth 세션 **또는** 화이트리스트 표시 로그인(위 notifier에 번호가 있음)이면 true.
+/// 환영 배너(0019 엔진)와 급구 알바 등록 가드의 기준을 통일한다.
+bool get hasRecognizedUserSession {
+  if (auth.currentUser != null) return true;
+  final v = whitelistDisplayPhoneNotifier.value?.trim();
+  return v != null && v.isNotEmpty;
+}
+
+/// `jobs.employerId` 저장·소유권 비교용: Auth UID 우선, 없으면 `whitelist_` + 숫자만(안정 키).
+String? employerIdForCurrentSession() {
+  final uid = auth.currentUser?.uid;
+  if (uid != null && uid.isNotEmpty) return uid;
+  final raw = whitelistDisplayPhoneNotifier.value?.trim();
+  if (raw == null || raw.isEmpty) return null;
+  final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+  if (digits.isEmpty) return null;
+  return 'whitelist_$digits';
+}
+
 /// Firestore 오프라인 우선: 기기에 먼저 캐시하고 연결 시 서버와 동기화.
 /// 앱 시작 시 한 번 호출. (미션02: 인터넷 불안정 지역 대비)
 Future<void> enableFirestoreOfflinePersistence() async {

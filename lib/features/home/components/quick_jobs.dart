@@ -134,9 +134,9 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (job['isSample'] == true) return false;
     final docId = job['documentId']?.toString();
     if (docId == null || docId.isEmpty) return false;
-    final uid = auth.currentUser?.uid;
-    if (uid == null) return false;
-    return job['employerId']?.toString() == uid;
+    final ownerKey = employerIdForCurrentSession();
+    if (ownerKey == null) return false;
+    return job['employerId']?.toString() == ownerKey;
   }
 
   Future<void> _promptLoginRequired(BuildContext context) async {
@@ -328,9 +328,15 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         const SizedBox(height: 10),
         _buildPremiumPostCard(context),
         const SizedBox(height: 10),
-        StreamBuilder<List<Map<String, dynamic>>>(
-          stream: widget.firebaseService.getQuickJobs(),
-          builder: (context, snapshot) {
+        ListenableBuilder(
+          listenable: whitelistDisplayPhoneNotifier,
+          builder: (context, _) {
+            return StreamBuilder(
+              stream: auth.authStateChanges(),
+              builder: (context, __) {
+                return StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: widget.firebaseService.getQuickJobs(),
+                  builder: (context, snapshot) {
             final remote = snapshot.data ?? const <Map<String, dynamic>>[];
 
             final realJobs = <Map<String, dynamic>>[
@@ -611,6 +617,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                 ),
               ],
             );
+                  },
+                );
+              },
+            );
           },
         ),
       ],
@@ -618,25 +628,31 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
   }
 
   Widget _buildPremiumPostCard(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(28),
-      onTap: () async {
-        if (isFirebaseEnabled && auth.currentUser == null) {
-          await _promptLoginRequired(context);
-          return;
-        }
-        final result = await Navigator.pushNamed(context, quickJobPostRouteName);
-        if (!mounted) return;
-        if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
-          return;
-        }
-        if (result is Map<String, dynamic>) {
-          setState(() {
-            _localJobs.insert(0, {...result, 'isSample': false});
-          });
-        }
-      },
-      child: Container(
+    return ListenableBuilder(
+      listenable: whitelistDisplayPhoneNotifier,
+      builder: (context, _) {
+        return StreamBuilder(
+          stream: auth.authStateChanges(),
+          builder: (context, __) {
+            return InkWell(
+              borderRadius: BorderRadius.circular(28),
+              onTap: () async {
+                if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                  await _promptLoginRequired(context);
+                  return;
+                }
+                final result = await Navigator.pushNamed(context, quickJobPostRouteName);
+                if (!mounted) return;
+                if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
+                  return;
+                }
+                if (result is Map<String, dynamic>) {
+                  setState(() {
+                    _localJobs.insert(0, {...result, 'isSample': false});
+                  });
+                }
+              },
+              child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
@@ -670,7 +686,11 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
           ],
         ),
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

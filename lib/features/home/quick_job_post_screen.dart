@@ -96,7 +96,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
   }
 
   Future<void> _submit() async {
-    if (isFirebaseEnabled && auth.currentUser == null) {
+    if (isFirebaseEnabled && !hasRecognizedUserSession) {
       await _showLoginRequiredDialog();
       return;
     }
@@ -140,7 +140,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           await firestore.collection(kColJobs).add({
             ...payload,
             JobFields.createdAt: FieldValue.serverTimestamp(),
-            JobFields.employerId: auth.currentUser?.uid,
+            JobFields.employerId: employerIdForCurrentSession(),
           });
         }
         success = true;

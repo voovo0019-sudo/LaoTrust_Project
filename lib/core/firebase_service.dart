@@ -1,9 +1,11 @@
 // LT-08 미션02: Firebase(Firestore + 전화번호 인증) 개통.
 // 지사 인계용: Firestore 오프라인 지속 저장 활성화, Auth 전화번호 로그인 진입점 제공.
 
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Firebase 초기화 여부. main()에서 초기화 실패 시 false.
 bool get isFirebaseEnabled => _firebaseEnabled;
@@ -50,6 +52,42 @@ Future<void> enableFirestoreOfflinePersistence() async {
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
+  registerAuthForegroundGuard();
+}
+
+// -----------------------------------------------------------------------------
+// v10.1 과제 C: 포그라운드 복귀 시 토큰 갱신 → Auth 스트림·세션 인지와 동기화
+// (AuthService와 순환 import 방지를 위해 core에 둠. 전화 인증 API는 auth_service.)
+// -----------------------------------------------------------------------------
+
+bool _authForegroundGuardRegistered = false;
+
+class _AuthForegroundGuard with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_syncAuthOnResume());
+    }
+  }
+}
+
+Future<void> _syncAuthOnResume() async {
+  if (!_firebaseEnabled) return;
+  final u = auth.currentUser;
+  if (u == null) return;
+  try {
+    await u.getIdToken(true);
+    await u.reload();
+  } catch (_) {
+    // 네트워크·토큰 오류는 이후 authStateChanges / UI 가드가 처리
+  }
+}
+
+/// 앱 생명주기당 1회 등록. [enableFirestoreOfflinePersistence] 성공 시 호출.
+void registerAuthForegroundGuard() {
+  if (_authForegroundGuardRegistered || !_firebaseEnabled) return;
+  _authForegroundGuardRegistered = true;
+  WidgetsBinding.instance.addObserver(_AuthForegroundGuard());
 }
 
 /// 전화번호 인증: 번호로 인증 코드 발송 후, 코드 입력으로 로그인.

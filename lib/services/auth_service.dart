@@ -2,6 +2,9 @@
 // LT-10 [Auth] 라오스 현지 전화번호 기반 인증(Phone Auth) 로직
 // lib/services/auth_service.dart — Laos +856, 디지털 캡슐 v1.5. 한/영 주석 병기.
 // v7.9: 모바일 Auth 스냅샷 확정(finalize) — currentUser 레이스 완화.
+// v10.1: 앱 포그라운드 복귀 시 토큰 갱신·세션 동기화는 순환 import 방지를 위해
+//        [registerAuthForegroundGuard]가 core/firebase_service.dart에 있으며,
+//        [enableFirestoreOfflinePersistence] 성공 시 1회 등록된다.
 // =============================================================================
 
 import 'dart:async';

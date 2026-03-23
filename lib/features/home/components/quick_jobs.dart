@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
+import '../../../core/translation_mapper.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/firebase_service.dart';
 import '../../profile/profile_screen.dart';
 import '../quick_job_post_screen.dart';
-import '../quick_job_title_catalog.dart';
 import 'section_title_style.dart';
 
 class QuickJobsSection extends StatefulWidget {
@@ -65,38 +65,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   static const int _sampleBaseCreatedAt = 1;
 
-  static final Map<String, String> _jobTitleValueToKey = {
-    ...kQuickJobTitlePhraseToKey,
-    '\uC2DD\uB2F9 \uC11C\uBC84': 'job_title_restaurant_server',
-    '\uB2E8\uC21C \uB178\uBB34': 'job_title_simple_labor',
-    '\uCE74\uD398 \uC54C\uBC14': 'job_title_cafe_part_time',
-    '\uBC30\uB2EC \uB3C4\uC6B0\uBBF8': 'job_title_delivery_helper',
-    '\uD589\uC0AC \uC2A4\uD0DC\uD504': 'job_title_event_staff',
-    '\uBB3C\uB958 \uBCF4\uC870': 'job_title_logistics',
-    '\uD310\uCD09 \uD64D\uBCF4': 'job_title_promotion',
-    'Restaurant Server': 'job_title_restaurant_server',
-    'Simple Labor': 'job_title_simple_labor',
-    'Cafe Part-time': 'job_title_cafe_part_time',
-    'Event Staff': 'job_title_event_staff',
-    'Logistics Assistant': 'job_title_logistics',
-    'Promotion': 'job_title_promotion',
-    'ພະນັກງານຮ້ານອາຫານ': 'job_title_restaurant_server',
-    'ແຮງງານທົ່ວໄປ': 'job_title_simple_labor',
-    'ວຽກພາດໄທມ໌ຮ້ານກາເຟ': 'job_title_cafe_part_time',
-    'ພະນັກງານງານອີເວັນ': 'job_title_event_staff',
-    'ຊ່ວຍວຽກຂົນສົ່ງ': 'job_title_logistics',
-    'ຕະຫຼາດ/ໂຄສະນາ': 'job_title_promotion',
-  };
-
   String _jobCardTitle(BuildContext context, Map<String, dynamic> job) {
     if (job.containsKey('titleKey')) {
       return context.t(job['titleKey']!.toString().trim());
     }
     final raw = (job['title']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final viaT = context.t(raw);
-    if (viaT != raw) return viaT;
-    return _localizedFromMaybeKey(context, raw, _jobTitleValueToKey);
+    return displayQuickJobTitle(context, raw);
   }
 
   String _jobCardDetail(BuildContext context, Map<String, dynamic> job) {
@@ -105,47 +80,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     }
     final raw = (job['detail']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final viaT = context.t(raw);
-    if (viaT != raw) return viaT;
-    final phraseKey = kQuickJobDetailPhraseToKey[raw];
-    if (phraseKey != null) return context.t(phraseKey);
-    return _localizedFromMaybeKey(context, raw, _jobDetailValueToKey);
+    return displayQuickJobDetail(context, raw);
   }
-
-  static const Map<String, String> _jobLocValueToKey = {
-    '\uBE44\uC5D4\uD2F0\uC548 \uC2DC\uCCAD \uC778\uADFC': 'location_near_vientiane_hall',
-    '\uD0C0\uB77D\uAD11\uC7A5 \uADFC\uCC98': 'location_near_that_luang',
-    '\uC2DC\uB0B4 \uC911\uC2EC\uAC00': 'location_downtown',
-    '\uC2DC\uB0B4': 'location_downtown',
-  };
-
-  static const Map<String, String> _jobSalaryValueToKey = {
-    '15,000 LAK/\uC2DC\uAC04': 'salary_15k_per_hour',
-    '12,000 LAK/\uC2DC\uAC04': 'salary_12k_per_hour',
-    '\uD611\uC758': 'salary_negotiable',
-  };
-
-  static final Map<String, String> _jobDetailValueToKey = {
-    ...kQuickJobDetailPhraseToKey,
-    '\uC2DD\uB2F9 \uC11C\uBC84': 'job_detail_restaurant_server',
-    '\uB2E8\uC21C \uB178\uBB34': 'job_detail_simple_labor',
-    '\uCE74\uD398 \uC54C\uBC14': 'job_detail_cafe_part_time',
-    '\uD589\uC0AC \uC2A4\uD0DC\uD504': 'job_detail_event_staff',
-    '\uBB3C\uB958 \uBCF4\uC870': 'job_detail_logistics',
-    '\uD310\uCD09 \uD64D\uBCF4': 'job_detail_promotion',
-    'Restaurant Server': 'job_detail_restaurant_server',
-    'Simple Labor': 'job_detail_simple_labor',
-    'Cafe Part-time': 'job_detail_cafe_part_time',
-    'Event Staff': 'job_detail_event_staff',
-    'Logistics Assistant': 'job_detail_logistics',
-    'Promotion': 'job_detail_promotion',
-    'ພະນັກງານຮ້ານອາຫານ': 'job_detail_restaurant_server',
-    'ແຮງງານທົ່ວໄປ': 'job_detail_simple_labor',
-    'ວຽກພາດໄທມ໌ຮ້ານກາເຟ': 'job_detail_cafe_part_time',
-    'ພະນັກງານງານອີເວັນ': 'job_detail_event_staff',
-    'ຊ່ວຍວຽກຂົນສົ່ງ': 'job_detail_logistics',
-    'ຕະຫຼາດ/ໂຄສະນາ': 'job_detail_promotion',
-  };
 
   final PageController _pageController = PageController(viewportFraction: 0.48);
   int _currentPage = 0;
@@ -257,18 +193,6 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  String _localizedFromMaybeKey(
-    BuildContext context,
-    Object? maybeKeyOrValue,
-    Map<String, String> valueToKey,
-  ) {
-    if (maybeKeyOrValue == null) return '';
-    final raw = maybeKeyOrValue.toString().trim();
-    if (raw.isEmpty) return '';
-    final key = valueToKey[raw];
-    return key == null ? raw : context.l10n(key);
   }
 
   String _localizedIfKeyOrRaw(BuildContext context, Object? maybeKeyOrValue) {
@@ -438,17 +362,15 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       final title = _jobCardTitle(context, job);
                       final location = job.containsKey('locKey')
                           ? context.l10n(job['locKey']?.toString() ?? '')
-                          : _localizedFromMaybeKey(
+                          : displayQuickJobLocation(
                               context,
-                              job['loc'],
-                              _jobLocValueToKey,
+                              (job['loc']?.toString() ?? '').trim(),
                             );
                       final salary = job.containsKey('salaryKey')
                           ? context.l10n(job['salaryKey']?.toString() ?? '')
-                          : _localizedFromMaybeKey(
+                          : displayQuickJobSalary(
                               context,
-                              job['salary'],
-                              _jobSalaryValueToKey,
+                              (job['salary']?.toString() ?? '').trim(),
                             );
                       final detail = _jobCardDetail(context, job);
                       final tag = _localizedIfKeyOrRaw(context, job['tag']);

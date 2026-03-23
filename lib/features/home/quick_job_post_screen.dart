@@ -5,15 +5,14 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
+import '../../core/translation_mapper.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
 import '../profile/profile_screen.dart';
-import 'quick_job_title_catalog.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
@@ -117,6 +116,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
 
     setState(() => _saving = true);
     var success = false;
+    var overlayShown = false;
     try {
       final title = _titleController.text.trim();
       final locText = _locationController.text.trim();
@@ -124,53 +124,41 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       final detail = _descriptionController.text.trim();
 
       if (isFirebaseEnabled) {
+        if (!context.mounted) return;
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          useRootNavigator: true,
+          builder: (_) => PopScope(
+            canPop: false,
+            child: Material(
+              type: MaterialType.transparency,
+              child: Center(
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(28),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        overlayShown = true;
+
         final (p, _) = await getUserLocationOrDefault().timeout(
           const Duration(seconds: 5),
           onTimeout: () => (kVientianeCityHall, true),
         );
+        if (!context.mounted) return;
         final geo = GeoPoint(p.latitude, p.longitude);
 
-        final String? titleKey;
-        final String? titleValue;
-        if (title.isEmpty) {
-          titleKey = 'quick_job_default_title';
-          titleValue = null;
-        } else {
-          final mapped = quickJobTitleStorageKeyForInput(title);
-          if (mapped != null) {
-            titleKey = mapped;
-            titleValue = null;
-          } else {
-            titleKey = null;
-            titleValue = title;
-          }
-        }
-        final locValue = locText.isEmpty ? null : locText;
-        final locKey = locText.isEmpty ? 'quick_job_default_location' : null;
-        final salaryValue = salary.isEmpty ? null : salary;
-        final salaryKey = salary.isEmpty ? 'salary_negotiable' : null;
-
-        final String? detailKey;
-        final String? detailValue;
-        if (detail.isEmpty) {
-          detailKey = null;
-          detailValue = null;
-        } else {
-          final mappedDetail = quickJobDetailStorageKeyForInput(detail);
-          if (mappedDetail != null) {
-            detailKey = mappedDetail;
-            detailValue = null;
-          } else {
-            detailKey = null;
-            detailValue = detail;
-          }
-        }
-
         final payload = <String, dynamic>{
-          JobFields.title: titleValue ?? titleKey,
-          JobFields.location: locValue ?? locKey,
-          JobFields.salary: salaryValue ?? salaryKey,
-          JobFields.description: detailValue ?? detailKey ?? '',
+          JobFields.title: encodeQuickJobTitleForFirestore(title),
+          JobFields.location: encodeQuickJobLocationForFirestore(locText),
+          JobFields.salary: encodeQuickJobSalaryForFirestore(salary),
+          JobFields.description: encodeQuickJobDetailForFirestore(detail),
           JobFields.deadlineAt: Timestamp.fromDate(_deadline),
           JobFields.updatedAt: FieldValue.serverTimestamp(),
           JobFields.locationGeo: geo,
@@ -197,16 +185,16 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         );
       }
     } finally {
+      if (overlayShown && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
       if (mounted) setState(() => _saving = false);
     }
 
     if (!mounted || !success) return;
     final result =
         isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(result);
-    });
+    Navigator.of(context, rootNavigator: true).pop(result);
   }
 
   Map<String, dynamic> _buildOfflineResult() {

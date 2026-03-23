@@ -5,6 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:lao_trust/core/firebase_service.dart';
+import 'package:lao_trust/core/translation_mapper.dart';
 import 'package:lao_trust/data/firestore_schema.dart';
 
 /// 전문가 서비스·급구 알바 Firestore 스트림 제공. UI는 사용처(예: HomeScreen)에서만 처리.
@@ -61,10 +62,10 @@ class FirebaseService {
         return {
           'documentId': doc.id,
           'employerId': data[JobFields.employerId],
-          'title': data[JobFields.title],
-          'loc': data[JobFields.location],
-          'salary': data[JobFields.salary],
-          'detail': data[JobFields.description],
+          'title': normalizeQuickJobTitleFromFirestore(data[JobFields.title]),
+          'loc': normalizeQuickJobLocationFromFirestore(data[JobFields.location]),
+          'salary': normalizeQuickJobSalaryFromFirestore(data[JobFields.salary]),
+          'detail': normalizeQuickJobDetailFromFirestore(data[JobFields.description]),
           // Store as translation key when possible (fallback handled in UI).
           'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
           'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',

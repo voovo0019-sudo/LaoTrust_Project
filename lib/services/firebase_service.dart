@@ -5,7 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:lao_trust/core/firebase_service.dart';
-import 'package:lao_trust/core/translation_mapper.dart';
+import 'package:lao_trust/core/quick_job_triple_map_builder.dart';
 import 'package:lao_trust/data/firestore_schema.dart';
 
 /// 전문가 서비스·급구 알바 Firestore 스트림 제공. UI는 사용처(예: HomeScreen)에서만 처리.
@@ -45,7 +45,7 @@ class FirebaseService {
   }
 
   /// 급구 알바 목록 실시간 스트림.
-  /// 컬렉션: jobs. 필드: title, loc(location), tag(jobType), tagColor.
+  /// v10.8: title_i18n 등 Map 우선, 레거시 String은 healQuickJobI18nField로 즉시 정규화.
   Stream<List<Map<String, dynamic>>> getQuickJobs() {
     if (!isFirebaseEnabled) {
       return Stream.value([]);
@@ -59,14 +59,25 @@ class FirebaseService {
         final data = doc.data();
         final createdAt = data[JobFields.createdAt];
         final deadlineAt = data[JobFields.deadlineAt];
+        final titleMap = healQuickJobI18nField(
+          data[JobFields.titleI18n] ?? data[JobFields.title],
+        );
+        final locMap = healQuickJobI18nField(
+          data[JobFields.locationI18n] ?? data[JobFields.location],
+        );
+        final salaryMap = healQuickJobI18nField(
+          data[JobFields.salaryI18n] ?? data[JobFields.salary],
+        );
+        final detailMap = healQuickJobI18nField(
+          data[JobFields.descriptionI18n] ?? data[JobFields.description],
+        );
         return {
           'documentId': doc.id,
           'employerId': data[JobFields.employerId],
-          'title': normalizeQuickJobTitleFromFirestore(data[JobFields.title]),
-          'loc': normalizeQuickJobLocationFromFirestore(data[JobFields.location]),
-          'salary': normalizeQuickJobSalaryFromFirestore(data[JobFields.salary]),
-          'detail': normalizeQuickJobDetailFromFirestore(data[JobFields.description]),
-          // Store as translation key when possible (fallback handled in UI).
+          'titleMap': titleMap,
+          'locMap': locMap,
+          'salaryMap': salaryMap,
+          'detailMap': detailMap,
           'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
           'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
           'createdAt': _createdAtMillis(createdAt),

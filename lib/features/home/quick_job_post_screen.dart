@@ -4,11 +4,13 @@
 // 디자인: 곡률 28px, 로얄 네이비 #1E293B.
 // =============================================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
-import '../../core/translation_mapper.dart';
+import '../../core/quick_job_triple_map_builder.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
@@ -16,6 +18,9 @@ import '../profile/profile_screen.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
+
+/// v10.2 Fail-Safe: 타임아웃 시 스낵바 문구 (지시서 원문).
+const String kQuickJobSaveTimeoutSnackMessage = '통신이 원활하지 않으나 등록은 시도되었습니다';
 
 class QuickJobPostScreen extends StatefulWidget {
   const QuickJobPostScreen({
@@ -117,6 +122,8 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     setState(() => _saving = true);
     var success = false;
     var overlayShown = false;
+    var timedOut = false;
+    NavigatorState? rootNav;
     try {
       final title = _titleController.text.trim();
       final locText = _locationController.text.trim();
@@ -124,7 +131,8 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       final detail = _descriptionController.text.trim();
 
       if (isFirebaseEnabled) {
-        if (!context.mounted) return;
+        if (!mounted) return;
+        rootNav = Navigator.of(context, rootNavigator: true);
         showDialog<void>(
           context: context,
           barrierDismissible: false,
@@ -147,37 +155,46 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         );
         overlayShown = true;
 
-        final (p, _) = await getUserLocationOrDefault().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => (kVientianeCityHall, true),
-        );
-        if (!context.mounted) return;
-        final geo = GeoPoint(p.latitude, p.longitude);
+        await Future<void>(() async {
+          final (p, _) = await getUserLocationOrDefault();
+          if (!mounted) return;
+          final geo = GeoPoint(p.latitude, p.longitude);
+          final sourceLang = Localizations.localeOf(context).languageCode;
 
-        final payload = <String, dynamic>{
-          JobFields.title: encodeQuickJobTitleForFirestore(title),
-          JobFields.location: encodeQuickJobLocationForFirestore(locText),
-          JobFields.salary: encodeQuickJobSalaryForFirestore(salary),
-          JobFields.description: encodeQuickJobDetailForFirestore(detail),
-          JobFields.deadlineAt: Timestamp.fromDate(_deadline),
-          JobFields.updatedAt: FieldValue.serverTimestamp(),
-          JobFields.locationGeo: geo,
-          JobFields.jobType: 'quick_job_tag_part_time',
-        };
+          final maps = await Future.wait([
+            QuickJobTripleMapBuilder.build(title, sourceLanguageCode: sourceLang),
+            QuickJobTripleMapBuilder.build(locText, sourceLanguageCode: sourceLang),
+            QuickJobTripleMapBuilder.build(salary, sourceLanguageCode: sourceLang),
+            QuickJobTripleMapBuilder.build(detail, sourceLanguageCode: sourceLang),
+          ]);
 
-        if (widget.isEditMode) {
-          await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
-        } else {
-          await firestore.collection(kColJobs).add({
-            ...payload,
-            JobFields.createdAt: FieldValue.serverTimestamp(),
-            JobFields.employerId: employerIdForCurrentSession(),
-          });
-        }
+          final payload = <String, dynamic>{
+            JobFields.titleI18n: maps[0],
+            JobFields.locationI18n: maps[1],
+            JobFields.salaryI18n: maps[2],
+            JobFields.descriptionI18n: maps[3],
+            JobFields.deadlineAt: Timestamp.fromDate(_deadline),
+            JobFields.updatedAt: FieldValue.serverTimestamp(),
+            JobFields.locationGeo: geo,
+            JobFields.jobType: 'quick_job_tag_part_time',
+          };
+
+          if (widget.isEditMode) {
+            await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
+          } else {
+            await firestore.collection(kColJobs).add({
+              ...payload,
+              JobFields.createdAt: FieldValue.serverTimestamp(),
+              JobFields.employerId: employerIdForCurrentSession(),
+            });
+          }
+        }).timeout(const Duration(seconds: 5));
         success = true;
       } else {
         success = true;
       }
+    } on TimeoutException {
+      timedOut = true;
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -185,13 +202,23 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         );
       }
     } finally {
-      if (overlayShown && mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
+      if (overlayShown) {
+        rootNav?.pop();
       }
       if (mounted) setState(() => _saving = false);
     }
 
-    if (!mounted || !success) return;
+    if (!mounted) return;
+
+    if (timedOut) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(kQuickJobSaveTimeoutSnackMessage)),
+      );
+      Navigator.of(context, rootNavigator: true).pop(<String, dynamic>{'_firebaseHandled': true});
+      return;
+    }
+
+    if (!success) return;
     final result =
         isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult();
     Navigator.of(context, rootNavigator: true).pop(result);
@@ -203,11 +230,21 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     final locText = _locationController.text.trim();
     final salary = _salaryController.text.trim();
     final detail = _descriptionController.text.trim();
+    final sl = Localizations.localeOf(context).languageCode;
     return <String, dynamic>{
-      'title': title.isEmpty ? context.l10n('quick_job_default_title') : title,
-      'loc': locText.isEmpty ? context.l10n('quick_job_default_location') : locText,
-      'salary': salary.isEmpty ? context.l10n('salary_negotiable') : salary,
-      'detail': detail,
+      'titleMap': QuickJobTripleMapBuilder.policyTripleFallback(
+        title.isEmpty ? context.l10n('quick_job_default_title') : title,
+        sl,
+      ),
+      'locMap': QuickJobTripleMapBuilder.policyTripleFallback(
+        locText.isEmpty ? context.l10n('quick_job_default_location') : locText,
+        sl,
+      ),
+      'salaryMap': QuickJobTripleMapBuilder.policyTripleFallback(
+        salary.isEmpty ? context.l10n('salary_negotiable') : salary,
+        sl,
+      ),
+      'detailMap': QuickJobTripleMapBuilder.policyTripleFallback(detail, sl),
       'deadlineAt': _deadline,
       'createdAt': nowMs,
       'tag': 'quick_job_tag_part_time',

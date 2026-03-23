@@ -82,4 +82,9 @@ abstract class JobFields {
   static const String updatedAt = 'updatedAt';
   /// 급구 알바: 마감 시각 (Timestamp). 퀵 데드라인 바 계산용.
   static const String deadlineAt = 'deadline_at';
+  /// v10.8: KO/EN/LO 삼중 맵 (Firestore Map)
+  static const String titleI18n = 'title_i18n';
+  static const String locationI18n = 'location_i18n';
+  static const String salaryI18n = 'salary_i18n';
+  static const String descriptionI18n = 'description_i18n';
 }

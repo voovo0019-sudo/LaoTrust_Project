@@ -83,16 +83,31 @@ const Map<String, String> kQuickJobTitleLegacyValueToKey = {
 };
 
 const Map<String, String> kQuickJobLocLegacyValueToKey = {
-  '\uBE44\uC5D4\uD2F0\uC548 \uC2DC\uCCAD \uC778\uADFC': 'location_near_vientiane_hall',
-  '\uD0C0\uB77D\uAD11\uC7A5 \uADFC\uCC98': 'location_near_that_luang',
-  '\uC2DC\uB0B4 \uC911\uC2EC\uAC00': 'location_downtown',
-  '\uC2DC\uB0B4': 'location_downtown',
+  '비엔티안 시청 인근': 'location_near_vientiane_hall',
+  '비엔티안시청인근': 'location_near_vientiane_hall',
+  '비엔티안': 'location_near_vientiane_hall',
+  'Vientiane city hall area': 'location_near_vientiane_hall',
+  'Near Vientiane Hall': 'location_near_vientiane_hall',
+  '타락광장 근처': 'location_near_that_luang',
+  'That Luang area': 'location_near_that_luang',
+  '시내 중심가': 'location_downtown',
+  '시내중심가': 'location_downtown',
+  'Downtown': 'location_downtown',
+  'City center': 'location_downtown',
+  'City Center': 'location_downtown',
+  '시내': 'location_downtown',
+  'ໃຈກາງເມືອງ': 'location_downtown',
 };
 
 const Map<String, String> kQuickJobSalaryLegacyValueToKey = {
   '15,000 LAK/\uC2DC\uAC04': 'salary_15k_per_hour',
   '12,000 LAK/\uC2DC\uAC04': 'salary_12k_per_hour',
   '\uD611\uC758': 'salary_negotiable',
+  '추후 결정': 'salary_negotiable',
+  '추후결정': 'salary_negotiable',
+  'Negotiable': 'salary_negotiable',
+  'TBD': 'salary_negotiable',
+  'To be determined': 'salary_negotiable',
 };
 
 const Map<String, String> kQuickJobDetailLegacyValueToKey = {
@@ -119,6 +134,26 @@ const Map<String, String> kQuickJobDetailLegacyValueToKey = {
 
 bool _looksLikeI18nKey(String s) => s.startsWith('quick_job_') || s.startsWith('job_') || s.startsWith('location_') || s.startsWith('salary_');
 
+String _trimCollapseWs(String s) => s.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+String _compactNoSpace(String s) => s.replaceAll(RegExp(r'\s+'), '');
+
+String? _lookupLocationPhrase(String trimmed) {
+  final t = trimmed.trim();
+  if (t.isEmpty) return null;
+  return kQuickJobLocLegacyValueToKey[t] ??
+      kQuickJobLocLegacyValueToKey[_trimCollapseWs(t)] ??
+      kQuickJobLocLegacyValueToKey[_compactNoSpace(t)];
+}
+
+String? _lookupSalaryPhrase(String trimmed) {
+  final t = trimmed.trim();
+  if (t.isEmpty) return null;
+  return kQuickJobSalaryLegacyValueToKey[t] ??
+      kQuickJobSalaryLegacyValueToKey[_trimCollapseWs(t)] ??
+      kQuickJobSalaryLegacyValueToKey[_compactNoSpace(t)];
+}
+
 String encodeQuickJobTitleForFirestore(String trimmed) {
   if (trimmed.isEmpty) return 'quick_job_default_title';
   final key = quickJobTitleStorageKeyForInput(trimmed);
@@ -128,15 +163,22 @@ String encodeQuickJobTitleForFirestore(String trimmed) {
 
 String encodeQuickJobLocationForFirestore(String trimmed) {
   if (trimmed.isEmpty) return 'quick_job_default_location';
-  final key = kQuickJobLocLegacyValueToKey[trimmed];
+  final key = _lookupLocationPhrase(trimmed);
   if (key != null) return key;
   return '$kQuickJobLiteralPrefix$trimmed';
 }
 
 String encodeQuickJobSalaryForFirestore(String trimmed) {
   if (trimmed.isEmpty) return 'salary_negotiable';
-  final key = kQuickJobSalaryLegacyValueToKey[trimmed];
+  final key = _lookupSalaryPhrase(trimmed);
   if (key != null) return key;
+  final t = trimmed.trim();
+  if (RegExp(r'^\s*협의\s*$', unicode: true).hasMatch(t)) {
+    return 'salary_negotiable';
+  }
+  if (t.contains('협의')) {
+    return '$kQuickJobLiteralPrefix$t';
+  }
   return '$kQuickJobLiteralPrefix$trimmed';
 }
 
@@ -164,7 +206,7 @@ String normalizeQuickJobLocationFromFirestore(dynamic v) {
   if (s.isEmpty) return 'quick_job_default_location';
   if (s.startsWith(kQuickJobLiteralPrefix)) return s;
   if (_looksLikeI18nKey(s)) return s;
-  final key = kQuickJobLocLegacyValueToKey[s];
+  final key = _lookupLocationPhrase(s);
   if (key != null) return key;
   return '$kQuickJobLiteralPrefix$s';
 }
@@ -175,8 +217,11 @@ String normalizeQuickJobSalaryFromFirestore(dynamic v) {
   if (s.isEmpty) return 'salary_negotiable';
   if (s.startsWith(kQuickJobLiteralPrefix)) return s;
   if (_looksLikeI18nKey(s)) return s;
-  final key = kQuickJobSalaryLegacyValueToKey[s];
+  final key = _lookupSalaryPhrase(s);
   if (key != null) return key;
+  if (s.contains('협의')) {
+    return '$kQuickJobLiteralPrefix$s';
+  }
   return '$kQuickJobLiteralPrefix$s';
 }
 
@@ -208,18 +253,61 @@ String displayQuickJobStoredField(
   return key == null ? t : context.l10n(key);
 }
 
+/// 리터럴/혼합 문자열 속 자주 쓰는 장소 키워드를 현재 로케일 [t]로 치환 (긴 구문 우선).
+String localizeQuickJobLocationFreeText(BuildContext context, String s) {
+  if (s.isEmpty) return s;
+  var o = s;
+  final pairs = <(String, String)>[
+    ('비엔티안 시청 인근', 'location_near_vientiane_hall'),
+    ('비엔티안시청인근', 'location_near_vientiane_hall'),
+    ('타락광장 근처', 'location_near_that_luang'),
+    ('시내 중심가', 'location_downtown'),
+    ('시내중심가', 'location_downtown'),
+    ('비엔티안', 'location_near_vientiane_hall'),
+  ];
+  for (final p in pairs) {
+    o = o.replaceAll(p.$1, context.t(p.$2));
+  }
+  return o;
+}
+
+/// 급여 문구 속 '협의·추후 결정' 등을 현재 로케일 키로 치환 (숫자·단위는 유지).
+String localizeQuickJobSalaryFreeText(BuildContext context, String s) {
+  if (s.isEmpty) return s;
+  var o = s;
+  o = o.replaceAll('추후 결정', context.t('salary_negotiable'));
+  o = o.replaceAll('추후결정', context.t('salary_negotiable'));
+  o = o.replaceAll('협의', context.t('salary_negotiable'));
+  o = o.replaceAll('Negotiable', context.t('salary_negotiable'));
+  o = o.replaceAll('TBD', context.t('salary_negotiable'));
+  return o;
+}
+
+String localizeQuickJobDetailFreeText(BuildContext context, String s) {
+  if (s.isEmpty) return s;
+  var o = s;
+  o = o.replaceAll('질서 유지', context.t('quick_job_dyn_desc_order'));
+  o = o.replaceAll('질서유지', context.t('quick_job_dyn_desc_order'));
+  o = o.replaceAll('질서 정리', context.t('quick_job_dyn_desc_order'));
+  o = o.replaceAll('질서정리', context.t('quick_job_dyn_desc_order'));
+  return o;
+}
+
 String displayQuickJobTitle(BuildContext context, String stored) {
   return displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobTitleLegacyValueToKey);
 }
 
 String displayQuickJobLocation(BuildContext context, String stored) {
-  return displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobLocLegacyValueToKey);
+  final base = displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobLocLegacyValueToKey);
+  return localizeQuickJobLocationFreeText(context, base);
 }
 
 String displayQuickJobSalary(BuildContext context, String stored) {
-  return displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobSalaryLegacyValueToKey);
+  final base = displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobSalaryLegacyValueToKey);
+  return localizeQuickJobSalaryFreeText(context, base);
 }
 
 String displayQuickJobDetail(BuildContext context, String stored) {
-  return displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobDetailLegacyValueToKey);
+  final base = displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobDetailLegacyValueToKey);
+  return localizeQuickJobDetailFreeText(context, base);
 }

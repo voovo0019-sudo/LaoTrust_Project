@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
+import '../../../core/quick_job_triple_map_builder.dart';
 import '../../../core/translation_mapper.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/firebase_service.dart';
@@ -65,18 +66,68 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   static const int _sampleBaseCreatedAt = 1;
 
-  String _jobCardTitle(BuildContext context, Map<String, dynamic> job) {
-    if (job.containsKey('titleKey')) {
+  String _displayJobTitle(BuildContext context, Map<String, dynamic> job) {
+    if (job['titleKey'] != null) {
       return context.t(job['titleKey']!.toString().trim());
+    }
+    final tm = job['titleMap'];
+    if (tm is Map) {
+      return pickQuickJobI18nForDisplay(
+        Map<String, dynamic>.from(tm),
+        Localizations.localeOf(context).languageCode,
+        context,
+      );
     }
     final raw = (job['title']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
     return displayQuickJobTitle(context, raw);
   }
 
-  String _jobCardDetail(BuildContext context, Map<String, dynamic> job) {
-    if (job.containsKey('detailKey')) {
+  String _displayJobLocation(BuildContext context, Map<String, dynamic> job) {
+    if (job['locKey'] != null) {
+      return context.l10n(job['locKey']!.toString());
+    }
+    final m = job['locMap'];
+    if (m is Map) {
+      return pickQuickJobI18nForDisplay(
+        Map<String, dynamic>.from(m),
+        Localizations.localeOf(context).languageCode,
+        context,
+      );
+    }
+    final raw = (job['loc']?.toString() ?? '').trim();
+    if (raw.isEmpty) return '';
+    return displayQuickJobLocation(context, raw);
+  }
+
+  String _displayJobSalary(BuildContext context, Map<String, dynamic> job) {
+    if (job['salaryKey'] != null) {
+      return context.l10n(job['salaryKey']!.toString());
+    }
+    final m = job['salaryMap'];
+    if (m is Map) {
+      return pickQuickJobI18nForDisplay(
+        Map<String, dynamic>.from(m),
+        Localizations.localeOf(context).languageCode,
+        context,
+      );
+    }
+    final raw = (job['salary']?.toString() ?? '').trim();
+    if (raw.isEmpty) return '';
+    return displayQuickJobSalary(context, raw);
+  }
+
+  String _displayJobDetail(BuildContext context, Map<String, dynamic> job) {
+    if (job['detailKey'] != null) {
       return context.t(job['detailKey']!.toString().trim());
+    }
+    final m = job['detailMap'];
+    if (m is Map) {
+      return pickQuickJobI18nForDisplay(
+        Map<String, dynamic>.from(m),
+        Localizations.localeOf(context).languageCode,
+        context,
+      );
     }
     final raw = (job['detail']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
@@ -206,66 +257,69 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   void _showQuickJobDetailsDialog({
     required BuildContext context,
-    required String title,
-    required String location,
-    required String salary,
-    required String detail,
+    required Map<String, dynamic> job,
     required String tag,
   }) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Noto Sans',
-            letterSpacing: 0.1,
+      builder: (ctx) {
+        final titleLine = _displayJobTitle(ctx, job);
+        final locationLine = _displayJobLocation(ctx, job);
+        final salaryLine = _displayJobSalary(ctx, job);
+        final detailLine = _displayJobDetail(ctx, job);
+        return AlertDialog(
+          title: Text(
+            titleLine,
+            style: const TextStyle(
+              fontFamily: 'Noto Sans',
+              letterSpacing: 0.1,
+            ),
           ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${context.t('status')}: $tag',
-              style: const TextStyle(
-                fontFamily: 'Noto Sans',
-                letterSpacing: 0.1,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${ctx.t('status')}: $tag',
+                style: const TextStyle(
+                  fontFamily: 'Noto Sans',
+                  letterSpacing: 0.1,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${context.t('location')}: $location',
-              style: const TextStyle(
-                fontFamily: 'Noto Sans',
-                letterSpacing: 0.1,
+              const SizedBox(height: 8),
+              Text(
+                '${ctx.t('location')}: $locationLine',
+                style: const TextStyle(
+                  fontFamily: 'Noto Sans',
+                  letterSpacing: 0.1,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${context.t('salary')}: $salary',
-              style: const TextStyle(
-                fontFamily: 'Noto Sans',
-                letterSpacing: 0.1,
+              const SizedBox(height: 8),
+              Text(
+                '${ctx.t('salary')}: $salaryLine',
+                style: const TextStyle(
+                  fontFamily: 'Noto Sans',
+                  letterSpacing: 0.1,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${context.t('detail')}: $detail',
-              style: const TextStyle(
-                fontFamily: 'Noto Sans',
-                letterSpacing: 0.1,
+              const SizedBox(height: 8),
+              Text(
+                '${ctx.t('detail')}: $detailLine',
+                style: const TextStyle(
+                  fontFamily: 'Noto Sans',
+                  letterSpacing: 0.1,
+                ),
               ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(ctx.l10n('confirm')),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(context.l10n('confirm')),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -359,20 +413,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       const totalHours = 24.0;
                       final remainingHours = remaining.inMinutes / 60.0;
                       final progress = (remainingHours / totalHours).clamp(0.0, 1.0);
-                      final title = _jobCardTitle(context, job);
-                      final location = job.containsKey('locKey')
-                          ? context.l10n(job['locKey']?.toString() ?? '')
-                          : displayQuickJobLocation(
-                              context,
-                              (job['loc']?.toString() ?? '').trim(),
-                            );
-                      final salary = job.containsKey('salaryKey')
-                          ? context.l10n(job['salaryKey']?.toString() ?? '')
-                          : displayQuickJobSalary(
-                              context,
-                              (job['salary']?.toString() ?? '').trim(),
-                            );
-                      final detail = _jobCardDetail(context, job);
+                      final title = _displayJobTitle(context, job);
+                      final location = _displayJobLocation(context, job);
+                      final salary = _displayJobSalary(context, job);
+                      final detail = _displayJobDetail(context, job);
                       final tag = _localizedIfKeyOrRaw(context, job['tag']);
                       final bool ownJob = _isOwnJob(job);
 
@@ -398,10 +442,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                             borderRadius: BorderRadius.circular(28.0),
                             onTap: () => _showQuickJobDetailsDialog(
                               context: context,
-                              title: title,
-                              location: location,
-                              salary: salary,
-                              detail: detail,
+                              job: job,
                               tag: tag,
                             ),
                             child: Padding(

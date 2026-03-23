@@ -24,6 +24,8 @@ dependencies:
   geolocator: ^13.0.1
   # LT-13 v4.4: 위저드 3단계 사진 업로드 (ImagePicker)
   image_picker: ^1.1.2
+  # v10.8: Gemini REST (선택 — dart-define GEMINI_API_KEY)
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:

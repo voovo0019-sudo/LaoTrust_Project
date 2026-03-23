@@ -80,7 +80,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     }
     final raw = (job['title']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    return displayQuickJobTitle(context, raw);
+    final lang = Localizations.localeOf(context).languageCode;
+    return pickQuickJobI18nForDisplay(
+      TranslationMapper.legacyTitleScalarToDisplayTriple(raw, lang),
+      lang,
+      context,
+    );
   }
 
   String _displayJobLocation(BuildContext context, Map<String, dynamic> job) {
@@ -97,7 +102,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     }
     final raw = (job['loc']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    return displayQuickJobLocation(context, raw);
+    final lang = Localizations.localeOf(context).languageCode;
+    return pickQuickJobI18nForDisplay(
+      TranslationMapper.legacyLocationScalarToDisplayTriple(raw, lang),
+      lang,
+      context,
+    );
   }
 
   String _displayJobSalary(BuildContext context, Map<String, dynamic> job) {
@@ -114,7 +124,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     }
     final raw = (job['salary']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    return displayQuickJobSalary(context, raw);
+    final lang = Localizations.localeOf(context).languageCode;
+    return pickQuickJobI18nForDisplay(
+      TranslationMapper.legacySalaryScalarToDisplayTriple(raw, lang),
+      lang,
+      context,
+    );
   }
 
   String _displayJobDetail(BuildContext context, Map<String, dynamic> job) {
@@ -131,7 +146,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     }
     final raw = (job['detail']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    return displayQuickJobDetail(context, raw);
+    final lang = Localizations.localeOf(context).languageCode;
+    return pickQuickJobI18nForDisplay(
+      TranslationMapper.legacyDetailScalarToDisplayTriple(raw, lang),
+      lang,
+      context,
+    );
   }
 
   final PageController _pageController = PageController(viewportFraction: 0.48);

@@ -3,7 +3,11 @@
 // DB에는 i18n 키 또는 __lt_literal__: 접두 + 원문만 둔다. 표시는 t() + 원문 폴백.
 // =============================================================================
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'app_localizations.dart';
 
@@ -310,4 +314,373 @@ String displayQuickJobSalary(BuildContext context, String stored) {
 String displayQuickJobDetail(BuildContext context, String stored) {
   final base = displayQuickJobStoredField(context, stored, legacyValueToKey: kQuickJobDetailLegacyValueToKey);
   return localizeQuickJobDetailFreeText(context, base);
+}
+
+// =============================================================================
+// v12.0 급구 알바: TranslationMapper AI 일괄 번역 + Zero-Pending (문구 미노출)
+// =============================================================================
+
+/// EN 슬롯 폴백 (한글·번역 실패 시, "Pending" 문구 사용 금지).
+const String kQuickJobNeutralLineEn = 'View full details in the LaoTrust app.';
+
+/// LO 슬롯 폴백
+const String kQuickJobNeutralLineLo = 'ເບິ່ງລາຍລະອຽດໃນແອັບ LaoTrust';
+
+/// KO 슬롯 폴백 (비한글 원문만 있을 때)
+const String kQuickJobNeutralLineKo = '라오트러스트 앱에서 상세 내용을 확인할 수 있습니다.';
+
+bool translationMapperContainsHangul(String s) =>
+    RegExp(r'[\u3131-\uD79D]').hasMatch(s);
+
+bool translationMapperIsLegacyPendingPhrase(String s) {
+  final t = s.trim().toLowerCase();
+  return t == 'pending translation' || t.contains('pending translation');
+}
+
+String _translationMapperLang2(String? code) {
+  if (code == null || code.isEmpty) return 'en';
+  final c = code.toLowerCase();
+  if (c.startsWith('ko')) return 'ko';
+  if (c.startsWith('lo')) return 'lo';
+  return 'en';
+}
+
+/// 급구 필드 4개 일괄 번역 → Firestore용 맵 리스트 [title, location, salary, detail].
+class TranslationMapper {
+  TranslationMapper._();
+
+  static const String _geminiModel = 'gemini-2.5-flash-preview-09-2025';
+  static const String _geminiKey =
+      String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+  static const Duration _perFieldGeminiTimeout = Duration(seconds: 2);
+
+  static String neutralCaptionForLangCode(String localeLanguageCode) {
+    switch (_translationMapperLang2(localeLanguageCode)) {
+      case 'ko':
+        return kQuickJobNeutralLineKo;
+      case 'lo':
+        return kQuickJobNeutralLineLo;
+      default:
+        return kQuickJobNeutralLineEn;
+    }
+  }
+
+  /// 단일 필드 폴백 (API 없음·실패). Pending 문구 없음.
+  static Map<String, String> fallbackTripleForText(
+    String raw,
+    String sourceLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    final src = _translationMapperLang2(sourceLanguageCode);
+    final hasH = translationMapperContainsHangul(t);
+    if (hasH) {
+      return {
+        'ko': t,
+        'en': kQuickJobNeutralLineEn,
+        'lo': kQuickJobNeutralLineLo,
+      };
+    }
+    switch (src) {
+      case 'en':
+        return {
+          'ko': kQuickJobNeutralLineKo,
+          'en': t,
+          'lo': kQuickJobNeutralLineLo,
+        };
+      case 'lo':
+        return {
+          'ko': kQuickJobNeutralLineKo,
+          'en': kQuickJobNeutralLineEn,
+          'lo': t,
+        };
+      default:
+        return {
+          'ko': t,
+          'en': t,
+          'lo': kQuickJobNeutralLineLo,
+        };
+    }
+  }
+
+  static List<Map<String, String>> fallbackAllFields(
+    String title,
+    String location,
+    String salary,
+    String detail,
+    String sourceLanguageCode,
+  ) {
+    return [
+      fallbackTripleForText(title, sourceLanguageCode),
+      fallbackTripleForText(location, sourceLanguageCode),
+      fallbackTripleForText(salary, sourceLanguageCode),
+      fallbackTripleForText(detail, sourceLanguageCode),
+    ];
+  }
+
+  /// v13.3: 제목·장소·급여·상세 각각 Gemini로 KO/EN/LO 맵 생성 (필드별 병렬 호출).
+  ///
+  /// [originalData] 키: `title`, `location`, `salary`, `detail`
+  /// 결과: `{ "title": {"ko","en","lo"}, "location": {...}, ... }`
+  static Future<Map<String, Map<String, String>>> translateAllFields(
+    Map<String, String> originalData, {
+    required String sourceLanguageCode,
+  }) async {
+    const keys = ['title', 'location', 'salary', 'detail'];
+    if (_geminiKey.isEmpty) {
+      return {
+        for (final k in keys)
+          k: fallbackTripleForText(originalData[k] ?? '', sourceLanguageCode),
+      };
+    }
+    final list = await Future.wait(
+      keys.map(
+        (k) => _translateOneFieldToTriple(
+          fieldKey: k,
+          text: originalData[k] ?? '',
+          sourceLanguageCode: sourceLanguageCode,
+        ),
+      ),
+    );
+    return {for (var i = 0; i < keys.length; i++) keys[i]: list[i]};
+  }
+
+  static Future<Map<String, String>> _translateOneFieldToTriple({
+    required String fieldKey,
+    required String text,
+    required String sourceLanguageCode,
+  }) async {
+    final t = text.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    try {
+      final got = await _geminiSingleFieldTriple(
+        fieldKey: fieldKey,
+        text: t,
+        sourceLanguageCode: sourceLanguageCode,
+      ).timeout(_perFieldGeminiTimeout);
+      if (got != null) {
+        return _sanitizeTripleNoHangulEnLo(got);
+      }
+    } catch (_) {}
+    return fallbackTripleForText(t, sourceLanguageCode);
+  }
+
+  /// 저장 직전 (리스트 순서): [title, location, salary, description] 맵.
+  static Future<List<Map<String, String>>> translateAll({
+    required String title,
+    required String location,
+    required String salary,
+    required String detail,
+    required String sourceLanguageCode,
+  }) async {
+    final m = await translateAllFields(
+      {
+        'title': title,
+        'location': location,
+        'salary': salary,
+        'detail': detail,
+      },
+      sourceLanguageCode: sourceLanguageCode,
+    );
+    return [
+      m['title']!,
+      m['location']!,
+      m['salary']!,
+      m['detail']!,
+    ];
+  }
+
+  /// 자유 텍스트만: 한글이면 원문을 KO로 두고 EN/LO는 중립, 그 외는 UI 로케일 힌트로 폴백.
+  static Map<String, String> legacyScalarToTripleForDisplay(
+    String raw,
+    String uiLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    final src = translationMapperContainsHangul(t)
+        ? 'ko'
+        : _translationMapperLang2(uiLanguageCode);
+    return fallbackTripleForText(t, src);
+  }
+
+  /// 레거시 `title` 스칼라 → 표시용 triple (리터럴 접두·i18n 키·구문 역매핑).
+  static Map<String, String> legacyTitleScalarToDisplayTriple(
+    String raw,
+    String uiLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    if (t.startsWith(kQuickJobLiteralPrefix)) {
+      return legacyScalarToTripleForDisplay(
+        t.substring(kQuickJobLiteralPrefix.length),
+        uiLanguageCode,
+      );
+    }
+    if (_looksLikeI18nKey(t)) {
+      return {'ko': t, 'en': t, 'lo': t};
+    }
+    final key = kQuickJobTitlePhraseToKey[t] ?? kQuickJobTitleLegacyValueToKey[t];
+    if (key != null) {
+      return {'ko': key, 'en': key, 'lo': key};
+    }
+    return legacyScalarToTripleForDisplay(t, uiLanguageCode);
+  }
+
+  /// 레거시 `loc` 스칼라 → 표시용 triple.
+  static Map<String, String> legacyLocationScalarToDisplayTriple(
+    String raw,
+    String uiLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    if (t.startsWith(kQuickJobLiteralPrefix)) {
+      return legacyScalarToTripleForDisplay(
+        t.substring(kQuickJobLiteralPrefix.length),
+        uiLanguageCode,
+      );
+    }
+    if (_looksLikeI18nKey(t)) {
+      return {'ko': t, 'en': t, 'lo': t};
+    }
+    final key = _lookupLocationPhrase(t);
+    if (key != null) {
+      return {'ko': key, 'en': key, 'lo': key};
+    }
+    return legacyScalarToTripleForDisplay(t, uiLanguageCode);
+  }
+
+  /// 레거시 `salary` 스칼라 → 표시용 triple.
+  static Map<String, String> legacySalaryScalarToDisplayTriple(
+    String raw,
+    String uiLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    if (t.startsWith(kQuickJobLiteralPrefix)) {
+      return legacyScalarToTripleForDisplay(
+        t.substring(kQuickJobLiteralPrefix.length),
+        uiLanguageCode,
+      );
+    }
+    if (_looksLikeI18nKey(t)) {
+      return {'ko': t, 'en': t, 'lo': t};
+    }
+    final key = _lookupSalaryPhrase(t);
+    if (key != null) {
+      return {'ko': key, 'en': key, 'lo': key};
+    }
+    return legacyScalarToTripleForDisplay(t, uiLanguageCode);
+  }
+
+  /// 레거시 `detail` 스칼라 → 표시용 triple.
+  static Map<String, String> legacyDetailScalarToDisplayTriple(
+    String raw,
+    String uiLanguageCode,
+  ) {
+    final t = raw.trim();
+    if (t.isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
+    }
+    if (t.startsWith(kQuickJobLiteralPrefix)) {
+      return legacyScalarToTripleForDisplay(
+        t.substring(kQuickJobLiteralPrefix.length),
+        uiLanguageCode,
+      );
+    }
+    if (_looksLikeI18nKey(t)) {
+      return {'ko': t, 'en': t, 'lo': t};
+    }
+    final key = kQuickJobDetailPhraseToKey[t] ?? kQuickJobDetailLegacyValueToKey[t];
+    if (key != null) {
+      return {'ko': key, 'en': key, 'lo': key};
+    }
+    return legacyScalarToTripleForDisplay(t, uiLanguageCode);
+  }
+
+  static Map<String, String> _sanitizeTripleNoHangulEnLo(Map<String, String>? m) {
+    final o = m ?? {'ko': '', 'en': '', 'lo': ''};
+    var en = o['en'] ?? '';
+    var lo = o['lo'] ?? '';
+    if (translationMapperContainsHangul(en)) en = kQuickJobNeutralLineEn;
+    if (translationMapperContainsHangul(lo)) lo = kQuickJobNeutralLineLo;
+    return {
+      'ko': o['ko'] ?? '',
+      'en': en,
+      'lo': lo,
+    };
+  }
+
+  static Future<Map<String, String>?> _geminiSingleFieldTriple({
+    required String fieldKey,
+    required String text,
+    required String sourceLanguageCode,
+  }) async {
+    final uri = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/models/$_geminiModel:generateContent?key=$_geminiKey',
+    );
+    final prompt =
+        'You translate a single job listing field for a multilingual app. '
+        'Field name: ${jsonEncode(fieldKey)}. '
+        'Return ONLY valid JSON (no markdown): {"ko":"","en":"","lo":""}. '
+        'ko=Korean, en=English, lo=Lao script. '
+        'Source locale hint: ${_translationMapperLang2(sourceLanguageCode)}.\n'
+        'Text:\n${jsonEncode(text)}';
+    final body = jsonEncode({
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt},
+          ],
+        },
+      ],
+    });
+    final resp = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+    if (resp.statusCode < 200 || resp.statusCode >= 300) return null;
+    final decoded = jsonDecode(resp.body) as Map<String, dynamic>?;
+    final candidates = decoded?['candidates'] as List<dynamic>?;
+    if (candidates == null || candidates.isEmpty) return null;
+    final content = candidates.first as Map<String, dynamic>?;
+    final parts = content?['content']?['parts'] as List<dynamic>?;
+    if (parts == null || parts.isEmpty) return null;
+    final rawOut =
+        (parts.first as Map<String, dynamic>)['text']?.toString() ?? '';
+    final jsonStr = _translationMapperExtractJson(rawOut);
+    if (jsonStr == null) return null;
+    final root = jsonDecode(jsonStr) as Map<String, dynamic>?;
+    if (root == null) return null;
+    return {
+      'ko': root['ko']?.toString().trim() ?? '',
+      'en': root['en']?.toString().trim() ?? '',
+      'lo': root['lo']?.toString().trim() ?? '',
+    };
+  }
+
+  static String? _translationMapperExtractJson(String text) {
+    var t = text.trim();
+    if (t.contains('```')) {
+      final i = t.indexOf('{');
+      final j = t.lastIndexOf('}');
+      if (i >= 0 && j > i) t = t.substring(i, j + 1);
+    }
+    final start = t.indexOf('{');
+    final end = t.lastIndexOf('}');
+    if (start < 0 || end <= start) return null;
+    return t.substring(start, end + 1);
+  }
 }

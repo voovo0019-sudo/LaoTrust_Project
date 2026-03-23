@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
-import '../../core/quick_job_triple_map_builder.dart';
+import '../../core/translation_mapper.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
@@ -161,18 +161,21 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           final geo = GeoPoint(p.latitude, p.longitude);
           final sourceLang = Localizations.localeOf(context).languageCode;
 
-          final maps = await Future.wait([
-            QuickJobTripleMapBuilder.build(title, sourceLanguageCode: sourceLang),
-            QuickJobTripleMapBuilder.build(locText, sourceLanguageCode: sourceLang),
-            QuickJobTripleMapBuilder.build(salary, sourceLanguageCode: sourceLang),
-            QuickJobTripleMapBuilder.build(detail, sourceLanguageCode: sourceLang),
-          ]);
+          final bundled = await TranslationMapper.translateAllFields(
+            {
+              'title': title,
+              'location': locText,
+              'salary': salary,
+              'detail': detail,
+            },
+            sourceLanguageCode: sourceLang,
+          );
 
           final payload = <String, dynamic>{
-            JobFields.titleI18n: maps[0],
-            JobFields.locationI18n: maps[1],
-            JobFields.salaryI18n: maps[2],
-            JobFields.descriptionI18n: maps[3],
+            JobFields.titleI18n: bundled['title']!,
+            JobFields.locationI18n: bundled['location']!,
+            JobFields.salaryI18n: bundled['salary']!,
+            JobFields.descriptionI18n: bundled['detail']!,
             JobFields.deadlineAt: Timestamp.fromDate(_deadline),
             JobFields.updatedAt: FieldValue.serverTimestamp(),
             JobFields.locationGeo: geo,
@@ -231,20 +234,18 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     final salary = _salaryController.text.trim();
     final detail = _descriptionController.text.trim();
     final sl = Localizations.localeOf(context).languageCode;
+    final fb = TranslationMapper.fallbackAllFields(
+      title.isEmpty ? context.l10n('quick_job_default_title') : title,
+      locText.isEmpty ? context.l10n('quick_job_default_location') : locText,
+      salary.isEmpty ? context.l10n('salary_negotiable') : salary,
+      detail,
+      sl,
+    );
     return <String, dynamic>{
-      'titleMap': QuickJobTripleMapBuilder.policyTripleFallback(
-        title.isEmpty ? context.l10n('quick_job_default_title') : title,
-        sl,
-      ),
-      'locMap': QuickJobTripleMapBuilder.policyTripleFallback(
-        locText.isEmpty ? context.l10n('quick_job_default_location') : locText,
-        sl,
-      ),
-      'salaryMap': QuickJobTripleMapBuilder.policyTripleFallback(
-        salary.isEmpty ? context.l10n('salary_negotiable') : salary,
-        sl,
-      ),
-      'detailMap': QuickJobTripleMapBuilder.policyTripleFallback(detail, sl),
+      'titleMap': fb[0],
+      'locMap': fb[1],
+      'salaryMap': fb[2],
+      'detailMap': fb[3],
       'deadlineAt': _deadline,
       'createdAt': nowMs,
       'tag': 'quick_job_tag_part_time',

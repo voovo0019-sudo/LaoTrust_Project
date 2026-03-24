@@ -171,13 +171,18 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
             sourceLanguageCode: sourceLang,
           );
 
+          Map<String, dynamic> tripleForFirestore(Map<String, String> m) =>
+              Map<String, dynamic>.from(m);
+
+          /// Triple-Map 무결성: Firestore에 스칼라 혼입 없이 {ko,en,lo} 맵으로만 기록.
           final payload = <String, dynamic>{
-            JobFields.titleI18n: bundled['title']!,
-            JobFields.locationI18n: bundled['location']!,
-            JobFields.salaryI18n: bundled['salary']!,
-            JobFields.descriptionI18n: bundled['detail']!,
-            JobFields.deadlineAt: Timestamp.fromDate(_deadline),
+            JobFields.titleI18n: tripleForFirestore(bundled['title']!),
+            JobFields.locationI18n: tripleForFirestore(bundled['location']!),
+            JobFields.salaryI18n: tripleForFirestore(bundled['salary']!),
+            JobFields.descriptionI18n: tripleForFirestore(bundled['detail']!),
             JobFields.updatedAt: FieldValue.serverTimestamp(),
+            JobFields.employerId: employerIdForCurrentSession(),
+            JobFields.deadlineAt: Timestamp.fromDate(_deadline),
             JobFields.locationGeo: geo,
             JobFields.jobType: 'quick_job_tag_part_time',
           };
@@ -188,7 +193,6 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
             await firestore.collection(kColJobs).add({
               ...payload,
               JobFields.createdAt: FieldValue.serverTimestamp(),
-              JobFields.employerId: employerIdForCurrentSession(),
             });
           }
         }).timeout(const Duration(seconds: 5));

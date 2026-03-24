@@ -349,7 +349,8 @@ String _translationMapperLang2(String? code) {
 class TranslationMapper {
   TranslationMapper._();
 
-  static const String _geminiModel = 'gemini-2.5-flash-preview-09-2025';
+  /// Google AI Studio / generativelanguage REST에서 안정적으로 동작하는 Flash 모델.
+  static const String _geminiModel = 'gemini-2.0-flash';
   static const String _geminiKey =
       String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
   static const Duration _perFieldGeminiTimeout = Duration(seconds: 2);
@@ -463,7 +464,14 @@ class TranslationMapper {
         sourceLanguageCode: sourceLanguageCode,
       ).timeout(_perFieldGeminiTimeout);
       if (got != null) {
-        return _sanitizeTripleNoHangulEnLo(got);
+        final sanitized = _sanitizeTripleNoHangulEnLo(got);
+        if (t.isNotEmpty &&
+            (sanitized['ko'] ?? '').isEmpty &&
+            (sanitized['en'] ?? '').isEmpty &&
+            (sanitized['lo'] ?? '').isEmpty) {
+          return fallbackTripleForText(t, sourceLanguageCode);
+        }
+        return sanitized;
       }
     } catch (_) {}
     return fallbackTripleForText(t, sourceLanguageCode);
@@ -611,15 +619,27 @@ class TranslationMapper {
 
   static Map<String, String> _sanitizeTripleNoHangulEnLo(Map<String, String>? m) {
     final o = m ?? {'ko': '', 'en': '', 'lo': ''};
-    var en = o['en'] ?? '';
-    var lo = o['lo'] ?? '';
+    String stripPending(String slot, String v) {
+      final s = v.trim();
+      if (translationMapperIsLegacyPendingPhrase(s)) {
+        switch (slot) {
+          case 'en':
+            return kQuickJobNeutralLineEn;
+          case 'lo':
+            return kQuickJobNeutralLineLo;
+          default:
+            return kQuickJobNeutralLineKo;
+        }
+      }
+      return s;
+    }
+
+    var ko = stripPending('ko', o['ko'] ?? '');
+    var en = stripPending('en', o['en'] ?? '');
+    var lo = stripPending('lo', o['lo'] ?? '');
     if (translationMapperContainsHangul(en)) en = kQuickJobNeutralLineEn;
     if (translationMapperContainsHangul(lo)) lo = kQuickJobNeutralLineLo;
-    return {
-      'ko': o['ko'] ?? '',
-      'en': en,
-      'lo': lo,
-    };
+    return {'ko': ko, 'en': en, 'lo': lo};
   }
 
   static Future<Map<String, String>?> _geminiSingleFieldTriple({
@@ -645,6 +665,10 @@ class TranslationMapper {
           ],
         },
       ],
+      'generationConfig': {
+        'temperature': 0.2,
+        'responseMimeType': 'application/json',
+      },
     });
     final resp = await http.post(
       uri,

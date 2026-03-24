@@ -5,6 +5,7 @@ import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
 import '../../../core/quick_job_triple_map_builder.dart';
 import '../../../core/translation_mapper.dart';
+import '../../../data/firestore_schema.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/firebase_service.dart';
 import '../../profile/profile_screen.dart';
@@ -66,21 +67,22 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   static const int _sampleBaseCreatedAt = 1;
 
+  /// Zero-Pending: String·오염 맵을 읽는 즉시 heal → Pending/한글 슬롯 오염 차단.
+  Map<String, dynamic> _healedTripleForDisplay(dynamic field) {
+    return Map<String, dynamic>.from(healQuickJobI18nField(field));
+  }
+
   String _displayJobTitle(BuildContext context, Map<String, dynamic> job) {
     if (job['titleKey'] != null) {
       return context.t(job['titleKey']!.toString().trim());
     }
-    final tm = job['titleMap'];
-    if (tm is Map) {
-      return pickQuickJobI18nForDisplay(
-        Map<String, dynamic>.from(tm),
-        Localizations.localeOf(context).languageCode,
-        context,
-      );
+    final lang = Localizations.localeOf(context).languageCode;
+    final tm = job['titleMap'] ?? job[JobFields.titleI18n];
+    if (tm != null) {
+      return pickQuickJobI18nForDisplay(_healedTripleForDisplay(tm), lang, context);
     }
     final raw = (job['title']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final lang = Localizations.localeOf(context).languageCode;
     return pickQuickJobI18nForDisplay(
       TranslationMapper.legacyTitleScalarToDisplayTriple(raw, lang),
       lang,
@@ -92,17 +94,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (job['locKey'] != null) {
       return context.l10n(job['locKey']!.toString());
     }
-    final m = job['locMap'];
-    if (m is Map) {
-      return pickQuickJobI18nForDisplay(
-        Map<String, dynamic>.from(m),
-        Localizations.localeOf(context).languageCode,
-        context,
-      );
+    final lang = Localizations.localeOf(context).languageCode;
+    final m = job['locMap'] ?? job[JobFields.locationI18n];
+    if (m != null) {
+      return pickQuickJobI18nForDisplay(_healedTripleForDisplay(m), lang, context);
     }
     final raw = (job['loc']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final lang = Localizations.localeOf(context).languageCode;
     return pickQuickJobI18nForDisplay(
       TranslationMapper.legacyLocationScalarToDisplayTriple(raw, lang),
       lang,
@@ -114,17 +112,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (job['salaryKey'] != null) {
       return context.l10n(job['salaryKey']!.toString());
     }
-    final m = job['salaryMap'];
-    if (m is Map) {
-      return pickQuickJobI18nForDisplay(
-        Map<String, dynamic>.from(m),
-        Localizations.localeOf(context).languageCode,
-        context,
-      );
+    final lang = Localizations.localeOf(context).languageCode;
+    final m = job['salaryMap'] ?? job[JobFields.salaryI18n];
+    if (m != null) {
+      return pickQuickJobI18nForDisplay(_healedTripleForDisplay(m), lang, context);
     }
     final raw = (job['salary']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final lang = Localizations.localeOf(context).languageCode;
     return pickQuickJobI18nForDisplay(
       TranslationMapper.legacySalaryScalarToDisplayTriple(raw, lang),
       lang,
@@ -136,17 +130,13 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (job['detailKey'] != null) {
       return context.t(job['detailKey']!.toString().trim());
     }
-    final m = job['detailMap'];
-    if (m is Map) {
-      return pickQuickJobI18nForDisplay(
-        Map<String, dynamic>.from(m),
-        Localizations.localeOf(context).languageCode,
-        context,
-      );
+    final lang = Localizations.localeOf(context).languageCode;
+    final m = job['detailMap'] ?? job[JobFields.descriptionI18n];
+    if (m != null) {
+      return pickQuickJobI18nForDisplay(_healedTripleForDisplay(m), lang, context);
     }
     final raw = (job['detail']?.toString() ?? '').trim();
     if (raw.isEmpty) return '';
-    final lang = Localizations.localeOf(context).languageCode;
     return pickQuickJobI18nForDisplay(
       TranslationMapper.legacyDetailScalarToDisplayTriple(raw, lang),
       lang,

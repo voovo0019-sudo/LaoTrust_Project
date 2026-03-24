@@ -25,26 +25,43 @@ String _lang2(String? code) {
   return 'en';
 }
 
-/// UI 표시: [m]에서 현재 언어 값 선택. EN/LO에서 한글·레거시 Pending 금지.
+bool _loSlotDisplayable(String lo) {
+  final t = lo.trim();
+  if (t.isEmpty || quickJobStringContainsHangul(t)) return false;
+  return translationMapperHasLaoScript(t) || TranslationMapper.looksLikeLatinSalaryLine(t);
+}
+
+/// UI 표시: v13.7 라오/영어 모드에서 **한글 미노출** 우선.
 String pickQuickJobI18nLine(
   Map<String, dynamic>? m,
   String localeLanguageCode,
 ) {
   if (m == null || m.isEmpty) return '';
   final lang = _lang2(localeLanguageCode);
-  String v = (m[lang] ?? m['en'] ?? m['ko'] ?? m['lo'] ?? '').toString().trim();
-  if (v.isEmpty) return '';
-  if (translationMapperIsLegacyPendingPhrase(v)) {
-    return TranslationMapper.neutralCaptionForLangCode(lang);
+  if (lang == 'ko') {
+    var v = (m['ko'] ?? m['en'] ?? m['lo'] ?? '').toString().trim();
+    if (v.isEmpty) return '';
+    if (translationMapperIsLegacyPendingPhrase(v) ||
+        translationMapperIsLegacyEnglishBridgePhrase(v)) {
+      v = (m['en'] ?? m['lo'] ?? m['ko'] ?? '').toString().trim();
+    }
+    return v;
   }
-  if (lang == 'ko') return v;
-  if (quickJobStringContainsHangul(v)) {
-    return TranslationMapper.neutralCaptionForLangCode(lang);
+  if (lang == 'lo') {
+    final lo = (m['lo'] ?? '').toString().trim();
+    if (_loSlotDisplayable(lo)) return lo;
+    final en = (m['en'] ?? '').toString().trim();
+    if (en.isNotEmpty && !quickJobStringContainsHangul(en)) return en;
+    return TranslationMapper.neutralCaptionForLangCode('lo');
   }
-  return v;
+  final en = (m['en'] ?? '').toString().trim();
+  if (en.isNotEmpty && !quickJobStringContainsHangul(en)) return en;
+  final lo = (m['lo'] ?? '').toString().trim();
+  if (_loSlotDisplayable(lo)) return lo;
+  return TranslationMapper.neutralCaptionForLangCode('en');
 }
 
-/// 카드/모달용: i18n 키는 [t]로 풀고, EN/LO에서 한글·Pending 미노출.
+/// 카드/모달용: i18n 키는 [t]로 풀고, v13.7 EN/LO에서 한글 숨김.
 String pickQuickJobI18nForDisplay(
   Map<String, dynamic>? m,
   String localeLanguageCode,
@@ -52,20 +69,38 @@ String pickQuickJobI18nForDisplay(
 ) {
   if (m == null || m.isEmpty) return '';
   final lang = _lang2(localeLanguageCode);
-  var raw = (m[lang] ?? m['en'] ?? m['ko'] ?? m['lo'] ?? '').toString().trim();
-  if (raw.isEmpty) return '';
-  if (translationMapperIsLegacyPendingPhrase(raw)) {
-    return TranslationMapper.neutralCaptionForLangCode(lang);
+  if (lang == 'ko') {
+    var raw = (m['ko'] ?? m['en'] ?? m['lo'] ?? '').toString().trim();
+    if (raw.isEmpty) return '';
+    if (translationMapperIsLegacyPendingPhrase(raw) ||
+        translationMapperIsLegacyEnglishBridgePhrase(raw)) {
+      raw = (m['en'] ?? m['lo'] ?? m['ko'] ?? '').toString().trim();
+    }
+    if (raw.isEmpty) return '';
+    return quickJobLooksLikeI18nStorageKey(raw) ? context.t(raw) : raw;
   }
-  var v = quickJobLooksLikeI18nStorageKey(raw) ? context.t(raw) : raw;
-  if (translationMapperIsLegacyPendingPhrase(v)) {
-    return TranslationMapper.neutralCaptionForLangCode(lang);
+  if (lang == 'lo') {
+    final lo = (m['lo'] ?? '').toString().trim();
+    if (_loSlotDisplayable(lo)) {
+      final v = quickJobLooksLikeI18nStorageKey(lo) ? context.t(lo) : lo;
+      if (!quickJobStringContainsHangul(v)) return v;
+    }
+    final en = (m['en'] ?? '').toString().trim();
+    if (en.isNotEmpty && !quickJobStringContainsHangul(en)) {
+      return quickJobLooksLikeI18nStorageKey(en) ? context.t(en) : en;
+    }
+    return TranslationMapper.neutralCaptionForLangCode('lo');
   }
-  if (lang == 'ko') return v;
-  if (quickJobStringContainsHangul(v)) {
-    return TranslationMapper.neutralCaptionForLangCode(lang);
+  final en = (m['en'] ?? '').toString().trim();
+  if (en.isNotEmpty && !quickJobStringContainsHangul(en)) {
+    return quickJobLooksLikeI18nStorageKey(en) ? context.t(en) : en;
   }
-  return v;
+  final lo = (m['lo'] ?? '').toString().trim();
+  if (_loSlotDisplayable(lo)) {
+    final v = quickJobLooksLikeI18nStorageKey(lo) ? context.t(lo) : lo;
+    if (!quickJobStringContainsHangul(v)) return v;
+  }
+  return TranslationMapper.neutralCaptionForLangCode('en');
 }
 
 Map<String, String> _normalizeIncomingMap(dynamic raw) {
@@ -81,13 +116,29 @@ Map<String, String> _normalizeIncomingMap(dynamic raw) {
 }
 
 Map<String, String> _sanitizeStoredTriple(Map<String, String> m) {
-  var ko = m['ko'] ?? '';
-  var en = m['en'] ?? '';
-  var lo = m['lo'] ?? '';
-  if (translationMapperIsLegacyPendingPhrase(en)) en = kQuickJobNeutralLineEn;
-  if (translationMapperIsLegacyPendingPhrase(lo)) lo = kQuickJobNeutralLineLo;
-  if (quickJobStringContainsHangul(en)) en = kQuickJobNeutralLineEn;
-  if (quickJobStringContainsHangul(lo)) lo = kQuickJobNeutralLineLo;
+  var ko = (m['ko'] ?? '').trim();
+  var en = (m['en'] ?? '').trim();
+  var lo = (m['lo'] ?? '').trim();
+
+  bool badEn(String s) =>
+      translationMapperIsLegacyPendingPhrase(s) ||
+      translationMapperIsLegacyEnglishBridgePhrase(s) ||
+      s == kQuickJobNeutralLineEn;
+  bool badLo(String s) =>
+      translationMapperIsLegacyPendingPhrase(s) ||
+      translationMapperIsLegacyEnglishBridgePhrase(s) ||
+      s == kQuickJobNeutralLineLo;
+
+  if (badEn(en) && ko.isNotEmpty) en = ko;
+  if (badLo(lo) && ko.isNotEmpty) lo = ko;
+  if (badEn(en) && en.isEmpty && lo.isNotEmpty) en = lo;
+  if (badLo(lo) && lo.isEmpty && en.isNotEmpty) lo = en;
+  if (quickJobStringContainsHangul(lo) && en.isNotEmpty && !quickJobStringContainsHangul(en)) {
+    lo = en;
+  }
+  if (quickJobStringContainsHangul(en) && lo.isNotEmpty && !quickJobStringContainsHangul(lo)) {
+    en = lo;
+  }
   return {'ko': ko, 'en': en, 'lo': lo};
 }
 

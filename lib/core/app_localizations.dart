@@ -23,6 +23,8 @@ const Map<String, String> _kFallbackKo = {
   'location': '장소',
   'salary': '급여',
   'detail': '업무 상세',
+  'quick_job_ai_translating': 'AI가 정밀 번역 중입니다...',
+  'quick_job_translation_incomplete': '번역이 완료되지 않아 저장할 수 없습니다.',
 };
 
 class AppLocalizations {

@@ -257,6 +257,8 @@
   "quick_job_post_edit_title": "Edit job posting",
   "quick_job_post_save_edit": "Save changes",
   "quick_job_save_failed": "Could not save. Check your connection.",
+  "quick_job_ai_translating": "AI is translating your post…",
+  "quick_job_translation_incomplete": "Translation could not be completed. Nothing was saved.",
   "quick_job_dyn_event": "Event",
   "quick_job_dyn_delivery": "Delivery",
   "quick_job_dyn_cleaning": "Cleaning",

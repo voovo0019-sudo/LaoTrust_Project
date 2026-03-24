@@ -12,6 +12,7 @@ import '../../profile/profile_screen.dart';
 import '../quick_job_post_screen.dart';
 import 'section_title_style.dart';
 
+/// v13.9: 급구 표시는 [pickQuickJobI18nForDisplay](힐링 포함) — EN/LO 한글 숨김 유지.
 class QuickJobsSection extends StatefulWidget {
   const QuickJobsSection({
     super.key,

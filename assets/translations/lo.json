@@ -257,6 +257,8 @@
   "quick_job_post_edit_title": "ແກ້ໄຂປະກາດວຽກ",
   "quick_job_post_save_edit": "ບັນທຶກການແກ້ໄຂ",
   "quick_job_save_failed": "ບັນທຶກບໍ່ສຳເລັດ. ກວດເບິ່ງອິນເຕີເນັດ.",
+  "quick_job_ai_translating": "AI ກຳລັງແປພາສາຢ່າງລະອຽດ...",
+  "quick_job_translation_incomplete": "ແປບໍ່ສຳເລັດ — ບໍ່ໄດ້ບັນທຶກ.",
   "quick_job_dyn_event": "ອີເວັນ",
   "quick_job_dyn_delivery": "ຂົນສົ່ງ",
   "quick_job_dyn_cleaning": "ທຳຄວາມສະອາດ",

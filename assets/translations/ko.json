@@ -278,6 +278,8 @@
   "quick_job_post_edit_title": "알바 공고 수정",
   "quick_job_post_save_edit": "수정 저장",
   "quick_job_save_failed": "저장에 실패했습니다. 네트워크를 확인해 주세요.",
+  "quick_job_ai_translating": "AI가 정밀 번역 중입니다...",
+  "quick_job_translation_incomplete": "번역이 완료되지 않아 저장할 수 없습니다.",
   "quick_job_dyn_event": "행사",
   "quick_job_dyn_delivery": "배달",
   "quick_job_dyn_cleaning": "청소",

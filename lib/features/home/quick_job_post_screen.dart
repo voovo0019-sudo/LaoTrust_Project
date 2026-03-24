@@ -137,16 +137,31 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           context: context,
           barrierDismissible: false,
           useRootNavigator: true,
-          builder: (_) => PopScope(
+          builder: (ctx) => PopScope(
             canPop: false,
             child: Material(
               type: MaterialType.transparency,
               child: Center(
                 child: Card(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(28),
-                    child: CircularProgressIndicator(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 20),
+                        Text(
+                          ctx.t('quick_job_ai_translating'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: _royalNavy,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -156,20 +171,33 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         overlayShown = true;
 
         await Future<void>(() async {
-          final (p, _) = await getUserLocationOrDefault();
+          final (p, _) = await getUserLocationOrDefault().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => (kVientianeCityHall, true),
+          );
           if (!mounted) return;
           final geo = GeoPoint(p.latitude, p.longitude);
           final sourceLang = Localizations.localeOf(context).languageCode;
+          final inputData = <String, String>{
+            'title': title,
+            'location': locText,
+            'salary': salary,
+            'detail': detail,
+          };
 
-          final bundled = await TranslationMapper.translateAllFields(
-            {
-              'title': title,
-              'location': locText,
-              'salary': salary,
-              'detail': detail,
-            },
+          final tResult = await TranslationMapper.translateAllFieldsStrict(
+            inputData,
             sourceLanguageCode: sourceLang,
           );
+          final bundled = tResult.bundle ??
+              {
+                for (final k in ['title', 'location', 'salary', 'detail'])
+                  k: TranslationMapper.finalizeTripleForFirestoreSave(
+                    {'ko': '', 'en': '', 'lo': ''},
+                    inputData[k] ?? '',
+                    k,
+                  ),
+              };
 
           Map<String, dynamic> tripleForFirestore(Map<String, String> m) =>
               Map<String, dynamic>.from(m);
@@ -195,7 +223,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
               JobFields.createdAt: FieldValue.serverTimestamp(),
             });
           }
-        }).timeout(const Duration(seconds: 5));
+        }).timeout(const Duration(seconds: 70));
         success = true;
       } else {
         success = true;

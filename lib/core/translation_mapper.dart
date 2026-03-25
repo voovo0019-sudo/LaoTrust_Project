@@ -444,7 +444,7 @@ class TranslationMapper {
     ];
   }
 
-  /// v13.9: 배치(최대 10s) → 필드별 재시도 → **후처리로 항상 저장 가능한 Triple-Map** (검수 실패 반환 없음).
+  /// v13.9: 배치(최대 5s) → 필드별 재시도 → **후처리로 항상 저장 가능한 Triple-Map** (검수 실패 반환 없음).
   static Future<QuickJobTranslationResult> translateAllFieldsStrict(
     Map<String, String> originalData, {
     required String sourceLanguageCode,
@@ -470,21 +470,20 @@ class TranslationMapper {
       return QuickJobTranslationResult.ok(out);
     }
 
+    bool apiQuotaExceeded = false;
     Map<String, Map<String, String>>? batch;
     try {
       batch = await _geminiBatchAllFourFields(
         originalData,
         sourceLanguageCode: sourceLanguageCode,
-      ).timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: 배치 번역 10초 타임아웃 → 필드별 재시도');
-      }
+      ).timeout(const Duration(seconds: 5));
+    } on _GeminiNoRetryException {
+      // 429/403 → 재시도 전혀 없이 즉시 원문 저장
+      apiQuotaExceeded = true;
       batch = null;
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: 배치 오류 — $e\n$st');
-      }
+    } on TimeoutException {
+      batch = null;
+    } catch (e) {
       batch = null;
     }
 
@@ -511,7 +510,8 @@ class TranslationMapper {
       }
     }
 
-    if (needRetry.isNotEmpty) {
+    // 429/403이면 재시도 완전 스킵
+    if (!apiQuotaExceeded && needRetry.isNotEmpty) {
       if (kDebugMode) {
         debugPrint('TranslationMapper: 필드별 재시도 — $needRetry');
       }
@@ -819,6 +819,7 @@ class TranslationMapper {
         if (kDebugMode) {
           debugPrint('TranslationMapper: 단일 필드 $fieldKey ${attempt + 1}차 — $e');
         }
+        if (e is _GeminiNoRetryException) break;
       }
     }
     return best ?? {'ko': '', 'en': '', 'lo': ''};
@@ -859,6 +860,12 @@ class TranslationMapper {
       headers: {'Content-Type': 'application/json'},
       body: body,
     );
+    if (resp.statusCode == 403 || resp.statusCode == 429) {
+      if (kDebugMode) {
+        debugPrint('TranslationMapper: ${resp.statusCode} 에러 → 재시도 없이 즉시 포기');
+      }
+      throw _GeminiNoRetryException(resp.statusCode);
+    }
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
       _logGeminiHttpError(resp);
       return null;
@@ -954,6 +961,12 @@ class TranslationMapper {
       headers: {'Content-Type': 'application/json'},
       body: body,
     );
+    if (resp.statusCode == 403 || resp.statusCode == 429) {
+      if (kDebugMode) {
+        debugPrint('TranslationMapper: 배치 ${resp.statusCode} → 즉시 포기');
+      }
+      throw _GeminiNoRetryException(resp.statusCode);
+    }
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
       _logGeminiHttpError(resp);
       return null;
@@ -1024,4 +1037,9 @@ class TranslationMapper {
     if (start < 0 || end <= start) return null;
     return t.substring(start, end + 1);
   }
+}
+
+class _GeminiNoRetryException implements Exception {
+  const _GeminiNoRetryException(this.statusCode);
+  final int statusCode;
 }

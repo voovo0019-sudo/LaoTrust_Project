@@ -266,6 +266,25 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     return localized == raw ? raw : localized;
   }
 
+  /// 상세 모달: Pending 문구 대신 ko·en 등 안전한 표시값.
+  String _safeDisplay(dynamic fieldValue, String currentLang) {
+    if (fieldValue == null) return '';
+
+    if (fieldValue is Map) {
+      final localized = fieldValue[currentLang]?.toString().trim() ?? '';
+      if (localized.isNotEmpty) return localized;
+      final ko = fieldValue['ko']?.toString().trim() ?? '';
+      if (ko.isNotEmpty) return ko;
+      final en = fieldValue['en']?.toString().trim() ?? '';
+      return en;
+    }
+
+    final s = fieldValue.toString().trim();
+    if (s.isEmpty) return '';
+    if (s.toLowerCase().contains('pending')) return '';
+    return s;
+  }
+
   void _showQuickJobDetailsDialog({
     required BuildContext context,
     required Map<String, dynamic> job,
@@ -274,10 +293,19 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     showDialog(
       context: context,
       builder: (ctx) {
-        final titleLine = _displayJobTitle(ctx, job);
-        final locationLine = _displayJobLocation(ctx, job);
-        final salaryLine = _displayJobSalary(ctx, job);
-        final detailLine = _displayJobDetail(ctx, job);
+        final lang = Localizations.localeOf(ctx).languageCode;
+        final titleLine = job['titleKey'] != null
+            ? ctx.t(job['titleKey']!.toString().trim())
+            : _safeDisplay(job['titleMap'] ?? job[JobFields.titleI18n] ?? job['title'], lang);
+        final locationLine = job['locKey'] != null
+            ? ctx.l10n(job['locKey']!.toString())
+            : _safeDisplay(job['locMap'] ?? job[JobFields.locationI18n] ?? job['loc'], lang);
+        final salaryLine = job['salaryKey'] != null
+            ? ctx.l10n(job['salaryKey']!.toString())
+            : _safeDisplay(job['salaryMap'] ?? job[JobFields.salaryI18n] ?? job['salary'], lang);
+        final detailLine = job['detailKey'] != null
+            ? ctx.t(job['detailKey']!.toString().trim())
+            : _safeDisplay(job['detailMap'] ?? job[JobFields.descriptionI18n] ?? job['detail'], lang);
         return AlertDialog(
           title: Text(
             titleLine,

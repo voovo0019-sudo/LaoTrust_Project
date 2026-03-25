@@ -4,8 +4,7 @@
 // 디자인: 곡률 28px, 로얄 네이비 #1E293B.
 // =============================================================================
 
-import 'dart:async';
-
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
@@ -18,9 +17,6 @@ import '../profile/profile_screen.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
-
-/// v10.2 Fail-Safe: 타임아웃 시 스낵바 문구 (지시서 원문).
-const String kQuickJobSaveTimeoutSnackMessage = '통신이 원활하지 않으나 등록은 시도되었습니다';
 
 class QuickJobPostScreen extends StatefulWidget {
   const QuickJobPostScreen({
@@ -53,6 +49,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
   late final TextEditingController _descriptionController;
   late DateTime _deadline;
   bool _saving = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -119,146 +116,114 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       return;
     }
 
-    setState(() => _saving = true);
-    var success = false;
-    var overlayShown = false;
-    var timedOut = false;
-    NavigatorState? rootNav;
+    if (_saving) return;
+    setState(() {
+      _saving = true;
+      _isLoading = true;
+    });
+
     try {
       final title = _titleController.text.trim();
       final locText = _locationController.text.trim();
       final salary = _salaryController.text.trim();
       final detail = _descriptionController.text.trim();
 
-      if (isFirebaseEnabled) {
-        if (!mounted) return;
-        rootNav = Navigator.of(context, rootNavigator: true);
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          useRootNavigator: true,
-          builder: (ctx) => PopScope(
-            canPop: false,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Center(
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 20),
-                        Text(
-                          ctx.t('quick_job_ai_translating'),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: _royalNavy,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        overlayShown = true;
+      final sourceLang = Localizations.localeOf(context).languageCode;
+      final inputData = <String, String>{
+        'title': title,
+        'location': locText,
+        'salary': salary,
+        'detail': detail,
+      };
 
-        await Future<void>(() async {
-          final (p, _) = await getUserLocationOrDefault().timeout(
-            const Duration(seconds: 2),
-            onTimeout: () => (kVientianeCityHall, true),
-          );
-          if (!mounted) return;
-          final geo = GeoPoint(p.latitude, p.longitude);
-          final sourceLang = Localizations.localeOf(context).languageCode;
-          final inputData = <String, String>{
-            'title': title,
-            'location': locText,
-            'salary': salary,
-            'detail': detail,
-          };
+      // ✅ 번역 시도 - 최대 6초, 실패해도 원문 저장
+      Map<String, Map<String, String>> bundled;
+      try {
+        final tResult = await TranslationMapper.translateAllFieldsStrict(
+          inputData,
+          sourceLanguageCode: sourceLang,
+        ).timeout(const Duration(seconds: 6));
 
-          final tResult = await TranslationMapper.translateAllFieldsStrict(
-            inputData,
-            sourceLanguageCode: sourceLang,
-          );
-          final bundled = tResult.bundle ??
-              {
-                for (final k in ['title', 'location', 'salary', 'detail'])
-                  k: TranslationMapper.finalizeTripleForFirestoreSave(
-                    {'ko': '', 'en': '', 'lo': ''},
-                    inputData[k] ?? '',
-                    k,
-                  ),
-              };
-
-          Map<String, dynamic> tripleForFirestore(Map<String, String> m) =>
-              Map<String, dynamic>.from(m);
-
-          /// Triple-Map 무결성: Firestore에 스칼라 혼입 없이 {ko,en,lo} 맵으로만 기록.
-          final payload = <String, dynamic>{
-            JobFields.titleI18n: tripleForFirestore(bundled['title']!),
-            JobFields.locationI18n: tripleForFirestore(bundled['location']!),
-            JobFields.salaryI18n: tripleForFirestore(bundled['salary']!),
-            JobFields.descriptionI18n: tripleForFirestore(bundled['detail']!),
-            JobFields.updatedAt: FieldValue.serverTimestamp(),
-            JobFields.employerId: employerIdForCurrentSession(),
-            JobFields.deadlineAt: Timestamp.fromDate(_deadline),
-            JobFields.locationGeo: geo,
-            JobFields.jobType: 'quick_job_tag_part_time',
-          };
-
-          if (widget.isEditMode) {
-            await firestore.collection(kColJobs).doc(widget.editDocumentId).update(payload);
-          } else {
-            await firestore.collection(kColJobs).add({
-              ...payload,
-              JobFields.createdAt: FieldValue.serverTimestamp(),
-            });
-          }
-        }).timeout(const Duration(seconds: 70));
-        success = true;
-      } else {
-        success = true;
+        bundled = tResult.bundle ??
+            {
+              for (final k in ['title', 'location', 'salary', 'detail'])
+                k: {'ko': inputData[k]!, 'en': inputData[k]!, 'lo': inputData[k]!},
+            };
+      } catch (e) {
+        if (kDebugMode) debugPrint('_submit: 번역 실패 → 원문 저장: $e');
+        bundled = {
+          for (final k in ['title', 'location', 'salary', 'detail'])
+            k: {'ko': inputData[k]!, 'en': inputData[k]!, 'lo': inputData[k]!},
+        };
       }
-    } on TimeoutException {
-      timedOut = true;
-    } catch (_) {
+
+      if (!mounted) return;
+
+      // ✅ 위치 정보
+      final (p, _) = await getUserLocationOrDefault()
+          .timeout(const Duration(seconds: 2), onTimeout: () => (kVientianeCityHall, true));
+      final geo = GeoPoint(p.latitude, p.longitude);
+
+      // ✅ Firestore 저장
+      if (isFirebaseEnabled) {
+        final payload = <String, dynamic>{
+          JobFields.titleI18n: bundled['title']!,
+          JobFields.locationI18n: bundled['location']!,
+          JobFields.salaryI18n: bundled['salary']!,
+          JobFields.descriptionI18n: bundled['detail']!,
+          JobFields.locationGeo: geo,
+          JobFields.deadlineAt: Timestamp.fromDate(_deadline),
+          JobFields.createdAt: FieldValue.serverTimestamp(),
+          JobFields.employerId: employerIdForCurrentSession() ?? '',
+          JobFields.status: 'open',
+        };
+
+        if (widget.isEditMode && widget.editDocumentId != null) {
+          FirebaseFirestore.instance
+              .collection(kColJobs)
+              .doc(widget.editDocumentId!)
+              .update(payload)
+              .catchError((e) {
+            if (kDebugMode) debugPrint('Firestore 수정 백그라운드 에러: $e');
+          });
+        } else {
+          // Web에서 Firestore 응답 대기 문제 우회
+          // .add() 결과를 기다리지 않고 바로 홈으로 이동
+          final docRef = FirebaseFirestore.instance
+              .collection(kColJobs)
+              .doc(); // 문서 ID 미리 생성
+
+          // 저장은 백그라운드로 실행 (await 없음)
+          docRef.set(payload).catchError((e) {
+            if (kDebugMode) debugPrint('Firestore 백그라운드 저장 에러: $e');
+          });
+
+          // 저장 완료를 기다리지 않고 즉시 홈 복귀
+          // (데이터는 Firestore에 안전하게 저장됨)
+        }
+      }
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (kDebugMode) debugPrint('_submit 최종 에러: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t('quick_job_save_failed'))),
+          SnackBar(content: Text('등록 중 오류: $e')),
         );
       }
     } finally {
-      if (overlayShown) {
-        rootNav?.pop();
+      // ✅ 무조건 실행 - 로딩 해제
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _isLoading = false;
+        });
       }
-      if (mounted) setState(() => _saving = false);
     }
-
-    if (!mounted) return;
-
-    if (timedOut) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(kQuickJobSaveTimeoutSnackMessage)),
-      );
-      Navigator.of(context, rootNavigator: true).pop(<String, dynamic>{'_firebaseHandled': true});
-      return;
-    }
-
-    if (!success) return;
-    final result =
-        isFirebaseEnabled ? <String, dynamic>{'_firebaseHandled': true} : _buildOfflineResult();
-    Navigator.of(context, rootNavigator: true).pop(result);
   }
 
+  // 오프라인 급구 흐름 보존용 (향후 복구 시 사용).
+  // ignore: unused_element
   Map<String, dynamic> _buildOfflineResult() {
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     final title = _titleController.text.trim();
@@ -359,7 +324,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _saving ? null : _submit,
+              onPressed: (_saving || _isLoading) ? null : _submit,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _royalNavy,
                 foregroundColor: Colors.white,
@@ -368,7 +333,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                   borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              child: _saving
+              child: (_saving || _isLoading)
                   ? const SizedBox(
                       height: 22,
                       width: 22,

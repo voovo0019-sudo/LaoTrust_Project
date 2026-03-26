@@ -385,13 +385,13 @@ class QuickJobTranslationResult {
 class TranslationMapper {
   TranslationMapper._();
 
-  /// Google AI Studio / generativelanguage REST에서 안정적으로 동작하는 Flash 모델.
-  static const String _geminiModel = 'gemini-2.0-flash';
-  static const String _geminiKey =
-      String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+  static const String _translateApiKey =
+      String.fromEnvironment('GOOGLE_TRANSLATE_API_KEY', defaultValue: '');
+  static const String _translateEndpoint =
+      'https://translation.googleapis.com/language/translate/v2';
 
-  /// `dart-define` 주입 여부(디버그·로그용).
-  static bool get geminiApiKeyIsConfigured => _geminiKey.trim().isNotEmpty;
+  /// `dart-define` GOOGLE_TRANSLATE_API_KEY 주입 여부(디버그·로그용).
+  static bool get geminiApiKeyIsConfigured => _translateApiKey.trim().isNotEmpty;
 
   static String neutralCaptionForLangCode(String localeLanguageCode) {
     switch (_translationMapperLang2(localeLanguageCode)) {
@@ -450,10 +450,10 @@ class TranslationMapper {
     required String sourceLanguageCode,
   }) async {
     const keys = ['title', 'location', 'salary', 'detail'];
-    final keyTrim = _geminiKey.trim();
+    final keyTrim = _translateApiKey.trim();
     if (kDebugMode) {
       debugPrint(
-        'TranslationMapper: GEMINI_API_KEY configured=${keyTrim.isNotEmpty} '
+        'TranslationMapper: GOOGLE_TRANSLATE_API_KEY configured=${keyTrim.isNotEmpty} '
         'length=${keyTrim.length} (키 본문은 로그에 넣지 않음)',
       );
     }
@@ -579,9 +579,7 @@ class TranslationMapper {
         en = lo;
       }
     }
-    // 번역 실패·슬롯 비움 시 중립 영문 대신 **원문(src)** 표시 (Triple-Map 유지).
-    if (en.isEmpty) en = src;
-
+    if (en.isEmpty) en = ko;
     if (lo.isEmpty) {
       if (!translationMapperContainsHangul(en) && en.isNotEmpty) {
         if (fieldKey == 'salary') {
@@ -593,10 +591,10 @@ class TranslationMapper {
         }
       }
     }
-    if (lo.isEmpty) lo = src;
+    if (lo.isEmpty) lo = ko;
 
-    if (translationMapperContainsHangul(en)) en = src;
-    if (translationMapperContainsHangul(lo)) lo = src;
+    if (translationMapperContainsHangul(en)) en = ko;
+    if (translationMapperContainsHangul(lo)) lo = ko;
 
     return {'ko': ko, 'en': en, 'lo': lo};
   }
@@ -793,22 +791,16 @@ class TranslationMapper {
     if (t.isEmpty) {
       return {'ko': '', 'en': '', 'lo': ''};
     }
-    final salaryHint = fieldKey == 'salary'
-        ? 'Salary field: "lo" may be Latin digits/currency (e.g. 15,000 LAK/hour) or Lao script. '
-        : '"lo" must be authentic Lao script (ລາວ). ';
     Map<String, String>? best;
     for (var attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
         await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
       try {
-        final got = await _geminiSingleFieldTriple(
-          fieldKey: fieldKey,
+        final got = await _translateOneField(
           text: t,
-          sourceLanguageCode: sourceLanguageCode,
-          salaryHint: salaryHint,
+          sourceLang: sourceLanguageCode,
         ).timeout(const Duration(seconds: 9));
-        if (got == null) continue;
         final san = _sanitizeAiTripleStrict(got);
         if ((san['ko'] ?? '').trim().isNotEmpty) {
           best = san;
@@ -826,83 +818,118 @@ class TranslationMapper {
     return best ?? {'ko': '', 'en': '', 'lo': ''};
   }
 
-  static Future<Map<String, String>?> _geminiSingleFieldTriple({
-    required String fieldKey,
+  static Future<Map<String, String>> _translateOneField({
     required String text,
-    required String sourceLanguageCode,
-    required String salaryHint,
+    required String sourceLang,
   }) async {
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/$_geminiModel:generateContent?key=$_geminiKey',
-    );
-    final prompt =
-        'Translate ONE job listing field into Korean (ko), English (en), and Lao (lo). '
-        'Field: ${jsonEncode(fieldKey)}. '
-        '$salaryHint'
-        'Rules: ko may contain Hangul. en and lo MUST NOT contain Korean Hangul (no 한글 in en/lo). '
-        'Return ONLY JSON: {"ko":"","en":"","lo":""} — no markdown.\n'
-        'Source locale hint: ${_translationMapperLang2(sourceLanguageCode)}.\n'
-        'Text:\n${jsonEncode(text)}';
-    final body = jsonEncode({
-      'contents': [
-        {
-          'parts': [
-            {'text': prompt},
-          ],
-        },
-      ],
-      'generationConfig': {
-        'temperature': 0.2,
-        'responseMimeType': 'application/json',
-      },
-    });
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
-    if (resp.statusCode == 403 || resp.statusCode == 429) {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: ${resp.statusCode} 에러 → 재시도 없이 즉시 포기');
-      }
-      throw _GeminiNoRetryException(resp.statusCode);
+    if (text.trim().isEmpty) {
+      return {'ko': '', 'en': '', 'lo': ''};
     }
-    if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      _logGeminiHttpError(resp);
-      return null;
-    }
-    return _parseSingleTripleFromGenerateContentResponse(resp.body);
-  }
-
-  static Map<String, String>? _parseSingleTripleFromGenerateContentResponse(String body) {
+    final src = _translationMapperLang2(sourceLang);
     try {
-      final decoded = jsonDecode(body) as Map<String, dynamic>?;
-      final candidates = decoded?['candidates'] as List<dynamic>?;
-      if (candidates == null || candidates.isEmpty) return null;
-      final first = candidates.first;
-      if (first is! Map<String, dynamic>) return null;
-      final parts = first['content']?['parts'] as List<dynamic>?;
-      if (parts == null || parts.isEmpty) return null;
-      final rawOut = (parts.first as Map<String, dynamic>)['text']?.toString() ?? '';
-      var jsonStr = _translationMapperExtractJson(rawOut) ?? rawOut.trim();
-      jsonStr = _translationMapperRepairJson(jsonStr);
-      if (jsonStr.isEmpty) return null;
-      final root = jsonDecode(jsonStr) as Map<String, dynamic>?;
-      if (root == null) return null;
+      Future<String?> toTarget(String target) async {
+        if (src == target) return text;
+        return _callTranslateApi(text: text, source: src, target: target);
+      }
+
+      final koText = src == 'ko' ? text : (await toTarget('ko')) ?? text;
+      final enResult = src == 'en' ? text : (await toTarget('en'));
+      final loResult = src == 'lo' ? text : (await toTarget('lo'));
+
       return {
-        'ko': root['ko']?.toString().trim() ?? '',
-        'en': root['en']?.toString().trim() ?? '',
-        'lo': root['lo']?.toString().trim() ?? '',
+        'ko': koText,
+        'en': enResult ?? text,
+        'lo': loResult ?? text,
       };
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: 단일 필드 JSON 파싱 실패 — $e');
+      if (e is _GeminiNoRetryException) rethrow;
+      if (kDebugMode) debugPrint('TranslationMapper: 번역 실패: $e');
+      return {'ko': text, 'en': text, 'lo': text};
+    }
+  }
+
+  static Future<String?> _callTranslateApi({
+    required String text,
+    required String source,
+    required String target,
+  }) async {
+    try {
+      final uri = Uri.parse('$_translateEndpoint?key=$_translateApiKey');
+
+      final response = await http
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'q': text,
+              'source': source,
+              'target': target,
+              'format': 'text',
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>?;
+        final translations = data?['data']?['translations'] as List<dynamic>?;
+        final translated = translations?.isNotEmpty == true
+            ? translations!.first['translatedText'] as String?
+            : null;
+        if (kDebugMode) {
+          debugPrint('TranslationMapper: 번역 성공 [$source→$target]: $translated');
+        }
+        return translated;
       }
+
+      if (response.statusCode == 403 || response.statusCode == 429) {
+        throw _GeminiNoRetryException(response.statusCode);
+      }
+
+      if (kDebugMode) {
+        debugPrint('TranslationMapper: 번역 HTTP 에러: ${response.statusCode}');
+      }
+      _logHttpError(response);
+      return null;
+    } catch (e) {
+      if (e is _GeminiNoRetryException) rethrow;
+      if (kDebugMode) debugPrint('TranslationMapper: 번역 호출 에러: $e');
       return null;
     }
   }
 
-  static void _logGeminiHttpError(http.Response resp) {
+  static Future<Map<String, Map<String, String>>?> _geminiBatchAllFourFields(
+    Map<String, String> originalData, {
+    required String sourceLanguageCode,
+  }) async {
+    try {
+      final result = <String, Map<String, String>>{};
+
+      for (final entry in originalData.entries) {
+        final key = entry.key;
+        final raw = entry.value.trim();
+
+        if (raw.isEmpty) {
+          result[key] = {'ko': '', 'en': '', 'lo': ''};
+          continue;
+        }
+
+        final triple = await _translateOneField(
+          text: raw,
+          sourceLang: sourceLanguageCode,
+        );
+
+        result[key] = triple;
+      }
+
+      return result;
+    } catch (e) {
+      if (e is _GeminiNoRetryException) rethrow;
+      if (kDebugMode) debugPrint('TranslationMapper: 배치 번역 에러: $e');
+      return null;
+    }
+  }
+
+  static void _logHttpError(http.Response resp) {
     if (!kDebugMode) return;
     var detail = resp.body;
     try {
@@ -911,132 +938,7 @@ class TranslationMapper {
         detail = jsonEncode(j['error']);
       }
     } catch (_) {}
-    debugPrint('TranslationMapper: Gemini HTTP ${resp.statusCode} — $detail');
-  }
-
-  static Future<Map<String, Map<String, String>>?> _geminiBatchAllFourFields(
-    Map<String, String> originalData, {
-    required String sourceLanguageCode,
-  }) async {
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/$_geminiModel:generateContent?key=$_geminiKey',
-    );
-    final payload = <String, String>{
-      for (final k in ['title', 'location', 'salary', 'detail']) k: originalData[k] ?? '',
-    };
-    final prompt = StringBuffer()
-      ..writeln(
-        'You translate job listing fields for a trilingual app (Korean / English / Lao in Laos).',
-      )
-      ..writeln('Return ONLY valid JSON with exactly this shape (no markdown, no extra keys):')
-      ..writeln(
-        '{"title":{"ko":"","en":"","lo":""},"location":{"ko":"","en":"","lo":""},'
-        '"salary":{"ko":"","en":"","lo":""},"detail":{"ko":"","en":"","lo":""}}',
-      )
-      ..writeln('Rules:')
-      ..writeln('- For each top-level key, set ko, en, lo to faithful translations of the input string.')
-      ..writeln('- "lo" must be authentic Lao script (ລາວ), not Thai.')
-      ..writeln('- If an input field is empty, use "" for ko, en, and lo for that key.')
-      ..writeln('- Never use generic placeholders like "Pending", "View full details", or "TBD".')
-      ..writeln('- Preserve numbers and currency units in salary.')
-      ..writeln('Source UI language hint: ${_translationMapperLang2(sourceLanguageCode)}.')
-      ..writeln('Input JSON:')
-      ..writeln(jsonEncode(payload));
-
-    final body = jsonEncode({
-      'contents': [
-        {
-          'parts': [
-            {'text': prompt.toString()},
-          ],
-        },
-      ],
-      'generationConfig': {
-        'temperature': 0.2,
-        'responseMimeType': 'application/json',
-      },
-    });
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
-    if (resp.statusCode == 403 || resp.statusCode == 429) {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: 배치 ${resp.statusCode} → 즉시 포기');
-      }
-      throw _GeminiNoRetryException(resp.statusCode);
-    }
-    if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      _logGeminiHttpError(resp);
-      return null;
-    }
-    return _parseBatchQuadrupleFromGenerateContentResponse(resp.body);
-  }
-
-  static Map<String, Map<String, String>>? _parseBatchQuadrupleFromGenerateContentResponse(String body) {
-    final a = _parseBatchInner(body, lenient: false);
-    if (a != null && a.isNotEmpty) return a;
-    return _parseBatchInner(body, lenient: true);
-  }
-
-  static Map<String, Map<String, String>>? _parseBatchInner(String body, {required bool lenient}) {
-    try {
-      final decoded = jsonDecode(body) as Map<String, dynamic>?;
-      final candidates = decoded?['candidates'] as List<dynamic>?;
-      if (candidates == null || candidates.isEmpty) return null;
-      final content = candidates.first as Map<String, dynamic>?;
-      final parts = content?['content']?['parts'] as List<dynamic>?;
-      if (parts == null || parts.isEmpty) return null;
-      final rawOut =
-          (parts.first as Map<String, dynamic>)['text']?.toString() ?? '';
-      var jsonStr = _translationMapperExtractJson(rawOut) ?? rawOut.trim();
-      if (lenient) {
-        jsonStr = _translationMapperRepairJson(jsonStr);
-      }
-      if (jsonStr.isEmpty) return null;
-      final root = jsonDecode(jsonStr) as Map<String, dynamic>?;
-      if (root == null) return null;
-      const keys = ['title', 'location', 'salary', 'detail'];
-      final out = <String, Map<String, String>>{};
-      for (final k in keys) {
-        final node = root[k];
-        if (node is! Map) continue;
-        final m = Map<String, dynamic>.from(node);
-        out[k] = {
-          'ko': m['ko']?.toString().trim() ?? '',
-          'en': m['en']?.toString().trim() ?? '',
-          'lo': m['lo']?.toString().trim() ?? '',
-        };
-      }
-      return out.isEmpty ? null : out;
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('TranslationMapper: 배치 JSON 파싱(lenient=$lenient) — $e\n$st');
-      }
-      return null;
-    }
-  }
-
-  static String _translationMapperRepairJson(String s) {
-    var o = s.trim();
-    o = o.replaceAll(RegExp(r',\s*}'), '}');
-    o = o.replaceAll(RegExp(r',\s*]'), ']');
-    return o;
-  }
-
-  static String? _translationMapperExtractJson(String text) {
-    var t = text.trim();
-    if (t.contains('```')) {
-      final i = t.indexOf('{');
-      final j = t.lastIndexOf('}');
-      if (i >= 0 && j > i) t = t.substring(i, j + 1);
-    }
-    final start = t.indexOf('{');
-    final end = t.lastIndexOf('}');
-    if (start < 0 || end <= start) return null;
-    return t.substring(start, end + 1);
+    debugPrint('TranslationMapper: HTTP ${resp.statusCode} — $detail');
   }
 }
 

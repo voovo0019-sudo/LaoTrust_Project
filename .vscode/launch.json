@@ -8,7 +8,7 @@
         "program": "lib/main.dart",
         "args": [
           "--dart-define",
-          "GEMINI_API_KEY=AIzaSyBXwzgY0GuLmFYaPjwTx8LRneh3nK6q6hk"
+          "GEMINI_API_KEY=AIzaSyDLjbUci-tZWC102B2DMQhafxr9pdYEoco"
         ]
       }
     ]

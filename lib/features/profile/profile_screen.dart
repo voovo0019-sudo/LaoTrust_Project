@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
+import '../../services/auth_service.dart';
 import 'bcel_onepay_screen.dart';
 import 'expert_dashboard_screen.dart';
 import 'partner_support_center_screen.dart';
@@ -18,11 +19,14 @@ class ProfileScreen extends StatefulWidget {
     super.key,
     this.openPhoneAuthOnStart = false,
     this.popToHomeOnAuthSuccess = false,
+    /// true면 진입 시 보류 중인 로그인 리다이렉트를 비움(앱바·/login 전용 로그인 등).
+    this.discardPendingPostLoginRedirect = false,
   });
 
   final bool openPhoneAuthOnStart;
   /// v7.9: 전화 인증(또는 화이트리스트) 성공 직후 루트(홈 탭)까지 복귀.
   final bool popToHomeOnAuthSuccess;
+  final bool discardPendingPostLoginRedirect;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -36,6 +40,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.discardPendingPostLoginRedirect) {
+      clearPostLoginRedirect();
+    }
     _loadVerified();
     if (widget.openPhoneAuthOnStart) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -133,14 +140,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.dashboard,
             title: context.l10n('expert_dashboard'),
             subtitle: context.l10n('profile_expert_dashboard_sub'),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen())),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect(expertDashboardRouteName);
+                _openPhoneAuthSheet(context);
+                return;
+              }
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen()));
+            },
           ),
           _buildMenuTile(
             context,
             icon: Icons.shield,
             title: context.t('partner_support_center_title'),
             subtitle: context.t('partner_support_center_info'),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartnerSupportCenterScreen())),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect(partnerSupportCenterRouteName);
+                _openPhoneAuthSheet(context);
+                return;
+              }
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PartnerSupportCenterScreen()));
+            },
           ),
           _buildMenuTile(
             context,
@@ -347,12 +372,11 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
   }
 
   void _finishAuthSuccessNavigate() {
-    final navigator = Navigator.of(context, rootNavigator: true);
-    widget.onClose();
-    if (!widget.popToHomeOnAuthSuccess) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      navigator.popUntil((route) => route.isFirst);
-    });
+    schedulePostLoginNavigationAfterAuth(
+      sheetContext: context,
+      closeSheet: widget.onClose,
+      popToAppRoot: widget.popToHomeOnAuthSuccess,
+    );
   }
 
   Future<void> _login() async {

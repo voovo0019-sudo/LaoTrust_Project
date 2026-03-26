@@ -97,6 +97,17 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     );
     if (!mounted) return;
     if (goProfile == true) {
+      setPostLoginRedirect(
+        quickJobPostRouteName,
+        <String, dynamic>{
+          'documentId': widget.editDocumentId,
+          'title': _titleController.text,
+          'location': _locationController.text,
+          'salary': _salaryController.text,
+          'detail': _descriptionController.text,
+          'deadline': _deadline,
+        },
+      );
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => const ProfileScreen(

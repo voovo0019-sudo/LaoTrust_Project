@@ -5,11 +5,13 @@
 // v10.1: 앱 포그라운드 복귀 시 토큰 갱신·세션 동기화는 순환 import 방지를 위해
 //        [registerAuthForegroundGuard]가 core/firebase_service.dart에 있으며,
 //        [enableFirestoreOfflinePersistence] 성공 시 1회 등록된다.
+// 작전 A: 로그인 성공 후 [pushNamed]로 원래 목적 화면 복귀.
 // =============================================================================
 
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../core/firebase_service.dart';
 
@@ -25,6 +27,54 @@ String normalizeLaosPhone(String localNumber) {
 }
 
 String? _lastVerificationId;
+
+// ---------------------------------------------------------------------------
+// Post-login redirect (작전 A) — 보호된 화면 진입 전 [setPostLoginRedirect] 호출.
+// ---------------------------------------------------------------------------
+
+/// [MaterialApp]에 등록된 이름으로 라우팅한다. [arguments]는 [Navigator.pushNamed]와 동일.
+class PostLoginRedirect {
+  const PostLoginRedirect(this.routeName, {this.arguments});
+  final String routeName;
+  final Object? arguments;
+}
+
+PostLoginRedirect? _pendingPostLoginRedirect;
+
+/// 인증을 요청하기 **직전**에 호출: 로그인·화이트리스트 성공 후 해당 경로로 이동.
+void setPostLoginRedirect(String routeName, [Object? arguments]) {
+  _pendingPostLoginRedirect = PostLoginRedirect(routeName, arguments: arguments);
+}
+
+void clearPostLoginRedirect() {
+  _pendingPostLoginRedirect = null;
+}
+
+/// 일회성 소비(로그인 성공 처리 시). 없으면 null.
+PostLoginRedirect? takePostLoginRedirect() {
+  final r = _pendingPostLoginRedirect;
+  _pendingPostLoginRedirect = null;
+  return r;
+}
+
+/// 전화/화이트리스트 인증 성공 직후: 시트 닫기 → (옵션) 루트까지 pop → [pushNamed] 리다이렉트.
+void schedulePostLoginNavigationAfterAuth({
+  required BuildContext sheetContext,
+  required VoidCallback closeSheet,
+  required bool popToAppRoot,
+}) {
+  final navigator = Navigator.of(sheetContext, rootNavigator: true);
+  final redirect = takePostLoginRedirect();
+  closeSheet();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (popToAppRoot) {
+      navigator.popUntil((route) => route.isFirst);
+    }
+    if (redirect != null) {
+      navigator.pushNamed(redirect.routeName, arguments: redirect.arguments);
+    }
+  });
+}
 
 /// 인증 코드 발송 (라오스 현지 번호). / Send verification code to Laos phone.
 Future<void> sendPhoneVerificationCodeLaos(String phoneNumber) async {

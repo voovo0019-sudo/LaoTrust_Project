@@ -222,6 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const ProfileScreen(
                         openPhoneAuthOnStart: true,
                         popToHomeOnAuthSuccess: true,
+                        discardPendingPostLoginRedirect: true,
                       ),
                 ),
               );

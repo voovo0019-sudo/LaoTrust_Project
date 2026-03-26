@@ -6,6 +6,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// JSON 로드 실패·웹 캐시 등으로 맵이 비어도 `quick_job_dyn_*` 키가 그대로 노출되지 않도록 한국어 폴백.
 const Map<String, String> _kFallbackKo = {
@@ -75,9 +76,17 @@ class AppLocalizationsScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AppLocalizationsInherited(
+    final inherited = _AppLocalizationsInherited(
       data: AppLocalizations._(locale: locale, data: strings),
       child: child,
     );
+    // 라오어 UI: Noto Sans Lao 우선 (전역 DefaultTextStyle).
+    if (locale.languageCode.toLowerCase().startsWith('lo')) {
+      return DefaultTextStyle.merge(
+        style: GoogleFonts.notoSansLao(),
+        child: inherited,
+      );
+    }
+    return inherited;
   }
 }

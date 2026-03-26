@@ -26,6 +26,8 @@ dependencies:
   image_picker: ^1.1.2
   # v10.8: Gemini REST (선택 — dart-define GEMINI_API_KEY)
   http: ^1.2.2
+  # Noto Sans / Noto Sans Lao 전역 타이포 (작전 B)
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

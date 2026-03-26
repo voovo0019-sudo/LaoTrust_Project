@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
 import '../../../core/quick_job_triple_map_builder.dart';
+import '../../../core/theme.dart';
 import '../../../core/translation_mapper.dart';
 import '../../../data/firestore_schema.dart';
 import '../../../services/auth_service.dart';
@@ -27,6 +28,23 @@ class QuickJobsSection extends StatefulWidget {
 
 class _QuickJobsSectionState extends State<QuickJobsSection> {
   final List<Map<String, dynamic>> _localJobs = <Map<String, dynamic>>[];
+
+  /// 라오 문자(ລາວ) 포함 시 Noto Sans Lao 폴백.
+  TextStyle _qjTextStyle({
+    double fontSize = 13,
+    FontWeight? fontWeight,
+    Color? color,
+  }) {
+    return TextStyle(
+      fontFamily: 'Noto Sans',
+      fontFamilyFallback: AppTheme.notoSansLaoFallback,
+      letterSpacing: 0.1,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+    );
+  }
+
   static const List<Map<String, String>> _mockQuickJobs = [
     {
       'titleKey': 'job_title_restaurant_server',
@@ -186,6 +204,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     );
     if (!context.mounted) return;
     if (goProfile == true) {
+      setPostLoginRedirect(quickJobPostRouteName);
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => const ProfileScreen(
@@ -309,10 +328,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         return AlertDialog(
           title: Text(
             titleLine,
-            style: const TextStyle(
-              fontFamily: 'Noto Sans',
-              letterSpacing: 0.1,
-            ),
+            style: lang.toLowerCase().startsWith('lo')
+                ? TextStyle(
+                    fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
+                    letterSpacing: 0.1,
+                  )
+                : _qjTextStyle(),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -320,34 +341,42 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             children: [
               Text(
                 '${ctx.t('status')}: $tag',
-                style: const TextStyle(
-                  fontFamily: 'Noto Sans',
-                  letterSpacing: 0.1,
-                ),
+                style: lang.toLowerCase().startsWith('lo')
+                    ? TextStyle(
+                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
+                        letterSpacing: 0.1,
+                      )
+                    : _qjTextStyle(),
               ),
               const SizedBox(height: 8),
               Text(
                 '${ctx.t('location')}: $locationLine',
-                style: const TextStyle(
-                  fontFamily: 'Noto Sans',
-                  letterSpacing: 0.1,
-                ),
+                style: lang.toLowerCase().startsWith('lo')
+                    ? TextStyle(
+                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
+                        letterSpacing: 0.1,
+                      )
+                    : _qjTextStyle(),
               ),
               const SizedBox(height: 8),
               Text(
                 '${ctx.t('salary')}: $salaryLine',
-                style: const TextStyle(
-                  fontFamily: 'Noto Sans',
-                  letterSpacing: 0.1,
-                ),
+                style: lang.toLowerCase().startsWith('lo')
+                    ? TextStyle(
+                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
+                        letterSpacing: 0.1,
+                      )
+                    : _qjTextStyle(),
               ),
               const SizedBox(height: 8),
               Text(
                 '${ctx.t('detail')}: $detailLine',
-                style: const TextStyle(
-                  fontFamily: 'Noto Sans',
-                  letterSpacing: 0.1,
-                ),
+                style: lang.toLowerCase().startsWith('lo')
+                    ? TextStyle(
+                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
+                        letterSpacing: 0.1,
+                      )
+                    : _qjTextStyle(),
               ),
             ],
           ),
@@ -500,12 +529,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                         ),
                                         child: Text(
                                           tag,
-                                          style: const TextStyle(
-                                            color: Color(0xFF1E3A8A),
-                                            fontWeight: FontWeight.bold,
+                                          style: _qjTextStyle(
                                             fontSize: 10,
-                                            fontFamily: 'Noto Sans',
-                                            letterSpacing: 0.1,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF1E3A8A),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -516,11 +543,9 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                         fit: FlexFit.loose,
                                         child: Text(
                                           title,
-                                          style: const TextStyle(
+                                          style: _qjTextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13,
-                                            fontFamily: 'Noto Sans',
-                                            letterSpacing: 0.1,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -589,10 +614,9 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                           remaining.isNegative
                                               ? context.l10n('job_deadline_passed')
                                               : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
-                                          style: TextStyle(
+                                          style: _qjTextStyle(
                                             fontSize: 10,
                                             color: Colors.grey.shade600,
-                                            fontFamily: 'Noto Sans',
                                           ),
                                         ),
                                       ],

@@ -579,7 +579,8 @@ class TranslationMapper {
         en = lo;
       }
     }
-    if (en.isEmpty) en = kQuickJobNeutralLineEn;
+    // 번역 실패·슬롯 비움 시 중립 영문 대신 **원문(src)** 표시 (Triple-Map 유지).
+    if (en.isEmpty) en = src;
 
     if (lo.isEmpty) {
       if (!translationMapperContainsHangul(en) && en.isNotEmpty) {
@@ -592,10 +593,10 @@ class TranslationMapper {
         }
       }
     }
-    if (lo.isEmpty) lo = kQuickJobNeutralLineLo;
+    if (lo.isEmpty) lo = src;
 
-    if (translationMapperContainsHangul(en)) en = kQuickJobNeutralLineEn;
-    if (translationMapperContainsHangul(lo)) lo = kQuickJobNeutralLineLo;
+    if (translationMapperContainsHangul(en)) en = src;
+    if (translationMapperContainsHangul(lo)) lo = src;
 
     return {'ko': ko, 'en': en, 'lo': lo};
   }

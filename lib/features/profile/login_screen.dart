@@ -16,6 +16,7 @@ class LoginScreen extends StatelessWidget {
     return const ProfileScreen(
       openPhoneAuthOnStart: true,
       popToHomeOnAuthSuccess: true,
+      discardPendingPostLoginRedirect: true,
     );
   }
 }

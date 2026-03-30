@@ -57,7 +57,11 @@ PostLoginRedirect? takePostLoginRedirect() {
   return r;
 }
 
-/// 전화/화이트리스트 인증 성공 직후: 시트 닫기 → (옵션) 루트까지 pop → [pushNamed] 리다이렉트.
+/// 전화/화이트리스트 인증 성공 직후: 시트 닫기 → (옵션) 루트까지 pop → 목적지로 이동.
+/// [popToAppRoot]==true 이면 루트까지 pop 후 [pushNamed].
+/// [popToAppRoot]==false 이고 리다이렉트가 있으면: 스택에 `/login` 등 **추가 라우트가 있으면**
+/// [pushReplacementNamed]로 그 화면을 목적지와 바꾸고, 루트만 있으면(탭 내 시트만 연 경우)
+/// [pushNamed]로 메인 탭 위에 얹는다.
 void schedulePostLoginNavigationAfterAuth({
   required BuildContext sheetContext,
   required VoidCallback closeSheet,
@@ -71,7 +75,16 @@ void schedulePostLoginNavigationAfterAuth({
       navigator.popUntil((route) => route.isFirst);
     }
     if (redirect != null) {
-      navigator.pushNamed(redirect.routeName, arguments: redirect.arguments);
+      if (popToAppRoot) {
+        navigator.pushNamed(redirect.routeName, arguments: redirect.arguments);
+      } else if (navigator.canPop()) {
+        navigator.pushReplacementNamed(
+          redirect.routeName,
+          arguments: redirect.arguments,
+        );
+      } else {
+        navigator.pushNamed(redirect.routeName, arguments: redirect.arguments);
+      }
     }
   });
 }

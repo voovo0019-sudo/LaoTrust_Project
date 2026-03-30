@@ -391,7 +391,8 @@ class TranslationMapper {
       'https://translation.googleapis.com/language/translate/v2';
 
   /// `dart-define` GOOGLE_TRANSLATE_API_KEY 주입 여부(디버그·로그용).
-  static bool get geminiApiKeyIsConfigured => _translateApiKey.trim().isNotEmpty;
+  static bool get isTranslateApiKeyConfigured =>
+      _translateApiKey.trim().isNotEmpty;
 
   static String neutralCaptionForLangCode(String localeLanguageCode) {
     switch (_translationMapperLang2(localeLanguageCode)) {
@@ -457,7 +458,7 @@ class TranslationMapper {
         'length=${keyTrim.length} (키 본문은 로그에 넣지 않음)',
       );
     }
-    if (!geminiApiKeyIsConfigured) {
+    if (!isTranslateApiKeyConfigured) {
       final out = <String, Map<String, String>>{};
       for (final k in keys) {
         final src = (originalData[k] ?? '').trim();
@@ -473,7 +474,7 @@ class TranslationMapper {
     bool apiQuotaExceeded = false;
     Map<String, Map<String, String>>? batch;
     try {
-      batch = await _geminiBatchAllFourFields(
+      batch = await _translateBatchAllFourFields(
         originalData,
         sourceLanguageCode: sourceLanguageCode,
       ).timeout(const Duration(seconds: 5));
@@ -897,7 +898,11 @@ class TranslationMapper {
     }
   }
 
-  static Future<Map<String, Map<String, String>>?> _geminiBatchAllFourFields(
+  /// 네 필드에 대해 [Translation API v2](https://translation.googleapis.com/language/translate/v2)
+  /// 로 ko/en/lo 삼중 맵을 채운다. 각 HTTP 호출은 `_callTranslateApi`의 5초 타임아웃을 쓴다.
+  /// 403/429는 재시도 없이 상위로 전달; 그 외 실패·예외 시 `null` (원문은
+  /// [translateAllFieldsStrict] 후처리에서 보정).
+  static Future<Map<String, Map<String, String>>?> _translateBatchAllFourFields(
     Map<String, String> originalData, {
     required String sourceLanguageCode,
   }) async {
@@ -905,20 +910,21 @@ class TranslationMapper {
       final result = <String, Map<String, String>>{};
 
       for (final entry in originalData.entries) {
-        final key = entry.key;
+        final fieldKey = entry.key;
         final raw = entry.value.trim();
 
         if (raw.isEmpty) {
-          result[key] = {'ko': '', 'en': '', 'lo': ''};
+          result[fieldKey] = {'ko': '', 'en': '', 'lo': ''};
           continue;
         }
 
+        // GOOGLE_TRANSLATE_API_KEY + v2 엔드포인트 (_translateOneField → _callTranslateApi)
         final triple = await _translateOneField(
           text: raw,
           sourceLang: sourceLanguageCode,
         );
 
-        result[key] = triple;
+        result[fieldKey] = triple;
       }
 
       return result;

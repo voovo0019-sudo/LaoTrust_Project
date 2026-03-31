@@ -1,14 +1,20 @@
 // =============================================================================
-// v1.3: 유니버설 4단계 위저드 화면 (9대 카테고리 공통)
-// 1: 세부유형 선택 → 2: 규모/대상 → 3: 시각적 가이드 → 4: 확정·정산 가이드
-// 디자인 헌법: 곡률 28.0px, 로얄 네이비 #1E293B. 홈 레이아웃 무변경.
+// v5.1: 유니버설 4단계 위저드 — Storage URL 저장 · D2 설계도 반영
+// Firestore: artifacts/{projectId}/public/data/requests
 // =============================================================================
 
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../../core/app_localizations.dart';
+import '../../core/expert_request_photo_upload.dart';
+import '../../core/firebase_service.dart';
+import '../../core/location_service.dart';
+import '../../core/offline_first_sync.dart';
 import '../../core/search_trigger_bus.dart';
 import 'universal_wizard_config.dart';
 import 'universal_wizard_state.dart';
@@ -31,7 +37,6 @@ class UniversalWizardScreen extends StatefulWidget {
   State<UniversalWizardScreen> createState() => _UniversalWizardScreenState();
 }
 
-/// 지침 v3.9: 알바 구인 등록과 동일한 선명한 로얄 블루 (아웃라인 버튼용)
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 
 class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
@@ -40,6 +45,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   late UniversalWizardState _state;
   UniversalWizardConfig? _config;
   int _currentStep = 0;
+  bool _isSubmitting = false;
 
   final ImagePicker _imagePicker = ImagePicker();
   final List<XFile> _pickedImages = <XFile>[];
@@ -47,33 +53,41 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   final Set<String> _step2Selections = <String>{};
   bool _step2OtherSelected = false;
   final TextEditingController _step2OtherController = TextEditingController();
+  final TextEditingController _step1OtherServiceController = TextEditingController();
 
-  // Delivery / numeric inputs etc.
   final TextEditingController _weightKgController = TextEditingController();
-  final TextEditingController _distanceKmController = TextEditingController();
-  String _cargoSize = '';
+  final TextEditingController _movingRoomCountController = TextEditingController();
+  String _movingVehicleType = '';
 
-  // Cleaning
   final TextEditingController _cleaningAreaController = TextEditingController();
   String _cleaningScale = '';
+  final TextEditingController _cleaningTargetController = TextEditingController();
+  final TextEditingController _cleaningIndustryController = TextEditingController();
+  final TextEditingController _cleaningBeddingCountController = TextEditingController();
 
-  // Tutoring
   final Set<String> _tutoringLevels = <String>{};
+  final TextEditingController _tutorGoalController = TextEditingController();
 
-  // Security
-  final TextEditingController _securityPeopleController = TextEditingController();
-  final TextEditingController _securityTimeController = TextEditingController();
-
-  // Garden
-  String _gardenScale = '';
-  final Set<String> _gardenScopes = <String>{};
-
-  // Event
   final TextEditingController _eventPeopleController = TextEditingController();
 
-  // Photo
-  final TextEditingController _photoTimeController = TextEditingController();
-  final Set<String> _photoPlaceSelections = <String>{};
+  final Set<String> _interiorParts = <String>{};
+  final TextEditingController _interiorBudgetController = TextEditingController();
+
+  final Set<String> _businessLangs = <String>{};
+  final TextEditingController _documentTypeController = TextEditingController();
+
+  final Set<String> _vehicleSymptoms = <String>{};
+  final TextEditingController _vehicleBrandController = TextEditingController();
+
+  final TextEditingController _beautyPeopleController = TextEditingController();
+
+  final TextEditingController _d3LandmarkController = TextEditingController();
+  final TextEditingController _d3MovingFromController = TextEditingController();
+  final TextEditingController _d3MovingToController = TextEditingController();
+  final TextEditingController _d3MemoController = TextEditingController();
+
+  String _repairBrand = '';
+  final TextEditingController _repairSymptomMemoController = TextEditingController();
 
   @override
   void initState() {
@@ -99,13 +113,24 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   void dispose() {
     _pageController.dispose();
     _step2OtherController.dispose();
+    _step1OtherServiceController.dispose();
     _weightKgController.dispose();
-    _distanceKmController.dispose();
+    _movingRoomCountController.dispose();
     _cleaningAreaController.dispose();
-    _securityPeopleController.dispose();
-    _securityTimeController.dispose();
+    _cleaningTargetController.dispose();
+    _cleaningIndustryController.dispose();
+    _cleaningBeddingCountController.dispose();
+    _tutorGoalController.dispose();
     _eventPeopleController.dispose();
-    _photoTimeController.dispose();
+    _interiorBudgetController.dispose();
+    _documentTypeController.dispose();
+    _vehicleBrandController.dispose();
+    _beautyPeopleController.dispose();
+    _d3LandmarkController.dispose();
+    _d3MovingFromController.dispose();
+    _d3MovingToController.dispose();
+    _d3MemoController.dispose();
+    _repairSymptomMemoController.dispose();
     super.dispose();
   }
 
@@ -134,11 +159,251 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
-  bool _canProceedStep2() => _isStep2Complete();
-  bool _canProceedStep3() => true;
+
+  bool _canProceedStep2() {
+    if (_state.step1SubTypeId == 'other') {
+      return _step1OtherServiceController.text.trim().isNotEmpty;
+    }
+    switch (_state.categoryKey) {
+      case 'expert_moving':
+        final sub = _state.step1SubTypeId;
+        if (sub == 'small') return _movingVehicleType.isNotEmpty;
+        if (sub == 'home') return _movingRoomCountController.text.trim().isNotEmpty;
+        if (sub == 'cargo') return _weightKgController.text.trim().isNotEmpty;
+        return false;
+      case 'expert_cleaning':
+        final hasBase =
+            _cleaningAreaController.text.trim().isNotEmpty || _cleaningScale.isNotEmpty;
+        if (!hasBase) return false;
+        final sub = _state.step1SubTypeId;
+        if (sub == 'commercial') return _cleaningIndustryController.text.trim().isNotEmpty;
+        if (sub == 'regular_visit') return _cleaningTargetController.text.trim().isNotEmpty;
+        if (sub == 'bedding') return _cleaningBeddingCountController.text.trim().isNotEmpty;
+        return true;
+      case 'expert_repair':
+        return _repairBrand.isNotEmpty && _repairSymptomMemoController.text.trim().isNotEmpty;
+      case 'expert_interior':
+        if (_interiorParts.isEmpty) return false;
+        if (_state.step1SubTypeId == 'remodel') {
+          return _interiorBudgetController.text.trim().isNotEmpty;
+        }
+        return true;
+      case 'expert_business':
+        return _businessLangs.isNotEmpty && _documentTypeController.text.trim().isNotEmpty;
+      case 'expert_beauty':
+        final kindOk = _step2Selections.isNotEmpty || _step2OtherSelected;
+        if (!kindOk) return false;
+        if (_step2OtherSelected && _step2OtherController.text.trim().isEmpty) return false;
+        return _beautyPeopleController.text.trim().isNotEmpty;
+      case 'expert_tutoring':
+        return _tutoringLevels.isNotEmpty;
+      case 'expert_events':
+        return _eventPeopleController.text.trim().isNotEmpty;
+      case 'expert_vehicle':
+        return _vehicleBrandController.text.trim().isNotEmpty &&
+            (_vehicleSymptoms.isNotEmpty || _step2OtherSelected);
+      default:
+        return _step2Selections.isNotEmpty || _step2OtherSelected;
+    }
+  }
+
+  bool _canProceedStep3() {
+    final dateOk = _state.preferredDateStr.isNotEmpty;
+    final timeOk = _state.preferredTimeStr.isNotEmpty;
+    if (!dateOk || !timeOk) return false;
+    final hasPin = _state.step3Lat != null && _state.step3Lng != null;
+    final hasLandmark = _d3LandmarkController.text.trim().isNotEmpty;
+    if (!hasPin && !hasLandmark) return false;
+    if (_state.categoryKey == 'expert_moving') {
+      return _d3MovingFromController.text.trim().isNotEmpty &&
+          _d3MovingToController.text.trim().isNotEmpty;
+    }
+    return true;
+  }
+
   bool _canProceedStep4() => true;
 
+  String _categoryEnglish(String key) {
+    return switch (key) {
+      'expert_cleaning' => 'Cleaning',
+      'expert_moving' => 'Moving',
+      'expert_repair' => 'Repair',
+      'expert_interior' => 'Interior',
+      'expert_business' => 'Business',
+      'expert_beauty' => 'Beauty',
+      'expert_tutoring' => 'Lessons',
+      'expert_events' => 'Events',
+      'expert_vehicle' => 'Vehicle',
+      _ => 'Other',
+    };
+  }
+
+  String _subTypePascal(String id) {
+    if (id.isEmpty) return 'Other';
+    final parts = id.split('_');
+    return parts.map((p) => p.isEmpty ? '' : '${p[0].toUpperCase()}${p.substring(1)}').join();
+  }
+
+  Map<String, dynamic> _buildDepth2Map() {
+    if (_state.step1SubTypeId == 'other') {
+      return {'customService': _step1OtherServiceController.text.trim()};
+    }
+    switch (_state.categoryKey) {
+      case 'expert_cleaning':
+        return {
+          'areaOrSize': _cleaningAreaController.text.trim(),
+          'scale': _cleaningScale,
+          if (_state.step1SubTypeId == 'commercial')
+            'industry': _cleaningIndustryController.text.trim(),
+          if (_state.step1SubTypeId == 'regular_visit')
+            'target': _cleaningTargetController.text.trim(),
+          if (_state.step1SubTypeId == 'bedding')
+            'beddingCount': _cleaningBeddingCountController.text.trim(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+      case 'expert_moving':
+        return {
+          if (_state.step1SubTypeId == 'small') 'vehicleType': _movingVehicleType,
+          if (_state.step1SubTypeId == 'home') 'roomCount': _movingRoomCountController.text.trim(),
+          if (_state.step1SubTypeId == 'cargo') 'cargoWeightKg': _weightKgController.text.trim(),
+        };
+      case 'expert_repair':
+        return {
+          'brand': _repairBrand,
+          'symptomDetail': _repairSymptomMemoController.text.trim(),
+        };
+      case 'expert_interior':
+        return {
+          'parts': _interiorParts.toList(),
+          if (_state.step1SubTypeId == 'remodel')
+            'budgetRange': _interiorBudgetController.text.trim(),
+        };
+      case 'expert_business':
+        return {
+          'languages': _businessLangs.toList(),
+          'documentKind': _documentTypeController.text.trim(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+      case 'expert_beauty':
+        return {
+          'kinds': _step2Selections.toList(),
+          'people': _beautyPeopleController.text.trim(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+      case 'expert_tutoring':
+        return {
+          'subject': _state.step1SubTypeId,
+          'levels': _tutoringLevels.toList(),
+          'goal': _tutorGoalController.text.trim(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+      case 'expert_events':
+        return {
+          'eventKind': _state.step1SubTypeId,
+          'expectedPeople': _eventPeopleController.text.trim(),
+        };
+      case 'expert_vehicle':
+        return {
+          'brandOrModel': _vehicleBrandController.text.trim(),
+          'symptoms': _vehicleSymptoms.toList(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+      default:
+        return {
+          'selections': _step2Selections.toList(),
+          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+        };
+    }
+  }
+
   Future<void> _submit() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+
+    final uid = auth.currentUser?.uid ?? employerIdForCurrentSession() ?? '';
+    List<String> photoUrls = <String>[];
+    List<String>? photoLocalPaths;
+
+    try {
+      if (_pickedImages.isNotEmpty) {
+        if (!isFirebaseEnabled) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
+          );
+          return;
+        }
+        final conn = await Connectivity().checkConnectivity();
+        final online = conn.any((e) =>
+            e == ConnectivityResult.mobile ||
+            e == ConnectivityResult.wifi ||
+            e == ConnectivityResult.ethernet);
+        if (online) {
+          if (!mounted) return;
+          showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(child: CircularProgressIndicator()),
+          );
+          try {
+            photoUrls = await uploadExpertRequestImagesFromXFiles(
+              files: _pickedImages,
+              userId: uid,
+            );
+          } catch (_) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
+            );
+            return;
+          } finally {
+            if (mounted) Navigator.of(context).pop();
+          }
+          if (photoUrls.isEmpty) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
+            );
+            return;
+          }
+        } else {
+          photoLocalPaths = _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
+        }
+      }
+
+      final location = <String, dynamic>{
+        'lat': _state.step3Lat ?? 0.0,
+        'lng': _state.step3Lng ?? 0.0,
+        'landmark': _d3LandmarkController.text.trim(),
+        if (_state.categoryKey == 'expert_moving') ...{
+          'fromLandmark': _d3MovingFromController.text.trim(),
+          'toLandmark': _d3MovingToController.text.trim(),
+        },
+      };
+
+      final body = <String, dynamic>{
+        'category': _categoryEnglish(_state.categoryKey),
+        'subType': _subTypePascal(_state.step1SubTypeId),
+        'depth2Data': _buildDepth2Map(),
+        'location': location,
+        'schedule': {
+          'date': _state.preferredDateStr,
+          'time': _state.preferredTimeStr,
+          'isUrgent': _state.scheduleIsUrgent,
+        },
+        'photos': photoUrls,
+        'memo': _d3MemoController.text.trim(),
+        'status': 'pending',
+      };
+      if (photoLocalPaths != null && photoLocalPaths.isNotEmpty) {
+        body['_photoLocalPaths'] = photoLocalPaths;
+      }
+
+      await saveExpertRequestV5OfflineFirst(body);
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+
     if (!mounted) return;
     showDialog(
       context: context,
@@ -151,7 +416,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           OutlinedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              // v2.2: 레이더는 오직 신청 완료 시점에만 트리거
               SearchTriggerBus.trigger();
               Navigator.of(context).pop(true);
             },
@@ -166,75 +430,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final config = _config ?? kUniversalWizardConfigs['expert_repair']!;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: _kRoyalBlue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: _goBack,
-        ),
-        title: Text(
-          context.l10n(config.categoryKey),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          _buildProgressBar(),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (i) => setState(() => _currentStep = i),
-              children: [
-                _buildStep1(config),
-                _buildStep2(config),
-                _buildStep3(config),
-                _buildStep4(config),
-              ],
-            ),
-          ),
-          _buildBottomButton(config),
-        ],
-      ),
-    );
-  }
-
-  bool _isStep2Complete() {
-    final categoryKey = _state.categoryKey;
-    switch (categoryKey) {
-      case 'expert_delivery':
-        return _weightKgController.text.trim().isNotEmpty &&
-            _distanceKmController.text.trim().isNotEmpty &&
-            _cargoSize.isNotEmpty;
-      case 'expert_cleaning':
-        return _cleaningAreaController.text.trim().isNotEmpty || _cleaningScale.isNotEmpty;
-      case 'expert_tutoring':
-        return _tutoringLevels.isNotEmpty;
-      case 'expert_security':
-        return _securityPeopleController.text.trim().isNotEmpty &&
-            _securityTimeController.text.trim().isNotEmpty;
-      case 'expert_garden':
-        return _gardenScale.isNotEmpty || _gardenScopes.isNotEmpty;
-      case 'expert_event':
-        return _eventPeopleController.text.trim().isNotEmpty;
-      case 'expert_photo':
-        return _photoTimeController.text.trim().isNotEmpty && _photoPlaceSelections.isNotEmpty;
-      case 'expert_beauty':
-      case 'expert_repair':
-        return _step2Selections.isNotEmpty || _step2OtherSelected;
-      default:
-        return _step2Selections.isNotEmpty || _step2OtherSelected;
-    }
   }
 
   InputDecoration _outlineFieldDecoration(String label, {String? hint}) {
@@ -299,28 +494,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   String _photoPromptForCategory() {
-    switch (_state.categoryKey) {
-      case 'expert_repair':
-        return context.l10n('wizard_photo_prompt_repair');
-      case 'expert_delivery':
-        return context.l10n('wizard_photo_prompt_delivery');
-      case 'expert_beauty':
-        return context.l10n('wizard_photo_prompt_style_concept');
-      case 'expert_photo':
-        return context.l10n('wizard_photo_prompt_style_concept');
-      case 'expert_cleaning':
-        return context.l10n('wizard_photo_prompt_cleaning');
-      case 'expert_tutoring':
-        return context.l10n('wizard_photo_prompt_tutoring');
-      case 'expert_security':
-        return context.l10n('wizard_photo_prompt_security');
-      case 'expert_garden':
-        return context.l10n('wizard_photo_prompt_garden');
-      case 'expert_event':
-        return context.l10n('wizard_photo_prompt_event');
-      default:
-        return context.l10n('wizard_photo_prompt_generic');
-    }
+    return switch (_state.categoryKey) {
+      'expert_repair' => context.l10n('wizard_photo_prompt_repair'),
+      'expert_moving' => context.l10n('wizard_photo_prompt_moving'),
+      'expert_beauty' => context.l10n('wizard_photo_prompt_style_concept'),
+      'expert_events' => context.l10n('wizard_photo_prompt_event'),
+      'expert_cleaning' => context.l10n('wizard_photo_prompt_cleaning'),
+      'expert_tutoring' => context.l10n('wizard_photo_prompt_tutoring'),
+      'expert_business' => context.l10n('wizard_photo_prompt_business'),
+      'expert_interior' => context.l10n('wizard_photo_prompt_interior'),
+      'expert_vehicle' => context.l10n('wizard_photo_prompt_vehicle'),
+      _ => context.l10n('wizard_photo_prompt_generic'),
+    };
   }
 
   Future<void> _pickImagesFromGallery({required int maxCount}) async {
@@ -352,6 +537,43 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       _pickedImages.removeAt(index);
       _state = _state.copyWith(step3PhotoPaths: _pickedImages.map((e) => e.path).toList());
     });
+  }
+
+  Future<void> _useCurrentGps() async {
+    final (loc, _) = await getUserLocationOrDefault();
+    if (!mounted) return;
+    setState(() {
+      _state = _state.copyWith(step3Lat: loc.latitude, step3Lng: loc.longitude);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n('wizard_depth3_gps_saved'))),
+    );
+  }
+
+  Future<void> _pickPreferredDate() async {
+    final now = DateTime.now();
+    final d = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (d == null || !mounted) return;
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    setState(() => _state = _state.copyWith(preferredDateStr: '$y-$m-$day'));
+  }
+
+  Future<void> _pickPreferredTime() async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (t == null || !mounted) return;
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    setState(() => _state = _state.copyWith(preferredTimeStr: '$h:$m'));
   }
 
   Widget _buildProgressBar() {
@@ -388,6 +610,47 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final config = _config ?? kUniversalWizardConfigs['expert_repair']!;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: _kRoyalBlue,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: _goBack,
+        ),
+        title: Text(
+          context.l10n(config.categoryKey),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          _buildProgressBar(),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              onPageChanged: (i) => setState(() => _currentStep = i),
+              children: [
+                _buildStep1(config),
+                _buildStep2(config),
+                _buildStep3Unified(config),
+                _buildStep4(config),
+              ],
+            ),
+          ),
+          _buildBottomButton(config),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStep1(UniversalWizardConfig config) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -397,6 +660,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           Text(
             context.l10n('wizard_step1_title'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n('wizard_step1_desc_v5'),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 20),
           ...config.step1SubTypes.map((e) {
@@ -464,7 +732,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             context.l10n('wizard_step2_title'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n('wizard_step2_desc_v5'),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 16),
           ..._buildStep2FieldsByCategory(),
         ],
       ),
@@ -472,102 +745,87 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   List<Widget> _buildStep2FieldsByCategory() {
-    final categoryKey = _state.categoryKey;
-    switch (categoryKey) {
-      case 'expert_delivery':
-        return _buildStep2Delivery();
+    if (_state.step1SubTypeId == 'other') {
+      return [
+        TextField(
+          controller: _step1OtherServiceController,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_other_service_name_label'),
+            hint: context.l10n('wizard_other_service_name_hint'),
+          ),
+          maxLines: 2,
+        ),
+      ];
+    }
+    switch (_state.categoryKey) {
       case 'expert_cleaning':
-        return _buildStep2Cleaning();
-      case 'expert_tutoring':
-        return _buildStep2Tutoring();
-      case 'expert_security':
-        return _buildStep2Security();
-      case 'expert_garden':
-        return _buildStep2Garden();
-      case 'expert_event':
-        return _buildStep2Event();
-      case 'expert_photo':
-        return _buildStep2Photo();
-      case 'expert_beauty':
-        return _buildStep2Beauty();
+        return _buildStep2CleaningV5();
+      case 'expert_moving':
+        return _buildStep2Moving();
       case 'expert_repair':
-        return _buildStep2Repair();
+        return _buildStep2RepairV5();
+      case 'expert_interior':
+        return _buildStep2Interior();
+      case 'expert_business':
+        return _buildStep2Business();
+      case 'expert_beauty':
+        return _buildStep2BeautyV5();
+      case 'expert_tutoring':
+        return _buildStep2TutoringV5();
+      case 'expert_events':
+        return _buildStep2EventsV5();
+      case 'expert_vehicle':
+        return _buildStep2Vehicle();
       default:
         return _buildStep2GenericMultiSelect();
     }
   }
 
-  List<Widget> _buildStep2Repair() {
+  List<Widget> _buildStep2CleaningV5() {
     final sub = _state.step1SubTypeId;
-    final options = switch (sub) {
-      'ac' => ['symptom_ac_no_cold_air', 'symptom_ac_noise', 'wizard_symptom_ac_water_drop', 'symptom_ac_not_cool'],
-      'household' => ['symptom_household_power', 'symptom_household_noise', 'symptom_household_stopped', 'symptom_household_broken'],
-      'electric' => ['symptom_electric_breaker', 'symptom_electric_burn_smell', 'symptom_electric_flicker', 'symptom_electric_leak'],
-      'plumbing' => ['symptom_plumbing_leak', 'symptom_plumbing_clog', 'symptom_plumbing_backflow', 'symptom_plumbing_low_pressure'],
-      'roof' => ['wizard_symptom_roof_peeling', 'wizard_symptom_roof_leak_proof', 'wizard_symptom_roof_crack_repair'],
-      _ => <String>[],
-    };
     return [
-      for (final o in options)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(o),
-            selected: _step2Selections.contains(o),
-            onTap: () => setState(() {
-              if (_step2Selections.contains(o)) {
-                _step2Selections.remove(o);
-              } else {
-                _step2Selections.add(o);
-              }
-            }),
-          ),
-        ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: _outlineToggleTile(
-          label: context.l10n('symptom_other'),
-          selected: _step2OtherSelected,
-          onTap: () => setState(() {
-            _step2OtherSelected = !_step2OtherSelected;
-            if (!_step2OtherSelected) _step2OtherController.clear();
-          }),
-        ),
-      ),
-      if (_step2OtherSelected)
+      if (sub == 'commercial') ...[
         TextField(
-          controller: _step2OtherController,
+          controller: _cleaningIndustryController,
           decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_other_direct_input_hint'),
+            context.l10n('wizard_cleaning_industry_label'),
+            hint: context.l10n('wizard_cleaning_industry_hint'),
           ),
-          maxLines: 2,
         ),
-    ];
-  }
-
-  List<Widget> _buildStep2Delivery() {
-    return [
-      TextField(
-        controller: _weightKgController,
-        keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_delivery_weight_label'),
-          hint: context.l10n('wizard_delivery_weight_hint'),
+        const SizedBox(height: 12),
+      ],
+      if (sub == 'regular_visit') ...[
+        TextField(
+          controller: _cleaningTargetController,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_cleaning_target_label'),
+            hint: context.l10n('wizard_cleaning_target_hint'),
+          ),
         ),
-      ),
-      const SizedBox(height: 12),
+        const SizedBox(height: 12),
+      ],
+      if (sub == 'bedding') ...[
+        TextField(
+          controller: _cleaningBeddingCountController,
+          keyboardType: TextInputType.number,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_cleaning_bedding_count_label'),
+            hint: context.l10n('wizard_cleaning_bedding_count_hint'),
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
       TextField(
-        controller: _distanceKmController,
-        keyboardType: TextInputType.number,
+        controller: _cleaningAreaController,
+        keyboardType: TextInputType.text,
         decoration: _outlineFieldDecoration(
-          context.l10n('wizard_delivery_distance_label'),
-          hint: context.l10n('wizard_delivery_distance_hint'),
+          context.l10n('wizard_cleaning_area_label'),
+          hint: context.l10n('wizard_cleaning_area_hint'),
         ),
       ),
       const SizedBox(height: 12),
       Text(
-        context.l10n('wizard_delivery_cargo_size_title'),
+        context.l10n('wizard_cleaning_scale_title'),
         style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
       ),
       const SizedBox(height: 10),
@@ -575,58 +833,215 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         children: [
           Expanded(
             child: _outlineToggleTile(
-              label: 'S',
-              selected: _cargoSize == 'S',
-              onTap: () => setState(() => _cargoSize = _cargoSize == 'S' ? '' : 'S'),
+              label: context.l10n('cleaning_size_s'),
+              selected: _cleaningScale == 'S',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'S' ? '' : 'S'),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: _outlineToggleTile(
-              label: 'M',
-              selected: _cargoSize == 'M',
-              onTap: () => setState(() => _cargoSize = _cargoSize == 'M' ? '' : 'M'),
+              label: context.l10n('cleaning_size_m'),
+              selected: _cleaningScale == 'M',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'M' ? '' : 'M'),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: _outlineToggleTile(
-              label: 'L',
-              selected: _cargoSize == 'L',
-              onTap: () => setState(() => _cargoSize = _cargoSize == 'L' ? '' : 'L'),
+              label: context.l10n('cleaning_size_l'),
+              selected: _cleaningScale == 'L',
+              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'L' ? '' : 'L'),
             ),
           ),
         ],
       ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected) ...[
+    ];
+  }
+
+  List<Widget> _buildStep2Moving() {
+    final sub = _state.step1SubTypeId;
+    if (sub == 'small') {
+      final opts = [
+        ('tuk', context.l10n('wizard_moving_vehicle_tuk')),
+        ('1ton', context.l10n('wizard_moving_vehicle_1ton')),
+        ('pickup', context.l10n('wizard_moving_vehicle_pickup')),
+      ];
+      return [
+        Text(
+          context.l10n('wizard_moving_vehicle_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+        ),
         const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_delivery_other_hint'),
+        for (final o in opts)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _outlineToggleTile(
+              label: o.$2,
+              selected: _movingVehicleType == o.$1,
+              onTap: () => setState(() => _movingVehicleType = _movingVehicleType == o.$1 ? '' : o.$1),
+            ),
           ),
-          maxLines: 2,
+      ];
+    }
+    if (sub == 'home') {
+      return [
+        TextField(
+          controller: _movingRoomCountController,
+          keyboardType: TextInputType.number,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_moving_room_count_label'),
+            hint: context.l10n('wizard_moving_room_count_hint'),
+          ),
+        ),
+      ];
+    }
+    if (sub == 'cargo') {
+      return [
+        TextField(
+          controller: _weightKgController,
+          keyboardType: TextInputType.number,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_delivery_weight_label'),
+            hint: context.l10n('wizard_moving_cargo_weight_hint'),
+          ),
+        ),
+      ];
+    }
+    return [];
+  }
+
+  List<Widget> _buildStep2RepairV5() {
+    const brands = [
+      ('Samsung', 'wizard_brand_samsung'),
+      ('LG', 'wizard_brand_lg'),
+      ('Panasonic', 'wizard_brand_panasonic'),
+      ('Chinese', 'wizard_brand_chinese'),
+      ('Other', 'wizard_brand_other'),
+    ];
+    return [
+      Text(
+        context.l10n('wizard_repair_brand_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: brands
+            .map(
+              (b) => ChoiceChip(
+                label: Text(context.l10n(b.$2)),
+                selected: _repairBrand == b.$1,
+                onSelected: (_) => setState(() => _repairBrand = _repairBrand == b.$1 ? '' : b.$1),
+                selectedColor: _kRoyalBlue.withValues(alpha: 0.2),
+                labelStyle: TextStyle(
+                  color: _repairBrand == b.$1 ? _kRoyalBlue : Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+            .toList(),
+      ),
+      const SizedBox(height: 20),
+      TextField(
+        controller: _repairSymptomMemoController,
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_repair_symptom_memo_label'),
+          hint: context.l10n('wizard_repair_symptom_memo_hint'),
+        ),
+        minLines: 4,
+        maxLines: 8,
+      ),
+    ];
+  }
+
+  List<Widget> _buildStep2Interior() {
+    const parts = [
+      'wizard_interior_living',
+      'wizard_interior_bath',
+      'wizard_interior_kitchen',
+      'wizard_interior_balcony',
+    ];
+    return [
+      Text(
+        context.l10n('wizard_interior_parts_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
+      const SizedBox(height: 10),
+      for (final p in parts)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: context.l10n(p),
+            selected: _interiorParts.contains(p),
+            onTap: () => setState(() {
+              if (_interiorParts.contains(p)) {
+                _interiorParts.remove(p);
+              } else {
+                _interiorParts.add(p);
+              }
+            }),
+          ),
+        ),
+      if (_state.step1SubTypeId == 'remodel') ...[
+        const SizedBox(height: 12),
+        TextField(
+          controller: _interiorBudgetController,
+          decoration: _outlineFieldDecoration(
+            context.l10n('wizard_interior_budget_label'),
+            hint: context.l10n('wizard_interior_budget_hint'),
+          ),
         ),
       ],
     ];
   }
 
-  List<Widget> _buildStep2Beauty() {
+  List<Widget> _buildStep2Business() {
+    const langs = [
+      'lang_ko',
+      'lang_lo',
+      'lang_en',
+      'wizard_lang_zh',
+    ];
+    return [
+      Text(
+        context.l10n('wizard_business_lang_title'),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+      ),
+      const SizedBox(height: 10),
+      for (final k in langs)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _outlineToggleTile(
+            label: context.l10n(k),
+            selected: _businessLangs.contains(k),
+            onTap: () => setState(() {
+              if (_businessLangs.contains(k)) {
+                _businessLangs.remove(k);
+              } else {
+                _businessLangs.add(k);
+              }
+            }),
+          ),
+        ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _documentTypeController,
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_business_doc_type_label'),
+          hint: context.l10n('wizard_business_doc_type_hint'),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildStep2BeautyV5() {
     const options = [
-      'wizard_beauty_option_cut',
-      'wizard_beauty_option_perm',
-      'wizard_beauty_option_care',
+      'wizard_beauty_massage',
       'wizard_beauty_option_nail',
+      'wizard_beauty_option_cut',
+      'wizard_beauty_option_care',
       'wizard_beauty_option_makeup',
     ];
     return [
@@ -664,138 +1079,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           maxLines: 2,
         ),
       ],
-    ];
-  }
-
-  List<Widget> _buildStep2Photo() {
-    return [
-      TextField(
-        controller: _photoTimeController,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_photo_time_label'),
-          hint: context.l10n('wizard_photo_time_hint'),
-        ),
-        maxLines: 1,
-      ),
       const SizedBox(height: 12),
-      Text(
-        context.l10n('wizard_photo_place_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('wizard_photo_place_indoor'),
-        selected: _photoPlaceSelections.contains('wizard_photo_place_indoor'),
-        onTap: () => setState(() {
-          if (_photoPlaceSelections.contains('wizard_photo_place_indoor')) {
-            _photoPlaceSelections.remove('wizard_photo_place_indoor');
-          } else {
-            _photoPlaceSelections.add('wizard_photo_place_indoor');
-          }
-        }),
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('wizard_photo_place_outdoor'),
-        selected: _photoPlaceSelections.contains('wizard_photo_place_outdoor'),
-        onTap: () => setState(() {
-          if (_photoPlaceSelections.contains('wizard_photo_place_outdoor')) {
-            _photoPlaceSelections.remove('wizard_photo_place_outdoor');
-          } else {
-            _photoPlaceSelections.add('wizard_photo_place_outdoor');
-          }
-        }),
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_photo_other_hint'),
-          ),
-          maxLines: 2,
-        ),
-      ],
-    ];
-  }
-
-  List<Widget> _buildStep2Cleaning() {
-    return [
       TextField(
-        controller: _cleaningAreaController,
+        controller: _beautyPeopleController,
         keyboardType: TextInputType.number,
         decoration: _outlineFieldDecoration(
-          context.l10n('wizard_cleaning_area_label'),
-          hint: context.l10n('wizard_cleaning_area_hint'),
+          context.l10n('wizard_beauty_people_label'),
+          hint: context.l10n('wizard_beauty_people_hint'),
         ),
       ),
-      const SizedBox(height: 12),
-      Text(
-        context.l10n('wizard_cleaning_scale_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      Row(
-        children: [
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'S',
-              selected: _cleaningScale == 'S',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'S' ? '' : 'S'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'M',
-              selected: _cleaningScale == 'M',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'M' ? '' : 'M'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'L',
-              selected: _cleaningScale == 'L',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'L' ? '' : 'L'),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_cleaning_other_hint'),
-          ),
-          maxLines: 2,
-        ),
-      ],
     ];
   }
 
-  List<Widget> _buildStep2Tutoring() {
+  List<Widget> _buildStep2TutoringV5() {
     const levels = [
       'wizard_level_elem',
       'wizard_level_mid',
@@ -804,11 +1100,24 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     ];
     return [
       Text(
+        context.l10n('wizard_tutoring_subject_from_step1'),
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
+      ),
+      const SizedBox(height: 6),
+      if (_state.step1SubTypeLabel.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Text(
+            context.l10n(_state.step1SubTypeLabel),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          ),
+        ),
+      Text(
         context.l10n('wizard_tutoring_level_title'),
         style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
       ),
       const SizedBox(height: 10),
-      for (final l in levels) ...[
+      for (final l in levels)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
@@ -823,7 +1132,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             }),
           ),
         ),
-      ],
+      const SizedBox(height: 12),
+      TextField(
+        controller: _tutorGoalController,
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_learning_goal_label'),
+          hint: context.l10n('wizard_learning_goal_hint'),
+        ),
+        maxLines: 2,
+      ),
+      const SizedBox(height: 10),
       _outlineToggleTile(
         label: context.l10n('symptom_other'),
         selected: _step2OtherSelected,
@@ -832,8 +1150,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           if (!_step2OtherSelected) _step2OtherController.clear();
         }),
       ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
+      if (_step2OtherSelected)
         TextField(
           controller: _step2OtherController,
           decoration: _outlineFieldDecoration(
@@ -842,109 +1159,65 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
           maxLines: 2,
         ),
-      ],
     ];
   }
 
-  List<Widget> _buildStep2Security() {
+  List<Widget> _buildStep2EventsV5() {
     return [
+      Text(
+        context.l10n('wizard_events_kind_from_step1'),
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
+      ),
+      const SizedBox(height: 8),
+      if (_state.step1SubTypeLabel.isNotEmpty)
+        Text(
+          context.l10n(_state.step1SubTypeLabel),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+        ),
+      const SizedBox(height: 20),
       TextField(
-        controller: _securityPeopleController,
+        controller: _eventPeopleController,
         keyboardType: TextInputType.number,
         decoration: _outlineFieldDecoration(
-          context.l10n('wizard_security_people_label'),
-          hint: context.l10n('wizard_security_people_hint'),
+          context.l10n('wizard_event_people_label'),
+          hint: context.l10n('wizard_event_people_hint'),
         ),
       ),
-      const SizedBox(height: 12),
-      TextField(
-        controller: _securityTimeController,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_security_time_label'),
-          hint: context.l10n('wizard_security_time_hint'),
-        ),
-        maxLines: 1,
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_security_other_hint'),
-          ),
-          maxLines: 2,
-        ),
-      ],
     ];
   }
 
-  List<Widget> _buildStep2Garden() {
-    const scopes = [
-      'wizard_garden_scope_lawn',
-      'wizard_garden_scope_landscape',
-      'wizard_garden_scope_tree_trim',
-      'wizard_garden_scope_all',
+  List<Widget> _buildStep2Vehicle() {
+    const syms = [
+      'wizard_vehicle_sym_engine',
+      'wizard_vehicle_sym_tire',
+      'wizard_vehicle_sym_accident',
+      'wizard_vehicle_sym_electrical',
     ];
     return [
+      TextField(
+        controller: _vehicleBrandController,
+        decoration: _outlineFieldDecoration(
+          context.l10n('wizard_vehicle_brand_label'),
+          hint: context.l10n('wizard_vehicle_brand_hint'),
+        ),
+      ),
+      const SizedBox(height: 16),
       Text(
-        context.l10n('wizard_garden_scale_title'),
+        context.l10n('wizard_vehicle_symptom_title'),
         style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
       ),
       const SizedBox(height: 10),
-      Row(
-        children: [
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'S',
-              selected: _gardenScale == 'S',
-              onTap: () => setState(() => _gardenScale = _gardenScale == 'S' ? '' : 'S'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'M',
-              selected: _gardenScale == 'M',
-              onTap: () => setState(() => _gardenScale = _gardenScale == 'M' ? '' : 'M'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: 'L',
-              selected: _gardenScale == 'L',
-              onTap: () => setState(() => _gardenScale = _gardenScale == 'L' ? '' : 'L'),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 12),
-      Text(
-        context.l10n('wizard_garden_scope_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      for (final s in scopes)
+      for (final s in syms)
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: _outlineToggleTile(
             label: context.l10n(s),
-            selected: _gardenScopes.contains(s),
+            selected: _vehicleSymptoms.contains(s),
             onTap: () => setState(() {
-              if (_gardenScopes.contains(s)) {
-                _gardenScopes.remove(s);
+              if (_vehicleSymptoms.contains(s)) {
+                _vehicleSymptoms.remove(s);
               } else {
-                _gardenScopes.add(s);
+                _vehicleSymptoms.add(s);
               }
             }),
           ),
@@ -957,50 +1230,15 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           if (!_step2OtherSelected) _step2OtherController.clear();
         }),
       ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
+      if (_step2OtherSelected)
         TextField(
           controller: _step2OtherController,
           decoration: _outlineFieldDecoration(
             context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_garden_other_hint'),
+            hint: context.l10n('wizard_vehicle_other_hint'),
           ),
           maxLines: 2,
         ),
-      ],
-    ];
-  }
-
-  List<Widget> _buildStep2Event() {
-    return [
-      TextField(
-        controller: _eventPeopleController,
-        keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_event_people_label'),
-          hint: context.l10n('wizard_event_people_hint'),
-        ),
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_event_other_hint'),
-          ),
-          maxLines: 2,
-        ),
-      ],
     ];
   }
 
@@ -1041,38 +1279,33 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     ];
   }
 
-  Widget _buildStep3(UniversalWizardConfig config) {
-    switch (config.visualGuideType) {
-      case VisualGuideType.photoUpload:
-        return _buildStep3PhotoUpload(config);
-      case VisualGuideType.mapPick:
-        return _buildStep3MapPick(config);
-      case VisualGuideType.textFields:
-        return _buildStep3TextFields(config);
-      case VisualGuideType.symptomAndNote:
-        return _buildStep3SymptomAndNote(config);
-    }
-  }
-
-  Widget _buildStep3PhotoUpload(UniversalWizardConfig config) {
-    final slots = config.photoSlotCount.clamp(1, 5);
+  Widget _buildStep3Unified(UniversalWizardConfig config) {
+    const slots = 5;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _photoPromptForCategory(),
+            context.l10n('wizard_depth3_section_title'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
-            context
-                .l10n('wizard_photo_upload_max')
-                .replaceAll('{n}', '$slots'),
+            context.l10n('wizard_depth3_section_desc'),
             style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 20),
+          Text(
+            _photoPromptForCategory(),
+            style: const TextStyle(fontWeight: FontWeight.w600, color: _kRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n('wizard_photo_upload_max').replaceAll('{n}', '$slots'),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -1155,8 +1388,107 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             }),
           ),
           const SizedBox(height: 24),
+          if (_state.categoryKey == 'expert_moving') ...[
+            TextField(
+              controller: _d3MovingFromController,
+              decoration: _outlineFieldDecoration(
+                context.l10n('wizard_depth3_from_label'),
+                hint: context.l10n('wizard_depth3_from_hint'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _d3MovingToController,
+              decoration: _outlineFieldDecoration(
+                context.l10n('wizard_depth3_to_label'),
+                hint: context.l10n('wizard_depth3_to_hint'),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           TextField(
-            onChanged: (v) => setState(() => _state = _state.copyWith(step3ExtraNote: v)),
+            controller: _d3LandmarkController,
+            decoration: _outlineFieldDecoration(
+              context.l10n('wizard_depth3_landmark_label'),
+              hint: context.l10n('wizard_depth3_landmark_hint'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _useCurrentGps,
+            icon: const Icon(Icons.my_location),
+            label: Text(context.l10n('wizard_depth3_use_gps_button')),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _kRoyalBlue,
+              side: const BorderSide(color: _kRoyalBlue),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            ),
+          ),
+          if (_state.step3Lat != null && _state.step3Lng != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                context.l10n('wizard_depth3_gps_coords').replaceAll('{lat}', '${_state.step3Lat}').replaceAll('{lng}', '${_state.step3Lng}'),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+              ),
+            ),
+          const SizedBox(height: 20),
+          Text(
+            context.l10n('wizard_depth3_schedule_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _pickPreferredDate,
+                  child: Text(
+                    _state.preferredDateStr.isEmpty
+                        ? context.l10n('wizard_depth3_pick_date')
+                        : _state.preferredDateStr,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _pickPreferredTime,
+                  child: Text(
+                    _state.preferredTimeStr.isEmpty
+                        ? context.l10n('wizard_depth3_pick_time')
+                        : _state.preferredTimeStr,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n('wizard_schedule_urgency'),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Text(
+                _state.scheduleIsUrgent
+                    ? context.l10n('wizard_schedule_urgent')
+                    : context.l10n('wizard_schedule_normal'),
+                style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+              ),
+              Switch.adaptive(
+                value: _state.scheduleIsUrgent,
+                onChanged: (v) => setState(() => _state = _state.copyWith(scheduleIsUrgent: v)),
+                activeThumbColor: Colors.white,
+                activeTrackColor: _kRoyalBlue,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _d3MemoController,
             decoration: InputDecoration(
               labelText: context.l10n('wizard_extra_request_label'),
               hintText: context.l10n('wizard_extra_request_hint'),
@@ -1171,145 +1503,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     );
   }
 
-  Widget _buildStep3MapPick(UniversalWizardConfig config) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n('wizard_map_pick_title'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            context.l10n('wizard_map_pick_desc'),
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: _kRoyalBlue.withValues(alpha: 0.3)),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.map_outlined, size: 48, color: _kRoyalBlue.withValues(alpha: 0.6)),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n('wizard_map_pick_hint'),
-                    style: TextStyle(color: _kRoyalBlue.withValues(alpha: 0.8), fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.trip_origin, size: 20),
-                  label: Text(context.l10n('wizard_origin')),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _kRoyalBlue,
-                    side: const BorderSide(color: _kRoyalBlue),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.location_on, size: 20),
-                  label: Text(context.l10n('wizard_destination')),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _kRoyalBlue,
-                    side: const BorderSide(color: _kRoyalBlue),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep3TextFields(UniversalWizardConfig config) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n('wizard_tutoring_textfields_title'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            onChanged: (v) => setState(() => _state = _state.copyWith(step3LearningGoal: v)),
-            decoration: InputDecoration(
-              labelText: context.l10n('wizard_learning_goal_label'),
-              hintText: context.l10n('wizard_learning_goal_hint'),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            onChanged: (v) => setState(() => _state = _state.copyWith(step3Schedule: v)),
-            decoration: InputDecoration(
-              labelText: context.l10n('wizard_schedule_label'),
-              hintText: context.l10n('wizard_schedule_hint'),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            maxLines: 2,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep3SymptomAndNote(UniversalWizardConfig config) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n('wizard_note_title'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            onChanged: (v) => setState(() => _state = _state.copyWith(step3ExtraNote: v)),
-            decoration: InputDecoration(
-              labelText: context.l10n('wizard_extra_request_label'),
-              hintText: context.l10n('wizard_extra_request_hint'),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            maxLines: 4,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildStep4(UniversalWizardConfig config) {
+    final buf = StringBuffer();
+    final d2 = _buildDepth2Map();
+    d2.forEach((k, v) => buf.writeln('$k: $v'));
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1319,19 +1516,39 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             context.l10n('wizard_summary_title'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _kRoyalBlue),
           ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n('wizard_step4_desc_v5'),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
           const SizedBox(height: 20),
           _summaryRow(context.l10n('wizard_summary_category'), context.l10n(config.categoryKey)),
           _summaryRow(
             context.l10n('wizard_summary_subtype'),
             _state.step1SubTypeLabel.isEmpty ? '' : context.l10n(_state.step1SubTypeLabel),
           ),
-          if (_state.step2SelectedLabel.isNotEmpty)
+          _summaryRow(context.l10n('wizard_summary_depth2'), buf.toString().trim()),
+          _summaryRow(
+            context.l10n('wizard_summary_location'),
+            _state.categoryKey == 'expert_moving'
+                ? '${context.l10n('wizard_depth3_from_label')}: ${_d3MovingFromController.text}\n'
+                    '${context.l10n('wizard_depth3_to_label')}: ${_d3MovingToController.text}\n'
+                    '${context.l10n('wizard_depth3_landmark_label')}: ${_d3LandmarkController.text}'
+                : _d3LandmarkController.text,
+          ),
+          if (_state.step3Lat != null)
             _summaryRow(
-              context.l10n('wizard_summary_detail'),
-              context.l10n(_state.step2SelectedLabel),
+              'GPS',
+              '${_state.step3Lat}, ${_state.step3Lng}',
             ),
-          if (_state.step3ExtraNote.isNotEmpty)
-            _summaryRow(context.l10n('wizard_summary_note'), _state.step3ExtraNote),
+          _summaryRow(
+            context.l10n('wizard_summary_schedule'),
+            '${_state.preferredDateStr} ${_state.preferredTimeStr} '
+                '(${_state.scheduleIsUrgent ? context.l10n('wizard_schedule_urgent') : context.l10n('wizard_schedule_normal')})',
+          ),
+          _summaryRow(context.l10n('wizard_summary_photos'), '${_state.step3PhotoPaths.length}${context.l10n('wizard_summary_photos_unit')}'),
+          if (_d3MemoController.text.trim().isNotEmpty)
+            _summaryRow(context.l10n('wizard_summary_note'), _d3MemoController.text.trim()),
           const SizedBox(height: 24),
           const SettlementGuideWidget(),
         ],
@@ -1345,7 +1562,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700))),
+          SizedBox(
+            width: 100,
+            child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+          ),
           Expanded(child: Text(value, style: const TextStyle(color: _kRoyalBlue))),
         ],
       ),
@@ -1353,7 +1573,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Widget _buildBottomButton(UniversalWizardConfig config) {
-    bool canProceed = false;
+    var canProceed = false;
     switch (_currentStep) {
       case 0:
         canProceed = _canProceedStep1();
@@ -1376,7 +1596,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           width: double.infinity,
           height: 56,
           child: OutlinedButton(
-            onPressed: canProceed ? _goNext : null,
+            onPressed: (_isSubmitting || !canProceed) ? null : _goNext,
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _kRoyalBlue,

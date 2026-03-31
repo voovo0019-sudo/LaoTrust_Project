@@ -1,5 +1,5 @@
 // =============================================================================
-// v1.3: 유니버설 4단계 위저드 상태 (9대 카테고리 공통)
+// v5.0: 유니버설 4단계 위저드 상태 — D3 현장 정보(사진·위치·일시) + 요약/신청
 // =============================================================================
 
 /// 위저드 전체 상태
@@ -11,10 +11,14 @@ class UniversalWizardState {
     this.step2SelectedId = '',
     this.step2SelectedLabel = '',
     this.step3PhotoPaths = const [],
-    this.step3OriginLat,
-    this.step3OriginLng,
-    this.step3DestLat,
-    this.step3DestLng,
+    this.step3Landmark = '',
+    this.step3MovingFromLandmark = '',
+    this.step3MovingToLandmark = '',
+    this.step3Lat,
+    this.step3Lng,
+    this.preferredDateStr = '',
+    this.preferredTimeStr = '',
+    this.scheduleIsUrgent = false,
     this.step3LearningGoal = '',
     this.step3Schedule = '',
     this.step3SymptomIds = const [],
@@ -27,10 +31,21 @@ class UniversalWizardState {
   final String step2SelectedId;
   final String step2SelectedLabel;
   final List<String> step3PhotoPaths;
-  final double? step3OriginLat;
-  final double? step3OriginLng;
-  final double? step3DestLat;
-  final double? step3DestLng;
+
+  /// D3: 랜드마크/주소 설명 (GPS 미사용 시 필수)
+  final String step3Landmark;
+  /// 이사: 출발지 설명
+  final String step3MovingFromLandmark;
+  /// 이사: 도착지 설명
+  final String step3MovingToLandmark;
+  final double? step3Lat;
+  final double? step3Lng;
+
+  /// D3: 희망 일시 (라오스 현지 기준 입력)
+  final String preferredDateStr;
+  final String preferredTimeStr;
+  final bool scheduleIsUrgent;
+
   final String step3LearningGoal;
   final String step3Schedule;
   final List<String> step3SymptomIds;
@@ -43,10 +58,14 @@ class UniversalWizardState {
     String? step2SelectedId,
     String? step2SelectedLabel,
     List<String>? step3PhotoPaths,
-    double? step3OriginLat,
-    double? step3OriginLng,
-    double? step3DestLat,
-    double? step3DestLng,
+    String? step3Landmark,
+    String? step3MovingFromLandmark,
+    String? step3MovingToLandmark,
+    double? step3Lat,
+    double? step3Lng,
+    String? preferredDateStr,
+    String? preferredTimeStr,
+    bool? scheduleIsUrgent,
     String? step3LearningGoal,
     String? step3Schedule,
     List<String>? step3SymptomIds,
@@ -59,10 +78,14 @@ class UniversalWizardState {
       step2SelectedId: step2SelectedId ?? this.step2SelectedId,
       step2SelectedLabel: step2SelectedLabel ?? this.step2SelectedLabel,
       step3PhotoPaths: step3PhotoPaths ?? this.step3PhotoPaths,
-      step3OriginLat: step3OriginLat ?? this.step3OriginLat,
-      step3OriginLng: step3OriginLng ?? this.step3OriginLng,
-      step3DestLat: step3DestLat ?? this.step3DestLat,
-      step3DestLng: step3DestLng ?? this.step3DestLng,
+      step3Landmark: step3Landmark ?? this.step3Landmark,
+      step3MovingFromLandmark: step3MovingFromLandmark ?? this.step3MovingFromLandmark,
+      step3MovingToLandmark: step3MovingToLandmark ?? this.step3MovingToLandmark,
+      step3Lat: step3Lat ?? this.step3Lat,
+      step3Lng: step3Lng ?? this.step3Lng,
+      preferredDateStr: preferredDateStr ?? this.preferredDateStr,
+      preferredTimeStr: preferredTimeStr ?? this.preferredTimeStr,
+      scheduleIsUrgent: scheduleIsUrgent ?? this.scheduleIsUrgent,
       step3LearningGoal: step3LearningGoal ?? this.step3LearningGoal,
       step3Schedule: step3Schedule ?? this.step3Schedule,
       step3SymptomIds: step3SymptomIds ?? this.step3SymptomIds,

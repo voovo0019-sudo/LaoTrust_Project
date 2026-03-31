@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_localizations.dart';
 
-/// 9대 전문가 서비스 카테고리 그리드 (원스크린 압축 버전).
+/// v5.0 — 9대 전문가 서비스 카테고리 그리드 (3×3).
 class CategoryGrid extends StatelessWidget {
   const CategoryGrid({
     super.key,
@@ -14,16 +14,15 @@ class CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> services = [
-      // 9대 카테고리 (3x3 그리드). 라벨은 i18n 키로 표시.
       {'key': 'expert_cleaning', 'icon': Icons.cleaning_services, 'color': Colors.cyan},
-      {'key': 'expert_security', 'icon': Icons.shield, 'color': const Color(0xFF1E3A8A)},
+      {'key': 'expert_moving', 'icon': Icons.local_shipping, 'color': Colors.green},
       {'key': 'expert_repair', 'icon': Icons.build, 'color': Colors.orange},
-      {'key': 'expert_delivery', 'icon': Icons.delivery_dining, 'color': Colors.green},
-      {'key': 'expert_beauty', 'icon': Icons.face, 'color': Colors.pinkAccent},
+      {'key': 'expert_interior', 'icon': Icons.home_work_outlined, 'color': const Color(0xFF7C3AED)},
+      {'key': 'expert_business', 'icon': Icons.translate, 'color': const Color(0xFF1E3A8A)},
+      {'key': 'expert_beauty', 'icon': Icons.spa_outlined, 'color': Colors.pinkAccent},
       {'key': 'expert_tutoring', 'icon': Icons.menu_book, 'color': Colors.purple},
-      {'key': 'expert_photo', 'icon': Icons.camera_alt, 'color': Colors.amber},
-      {'key': 'expert_event', 'icon': Icons.celebration, 'color': Colors.indigo},
-      {'key': 'expert_garden', 'icon': Icons.park_outlined, 'color': Colors.teal},
+      {'key': 'expert_events', 'icon': Icons.celebration, 'color': Colors.indigo},
+      {'key': 'expert_vehicle', 'icon': Icons.directions_car_filled_outlined, 'color': Colors.teal},
     ];
 
     return GridView.builder(
@@ -32,10 +31,8 @@ class CategoryGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        // 상하·좌우 여백을 초밀도로 조정 (mainAxisSpacing ≤ 2, crossAxisSpacing ≤ 4)
         mainAxisSpacing: 2,
         crossAxisSpacing: 4,
-        // 카테고리 셀의 물리적 세로 높이를 직접 고정
         mainAxisExtent: 88.0,
         childAspectRatio: 0.9,
       ),
@@ -92,4 +89,3 @@ class CategoryGrid extends StatelessWidget {
     );
   }
 }
-

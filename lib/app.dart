@@ -131,7 +131,7 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
         UniversalWizardScreen.routeName: (context) {
           final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
           return UniversalWizardScreen(
-            categoryKey: args?['categoryKey'] as String? ?? 'repair',
+            categoryKey: args?['categoryKey'] as String? ?? 'expert_repair',
             initialSubTypeId: args?['initialSubTypeId'] as String?,
             initialSubTypeLabel: args?['initialSubTypeLabel'] as String?,
           );

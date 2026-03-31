@@ -7,10 +7,69 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:lao_trust/firebase_options.dart';
+import 'expert_request_photo_upload.dart';
+
 import '../data/firestore_schema.dart';
 import 'firebase_service.dart';
 
 const String _keyPending = 'laotrust_pending_requests';
+
+/// v5.0 Firestore: `artifacts/{appId}/public/data/requests` (appId = Firebase projectId)
+CollectionReference<Map<String, dynamic>> expertRequestsV5Collection() {
+  final appId = DefaultFirebaseOptions.android.projectId;
+  return firestore
+      .collection('artifacts')
+      .doc(appId)
+      .collection('public')
+      .doc('data')
+      .collection('requests');
+}
+
+/// 전문가 요청 v5 규격 — 온라인 즉시 저장 또는 오프라인 큐.
+Future<void> saveExpertRequestV5OfflineFirst(Map<String, dynamic> body) async {
+  final uid = auth.currentUser?.uid ?? employerIdForCurrentSession() ?? '';
+  final map = Map<String, dynamic>.from(body);
+  final existingUid = map['userId'] as String?;
+  map['userId'] =
+      (existingUid != null && existingUid.trim().isNotEmpty) ? existingUid.trim() : uid;
+
+  if (isFirebaseEnabled) {
+    final result = await Connectivity().checkConnectivity();
+    final online = result.any((e) =>
+        e == ConnectivityResult.mobile ||
+        e == ConnectivityResult.wifi ||
+        e == ConnectivityResult.ethernet);
+    if (online) {
+      final pending = map['_photoLocalPaths'];
+      if (pending is List && pending.isNotEmpty) {
+        final paths = pending.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+        final uid = map['userId'] as String? ?? '';
+        map['photos'] = await uploadExpertRequestImagesFromLocalPaths(paths: paths, userId: uid);
+        map.remove('_photoLocalPaths');
+      }
+      await _sendExpertV5ToFirestore(map);
+      return;
+    }
+  }
+
+  final prefs = await SharedPreferences.getInstance();
+  final list = prefs.getStringList(_keyPending) ?? [];
+  list.add(jsonEncode({
+    'version': 5,
+    'payload': map,
+    'at': DateTime.now().toIso8601String(),
+  }));
+  await prefs.setStringList(_keyPending, list);
+}
+
+/// v5.1: 내부 키 `_photoLocalPaths` 제거 후 저장.
+Future<void> _sendExpertV5ToFirestore(Map<String, dynamic> body) async {
+  final data = Map<String, dynamic>.from(body);
+  data.remove('_photoLocalPaths');
+  data['createdAt'] = FieldValue.serverTimestamp();
+  await expertRequestsV5Collection().add(data);
+}
 
 /// 오프라인 시 로컬에 적재해 두었다가, 온라인 시 Firestore로 전송.
 Future<void> saveRequestOfflineFirst({
@@ -76,10 +135,24 @@ Future<int> flushPendingRequestsWhenOnline() async {
   for (final raw in list) {
     try {
       final map = jsonDecode(raw) as Map<String, dynamic>;
-      final category = map['category'] as String;
-      final payload = map['payload'] as Map<String, dynamic>;
-      await _sendToFirestore(category: category, payload: payload);
-      sent++;
+      if (map['version'] == 5) {
+        final payload = Map<String, dynamic>.from(map['payload'] as Map);
+        final pending = payload['_photoLocalPaths'];
+        if (pending is List && pending.isNotEmpty && isFirebaseEnabled) {
+          final paths = pending.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+          final uid = (payload['userId'] as String?)?.trim() ?? '';
+          final urls = await uploadExpertRequestImagesFromLocalPaths(paths: paths, userId: uid);
+          payload['photos'] = urls;
+          payload.remove('_photoLocalPaths');
+        }
+        await _sendExpertV5ToFirestore(payload);
+        sent++;
+      } else {
+        final category = map['category'] as String;
+        final payload = map['payload'] as Map<String, dynamic>;
+        await _sendToFirestore(category: category, payload: payload);
+        sent++;
+      }
     } catch (_) {
       remaining.add(raw);
     }

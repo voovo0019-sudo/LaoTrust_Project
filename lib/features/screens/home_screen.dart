@@ -660,18 +660,16 @@ class _HomeScreenState extends State<HomeScreen> {
           {'id': 'bedding', 'labelKey': 'sub_cleaning_bedding'},
           {'id': 'regular_visit', 'labelKey': 'sub_cleaning_regular_visit'},
         ];
-      case 'expert_security':
+      case 'expert_business':
         return [
-          {'id': 'building', 'labelKey': 'sub_security_building'},
-          {'id': 'site', 'labelKey': 'sub_security_site'},
-          {'id': 'vip', 'labelKey': 'sub_security_vip'},
-          {'id': 'event', 'labelKey': 'sub_security_event'},
+          {'id': 'translate_docs', 'labelKey': 'sub_business_translate'},
+          {'id': 'interpret', 'labelKey': 'sub_business_interpret'},
         ];
-      case 'expert_delivery':
+      case 'expert_moving':
         return [
-          {'id': 'food', 'labelKey': 'sub_delivery_food'},
-          {'id': 'cargo', 'labelKey': 'sub_delivery_cargo'},
-          {'id': 'mart', 'labelKey': 'sub_delivery_mart'},
+          {'id': 'small', 'labelKey': 'sub_moving_small'},
+          {'id': 'home', 'labelKey': 'sub_moving_home'},
+          {'id': 'cargo', 'labelKey': 'sub_moving_cargo'},
         ];
       case 'expert_beauty':
         return [
@@ -683,23 +681,21 @@ class _HomeScreenState extends State<HomeScreen> {
           {'id': 'it', 'labelKey': 'sub_tutor_it'},
           {'id': 'music', 'labelKey': 'sub_tutor_music'},
         ];
-      case 'expert_photo':
+      case 'expert_events':
         return [
-          {'id': 'studio', 'labelKey': 'sub_photo_studio'},
-          {'id': 'event', 'labelKey': 'sub_photo_event'},
+          {'id': 'party', 'labelKey': 'sub_events_party'},
+          {'id': 'photo_video', 'labelKey': 'sub_events_photo_video'},
+          {'id': 'catering', 'labelKey': 'sub_events_catering'},
         ];
-      case 'expert_event':
+      case 'expert_vehicle':
         return [
-          {'id': 'catering', 'labelKey': 'sub_event_catering'},
-          {'id': 'deco', 'labelKey': 'sub_event_deco'},
-          {'id': 'mc', 'labelKey': 'sub_event_mc'},
-          {'id': 'sound', 'labelKey': 'sub_event_sound'},
+          {'id': 'repair', 'labelKey': 'sub_vehicle_repair'},
+          {'id': 'rental', 'labelKey': 'sub_vehicle_rental'},
         ];
-      case 'expert_garden':
+      case 'expert_interior':
         return [
-          {'id': 'lawn', 'labelKey': 'sub_garden_lawn'},
-          {'id': 'trim', 'labelKey': 'sub_garden_trim'},
-          {'id': 'pest', 'labelKey': 'sub_garden_pest'},
+          {'id': 'partial', 'labelKey': 'sub_interior_partial'},
+          {'id': 'remodel', 'labelKey': 'sub_interior_remodel'},
         ];
       default:
         return [{'id': 'general', 'labelKey': 'symptom_other'}];

@@ -8,6 +8,9 @@ const String kColUsers = 'users';
 const String kColRequests = 'requests';
 const String kColJobs = 'jobs';
 
+// v5.1 전문가 요청: `artifacts/{projectId}/public/data/requests`
+// 사진: Firebase Storage 업로드 후 `photos`에 HTTPS URL 배열 — lib/core/expert_request_photo_upload.dart
+
 // -----------------------------------------------------------------------------
 // 1. users 컬렉션 (LT-10 필수: is_verified, user_type)
 // 문서 ID: Firebase Auth UID 권장.

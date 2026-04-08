@@ -1,5 +1,8 @@
 // v5.c1: 전문가 요청 사진 → Firebase Storage 업로드 후 다운로드 URL 반환.
 
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,7 +33,23 @@ Future<List<String>> uploadExpertRequestImagesFromXFiles({
   required String userId,
 }) async {
   if (!isFirebaseEnabled || files.isEmpty) return [];
-  final storage = FirebaseStorage.instance;
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    try {
+      user = await FirebaseAuth.instance
+          .authStateChanges()
+          .first
+          .timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      return [];
+    }
+    user ??= FirebaseAuth.instance.currentUser;
+  }
+  if (user == null) return [];
+  await user.getIdToken(true);
+  final storage = FirebaseStorage.instanceFor(
+    bucket: 'laotrust-web.firebasestorage.app',
+  );
   final safeUser = _storageSafeSegment(userId);
   final batch = DateTime.now().millisecondsSinceEpoch;
   final urls = <String>[];

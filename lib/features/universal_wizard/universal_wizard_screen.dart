@@ -3,6 +3,7 @@
 // Firestore: artifacts/{projectId}/public/data/requests
 // =============================================================================
 
+import 'dart:async' show TimeoutException, unawaited;
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -16,9 +17,11 @@ import '../../core/firebase_service.dart';
 import '../../core/location_service.dart';
 import '../../core/offline_first_sync.dart';
 import '../../core/search_trigger_bus.dart';
+import '../../core/translation_mapper.dart';
 import 'universal_wizard_config.dart';
 import 'universal_wizard_state.dart';
 import 'widgets/settlement_guide_widget.dart';
+import '../../services/auth_service.dart';
 
 class UniversalWizardScreen extends StatefulWidget {
   const UniversalWizardScreen({
@@ -107,6 +110,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         }
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthAndRedirect();
+    });
   }
 
   @override
@@ -144,6 +150,53 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     } else {
       _submit();
     }
+  }
+
+  void _checkAuthAndRedirect() {
+    if (!mounted) return;
+    // 전화번호 로그인만 통과 (익명 로그인은 통과 불가)
+    final user = auth.currentUser;
+    if (user != null && !user.isAnonymous) return;
+    // 화이트리스트 로그인 확인 (whitelistDisplayPhoneNotifier에 값이 있으면 통과)
+    final whitePhone = whitelistDisplayPhoneNotifier.value?.trim() ?? '';
+    if (whitePhone.isNotEmpty) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: const Text('로그인이 필요합니다'),
+        content: const Text('서비스를 이용하려면 전화번호로 로그인해 주세요.'),
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              final catKey = widget.categoryKey;
+              final subId = widget.initialSubTypeId;
+              final subLabel = widget.initialSubTypeLabel;
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
+              setPostLoginRedirect(
+                UniversalWizardScreen.routeName,
+                <String, dynamic>{
+                  'categoryKey': catKey,
+                  'initialSubTypeId': subId,
+                  'initialSubTypeLabel': subLabel,
+                },
+              );
+              Navigator.of(context).pushNamed('/login');
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF1E3A8A),
+              side: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+            ),
+            child: const Text('로그인하기'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _goBack() {
@@ -244,6 +297,42 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     return parts.map((p) => p.isEmpty ? '' : '${p[0].toUpperCase()}${p.substring(1)}').join();
   }
 
+  /// 급구 [TranslationMapper]와 동일한 4슬롯(title/location/salary/detail)으로 요약 문자열을 묶는다.
+  /// Step 4에는 호출하지 않고, [ _submit ]에서만 번역에 사용한다.
+  Map<String, String> _wizardTranslationInput(UniversalWizardConfig config) {
+    final buf = StringBuffer();
+    final d2 = _buildDepth2Map();
+    d2.forEach((k, v) => buf.writeln('$k: $v'));
+    final depth2Str = buf.toString().trim();
+
+    final locStr = _state.categoryKey == 'expert_moving'
+        ? '${context.l10n('wizard_depth3_from_label')}: ${_d3MovingFromController.text}\n'
+            '${context.l10n('wizard_depth3_to_label')}: ${_d3MovingToController.text}\n'
+            '${context.l10n('wizard_depth3_landmark_label')}: ${_d3LandmarkController.text}'
+        : _d3LandmarkController.text;
+
+    final titleStr = [
+      context.l10n(config.categoryKey),
+      if (_state.step1SubTypeLabel.isNotEmpty) context.l10n(_state.step1SubTypeLabel),
+    ].join(' · ');
+
+    final scheduleStr =
+        '${_state.preferredDateStr} ${_state.preferredTimeStr} (${_state.scheduleIsUrgent ? context.l10n('wizard_schedule_urgent') : context.l10n('wizard_schedule_normal')})';
+
+    final detailParts = <String>[
+      if (depth2Str.isNotEmpty) depth2Str,
+      if (_d3MemoController.text.trim().isNotEmpty) _d3MemoController.text.trim(),
+    ];
+    final detailStr = detailParts.join('\n');
+
+    return {
+      'title': titleStr.trim(),
+      'location': locStr.trim(),
+      'salary': scheduleStr.trim(),
+      'detail': detailStr.trim(),
+    };
+  }
+
   Map<String, dynamic> _buildDepth2Map() {
     if (_state.step1SubTypeId == 'other') {
       return {'customService': _step1OtherServiceController.text.trim()};
@@ -319,6 +408,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   Future<void> _submit() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
+    // ignore: avoid_print
+    print('[SUBMIT] 시작');
+
+    final cfg = _config ?? kUniversalWizardConfigs['expert_repair']!;
+    final txInput = _wizardTranslationInput(cfg);
+    final localeCode = Localizations.localeOf(context).languageCode;
 
     final uid = auth.currentUser?.uid ?? employerIdForCurrentSession() ?? '';
     List<String> photoUrls = <String>[];
@@ -327,48 +422,113 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     try {
       if (_pickedImages.isNotEmpty) {
         if (!isFirebaseEnabled) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
-          );
-          return;
-        }
-        final conn = await Connectivity().checkConnectivity();
-        final online = conn.any((e) =>
-            e == ConnectivityResult.mobile ||
-            e == ConnectivityResult.wifi ||
-            e == ConnectivityResult.ethernet);
-        if (online) {
-          if (!mounted) return;
-          showDialog<void>(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
-          );
-          try {
-            photoUrls = await uploadExpertRequestImagesFromXFiles(
-              files: _pickedImages,
-              userId: uid,
-            );
-          } catch (_) {
-            if (!mounted) return;
+          // ignore: avoid_print
+          print('[SUBMIT] Firebase 비활성 — 사진 없이 신청 계속');
+          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
+              SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
             );
-            return;
-          } finally {
-            if (mounted) Navigator.of(context).pop();
           }
-          if (photoUrls.isEmpty) {
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
-            );
-            return;
-          }
+          photoUrls = <String>[];
         } else {
-          photoLocalPaths = _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
+          // ignore: avoid_print
+          print('[SUBMIT] 연결 확인 시작');
+          List<ConnectivityResult> conn = <ConnectivityResult>[];
+          try {
+            conn = await Connectivity()
+                .checkConnectivity()
+                .timeout(const Duration(seconds: 30));
+          } on TimeoutException catch (e) {
+            if (kDebugMode) debugPrint('UniversalWizard: 연결 확인 타임아웃: $e');
+            conn = <ConnectivityResult>[];
+          } on Object catch (e, st) {
+            if (kDebugMode) {
+              debugPrint('UniversalWizard: 연결 확인 실패: $e');
+              debugPrint('$st');
+            }
+            conn = <ConnectivityResult>[];
+          }
+          final online = conn.any((e) =>
+              e == ConnectivityResult.mobile ||
+              e == ConnectivityResult.wifi ||
+              e == ConnectivityResult.ethernet);
+          // ignore: avoid_print
+          print('[SUBMIT] 연결 확인 완료 (online=$online)');
+          if (online) {
+            if (!mounted) return;
+            final lang = Localizations.localeOf(context).languageCode;
+            showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => Center(
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(
+                        kStaticUiTripleByMessageKey['uploading_photos']?[lang] ??
+                            '사진 업로드 중...',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+            try {
+              // ignore: avoid_print
+              print('[SUBMIT] 사진업로드 시작');
+              photoUrls = await uploadExpertRequestImagesFromXFiles(
+                files: _pickedImages,
+                userId: uid,
+              ).timeout(const Duration(seconds: 30));
+              // ignore: avoid_print
+              print('[SUBMIT] 사진업로드 결과: ${photoUrls.length}개 URL');
+            } on TimeoutException catch (e) {
+              if (kDebugMode) debugPrint('UniversalWizard: 사진 업로드 타임아웃: $e');
+              // ignore: avoid_print
+              print('[SUBMIT] 사진업로드 타임아웃 — photoUrls=[] 로 번역·저장 계속');
+              photoUrls = <String>[];
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
+                );
+              }
+            } on Object catch (e, st) {
+              if (kDebugMode) {
+                debugPrint('UniversalWizard: 사진 업로드 실패: $e');
+                debugPrint('$st');
+              }
+              // ignore: avoid_print
+              print('[SUBMIT] 사진업로드 실패 — photoUrls=[] 로 번역·저장 계속: $e');
+              photoUrls = <String>[];
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n('wizard_upload_failed'))),
+                );
+              }
+            } finally {
+              // ignore: avoid_print
+              print('[SUBMIT] 사진업로드 블록 finally (다이얼로그 닫기)');
+              if (mounted) Navigator.of(context).pop();
+            }
+          } else {
+            photoLocalPaths =
+                _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
+            // ignore: avoid_print
+            print('[SUBMIT] 오프라인 — 로컬 경로 ${_pickedImages.length}건, 업로드 생략');
+          }
         }
+      } else {
+        // ignore: avoid_print
+        print('[SUBMIT] 선택된 사진 없음 — 바로 번역 단계');
       }
 
       final location = <String, dynamic>{
@@ -380,6 +540,62 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           'toLandmark': _d3MovingToController.text.trim(),
         },
       };
+
+      Map<String, Map<String, String>> wizardI18n =
+          TranslationMapper.rawTripleBundleForFields(txInput);
+      var translateProgressShown = false;
+      if (mounted) {
+        translateProgressShown = true;
+        final lang = Localizations.localeOf(context).languageCode;
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => Center(
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    kStaticUiTripleByMessageKey['translating_request']?[lang] ??
+                        '번역 중...',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      // ignore: avoid_print
+      print('[SUBMIT] 번역 시작');
+      try {
+        final tResult = await TranslationMapper.translateAllFieldsStrict(
+          txInput,
+          sourceLanguageCode: localeCode,
+        ).timeout(const Duration(seconds: 30));
+        wizardI18n = tResult.bundle ?? TranslationMapper.rawTripleBundleForFields(txInput);
+      } on TimeoutException catch (e) {
+        if (kDebugMode) debugPrint('UniversalWizard: 번역 타임아웃 — 원문 트리플 저장: $e');
+      } on Object catch (e, st) {
+        if (kDebugMode) {
+          debugPrint('UniversalWizard: 번역 실패 — 원문 트리플 저장: $e');
+          debugPrint('$st');
+        }
+      } finally {
+        if (kDebugMode) debugPrint('UniversalWizard: 번역 단계 종료(상한 30초)');
+      }
+      if (translateProgressShown && mounted) {
+        Navigator.of(context).pop();
+      }
+      // ignore: avoid_print
+      print('[SUBMIT] 번역 완료');
 
       final body = <String, dynamic>{
         'category': _categoryEnglish(_state.categoryKey),
@@ -394,41 +610,106 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         'photos': photoUrls,
         'memo': _d3MemoController.text.trim(),
         'status': 'pending',
+        'wizardI18n': wizardI18n,
       };
       if (photoLocalPaths != null && photoLocalPaths.isNotEmpty) {
         body['_photoLocalPaths'] = photoLocalPaths;
       }
 
-      await saveExpertRequestV5OfflineFirst(body);
+      var submitProgressShown = false;
+      if (mounted) {
+        submitProgressShown = true;
+        final lang = Localizations.localeOf(context).languageCode;
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => Center(
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    kStaticUiTripleByMessageKey['submitting_request']?[lang] ??
+                        '전문가에게 전달 중...',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      // ignore: avoid_print
+      print('[SUBMIT] Firestore 저장 시작 (photos=${photoUrls.length}개)');
+      unawaited(
+        saveExpertRequestV5OfflineFirst(body).then((_) {
+          debugPrint('[SUBMIT] Firestore 저장 성공 (Background)');
+        }).catchError((e) {
+          debugPrint('[SUBMIT ERROR] 백그라운드 저장 중 범인 발생: $e');
+        }),
+      );
+      if (submitProgressShown && mounted) {
+        Navigator.of(context).pop();
+      }
+    } on Object catch (e) {
+      // ignore: avoid_print
+      print('[SUBMIT] 에러: $e');
+      rethrow;
     } finally {
+      // ignore: avoid_print
+      print('[SUBMIT] finally 실행');
       if (mounted) setState(() => _isSubmitting = false);
     }
 
+    // finally 완전히 끝난 후
+    debugPrint('[SUBMIT] 유저 응답성 확보를 위해 즉시 팝업 호출');
     if (!mounted) return;
+    _showSuccessDialog();
+  }
+
+  /// 전문가 신청 완료 팝업 (즉시 호출용)
+  void _showSuccessDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n('application_complete_title')),
-        content: Text(context.l10n('application_complete_message')),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              SearchTriggerBus.trigger();
-              Navigator.of(context).pop(true);
-            },
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: _kRoyalBlue,
-              side: const BorderSide(color: _kRoyalBlue, width: 1.2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-            ),
-            child: Text(context.l10n('confirm')),
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('신청 완료', textAlign: TextAlign.center),
+          content: const Text(
+            '전문가에게 요청이 성공적으로 전달되었습니다.\n잠시만 기다려주시면 전문가가 연락을 드립니다.',
+            textAlign: TextAlign.center,
           ),
-        ],
-      ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  SearchTriggerBus.trigger();
+                  Navigator.of(dialogContext).pop();
+                  if (mounted) {
+                    Navigator.of(context).pop(true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kRoyalBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('확인'),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1596,7 +1877,13 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           width: double.infinity,
           height: 56,
           child: OutlinedButton(
-            onPressed: (_isSubmitting || !canProceed) ? null : _goNext,
+            onPressed: (_isSubmitting || !canProceed)
+                ? null
+                : () {
+                    // ignore: avoid_print
+                    print('[BUTTON] 버튼 클릭됨');
+                    _goNext();
+                  },
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _kRoyalBlue,

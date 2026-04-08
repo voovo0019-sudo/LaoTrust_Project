@@ -2,9 +2,11 @@
 // 데이터를 기기에 먼저 임시 저장하고, 연결 시 자동 전송.
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:lao_trust/firebase_options.dart';
@@ -17,7 +19,7 @@ const String _keyPending = 'laotrust_pending_requests';
 
 /// v5.0 Firestore: `artifacts/{appId}/public/data/requests` (appId = Firebase projectId)
 CollectionReference<Map<String, dynamic>> expertRequestsV5Collection() {
-  final appId = DefaultFirebaseOptions.android.projectId;
+  final appId = DefaultFirebaseOptions.currentPlatform.projectId;
   return firestore
       .collection('artifacts')
       .doc(appId)
@@ -68,7 +70,10 @@ Future<void> _sendExpertV5ToFirestore(Map<String, dynamic> body) async {
   final data = Map<String, dynamic>.from(body);
   data.remove('_photoLocalPaths');
   data['createdAt'] = FieldValue.serverTimestamp();
-  await expertRequestsV5Collection().add(data);
+  final uuid =
+      '${DateTime.now().millisecondsSinceEpoch}_${Random.secure().nextInt(99999)}';
+  await FirebaseAuth.instance.currentUser?.getIdToken(true);
+  await expertRequestsV5Collection().doc(uuid).set(data);
 }
 
 /// 오프라인 시 로컬에 적재해 두었다가, 온라인 시 Firestore로 전송.

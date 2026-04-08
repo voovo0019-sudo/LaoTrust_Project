@@ -29,6 +29,23 @@ class QuickJobsSection extends StatefulWidget {
 class _QuickJobsSectionState extends State<QuickJobsSection> {
   final List<Map<String, dynamic>> _localJobs = <Map<String, dynamic>>[];
 
+  Future<List<Map<String, dynamic>>>? _quickJobsCachedFuture;
+  String _quickJobsCachedAuthKey = '\u0000';
+
+  Future<List<Map<String, dynamic>>> _quickJobsFutureForCurrentAuth() {
+    final key = auth.currentUser?.uid ?? '';
+    if (_quickJobsCachedFuture == null || _quickJobsCachedAuthKey != key) {
+      _quickJobsCachedAuthKey = key;
+      _quickJobsCachedFuture = widget.firebaseService.getQuickJobs();
+    }
+    return _quickJobsCachedFuture!;
+  }
+
+  void _invalidateQuickJobsRemoteCache() {
+    _quickJobsCachedFuture = null;
+    _quickJobsCachedAuthKey = '\u0000';
+  }
+
   /// 라오 문자(ລາວ) 포함 시 Noto Sans Lao 폴백.
   TextStyle _qjTextStyle({
     double fontSize = 13,
@@ -238,6 +255,10 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     if (ok != true || !context.mounted) return;
     try {
       await widget.firebaseService.deleteQuickJobDocument(documentId);
+      if (context.mounted) {
+        _invalidateQuickJobsRemoteCache();
+        setState(() {});
+      }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -412,8 +433,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             return StreamBuilder(
               stream: auth.authStateChanges(),
               builder: (context, __) {
-                return StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: widget.firebaseService.getQuickJobs(),
+                return FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _quickJobsFutureForCurrentAuth(),
                   builder: (context, snapshot) {
             final remote = snapshot.data ?? const <Map<String, dynamic>>[];
 

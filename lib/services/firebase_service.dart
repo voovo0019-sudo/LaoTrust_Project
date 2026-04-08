@@ -44,48 +44,46 @@ class FirebaseService {
     });
   }
 
-  /// 급구 알바 목록 실시간 스트림.
+  /// 급구 알바 목록 일회 조회 (`Query.get`).
   /// v10.8: title_i18n 등 Map 우선, 레거시 String은 healQuickJobI18nField로 즉시 정규화.
-  Stream<List<Map<String, dynamic>>> getQuickJobs() {
+  Future<List<Map<String, dynamic>>> getQuickJobs() async {
     if (!isFirebaseEnabled) {
-      return Stream.value([]);
+      return [];
     }
-    return firestore
+    final snapshot = await firestore
         .collection(kColJobs)
         .orderBy(JobFields.createdAt, descending: true)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        final createdAt = data[JobFields.createdAt];
-        final deadlineAt = data[JobFields.deadlineAt];
-        final titleMap = healQuickJobI18nField(
-          data[JobFields.titleI18n] ?? data[JobFields.title],
-        );
-        final locMap = healQuickJobI18nField(
-          data[JobFields.locationI18n] ?? data[JobFields.location],
-        );
-        final salaryMap = healQuickJobI18nField(
-          data[JobFields.salaryI18n] ?? data[JobFields.salary],
-        );
-        final detailMap = healQuickJobI18nField(
-          data[JobFields.descriptionI18n] ?? data[JobFields.description],
-        );
-        return {
-          'documentId': doc.id,
-          'employerId': data[JobFields.employerId],
-          'titleMap': titleMap,
-          'locMap': locMap,
-          'salaryMap': salaryMap,
-          'detailMap': detailMap,
-          'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
-          'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
-          'createdAt': _createdAtMillis(createdAt),
-          'deadlineAt': _normalizeDeadline(deadlineAt),
-          'isSample': false,
-        };
-      }).toList();
-    });
+        .get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      final createdAt = data[JobFields.createdAt];
+      final deadlineAt = data[JobFields.deadlineAt];
+      final titleMap = healQuickJobI18nField(
+        data[JobFields.titleI18n] ?? data[JobFields.title],
+      );
+      final locMap = healQuickJobI18nField(
+        data[JobFields.locationI18n] ?? data[JobFields.location],
+      );
+      final salaryMap = healQuickJobI18nField(
+        data[JobFields.salaryI18n] ?? data[JobFields.salary],
+      );
+      final detailMap = healQuickJobI18nField(
+        data[JobFields.descriptionI18n] ?? data[JobFields.description],
+      );
+      return {
+        'documentId': doc.id,
+        'employerId': data[JobFields.employerId],
+        'titleMap': titleMap,
+        'locMap': locMap,
+        'salaryMap': salaryMap,
+        'detailMap': detailMap,
+        'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
+        'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
+        'createdAt': _createdAtMillis(createdAt),
+        'deadlineAt': _normalizeDeadline(deadlineAt),
+        'isSample': false,
+      };
+    }).toList();
   }
 
   /// 본인 급구 알바 공고 삭제 (문서 ID).

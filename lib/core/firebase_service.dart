@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/widgets.dart';
 
 /// Firebase 초기화 여부. main()에서 초기화 실패 시 false.
@@ -47,12 +48,27 @@ String? employerIdForCurrentSession() {
 /// 앱 시작 시 한 번 호출. (미션02: 인터넷 불안정 지역 대비)
 Future<void> enableFirestoreOfflinePersistence() async {
   if (!_firebaseEnabled) return;
-  // Firestore는 모바일에서 기본적으로 persistence 활성화됨. 설정 명시.
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-  );
+  if (kIsWeb) {
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: false,
+    );
+  } else {
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+  }
   registerAuthForegroundGuard();
+
+  // 익명 로그인 자동 적용: 로그인 안 된 경우 자동으로 익명 인증
+  if (auth.currentUser == null) {
+    try {
+      await auth.signInAnonymously();
+      debugPrint('[Auth] 익명 로그인 자동 적용 완료');
+    } catch (e) {
+      debugPrint('[Auth] 익명 로그인 실패 (무시): $e');
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------

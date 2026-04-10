@@ -28,7 +28,8 @@ final ValueNotifier<String?> whitelistDisplayPhoneNotifier = ValueNotifier<Strin
 /// Firebase Auth 세션 **또는** 화이트리스트 표시 로그인(위 notifier에 번호가 있음)이면 true.
 /// 환영 배너(0019 엔진)와 급구 알바 등록 가드의 기준을 통일한다.
 bool get hasRecognizedUserSession {
-  if (auth.currentUser != null) return true;
+  final user = auth.currentUser;
+  if (user != null && !user.isAnonymous) return true;
   final v = whitelistDisplayPhoneNotifier.value?.trim();
   return v != null && v.isNotEmpty;
 }

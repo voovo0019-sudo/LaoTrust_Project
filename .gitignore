@@ -5,3 +5,6 @@ build/
 .dart_tool/
 build/
 pubspec.lock
+
+# Firebase options (contains API keys)
+lib/firebase_options.dart

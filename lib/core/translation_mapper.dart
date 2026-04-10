@@ -439,8 +439,11 @@ class TranslationMapper {
     }
   }
 
-  /// [dotenv.get]로 키를 읽는다. 미로드·키 누락·예외 시 빈 문자열.
+  static const String _dartDefineApiKey =
+      String.fromEnvironment('GOOGLE_TRANSLATE_API_KEY', defaultValue: '');
+
   static String _translateApiKeyValue() {
+    if (_dartDefineApiKey.isNotEmpty) return _dartDefineApiKey;
     if (!dotenv.isInitialized) return '';
     try {
       return dotenv.get('GOOGLE_TRANSLATE_API_KEY').trim();
@@ -449,9 +452,8 @@ class TranslationMapper {
     }
   }
 
-  /// `.env`에 `GOOGLE_TRANSLATE_API_KEY`가 있는지(디버그·로그용).
   static bool get isTranslateApiKeyConfigured =>
-      dotenv.isInitialized && _translateApiKeyValue().isNotEmpty;
+      _translateApiKeyValue().isNotEmpty;
 
   static String neutralCaptionForLangCode(String localeLanguageCode) {
     switch (_translationMapperLang2(localeLanguageCode)) {

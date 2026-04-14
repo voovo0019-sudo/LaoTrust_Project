@@ -24,6 +24,8 @@ const Map<String, String> _kFallbackKo = {
   'location': '장소',
   'salary': '급여',
   'detail': '업무 상세',
+  'logout': '로그아웃',
+  'logout_sub': '현재 계정에서 로그아웃합니다',
   'quick_job_ai_translating': 'AI가 정밀 번역 중입니다...',
   'quick_job_translation_incomplete': '번역이 완료되지 않아 저장할 수 없습니다.',
 };

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // v10.1 급구 알바: 저장/표시 변환 레이어 (TranslationMapper)
 // DB에는 i18n 키 또는 __lt_literal__: 접두 + 원문만 둔다. 표시는 t() + 원문 폴백.
 // =============================================================================
@@ -362,6 +362,16 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '거의 완료됐습니다...',
     'en': 'Almost done...',
     'lo': 'ເກືອບສຳເລັດແລ້ວ...',
+  },
+  'logout': {
+    'ko': '로그아웃',
+    'en': 'Log Out',
+    'lo': 'ອອກຈາກລະບົບ',
+  },
+  'logout_sub': {
+    'ko': '현재 계정에서 로그아웃합니다',
+    'en': 'Sign out from current account',
+    'lo': 'ອອກຈາກບັນຊີປັດຈຸບັນ',
   },
 };
 
@@ -1010,3 +1020,4 @@ class _GeminiNoRetryException implements Exception {
   const _GeminiNoRetryException(this.statusCode);
   final int statusCode;
 }
+

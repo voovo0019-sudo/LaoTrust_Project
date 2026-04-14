@@ -86,6 +86,48 @@ class FirebaseService {
     }).toList();
   }
 
+  Stream<List<Map<String, dynamic>>> watchQuickJobs() {
+    if (!isFirebaseEnabled) {
+      return Stream.value([]);
+    }
+    return firestore
+        .collection(kColJobs)
+        .orderBy(JobFields.createdAt, descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              final titleMap = healQuickJobI18nField(
+                data[JobFields.titleI18n] ?? data[JobFields.title],
+              );
+              final locMap = healQuickJobI18nField(
+                data[JobFields.locationI18n] ?? data[JobFields.location],
+              );
+              final salaryMap = healQuickJobI18nField(
+                data[JobFields.salaryI18n] ?? data[JobFields.salary],
+              );
+              final detailMap = healQuickJobI18nField(
+                data[JobFields.descriptionI18n] ?? data[JobFields.description],
+              );
+              return {
+                'documentId': doc.id,
+                'employerId': data[JobFields.employerId],
+                'titleMap': titleMap,
+                'locMap': locMap,
+                'salaryMap': salaryMap,
+                'detailMap': detailMap,
+                'tag': data[JobFields.jobType] ?? 'quick_job_tag_part_time',
+                'tagColor': data['tagColor']?.toString() ?? '0xFF9E9E9E',
+                'createdAt': data[JobFields.createdAt] is Timestamp
+                    ? (data[JobFields.createdAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
+                'deadlineAt': data[JobFields.deadlineAt] is Timestamp
+                    ? (data[JobFields.deadlineAt] as Timestamp).toDate()
+                    : null,
+                'isSample': false,
+              };
+            }).toList());
+  }
+
   /// 본인 급구 알바 공고 삭제 (문서 ID).
   Future<void> deleteQuickJobDocument(String documentId) async {
     if (!isFirebaseEnabled) return;

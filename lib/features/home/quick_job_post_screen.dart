@@ -219,7 +219,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         }
       }
 
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop({'_firebaseHandled': true});
     } catch (e) {
       if (kDebugMode) debugPrint('_submit 최종 에러: $e');
       if (mounted) {

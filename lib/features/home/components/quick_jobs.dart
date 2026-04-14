@@ -28,10 +28,18 @@ class QuickJobsSection extends StatefulWidget {
 
 class _QuickJobsSectionState extends State<QuickJobsSection> {
   final List<Map<String, dynamic>> _localJobs = <Map<String, dynamic>>[];
+  Stream<List<Map<String, dynamic>>>? _jobsStream;
 
   Future<List<Map<String, dynamic>>>? _quickJobsCachedFuture;
   String _quickJobsCachedAuthKey = '\u0000';
 
+  @override
+  void initState() {
+    super.initState();
+    _jobsStream = widget.firebaseService.watchQuickJobs();
+  }
+
+  // ignore: unused_element
   Future<List<Map<String, dynamic>>> _quickJobsFutureForCurrentAuth() {
     final key = auth.currentUser?.uid ?? '';
     if (_quickJobsCachedFuture == null || _quickJobsCachedAuthKey != key) {
@@ -433,8 +441,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             return StreamBuilder(
               stream: auth.authStateChanges(),
               builder: (context, __) {
-                return FutureBuilder<List<Map<String, dynamic>>>(
-                  future: _quickJobsFutureForCurrentAuth(),
+                return StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: _jobsStream,
                   builder: (context, snapshot) {
             final remote = snapshot.data ?? const <Map<String, dynamic>>[];
 
@@ -713,6 +721,14 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                 final result = await Navigator.pushNamed(context, quickJobPostRouteName);
                 if (!context.mounted) return;
                 if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
+                  await Future.delayed(const Duration(milliseconds: 3000));
+                  if (!context.mounted) return;
+                  _invalidateQuickJobsRemoteCache();
+                  setState(() {});
+                  await Future.delayed(const Duration(milliseconds: 1000));
+                  if (!context.mounted) return;
+                  _invalidateQuickJobsRemoteCache();
+                  setState(() {});
                   return;
                 }
                 if (result is Map<String, dynamic>) {

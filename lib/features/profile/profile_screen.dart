@@ -174,6 +174,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: context.l10n('phone_auth_phone_label'),
             onTap: () => _openPhoneAuthSheet(context),
           ),
+          _buildMenuTile(
+            context,
+            icon: Icons.logout,
+            title: context.l10n('logout'),
+            subtitle: context.l10n('logout_sub'),
+            onTap: () async {
+              await auth.signOut();
+              whitelistDisplayPhoneNotifier.value = null;
+              if (!context.mounted) return;
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
         ],
       ),
     );

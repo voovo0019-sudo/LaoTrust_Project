@@ -67,6 +67,13 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   final TextEditingController _cleaningTargetController = TextEditingController();
   final TextEditingController _cleaningIndustryController = TextEditingController();
   final TextEditingController _cleaningBeddingCountController = TextEditingController();
+  String _cleaningHouseType = '';
+  String _cleaningRoomCount = '';
+  String _cleaningBathroomCount = '';
+  String _cleaningVisitCycle = '';
+  String _cleaningBeddingType = '';
+  String _cleaningApplianceCount = '';
+  final Set<String> _cleaningApplianceTypes = {};
 
   final Set<String> _tutoringLevels = <String>{};
   final TextEditingController _tutorGoalController = TextEditingController();
@@ -344,13 +351,25 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return {
           'areaOrSize': _cleaningAreaController.text.trim(),
           'scale': _cleaningScale,
+          'houseType': _cleaningHouseType,
+          'roomCount': _cleaningRoomCount,
+          'bathroomCount': _cleaningBathroomCount,
           if (_state.step1SubTypeId == 'restaurant_cafe')
             'industry': _cleaningIndustryController.text.trim(),
-          if (_state.step1SubTypeId == 'regular_visit')
+          if (_state.step1SubTypeId == 'regular_visit') ...{
             'target': _cleaningTargetController.text.trim(),
-          if (_state.step1SubTypeId == 'bedding')
+            'visitCycle': _cleaningVisitCycle,
+          },
+          if (_state.step1SubTypeId == 'bedding') ...{
+            'beddingType': _cleaningBeddingType,
             'beddingCount': _cleaningBeddingCountController.text.trim(),
-          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+          },
+          if (_state.step1SubTypeId == 'appliance') ...{
+            'applianceTypes': _cleaningApplianceTypes.toList(),
+            'applianceCount': _cleaningApplianceCount,
+          },
+          if (_step2OtherSelected)
+            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_moving':
         return {
@@ -1104,80 +1123,341 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   List<Widget> _buildStep2CleaningV5() {
     final sub = _state.step1SubTypeId;
-    return [
-      if (sub == 'restaurant_cafe') ...[
-        TextField(
-          controller: _cleaningIndustryController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_cleaning_restaurant_label'),
-            hint: context.l10n('wizard_cleaning_restaurant_hint'),
-          ),
-        ),
-        const SizedBox(height: 12),
-      ],
-      if (sub == 'regular_visit') ...[
-        TextField(
-          controller: _cleaningTargetController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_cleaning_target_label'),
-            hint: context.l10n('wizard_cleaning_target_hint'),
-          ),
-        ),
-        const SizedBox(height: 12),
-      ],
-      if (sub == 'bedding') ...[
-        TextField(
-          controller: _cleaningBeddingCountController,
+    final lang = _currentLangCode();
+
+    String t(String key) =>
+        kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+
+    // 공통 위젯: 면적(m²) 입력
+    Widget areaField() => TextField(
+          controller: _cleaningAreaController,
           keyboardType: TextInputType.number,
           decoration: _outlineFieldDecoration(
-            context.l10n('wizard_cleaning_bedding_count_label'),
-            hint: context.l10n('wizard_cleaning_bedding_count_hint'),
+            t('cleaning_area_m2'),
+            hint: t('cleaning_area_hint'),
           ),
-        ),
-        const SizedBox(height: 12),
-      ],
-      TextField(
-        controller: _cleaningAreaController,
-        keyboardType: TextInputType.text,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_cleaning_area_label'),
-          hint: context.l10n('wizard_cleaning_area_hint'),
-        ),
-      ),
-      const SizedBox(height: 12),
-      Text(
-        context.l10n('wizard_cleaning_scale_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      Row(
+        );
+
+    // 공통 위젯: 규모 S/M/L
+    Widget scaleRow() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t('wizard_cleaning_scale_title'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _outlineToggleTile(
+                    label: t('cleaning_size_s'),
+                    selected: _cleaningScale == 'S',
+                    onTap: () => setState(
+                        () => _cleaningScale = _cleaningScale == 'S' ? '' : 'S'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _outlineToggleTile(
+                    label: t('cleaning_size_m'),
+                    selected: _cleaningScale == 'M',
+                    onTap: () => setState(
+                        () => _cleaningScale = _cleaningScale == 'M' ? '' : 'M'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _outlineToggleTile(
+                    label: t('cleaning_size_l'),
+                    selected: _cleaningScale == 'L',
+                    onTap: () => setState(
+                        () => _cleaningScale = _cleaningScale == 'L' ? '' : 'L'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+
+    // 주거형태 선택 위젯
+    Widget housingTypeRow() {
+      final types = [
+        ('apartment', t('cleaning_house_apartment')),
+        ('villa', t('cleaning_house_villa')),
+        ('detached', t('cleaning_house_detached')),
+        ('officetel', t('cleaning_house_officetel')),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: _outlineToggleTile(
-              label: context.l10n('cleaning_size_s'),
-              selected: _cleaningScale == 'S',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'S' ? '' : 'S'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: context.l10n('cleaning_size_m'),
-              selected: _cleaningScale == 'M',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'M' ? '' : 'M'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _outlineToggleTile(
-              label: context.l10n('cleaning_size_l'),
-              selected: _cleaningScale == 'L',
-              onTap: () => setState(() => _cleaningScale = _cleaningScale == 'L' ? '' : 'L'),
-            ),
+          Text(t('cleaning_house_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: types.map((e) {
+              final selected = _cleaningHouseType == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () =>
+                    setState(() => _cleaningHouseType = selected ? '' : e.$1),
+              );
+            }).toList(),
           ),
         ],
-      ),
-    ];
+      );
+    }
+
+    switch (sub) {
+      // -- 이사/입주 청소 --
+      case 'move_in':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('cleaning_room_count'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final n in ['1', '2', '3', '4+'])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: n,
+                    selected: _cleaningRoomCount == n,
+                    onTap: () => setState(() =>
+                        _cleaningRoomCount = _cleaningRoomCount == n ? '' : n),
+                  ),
+                ),
+              ),
+          ]),
+          const SizedBox(height: 12),
+          Text(t('cleaning_bathroom_count'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final n in ['1', '2', '3+'])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: n,
+                    selected: _cleaningBathroomCount == n,
+                    onTap: () => setState(() => _cleaningBathroomCount =
+                        _cleaningBathroomCount == n ? '' : n),
+                  ),
+                ),
+              ),
+          ]),
+        ];
+
+      // -- 주택청소 --
+      case 'house_cleaning':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          scaleRow(),
+        ];
+
+      // -- 식당/카페 --
+      case 'restaurant_cafe':
+        return [
+          TextField(
+            controller: _cleaningIndustryController,
+            decoration: _outlineFieldDecoration(
+              t('wizard_cleaning_restaurant_label'),
+              hint: t('wizard_cleaning_restaurant_hint'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          scaleRow(),
+        ];
+
+      // -- 정기방문 --
+      case 'regular_visit':
+        return [
+          Text(t('cleaning_visit_target'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('home', t('cleaning_visit_home')),
+              ('office', t('cleaning_visit_office')),
+              ('store', t('cleaning_visit_store')),
+            ].map((e) {
+              final selected = _cleaningTargetController.text == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() => _cleaningTargetController.text =
+                    selected ? '' : e.$1),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(t('cleaning_visit_cycle'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('w1', t('cleaning_cycle_w1')),
+              ('w2', t('cleaning_cycle_w2')),
+              ('m2', t('cleaning_cycle_m2')),
+              ('m1', t('cleaning_cycle_m1')),
+            ].map((e) {
+              final selected = _cleaningVisitCycle == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    _cleaningVisitCycle = selected ? '' : e.$1),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          areaField(),
+        ];
+
+      // -- 침구세척 --
+      case 'bedding':
+        return [
+          Text(t('cleaning_bedding_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('duvet', t('cleaning_bedding_duvet')),
+              ('pillow', t('cleaning_bedding_pillow')),
+              ('mattress', t('cleaning_bedding_mattress')),
+              ('set', t('cleaning_bedding_set')),
+            ].map((e) {
+              final selected = _cleaningBeddingType == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    _cleaningBeddingType = selected ? '' : e.$1),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(t('cleaning_appliance_count'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final n in [
+              ('1', t('cleaning_count_1')),
+              ('2', t('cleaning_count_2')),
+              ('3+', t('cleaning_count_3plus')),
+            ])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: n.$2,
+                    selected: _cleaningBeddingCountController.text == n.$1,
+                    onTap: () => setState(() =>
+                        _cleaningBeddingCountController.text =
+                            _cleaningBeddingCountController.text == n.$1
+                                ? ''
+                                : n.$1),
+                  ),
+                ),
+              ),
+          ]),
+        ];
+
+      // -- 가전청소 --
+      case 'appliance':
+        return [
+          Text(t('cleaning_appliance_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('ac', t('cleaning_appliance_ac')),
+              ('fridge', t('cleaning_appliance_fridge')),
+              ('washer', t('cleaning_appliance_washer')),
+              ('dishwasher', t('cleaning_appliance_dishwasher')),
+              ('oven', t('cleaning_appliance_oven')),
+              ('microwave', t('cleaning_appliance_microwave')),
+            ].map((e) {
+              final selected = _cleaningApplianceTypes.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() => selected
+                    ? _cleaningApplianceTypes.remove(e.$1)
+                    : _cleaningApplianceTypes.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(t('cleaning_appliance_count'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final n in [
+              ('1', t('cleaning_count_1')),
+              ('2', t('cleaning_count_2')),
+              ('3+', t('cleaning_count_3plus')),
+            ])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: n.$2,
+                    selected: _cleaningApplianceCount == n.$1,
+                    onTap: () => setState(() =>
+                        _cleaningApplianceCount =
+                            _cleaningApplianceCount == n.$1 ? '' : n.$1),
+                  ),
+                ),
+              ),
+          ]),
+        ];
+
+      // -- 기타 --
+      default:
+        return [
+          TextField(
+            controller: _step1OtherServiceController,
+            decoration: _outlineFieldDecoration(
+              t('wizard_other_service_label'),
+              hint: t('wizard_other_service_hint'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          areaField(),
+        ];
+    }
   }
 
   List<Widget> _buildStep2Moving() {

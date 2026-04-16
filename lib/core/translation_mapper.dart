@@ -523,6 +523,196 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'e.g. Korean restaurant, café, bakery',
     'lo': 'ເຊັ່ນ: ຮ້ານອາຫານ, ກາເຟ, ເບເກີລີ',
   },
+  'wizard_cleaning_scale_title': {
+    'ko': '규모 선택 (S/M/L)',
+    'en': 'Select Size (S/M/L)',
+    'lo': 'ເລືອກຂະໜາດ (S/M/L)',
+  },
+  'cleaning_size_s': {
+    'ko': 'S (30㎡ 이하)',
+    'en': 'S (under 30㎡)',
+    'lo': 'S (ຕ່ຳກວ່າ 30㎡)',
+  },
+  'cleaning_size_m': {
+    'ko': 'M (30~60㎡)',
+    'en': 'M (30~60㎡)',
+    'lo': 'M (30~60㎡)',
+  },
+  'cleaning_size_l': {
+    'ko': 'L (60㎡ 이상)',
+    'en': 'L (over 60㎡)',
+    'lo': 'L (ເກີນ 60㎡)',
+  },
+  'cleaning_house_type': {
+    'ko': '주거 형태',
+    'en': 'Housing Type',
+    'lo': 'ປະເພດທີ່ພັກ',
+  },
+  'cleaning_house_apartment': {
+    'ko': '아파트',
+    'en': 'Apartment',
+    'lo': 'ອາພາດເມັນ',
+  },
+  'cleaning_house_villa': {
+    'ko': '빌라',
+    'en': 'Villa',
+    'lo': 'ວິນລາ',
+  },
+  'cleaning_house_detached': {
+    'ko': '단독주택',
+    'en': 'Detached House',
+    'lo': 'ເຮືອນດ່ຽວ',
+  },
+  'cleaning_house_officetel': {
+    'ko': '오피스텔',
+    'en': 'Studio/Officetel',
+    'lo': 'ສະຕູດິໂອ',
+  },
+  'cleaning_room_count': {
+    'ko': '방 개수',
+    'en': 'Number of Rooms',
+    'lo': 'ຈຳນວນຫ້ອງ',
+  },
+  'cleaning_bathroom_count': {
+    'ko': '화장실 개수',
+    'en': 'Number of Bathrooms',
+    'lo': 'ຈຳນວນຫ້ອງນ້ຳ',
+  },
+  'cleaning_area_m2': {
+    'ko': '면적 (m²)',
+    'en': 'Area (m²)',
+    'lo': 'ພື້ນທີ່ (m²)',
+  },
+  'cleaning_area_hint': {
+    'ko': '예: 50',
+    'en': 'e.g. 50',
+    'lo': 'ຕົວຢ່າງ: 50',
+  },
+  'cleaning_visit_target': {
+    'ko': '청소 대상',
+    'en': 'Cleaning Target',
+    'lo': 'ເປົ້າໝາຍການທຳຄວາມສະອາດ',
+  },
+  'cleaning_visit_home': {
+    'ko': '가정집',
+    'en': 'Home',
+    'lo': 'ເຮືອນ',
+  },
+  'cleaning_visit_office': {
+    'ko': '사무실',
+    'en': 'Office',
+    'lo': 'ຫ້ອງການ',
+  },
+  'cleaning_visit_store': {
+    'ko': '매장',
+    'en': 'Store',
+    'lo': 'ຮ້ານຄ້າ',
+  },
+  'cleaning_visit_cycle': {
+    'ko': '방문 주기',
+    'en': 'Visit Frequency',
+    'lo': 'ຄວາມຖີ່ການເຂົ້າຢ້ຽມ',
+  },
+  'cleaning_cycle_w1': {
+    'ko': '주 1회',
+    'en': 'Once a week',
+    'lo': '1 ຄັ້ງ/ອາທິດ',
+  },
+  'cleaning_cycle_w2': {
+    'ko': '주 2회',
+    'en': 'Twice a week',
+    'lo': '2 ຄັ້ງ/ອາທິດ',
+  },
+  'cleaning_cycle_m2': {
+    'ko': '월 2회',
+    'en': 'Twice a month',
+    'lo': '2 ຄັ້ງ/ເດືອນ',
+  },
+  'cleaning_cycle_m1': {
+    'ko': '월 1회',
+    'en': 'Once a month',
+    'lo': '1 ຄັ້ງ/ເດືອນ',
+  },
+  'cleaning_bedding_type': {
+    'ko': '침구 종류',
+    'en': 'Bedding Type',
+    'lo': 'ປະເພດເຄື່ອງນອນ',
+  },
+  'cleaning_bedding_duvet': {
+    'ko': '이불',
+    'en': 'Duvet',
+    'lo': 'ຜ້າຫົ່ມ',
+  },
+  'cleaning_bedding_pillow': {
+    'ko': '베개',
+    'en': 'Pillow',
+    'lo': 'ໝອນ',
+  },
+  'cleaning_bedding_mattress': {
+    'ko': '매트리스',
+    'en': 'Mattress',
+    'lo': 'ທີ່ນອນ',
+  },
+  'cleaning_bedding_set': {
+    'ko': '전체 세트',
+    'en': 'Full Set',
+    'lo': 'ຊຸດທັງໝົດ',
+  },
+  'cleaning_appliance_type': {
+    'ko': '가전 종류 (복수 선택)',
+    'en': 'Appliance Type (multiple)',
+    'lo': 'ປະເພດເຄື່ອງໃຊ້ໄຟຟ້າ',
+  },
+  'cleaning_appliance_ac': {
+    'ko': '에어컨',
+    'en': 'Air Conditioner',
+    'lo': 'ເຄື່ອງປັບອາກາດ',
+  },
+  'cleaning_appliance_fridge': {
+    'ko': '냉장고',
+    'en': 'Refrigerator',
+    'lo': 'ຕູ້ເຢັນ',
+  },
+  'cleaning_appliance_washer': {
+    'ko': '세탁기',
+    'en': 'Washing Machine',
+    'lo': 'ເຄື່ອງຊັກຜ້າ',
+  },
+  'cleaning_appliance_dishwasher': {
+    'ko': '식기세척기',
+    'en': 'Dishwasher',
+    'lo': 'ເຄື່ອງລ້າງຈານ',
+  },
+  'cleaning_appliance_oven': {
+    'ko': '오븐',
+    'en': 'Oven',
+    'lo': 'ເຕົາອົບ',
+  },
+  'cleaning_appliance_microwave': {
+    'ko': '전자레인지',
+    'en': 'Microwave',
+    'lo': 'ໄມໂຄເວັບ',
+  },
+  'cleaning_appliance_count': {
+    'ko': '대수',
+    'en': 'Number of Units',
+    'lo': 'ຈຳນວນເຄື່ອງ',
+  },
+  'cleaning_count_1': {
+    'ko': '1대',
+    'en': '1 unit',
+    'lo': '1 ເຄື່ອງ',
+  },
+  'cleaning_count_2': {
+    'ko': '2대',
+    'en': '2 units',
+    'lo': '2 ເຄື່ອງ',
+  },
+  'cleaning_count_3plus': {
+    'ko': '3대 이상',
+    'en': '3+ units',
+    'lo': '3+ ເຄື່ອງ',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

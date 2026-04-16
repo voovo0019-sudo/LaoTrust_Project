@@ -363,6 +363,51 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Almost done...',
     'lo': 'ເກືອບສຳເລັດແລ້ວ...',
   },
+  'radar_searching': {
+    'ko': '주변 전문가를 탐색하는 중...',
+    'en': 'Searching for nearby experts...',
+    'lo': 'ກຳລັງຊອກຫາຜູ້ຊ່ຽວຊານໃກ້ຄຽງ...',
+  },
+  'radar_found': {
+    'ko': '전문가를 찾았습니다!',
+    'en': 'Expert found!',
+    'lo': 'ພົບຜູ້ຊ່ຽວຊານແລ້ວ!',
+  },
+  'radar_stage_1km': {
+    'ko': '반경 1km 탐색 중...',
+    'en': 'Searching within 1km...',
+    'lo': 'ກຳລັງຊອກຫາໃນລັດສະໝີ 1km...',
+  },
+  'radar_stage_3km': {
+    'ko': '반경 3km로 확대 중...',
+    'en': 'Expanding to 3km...',
+    'lo': 'ກຳລັງຂະຫຍາຍໄປ 3km...',
+  },
+  'radar_stage_5km_plus': {
+    'ko': '5km 이상 광역 탐색 중...',
+    'en': 'Wide search beyond 5km...',
+    'lo': 'ກຳລັງຊອກຫາໄກກວ່າ 5km...',
+  },
+  'area_or_size': {
+    'ko': '면적 / 크기',
+    'en': 'Area / Size',
+    'lo': 'ພື້ນທີ່ / ຂະໜາດ',
+  },
+  'scale_small': {
+    'ko': '소형 (S)',
+    'en': 'Small (S)',
+    'lo': 'ນ້ອຍ (S)',
+  },
+  'scale_medium': {
+    'ko': '중형 (M)',
+    'en': 'Medium (M)',
+    'lo': 'ກາງ (M)',
+  },
+  'scale_large': {
+    'ko': '대형 (L)',
+    'en': 'Large (L)',
+    'lo': 'ໃຫຍ່ (L)',
+  },
   'logout': {
     'ko': '로그아웃',
     'en': 'Log Out',
@@ -372,6 +417,91 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '현재 계정에서 로그아웃합니다',
     'en': 'Sign out from current account',
     'lo': 'ອອກຈາກບັນຊີປັດຈຸບັນ',
+  },
+  'inbox_title': {
+    'ko': '수신함',
+    'en': 'Inbox',
+    'lo': 'ກ່ອງຈົດໝາຍ',
+  },
+  'inbox_empty': {
+    'ko': '받은 신청이 없습니다',
+    'en': 'No requests received',
+    'lo': 'ບໍ່ມີຄໍາຮ້ອງຂໍ',
+  },
+  'inbox_status_pending': {
+    'ko': '대기중',
+    'en': 'Pending',
+    'lo': 'ລໍຖ້າ',
+  },
+  'inbox_status_accepted': {
+    'ko': '수락됨',
+    'en': 'Accepted',
+    'lo': 'ຍອມຮັບແລ້ວ',
+  },
+  'inbox_status_rejected': {
+    'ko': '거절됨',
+    'en': 'Rejected',
+    'lo': 'ປະຕິເສດແລ້ວ',
+  },
+  'inbox_btn_accept': {
+    'ko': '수락하기',
+    'en': 'Accept',
+    'lo': 'ຍອມຮັບ',
+  },
+  'inbox_btn_reject': {
+    'ko': '거절하기',
+    'en': 'Reject',
+    'lo': 'ປະຕິເສດ',
+  },
+  'inbox_detail_title': {
+    'ko': '신청 상세',
+    'en': 'Request Detail',
+    'lo': 'ລາຍລະອຽດຄໍາຮ້ອງ',
+  },
+  'inbox_category': {
+    'ko': '카테고리',
+    'en': 'Category',
+    'lo': 'ໝວດໝູ່',
+  },
+  'inbox_location': {
+    'ko': '위치',
+    'en': 'Location',
+    'lo': 'ສະຖານທີ່',
+  },
+  'inbox_schedule': {
+    'ko': '희망 일시',
+    'en': 'Preferred Date',
+    'lo': 'ວັນທີທີ່ຕ້ອງການ',
+  },
+  'inbox_memo': {
+    'ko': '추가 메모',
+    'en': 'Additional Note',
+    'lo': 'ບັນທຶກເພີ່ມເຕີມ',
+  },
+  'inbox_accept_confirm': {
+    'ko': '이 신청을 수락하시겠습니까?',
+    'en': 'Do you want to accept this request?',
+    'lo': 'ທ່ານຕ້ອງການຍອມຮັບຄໍາຮ້ອງນີ້ບໍ?',
+  },
+  'inbox_reject_confirm': {
+    'ko': '이 신청을 거절하시겠습니까?',
+    'en': 'Do you want to reject this request?',
+    'lo': 'ທ່ານຕ້ອງການປະຕິເສດຄໍາຮ້ອງນີ້ບໍ?',
+  },
+  'inbox_confirm_yes': {
+    'ko': '네',
+    'en': 'Yes',
+    'lo': 'ແມ່ນ',
+  },
+  'inbox_confirm_no': {
+    'ko': '아니오',
+    'en': 'No',
+    'lo': 'ບໍ່',
+  },
+  'inbox_photos': {
+    'ko': '사진',
+    'en': 'Photos',
+    'lo': 'ຮູບພາບ',
   },
 };
 

@@ -300,10 +300,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   /// 급구 [TranslationMapper]와 동일한 4슬롯(title/location/salary/detail)으로 요약 문자열을 묶는다.
   /// Step 4에는 호출하지 않고, [ _submit ]에서만 번역에 사용한다.
   Map<String, String> _wizardTranslationInput(UniversalWizardConfig config) {
-    final buf = StringBuffer();
     final d2 = _buildDepth2Map();
-    d2.forEach((k, v) => buf.writeln('$k: $v'));
-    final depth2Str = buf.toString().trim();
+    final depth2Str = d2.entries
+        .map((entry) => _depth2DisplayLine(entry.key, entry.value))
+        .where((line) => line.trim().isNotEmpty)
+        .join('\n')
+        .trim();
 
     final locStr = _state.categoryKey == 'expert_moving'
         ? '${context.l10n('wizard_depth3_from_label')}: ${_d3MovingFromController.text}\n'
@@ -402,6 +404,44 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           'selections': _step2Selections.toList(),
           if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
         };
+    }
+  }
+
+  String _currentLangCode() {
+    final raw = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (raw.startsWith('ko')) return 'ko';
+    if (raw.startsWith('lo')) return 'lo';
+    return 'en';
+  }
+
+  String _tripleUiText(String key, {required String fallback}) {
+    final lang = _currentLangCode();
+    return kStaticUiTripleByMessageKey[key]?[lang] ?? fallback;
+  }
+
+  String _depth2DisplayLine(String key, dynamic value) {
+    final rawValue = value is List
+        ? value.map((e) => '$e').where((e) => e.trim().isNotEmpty).join(', ')
+        : '$value';
+    final trimmedValue = rawValue.trim();
+
+    switch (key) {
+      case 'areaOrSize':
+        return '${_tripleUiText('area_or_size', fallback: '면적 / 크기')}: $trimmedValue';
+      case 'scale':
+        final normalized = trimmedValue.toUpperCase();
+        if (normalized == 'S') {
+          return _tripleUiText('scale_small', fallback: '소형 (S)');
+        }
+        if (normalized == 'M') {
+          return _tripleUiText('scale_medium', fallback: '중형 (M)');
+        }
+        if (normalized == 'L') {
+          return _tripleUiText('scale_large', fallback: '대형 (L)');
+        }
+        return trimmedValue;
+      default:
+        return '$key: $trimmedValue';
     }
   }
 
@@ -1785,9 +1825,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Widget _buildStep4(UniversalWizardConfig config) {
-    final buf = StringBuffer();
     final d2 = _buildDepth2Map();
-    d2.forEach((k, v) => buf.writeln('$k: $v'));
+    final depth2Display = d2.entries
+        .map((entry) => _depth2DisplayLine(entry.key, entry.value))
+        .where((line) => line.trim().isNotEmpty)
+        .join('\n')
+        .trim();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1808,7 +1851,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             context.l10n('wizard_summary_subtype'),
             _state.step1SubTypeLabel.isEmpty ? '' : context.l10n(_state.step1SubTypeLabel),
           ),
-          _summaryRow(context.l10n('wizard_summary_depth2'), buf.toString().trim()),
+          _summaryRow(context.l10n('wizard_summary_depth2'), depth2Display),
           _summaryRow(
             context.l10n('wizard_summary_location'),
             _state.categoryKey == 'expert_moving'

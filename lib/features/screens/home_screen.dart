@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 import '../../core/app_localizations.dart';
 import '../../core/location_service.dart';
+import '../../core/translation_mapper.dart';
 import '../profile/profile_screen.dart';
 import '../home/components/welcome_banner.dart';
 import '../home/components/category_grid.dart';
@@ -11,6 +12,7 @@ import '../home/components/section_title_style.dart';
 import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
 import '../universal_wizard/universal_wizard_screen.dart';
+import '../expert_inbox/expert_inbox_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -261,6 +263,25 @@ class _HomeScreenState extends State<HomeScreen> {
             PopupMenuItem(value: 'account', child: Text(context.l10n('settings_account'))),
             PopupMenuItem(value: 'logout', child: Text(context.l10n('settings_logout'))),
           ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.move_to_inbox_outlined, color: Color(0xFF1E293B)),
+          tooltip: kStaticUiTripleByMessageKey['inbox_title']?[
+                  Localizations.localeOf(context).languageCode.startsWith('ko')
+                      ? 'ko'
+                      : Localizations.localeOf(context).languageCode.startsWith('lo')
+                      ? 'lo'
+                      : 'en'
+                ] ??
+                '수신함',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ExpertInboxScreen(),
+              ),
+            );
+          },
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.notifications_none, color: Color(0xFF1E293B)),

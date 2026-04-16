@@ -676,7 +676,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'expert_cleaning':
         return [
           {'id': 'move_in', 'labelKey': 'sub_cleaning_move_in'},
-          {'id': 'commercial', 'labelKey': 'sub_cleaning_commercial'},
+          {'id': 'house_cleaning', 'labelKey': 'sub_cleaning_house'},
+          {'id': 'restaurant_cafe', 'labelKey': 'sub_cleaning_restaurant_cafe'},
           {'id': 'appliance', 'labelKey': 'sub_cleaning_appliance'},
           {'id': 'bedding', 'labelKey': 'sub_cleaning_bedding'},
           {'id': 'regular_visit', 'labelKey': 'sub_cleaning_regular_visit'},

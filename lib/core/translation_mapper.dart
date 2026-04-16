@@ -503,6 +503,26 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Photos',
     'lo': 'ຮູບພາບ',
   },
+  'sub_cleaning_house': {
+    'ko': '주택청소',
+    'en': 'House Cleaning',
+    'lo': 'ທຳຄວາມສະອາດເຮືອນ',
+  },
+  'sub_cleaning_restaurant_cafe': {
+    'ko': '식당/카페',
+    'en': 'Restaurant/Café',
+    'lo': 'ຮ້ານອາຫານ/ກາເຟ',
+  },
+  'wizard_cleaning_restaurant_label': {
+    'ko': '업종 유형',
+    'en': 'Business Type',
+    'lo': 'ປະເພດທຸລະກິດ',
+  },
+  'wizard_cleaning_restaurant_hint': {
+    'ko': '예: 한식당, 카페, 베이커리 등',
+    'en': 'e.g. Korean restaurant, café, bakery',
+    'lo': 'ເຊັ່ນ: ຮ້ານອາຫານ, ກາເຟ, ເບເກີລີ',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

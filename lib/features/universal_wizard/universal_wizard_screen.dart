@@ -229,7 +229,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             _cleaningAreaController.text.trim().isNotEmpty || _cleaningScale.isNotEmpty;
         if (!hasBase) return false;
         final sub = _state.step1SubTypeId;
-        if (sub == 'commercial') return _cleaningIndustryController.text.trim().isNotEmpty;
+        if (sub == 'restaurant_cafe') return _cleaningIndustryController.text.trim().isNotEmpty;
         if (sub == 'regular_visit') return _cleaningTargetController.text.trim().isNotEmpty;
         if (sub == 'bedding') return _cleaningBeddingCountController.text.trim().isNotEmpty;
         return true;
@@ -344,7 +344,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return {
           'areaOrSize': _cleaningAreaController.text.trim(),
           'scale': _cleaningScale,
-          if (_state.step1SubTypeId == 'commercial')
+          if (_state.step1SubTypeId == 'restaurant_cafe')
             'industry': _cleaningIndustryController.text.trim(),
           if (_state.step1SubTypeId == 'regular_visit')
             'target': _cleaningTargetController.text.trim(),
@@ -1105,12 +1105,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   List<Widget> _buildStep2CleaningV5() {
     final sub = _state.step1SubTypeId;
     return [
-      if (sub == 'commercial') ...[
+      if (sub == 'restaurant_cafe') ...[
         TextField(
           controller: _cleaningIndustryController,
           decoration: _outlineFieldDecoration(
-            context.l10n('wizard_cleaning_industry_label'),
-            hint: context.l10n('wizard_cleaning_industry_hint'),
+            context.l10n('wizard_cleaning_restaurant_label'),
+            hint: context.l10n('wizard_cleaning_restaurant_hint'),
           ),
         ),
         const SizedBox(height: 12),

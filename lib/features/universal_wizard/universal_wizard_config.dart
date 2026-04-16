@@ -50,7 +50,8 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     categoryKey: 'expert_cleaning',
     step1SubTypes: [
       MapEntry('move_in', 'sub_cleaning_move_in'),
-      MapEntry('commercial', 'sub_cleaning_commercial'),
+      MapEntry('house_cleaning', 'sub_cleaning_house'),
+      MapEntry('restaurant_cafe', 'sub_cleaning_restaurant_cafe'),
       MapEntry('regular_visit', 'sub_cleaning_regular_visit'),
       MapEntry('bedding', 'sub_cleaning_bedding'),
       MapEntry('appliance', 'sub_cleaning_appliance'),

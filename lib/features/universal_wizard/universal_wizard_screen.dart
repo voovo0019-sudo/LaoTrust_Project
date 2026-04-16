@@ -1,5 +1,5 @@
-// =============================================================================
-// v5.1: 유니버설 4단계 위저드 — Storage URL 저장 · D2 설계도 반영
+﻿// =============================================================================
+// v5.1: ?좊땲踰꾩꽕 4?④퀎 ?꾩?????Storage URL ???쨌 D2 ?ㅺ퀎??諛섏쁺
 // Firestore: artifacts/{projectId}/public/data/requests
 // =============================================================================
 
@@ -61,6 +61,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   final TextEditingController _weightKgController = TextEditingController();
   final TextEditingController _movingRoomCountController = TextEditingController();
   String _movingVehicleType = '';
+  String _movingFloorFrom = '';
+  String _movingFloorTo = '';
+  String _movingElevator = '';
+  String _movingHouseType = '';
+  String _movingDistance = '';
+  final Set<String> _movingCargoTypes = {};
 
   final TextEditingController _cleaningAreaController = TextEditingController();
   String _cleaningScale = '';
@@ -161,10 +167,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   void _checkAuthAndRedirect() {
     if (!mounted) return;
-    // 전화번호 로그인만 통과 (익명 로그인은 통과 불가)
+    // ?꾪솕踰덊샇 濡쒓렇?몃쭔 ?듦낵 (?듬챸 濡쒓렇?몄? ?듦낵 遺덇?)
     final user = auth.currentUser;
     if (user != null && !user.isAnonymous) return;
-    // 화이트리스트 로그인 확인 (whitelistDisplayPhoneNotifier에 값이 있으면 통과)
+    // ?붿씠?몃━?ㅽ듃 濡쒓렇???뺤씤 (whitelistDisplayPhoneNotifier??媛믪씠 ?덉쑝硫??듦낵)
     final whitePhone = whitelistDisplayPhoneNotifier.value?.trim() ?? '';
     if (whitePhone.isNotEmpty) return;
     showDialog<void>(
@@ -172,8 +178,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        title: const Text('로그인이 필요합니다'),
-        content: const Text('서비스를 이용하려면 전화번호로 로그인해 주세요.'),
+        title: Text(kStaticUiTripleByMessageKey['login_required_title']?[
+          Localizations.localeOf(context).languageCode.startsWith('ko') ? 'ko' :
+          Localizations.localeOf(context).languageCode.startsWith('lo') ? 'lo' : 'en'
+        ] ?? '로그인이 필요합니다'),
+        content: Text(kStaticUiTripleByMessageKey['login_required_content']?[
+          Localizations.localeOf(context).languageCode.startsWith('ko') ? 'ko' :
+          Localizations.localeOf(context).languageCode.startsWith('lo') ? 'lo' : 'en'
+        ] ?? '서비스를 이용하려면 전화번호로 로그인해 주세요.'),
         actions: [
           OutlinedButton(
             onPressed: () {
@@ -199,7 +211,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 borderRadius: BorderRadius.circular(28),
               ),
             ),
-            child: const Text('로그인하기'),
+            child: Text(kStaticUiTripleByMessageKey['login_required_btn']?[
+              Localizations.localeOf(context).languageCode.startsWith('ko') ? 'ko' :
+              Localizations.localeOf(context).languageCode.startsWith('lo') ? 'lo' : 'en'
+            ] ?? '로그인하기'),
           ),
         ],
       ),
@@ -221,7 +236,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
 
   bool _canProceedStep2() {
-    if (_state.step1SubTypeId == 'other') {
+    if (_state.step1SubTypeId == 'other' &&
+        _state.categoryKey != 'expert_moving') {
       return _step1OtherServiceController.text.trim().isNotEmpty;
     }
     switch (_state.categoryKey) {
@@ -229,8 +245,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         final sub = _state.step1SubTypeId;
         if (sub == 'small') return _movingVehicleType.isNotEmpty;
         if (sub == 'home') return _movingRoomCountController.text.trim().isNotEmpty;
-        if (sub == 'cargo') return _weightKgController.text.trim().isNotEmpty;
-        return false;
+        if (sub == 'cargo') return _movingCargoTypes.isNotEmpty;
+        return true;
       case 'expert_cleaning':
         final hasBase =
             _cleaningAreaController.text.trim().isNotEmpty || _cleaningScale.isNotEmpty;
@@ -271,13 +287,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     final dateOk = _state.preferredDateStr.isNotEmpty;
     final timeOk = _state.preferredTimeStr.isNotEmpty;
     if (!dateOk || !timeOk) return false;
-    final hasPin = _state.step3Lat != null && _state.step3Lng != null;
-    final hasLandmark = _d3LandmarkController.text.trim().isNotEmpty;
-    if (!hasPin && !hasLandmark) return false;
+
     if (_state.categoryKey == 'expert_moving') {
       return _d3MovingFromController.text.trim().isNotEmpty &&
           _d3MovingToController.text.trim().isNotEmpty;
     }
+
+    final hasPin = _state.step3Lat != null && _state.step3Lng != null;
+    final hasLandmark = _d3LandmarkController.text.trim().isNotEmpty;
+    if (!hasPin && !hasLandmark) return false;
+
     return true;
   }
 
@@ -304,8 +323,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     return parts.map((p) => p.isEmpty ? '' : '${p[0].toUpperCase()}${p.substring(1)}').join();
   }
 
-  /// 급구 [TranslationMapper]와 동일한 4슬롯(title/location/salary/detail)으로 요약 문자열을 묶는다.
-  /// Step 4에는 호출하지 않고, [ _submit ]에서만 번역에 사용한다.
+  /// 湲됯뎄 [TranslationMapper]? ?숈씪??4?щ’(title/location/salary/detail)?쇰줈 ?붿빟 臾몄옄?댁쓣 臾띕뒗??
+  /// Step 4?먮뒗 ?몄텧?섏? ?딄퀬, [ _submit ]?먯꽌留?踰덉뿭???ъ슜?쒕떎.
   Map<String, String> _wizardTranslationInput(UniversalWizardConfig config) {
     final d2 = _buildDepth2Map();
     final depth2Str = d2.entries
@@ -323,7 +342,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     final titleStr = [
       context.l10n(config.categoryKey),
       if (_state.step1SubTypeLabel.isNotEmpty) context.l10n(_state.step1SubTypeLabel),
-    ].join(' · ');
+    ].join(' 쨌 ');
 
     final scheduleStr =
         '${_state.preferredDateStr} ${_state.preferredTimeStr} (${_state.scheduleIsUrgent ? context.l10n('wizard_schedule_urgent') : context.l10n('wizard_schedule_normal')})';
@@ -373,9 +392,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         };
       case 'expert_moving':
         return {
-          if (_state.step1SubTypeId == 'small') 'vehicleType': _movingVehicleType,
-          if (_state.step1SubTypeId == 'home') 'roomCount': _movingRoomCountController.text.trim(),
-          if (_state.step1SubTypeId == 'cargo') 'cargoWeightKg': _weightKgController.text.trim(),
+          'fromLandmark': _d3MovingFromController.text.trim(),
+          'toLandmark': _d3MovingToController.text.trim(),
+          'vehicleType': _movingVehicleType,
+          'houseType': _movingHouseType,
+          'roomCount': _movingRoomCountController.text.trim(),
+          'floorFrom': _movingFloorFrom,
+          'floorTo': _movingFloorTo,
+          'elevator': _movingElevator,
+          if (_state.step1SubTypeId == 'cargo') ...{
+            'cargoTypes': _movingCargoTypes.toList(),
+            'weightKg': _weightKgController.text.trim(),
+            'distance': _movingDistance,
+          },
         };
       case 'expert_repair':
         return {
@@ -446,17 +475,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
     switch (key) {
       case 'areaOrSize':
-        return '${_tripleUiText('area_or_size', fallback: '면적 / 크기')}: $trimmedValue';
+        return '${_tripleUiText('area_or_size', fallback: '硫댁쟻 / ?ш린')}: $trimmedValue';
       case 'scale':
         final normalized = trimmedValue.toUpperCase();
         if (normalized == 'S') {
-          return _tripleUiText('scale_small', fallback: '소형 (S)');
+          return _tripleUiText('scale_small', fallback: '?뚰삎 (S)');
         }
         if (normalized == 'M') {
-          return _tripleUiText('scale_medium', fallback: '중형 (M)');
+          return _tripleUiText('scale_medium', fallback: '以묓삎 (M)');
         }
         if (normalized == 'L') {
-          return _tripleUiText('scale_large', fallback: '대형 (L)');
+          return _tripleUiText('scale_large', fallback: '???(L)');
         }
         return trimmedValue;
       default:
@@ -468,7 +497,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
     // ignore: avoid_print
-    print('[SUBMIT] 시작');
+    print('[SUBMIT] ?쒖옉');
 
     final cfg = _config ?? kUniversalWizardConfigs['expert_repair']!;
     final txInput = _wizardTranslationInput(cfg);
@@ -482,7 +511,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       if (_pickedImages.isNotEmpty) {
         if (!isFirebaseEnabled) {
           // ignore: avoid_print
-          print('[SUBMIT] Firebase 비활성 — 사진 없이 신청 계속');
+          print('[SUBMIT] Firebase 鍮꾪솢?????ъ쭊 ?놁씠 ?좎껌 怨꾩냽');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
@@ -491,18 +520,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           photoUrls = <String>[];
         } else {
           // ignore: avoid_print
-          print('[SUBMIT] 연결 확인 시작');
+          print('[SUBMIT] ?곌껐 ?뺤씤 ?쒖옉');
           List<ConnectivityResult> conn = <ConnectivityResult>[];
           try {
             conn = await Connectivity()
                 .checkConnectivity()
                 .timeout(const Duration(seconds: 30));
           } on TimeoutException catch (e) {
-            if (kDebugMode) debugPrint('UniversalWizard: 연결 확인 타임아웃: $e');
+            if (kDebugMode) debugPrint('UniversalWizard: ?곌껐 ?뺤씤 ??꾩븘?? $e');
             conn = <ConnectivityResult>[];
           } on Object catch (e, st) {
             if (kDebugMode) {
-              debugPrint('UniversalWizard: 연결 확인 실패: $e');
+              debugPrint('UniversalWizard: ?곌껐 ?뺤씤 ?ㅽ뙣: $e');
               debugPrint('$st');
             }
             conn = <ConnectivityResult>[];
@@ -512,7 +541,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               e == ConnectivityResult.wifi ||
               e == ConnectivityResult.ethernet);
           // ignore: avoid_print
-          print('[SUBMIT] 연결 확인 완료 (online=$online)');
+          print('[SUBMIT] ?곌껐 ?뺤씤 ?꾨즺 (online=$online)');
           if (online) {
             if (!mounted) return;
             final lang = Localizations.localeOf(context).languageCode;
@@ -533,7 +562,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                       const SizedBox(height: 16),
                       Text(
                         kStaticUiTripleByMessageKey['uploading_photos']?[lang] ??
-                            '사진 업로드 중...',
+                            '?ъ쭊 ?낅줈??以?..',
                         style: const TextStyle(fontSize: 14),
                       ),
                     ],
@@ -543,17 +572,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             );
             try {
               // ignore: avoid_print
-              print('[SUBMIT] 사진업로드 시작');
+              print('[SUBMIT] ?ъ쭊?낅줈???쒖옉');
               photoUrls = await uploadExpertRequestImagesFromXFiles(
                 files: _pickedImages,
                 userId: uid,
               ).timeout(const Duration(seconds: 30));
               // ignore: avoid_print
-              print('[SUBMIT] 사진업로드 결과: ${photoUrls.length}개 URL');
+              print('[SUBMIT] ?ъ쭊?낅줈??寃곌낵: ${photoUrls.length}媛?URL');
             } on TimeoutException catch (e) {
-              if (kDebugMode) debugPrint('UniversalWizard: 사진 업로드 타임아웃: $e');
+              if (kDebugMode) debugPrint('UniversalWizard: ?ъ쭊 ?낅줈????꾩븘?? $e');
               // ignore: avoid_print
-              print('[SUBMIT] 사진업로드 타임아웃 — photoUrls=[] 로 번역·저장 계속');
+              print('[SUBMIT] ?ъ쭊?낅줈????꾩븘????photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -562,11 +591,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               }
             } on Object catch (e, st) {
               if (kDebugMode) {
-                debugPrint('UniversalWizard: 사진 업로드 실패: $e');
+                debugPrint('UniversalWizard: ?ъ쭊 ?낅줈???ㅽ뙣: $e');
                 debugPrint('$st');
               }
               // ignore: avoid_print
-              print('[SUBMIT] 사진업로드 실패 — photoUrls=[] 로 번역·저장 계속: $e');
+              print('[SUBMIT] ?ъ쭊?낅줈???ㅽ뙣 ??photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽: $e');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -575,19 +604,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               }
             } finally {
               // ignore: avoid_print
-              print('[SUBMIT] 사진업로드 블록 finally (다이얼로그 닫기)');
+              print('[SUBMIT] ?ъ쭊?낅줈??釉붾줉 finally (?ㅼ씠?쇰줈洹??リ린)');
               if (mounted) Navigator.of(context).pop();
             }
           } else {
             photoLocalPaths =
                 _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
             // ignore: avoid_print
-            print('[SUBMIT] 오프라인 — 로컬 경로 ${_pickedImages.length}건, 업로드 생략');
+            print('[SUBMIT] ?ㅽ봽?쇱씤 ??濡쒖뺄 寃쎈줈 ${_pickedImages.length}嫄? ?낅줈???앸왂');
           }
         }
       } else {
         // ignore: avoid_print
-        print('[SUBMIT] 선택된 사진 없음 — 바로 번역 단계');
+        print('[SUBMIT] ?좏깮???ъ쭊 ?놁쓬 ??諛붾줈 踰덉뿭 ?④퀎');
       }
 
       final location = <String, dynamic>{
@@ -623,7 +652,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   const SizedBox(height: 16),
                   Text(
                     kStaticUiTripleByMessageKey['translating_request']?[lang] ??
-                        '번역 중...',
+                        '踰덉뿭 以?..',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
@@ -633,7 +662,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      print('[SUBMIT] 번역 시작');
+      print('[SUBMIT] 踰덉뿭 ?쒖옉');
       try {
         final tResult = await TranslationMapper.translateAllFieldsStrict(
           txInput,
@@ -641,20 +670,20 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         ).timeout(const Duration(seconds: 30));
         wizardI18n = tResult.bundle ?? TranslationMapper.rawTripleBundleForFields(txInput);
       } on TimeoutException catch (e) {
-        if (kDebugMode) debugPrint('UniversalWizard: 번역 타임아웃 — 원문 트리플 저장: $e');
+        if (kDebugMode) debugPrint('UniversalWizard: 踰덉뿭 ??꾩븘?????먮Ц ?몃━????? $e');
       } on Object catch (e, st) {
         if (kDebugMode) {
-          debugPrint('UniversalWizard: 번역 실패 — 원문 트리플 저장: $e');
+          debugPrint('UniversalWizard: 踰덉뿭 ?ㅽ뙣 ???먮Ц ?몃━????? $e');
           debugPrint('$st');
         }
       } finally {
-        if (kDebugMode) debugPrint('UniversalWizard: 번역 단계 종료(상한 30초)');
+        if (kDebugMode) debugPrint('UniversalWizard: 踰덉뿭 ?④퀎 醫낅즺(?곹븳 30珥?');
       }
       if (translateProgressShown && mounted) {
         Navigator.of(context).pop();
       }
       // ignore: avoid_print
-      print('[SUBMIT] 번역 완료');
+      print('[SUBMIT] 踰덉뿭 ?꾨즺');
 
       final body = <String, dynamic>{
         'category': _categoryEnglish(_state.categoryKey),
@@ -696,7 +725,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   const SizedBox(height: 16),
                   Text(
                     kStaticUiTripleByMessageKey['submitting_request']?[lang] ??
-                        '전문가에게 전달 중...',
+                        '?꾨Ц媛?먭쾶 ?꾨떖 以?..',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
@@ -706,12 +735,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      print('[SUBMIT] Firestore 저장 시작 (photos=${photoUrls.length}개)');
+      print('[SUBMIT] Firestore ????쒖옉 (photos=${photoUrls.length}媛?');
       unawaited(
         saveExpertRequestV5OfflineFirst(body).then((_) {
-          debugPrint('[SUBMIT] Firestore 저장 성공 (Background)');
+          debugPrint('[SUBMIT] Firestore ????깃났 (Background)');
         }).catchError((e) {
-          debugPrint('[SUBMIT ERROR] 백그라운드 저장 중 범인 발생: $e');
+          debugPrint('[SUBMIT ERROR] 諛깃렇?쇱슫?????以?踰붿씤 諛쒖깮: $e');
         }),
       );
       if (submitProgressShown && mounted) {
@@ -719,21 +748,20 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       }
     } on Object catch (e) {
       // ignore: avoid_print
-      print('[SUBMIT] 에러: $e');
+      print('[SUBMIT] ?먮윭: $e');
       rethrow;
     } finally {
       // ignore: avoid_print
-      print('[SUBMIT] finally 실행');
+      print('[SUBMIT] finally ?ㅽ뻾');
       if (mounted) setState(() => _isSubmitting = false);
     }
 
-    // finally 완전히 끝난 후
-    debugPrint('[SUBMIT] 유저 응답성 확보를 위해 즉시 팝업 호출');
+    // finally ?꾩쟾???앸궃 ??    debugPrint('[SUBMIT] ?좎? ?묐떟???뺣낫瑜??꾪빐 利됱떆 ?앹뾽 ?몄텧');
     if (!mounted) return;
     _showSuccessDialog();
   }
 
-  /// 전문가 신청 완료 팝업 (즉시 호출용)
+  /// ?꾨Ц媛 ?좎껌 ?꾨즺 ?앹뾽 (利됱떆 ?몄텧??
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -741,9 +769,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('신청 완료', textAlign: TextAlign.center),
+          title: const Text('?좎껌 ?꾨즺', textAlign: TextAlign.center),
           content: const Text(
-            '전문가에게 요청이 성공적으로 전달되었습니다.\n잠시만 기다려주시면 전문가가 연락을 드립니다.',
+            '?꾨Ц媛?먭쾶 ?붿껌???깃났?곸쑝濡??꾨떖?섏뿀?듬땲??\n?좎떆留?湲곕떎?ㅼ＜?쒕㈃ ?꾨Ц媛媛 ?곕씫???쒕┰?덈떎.',
             textAlign: TextAlign.center,
           ),
           actions: [
@@ -763,7 +791,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('확인'),
+                child: const Text('?뺤씤'),
               ),
             ),
           ],
@@ -1128,7 +1156,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     String t(String key) =>
         kStaticUiTripleByMessageKey[key]?[lang] ?? key;
 
-    // 공통 위젯: 면적(m²) 입력
+    // 怨듯넻 ?꾩젽: 硫댁쟻(m짼) ?낅젰
     Widget areaField() => TextField(
           controller: _cleaningAreaController,
           keyboardType: TextInputType.number,
@@ -1138,7 +1166,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         );
 
-    // 공통 위젯: 규모 S/M/L
+    // 怨듯넻 ?꾩젽: 洹쒕え S/M/L
     Widget scaleRow() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1181,7 +1209,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ],
         );
 
-    // 주거형태 선택 위젯
+    // 二쇨굅?뺥깭 ?좏깮 ?꾩젽
     Widget housingTypeRow() {
       final types = [
         ('apartment', t('cleaning_house_apartment')),
@@ -1214,7 +1242,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     }
 
     switch (sub) {
-      // -- 이사/입주 청소 --
+      // -- ?댁궗/?낆＜ 泥?냼 --
       case 'move_in':
         return [
           housingTypeRow(),
@@ -1260,7 +1288,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ]),
         ];
 
-      // -- 주택청소 --
+      // -- 二쇳깮泥?냼 --
       case 'house_cleaning':
         return [
           housingTypeRow(),
@@ -1270,7 +1298,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           scaleRow(),
         ];
 
-      // -- 식당/카페 --
+      // -- ?앸떦/移댄럹 --
       case 'restaurant_cafe':
         return [
           TextField(
@@ -1286,7 +1314,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           scaleRow(),
         ];
 
-      // -- 정기방문 --
+      // -- ?뺢린諛⑸Ц --
       case 'regular_visit':
         return [
           Text(t('cleaning_visit_target'),
@@ -1337,7 +1365,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           areaField(),
         ];
 
-      // -- 침구세척 --
+      // -- 移④뎄?몄쿃 --
       case 'bedding':
         return [
           Text(t('cleaning_bedding_type'),
@@ -1390,7 +1418,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ]),
         ];
 
-      // -- 가전청소 --
+      // -- 媛?꾩껌??--
       case 'appliance':
         return [
           Text(t('cleaning_appliance_type'),
@@ -1444,7 +1472,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ]),
         ];
 
-      // -- 기타 --
+      // -- 湲고? --
       default:
         return [
           TextField(
@@ -1462,54 +1490,247 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   List<Widget> _buildStep2Moving() {
     final sub = _state.step1SubTypeId;
-    if (sub == 'small') {
-      final opts = [
-        ('tuk', context.l10n('wizard_moving_vehicle_tuk')),
-        ('1ton', context.l10n('wizard_moving_vehicle_1ton')),
-        ('pickup', context.l10n('wizard_moving_vehicle_pickup')),
-      ];
-      return [
-        Text(
-          context.l10n('wizard_moving_vehicle_title'),
-          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-        ),
-        const SizedBox(height: 10),
-        for (final o in opts)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _outlineToggleTile(
-              label: o.$2,
-              selected: _movingVehicleType == o.$1,
-              onTap: () => setState(() => _movingVehicleType = _movingVehicleType == o.$1 ? '' : o.$1),
+    final lang = _currentLangCode();
+    String t(String key) =>
+        kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+
+    // 怨듯넻: 痢듭닔 ?좏깮 ?꾩젽
+    Widget floorRow(String labelKey, String current, void Function(String) onSelect) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t(labelKey),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final f in [
+              ('1', t('moving_floor_1')),
+              ('2', t('moving_floor_2')),
+              ('3', t('moving_floor_3')),
+              ('4+', t('moving_floor_4plus')),
+            ])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: f.$2,
+                    selected: current == f.$1,
+                    onTap: () => onSelect(current == f.$1 ? '' : f.$1),
+                  ),
+                ),
+              ),
+          ]),
+        ],
+      );
+    }
+
+    switch (sub) {
+      // -- ?뚰삎 ?댁궗 --
+      case 'small':
+        return [
+          Text(t('moving_vehicle_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('damas', t('moving_vehicle_damas')),
+              ('labo', t('moving_vehicle_labo')),
+              ('truck_1t', t('moving_vehicle_truck_1t')),
+              ('truck_2t', t('moving_vehicle_truck_2t')),
+            ].map((e) {
+              final selected = _movingVehicleType == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(
+                    () => _movingVehicleType = selected ? '' : e.$1),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          floorRow('moving_floor_from', _movingFloorFrom,
+              (v) => setState(() => _movingFloorFrom = v)),
+          const SizedBox(height: 12),
+          floorRow('moving_floor_to', _movingFloorTo,
+              (v) => setState(() => _movingFloorTo = v)),
+          const SizedBox(height: 12),
+          Text(t('moving_elevator'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: _outlineToggleTile(
+                label: t('moving_elevator_yes'),
+                selected: _movingElevator == 'yes',
+                onTap: () => setState(() =>
+                    _movingElevator = _movingElevator == 'yes' ? '' : 'yes'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _outlineToggleTile(
+                label: t('moving_elevator_no'),
+                selected: _movingElevator == 'no',
+                onTap: () => setState(() =>
+                    _movingElevator = _movingElevator == 'no' ? '' : 'no'),
+              ),
+            ),
+          ]),
+        ];
+
+      // -- 媛???댁궗 --
+      case 'home':
+        return [
+          Text(t('moving_house_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('apartment', t('cleaning_house_apartment')),
+              ('villa', t('cleaning_house_villa')),
+              ('detached', t('cleaning_house_detached')),
+              ('officetel', t('cleaning_house_officetel')),
+            ].map((e) {
+              final selected = _movingHouseType == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(
+                    () => _movingHouseType = selected ? '' : e.$1),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(t('moving_room_count'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final n in ['1', '2', '3', '4+'])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _outlineToggleTile(
+                    label: n,
+                    selected: _movingRoomCountController.text == n,
+                    onTap: () => setState(() =>
+                        _movingRoomCountController.text =
+                            _movingRoomCountController.text == n ? '' : n),
+                  ),
+                ),
+              ),
+          ]),
+          const SizedBox(height: 12),
+          floorRow('moving_floor_from', _movingFloorFrom,
+              (v) => setState(() => _movingFloorFrom = v)),
+          const SizedBox(height: 12),
+          floorRow('moving_floor_to', _movingFloorTo,
+              (v) => setState(() => _movingFloorTo = v)),
+          const SizedBox(height: 12),
+          Text(t('moving_elevator'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: _outlineToggleTile(
+                label: t('moving_elevator_yes'),
+                selected: _movingElevator == 'yes',
+                onTap: () => setState(() =>
+                    _movingElevator = _movingElevator == 'yes' ? '' : 'yes'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _outlineToggleTile(
+                label: t('moving_elevator_no'),
+                selected: _movingElevator == 'no',
+                onTap: () => setState(() =>
+                    _movingElevator = _movingElevator == 'no' ? '' : 'no'),
+              ),
+            ),
+          ]),
+        ];
+
+      // -- 吏??대컲 --
+      case 'cargo':
+        return [
+          Text(t('moving_cargo_type'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('furniture', t('moving_cargo_furniture')),
+              ('appliance', t('moving_cargo_appliance')),
+              ('box', t('moving_cargo_box')),
+              ('etc', t('moving_cargo_etc')),
+            ].map((e) {
+              final selected = _movingCargoTypes.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() => selected
+                    ? _movingCargoTypes.remove(e.$1)
+                    : _movingCargoTypes.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _weightKgController,
+            keyboardType: TextInputType.number,
+            decoration: _outlineFieldDecoration(
+              t('moving_weight'),
+              hint: t('moving_weight_hint'),
             ),
           ),
-      ];
-    }
-    if (sub == 'home') {
-      return [
-        TextField(
-          controller: _movingRoomCountController,
-          keyboardType: TextInputType.number,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_moving_room_count_label'),
-            hint: context.l10n('wizard_moving_room_count_hint'),
+          const SizedBox(height: 12),
+          Text(t('moving_distance'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('local', t('moving_distance_local')),
+              ('city', t('moving_distance_city')),
+              ('intercity', t('moving_distance_intercity')),
+            ].map((e) {
+              final selected = _movingDistance == e.$1;
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(
+                    () => _movingDistance = selected ? '' : e.$1),
+              );
+            }).toList(),
           ),
-        ),
-      ];
-    }
-    if (sub == 'cargo') {
-      return [
-        TextField(
-          controller: _weightKgController,
-          keyboardType: TextInputType.number,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_delivery_weight_label'),
-            hint: context.l10n('wizard_moving_cargo_weight_hint'),
+        ];
+
+      // -- 湲고? --
+      default:
+        return [
+          TextField(
+            controller: _step1OtherServiceController,
+            decoration: _outlineFieldDecoration(
+              t('wizard_other_service_label'),
+              hint: t('wizard_other_service_hint'),
+            ),
           ),
-        ),
-      ];
+        ];
     }
-    return [];
   }
 
   List<Widget> _buildStep2RepairV5() {
@@ -2204,7 +2425,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 ? null
                 : () {
                     // ignore: avoid_print
-                    print('[BUTTON] 버튼 클릭됨');
+                    print('[BUTTON] 버튼 클릭');
                     _goNext();
                   },
             style: OutlinedButton.styleFrom(
@@ -2222,3 +2443,4 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     );
   }
 }
+

@@ -713,6 +713,156 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': '3+ units',
     'lo': '3+ ເຄື່ອງ',
   },
+  'moving_vehicle_type': {
+    'ko': '차량 종류',
+    'en': 'Vehicle Type',
+    'lo': 'ປະເພດລົດ',
+  },
+  'moving_vehicle_damas': {
+    'ko': '소형 밴',
+    'en': 'Small Van',
+    'lo': 'ລົດຕູ້ນ້ອຍ',
+  },
+  'moving_vehicle_labo': {
+    'ko': '픽업 트럭',
+    'en': 'Pickup Truck',
+    'lo': 'ລົດກະບະ',
+  },
+  'moving_vehicle_truck_1t': {
+    'ko': '1톤 트럭',
+    'en': '1-Ton Truck',
+    'lo': 'ລົດບັນທຸກ 1 ໂຕນ',
+  },
+  'moving_vehicle_truck_2t': {
+    'ko': '2.5톤 트럭',
+    'en': '2.5-Ton Truck',
+    'lo': 'ລົດບັນທຸກ 2.5 ໂຕນ',
+  },
+  'moving_floor_from': {
+    'ko': '출발 층수',
+    'en': 'From Floor',
+    'lo': 'ຊັ້ນຕົ້ນທາງ',
+  },
+  'moving_floor_to': {
+    'ko': '도착 층수',
+    'en': 'To Floor',
+    'lo': 'ຊັ້ນປາຍທາງ',
+  },
+  'moving_floor_1': {
+    'ko': '1층',
+    'en': '1F',
+    'lo': 'ຊັ້ນ 1',
+  },
+  'moving_floor_2': {
+    'ko': '2층',
+    'en': '2F',
+    'lo': 'ຊັ້ນ 2',
+  },
+  'moving_floor_3': {
+    'ko': '3층',
+    'en': '3F',
+    'lo': 'ຊັ້ນ 3',
+  },
+  'moving_floor_4plus': {
+    'ko': '4층 이상',
+    'en': '4F+',
+    'lo': 'ຊັ້ນ 4+',
+  },
+  'moving_elevator': {
+    'ko': '엘리베이터',
+    'en': 'Elevator',
+    'lo': 'ລິຟ',
+  },
+  'moving_elevator_yes': {
+    'ko': '있음',
+    'en': 'Available',
+    'lo': 'ມີ',
+  },
+  'moving_elevator_no': {
+    'ko': '없음',
+    'en': 'Not Available',
+    'lo': 'ບໍ່ມີ',
+  },
+  'moving_room_count': {
+    'ko': '방 개수',
+    'en': 'Number of Rooms',
+    'lo': 'ຈຳນວນຫ້ອງ',
+  },
+  'moving_house_type': {
+    'ko': '주거 형태',
+    'en': 'Housing Type',
+    'lo': 'ປະເພດທີ່ພັກ',
+  },
+  'moving_cargo_type': {
+    'ko': '짐 종류',
+    'en': 'Cargo Type',
+    'lo': 'ປະເພດສິນຄ້າ',
+  },
+  'moving_cargo_furniture': {
+    'ko': '가구',
+    'en': 'Furniture',
+    'lo': 'ເຟີນິເຈີ',
+  },
+  'moving_cargo_appliance': {
+    'ko': '가전',
+    'en': 'Appliances',
+    'lo': 'ເຄື່ອງໃຊ້ໄຟຟ້າ',
+  },
+  'moving_cargo_box': {
+    'ko': '박스/짐',
+    'en': 'Boxes/Luggage',
+    'lo': 'ກ່ອງ/ເຄື່ອງ',
+  },
+  'moving_cargo_etc': {
+    'ko': '기타',
+    'en': 'Other',
+    'lo': 'ອື່ນໆ',
+  },
+  'moving_weight': {
+    'ko': '무게 (kg)',
+    'en': 'Weight (kg)',
+    'lo': 'ນ້ຳໜັກ (kg)',
+  },
+  'moving_weight_hint': {
+    'ko': '예: 100',
+    'en': 'e.g. 100',
+    'lo': 'ຕົວຢ່າງ: 100',
+  },
+  'moving_distance': {
+    'ko': '이동 거리',
+    'en': 'Moving Distance',
+    'lo': 'ໄລຍະທາງ',
+  },
+  'moving_distance_local': {
+    'ko': '동네 이동',
+    'en': 'Local',
+    'lo': 'ໃນທ້ອງຖິ່ນ',
+  },
+  'moving_distance_city': {
+    'ko': '시내 이동',
+    'en': 'Within City',
+    'lo': 'ໃນເມືອງ',
+  },
+  'moving_distance_intercity': {
+    'ko': '도시 간 이동',
+    'en': 'Between Cities',
+    'lo': 'ລະຫວ່າງເມືອງ',
+  },
+  'login_required_title': {
+    'ko': '로그인이 필요합니다',
+    'en': 'Login Required',
+    'lo': 'ຕ້ອງການເຂົ້າສູ່ລະບົບ',
+  },
+  'login_required_content': {
+    'ko': '서비스를 이용하려면 전화번호로 로그인해 주세요.',
+    'en': 'Please log in with your phone number to use this service.',
+    'lo': 'ກະລຸນາເຂົ້າສູ່ລະບົບດ້ວຍເບີໂທລະສັບເພື່ອໃຊ້ບໍລິການ.',
+  },
+  'login_required_btn': {
+    'ko': '로그인하기',
+    'en': 'Log In',
+    'lo': 'ເຂົ້າສູ່ລະບົບ',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {
@@ -1360,4 +1510,5 @@ class _GeminiNoRetryException implements Exception {
   const _GeminiNoRetryException(this.statusCode);
   final int statusCode;
 }
+
 

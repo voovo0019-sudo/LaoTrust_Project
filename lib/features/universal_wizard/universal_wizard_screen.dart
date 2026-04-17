@@ -237,7 +237,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   bool _canProceedStep2() {
     if (_state.step1SubTypeId == 'other' &&
-        _state.categoryKey != 'expert_moving') {
+        _state.categoryKey != 'expert_moving' &&
+        _state.categoryKey != 'expert_interior') {
       return _step1OtherServiceController.text.trim().isNotEmpty;
     }
     switch (_state.categoryKey) {
@@ -265,11 +266,13 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         }
         return _repairSymptomMemoController.text.trim().isNotEmpty;
       case 'expert_interior':
-        if (_interiorParts.isEmpty) return false;
-        if (_state.step1SubTypeId == 'remodel') {
-          return _interiorBudgetController.text.trim().isNotEmpty;
+        if (_state.step1SubTypeId == 'other') {
+          return _step1OtherServiceController.text.trim().isNotEmpty;
         }
-        return true;
+        return _interiorBudgetController.text.trim().isNotEmpty ||
+            _step2Selections.isNotEmpty ||
+            _interiorParts.isNotEmpty ||
+            _step2OtherController.text.trim().isNotEmpty;
       case 'expert_business':
         return _businessLangs.isNotEmpty && _documentTypeController.text.trim().isNotEmpty;
       case 'expert_beauty':
@@ -348,7 +351,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     final titleStr = [
       context.l10n(config.categoryKey),
       if (_state.step1SubTypeLabel.isNotEmpty) context.l10n(_state.step1SubTypeLabel),
-    ].join(' 쨌 ');
+    ].join(' · ');
 
     final scheduleStr =
         '${_state.preferredDateStr} ${_state.preferredTimeStr} (${_state.scheduleIsUrgent ? context.l10n('wizard_schedule_urgent') : context.l10n('wizard_schedule_normal')})';
@@ -769,15 +772,20 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   /// ?꾨Ц媛 ?좎껌 ?꾨즺 ?앹뾽 (利됱떆 ?몄텧??
   void _showSuccessDialog() {
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('?좎껌 ?꾨즺', textAlign: TextAlign.center),
-          content: const Text(
-            '?꾨Ц媛?먭쾶 ?붿껌???깃났?곸쑝濡??꾨떖?섏뿀?듬땲??\n?좎떆留?湲곕떎?ㅼ＜?쒕㈃ ?꾨Ц媛媛 ?곕씫???쒕┰?덈떎.',
+          title: Text(
+            t('request_success_title'),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            t('request_success_message'),
             textAlign: TextAlign.center,
           ),
           actions: [
@@ -787,17 +795,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 onPressed: () {
                   SearchTriggerBus.trigger();
                   Navigator.of(dialogContext).pop();
-                  if (mounted) {
-                    Navigator.of(context).pop(true);
-                  }
+                  if (mounted) Navigator.of(context).pop(true);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kRoyalBlue,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('?뺤씤'),
+                child: Text(t('confirm')),
               ),
             ),
           ],
@@ -1123,6 +1130,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       return [
         TextField(
           controller: _step1OtherServiceController,
+          onChanged: (_) => setState(() {}),
           decoration: _outlineFieldDecoration(
             context.l10n('wizard_other_service_name_label'),
             hint: context.l10n('wizard_other_service_name_hint'),
@@ -1990,44 +1998,285 @@ List<Widget> _buildStep2RepairV5() {
 }
 
   List<Widget> _buildStep2Interior() {
-    const parts = [
-      'wizard_interior_living',
-      'wizard_interior_bath',
-      'wizard_interior_kitchen',
-      'wizard_interior_balcony',
-    ];
-    return [
-      Text(
-        context.l10n('wizard_interior_parts_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      for (final p in parts)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(p),
-            selected: _interiorParts.contains(p),
-            onTap: () => setState(() {
-              if (_interiorParts.contains(p)) {
-                _interiorParts.remove(p);
-              } else {
-                _interiorParts.add(p);
-              }
-            }),
-          ),
-        ),
-      if (_state.step1SubTypeId == 'remodel') ...[
-        const SizedBox(height: 12),
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    Widget areaField() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t('interior_area_label'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
         TextField(
           controller: _interiorBudgetController,
+          keyboardType: TextInputType.number,
+          onChanged: (_) => setState(() {}),
           decoration: _outlineFieldDecoration(
-            context.l10n('wizard_interior_budget_label'),
-            hint: context.l10n('wizard_interior_budget_hint'),
+            t('interior_area_label'),
+            hint: t('interior_area_hint'),
           ),
         ),
       ],
-    ];
+    );
+
+    Widget otherField() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        Text(t('wizard_other_service_label'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _step2OtherController,
+          onChanged: (_) => setState(() {}),
+          decoration: _outlineFieldDecoration(
+            t('wizard_other_service_label'),
+            hint: t('wizard_other_service_hint'),
+          ),
+          maxLines: 2,
+        ),
+      ],
+    );
+
+    Widget housingTypeRow() {
+      final types = [
+        ('house',      t('interior_housing_house')),
+        ('apartment',  t('interior_housing_apartment')),
+        ('condo',      t('interior_housing_condo')),
+        ('commercial', t('interior_housing_commercial')),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('interior_housing_type'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: types.map((e) {
+              final selected = _interiorParts.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _interiorParts.remove(e.$1) : _interiorParts.add(e.$1)),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    switch (sub) {
+      case 'wallpaper':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_wallpaper_type'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('paper',  t('interior_wallpaper_paper')),
+              ('fabric', t('interior_wallpaper_fabric')),
+              ('paint',  t('interior_wallpaper_paint')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      case 'flooring':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_floor_type'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('tile',   t('interior_floor_tile')),
+              ('wood',   t('interior_floor_wood')),
+              ('marble', t('interior_floor_marble')),
+              ('vinyl',  t('interior_floor_vinyl')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      case 'painting':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_painting_area'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('interior', t('interior_painting_interior')),
+              ('exterior', t('interior_painting_exterior')),
+              ('both',     t('interior_painting_both')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      case 'bathroom':
+        return [
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_bathroom_scope'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('tile',    t('interior_bathroom_tile')),
+              ('toilet',  t('interior_bathroom_toilet')),
+              ('sink',    t('interior_bathroom_sink')),
+              ('shower',  t('interior_bathroom_shower')),
+              ('full',    t('interior_bathroom_full')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      case 'kitchen':
+        return [
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_kitchen_scope'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('cabinet',    t('interior_kitchen_cabinet')),
+              ('countertop', t('interior_kitchen_countertop')),
+              ('sink',       t('interior_kitchen_sink')),
+              ('full',       t('interior_kitchen_full')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      case 'remodel':
+        return [
+          housingTypeRow(),
+          const SizedBox(height: 12),
+          areaField(),
+          const SizedBox(height: 12),
+          Text(t('interior_remodel_scope'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('partial', t('interior_remodel_partial')),
+              ('full',    t('interior_remodel_full')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(t('interior_budget_label'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('budget_s', t('interior_budget_s')),
+              ('budget_m', t('interior_budget_m')),
+              ('budget_l', t('interior_budget_l')),
+            ].map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: e.$2,
+                selected: selected,
+                onTap: () => setState(() =>
+                    selected ? _step2Selections.remove(e.$1) : _step2Selections.add(e.$1)),
+              );
+            }).toList(),
+          ),
+          otherField(),
+        ];
+
+      default:
+        return [
+          TextField(
+            controller: _step1OtherServiceController,
+            onChanged: (_) => setState(() {}),
+            decoration: _outlineFieldDecoration(
+              context.l10n('wizard_other_service_name_label'),
+              hint: context.l10n('wizard_other_service_name_hint'),
+            ),
+            maxLines: 3,
+          ),
+        ];
+    }
   }
 
   List<Widget> _buildStep2Business() {

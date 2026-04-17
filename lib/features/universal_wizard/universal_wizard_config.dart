@@ -95,7 +95,11 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
   'expert_interior': UniversalWizardConfig(
     categoryKey: 'expert_interior',
     step1SubTypes: [
-      MapEntry('partial', 'sub_interior_partial'),
+      MapEntry('wallpaper', 'sub_interior_wallpaper'),
+      MapEntry('flooring', 'sub_interior_flooring'),
+      MapEntry('painting', 'sub_interior_painting'),
+      MapEntry('bathroom', 'sub_interior_bathroom'),
+      MapEntry('kitchen', 'sub_interior_kitchen'),
       MapEntry('remodel', 'sub_interior_remodel'),
       MapEntry('other', 'symptom_other'),
     ],

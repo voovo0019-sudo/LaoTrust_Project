@@ -80,8 +80,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
   'expert_repair': UniversalWizardConfig(
     categoryKey: 'expert_repair',
     step1SubTypes: [
-      MapEntry('ac', 'service_ac'),
-      MapEntry('household', 'service_household'),
+      MapEntry('appliance', 'sub_repair_appliance'),
       MapEntry('electric', 'service_electric'),
       MapEntry('plumbing', 'service_plumbing'),
       MapEntry('roof', 'wizard_repair_sub_roof_paint'),

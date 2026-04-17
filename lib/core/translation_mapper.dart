@@ -863,6 +863,217 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Log In',
     'lo': 'ເຂົ້າສູ່ລະບົບ',
   },
+  'appliance_select_title': {
+    'ko': '어떤 가전제품인가요?',
+    'en': 'Which appliance needs repair?',
+    'lo': 'ເຄື່ອງໃຊ້ໄຟຟ້າຫຍັງ?',
+  },
+  'appliance_select_desc': {
+    'ko': '수리가 필요한 가전을 선택해 주세요',
+    'en': 'Select the appliance that needs repair',
+    'lo': 'ເລືອກເຄື່ອງໃຊ້ໄຟຟ້າທີ່ຕ້ອງການສ້ອມແປງ',
+  },
+  'appliance_ac': {
+    'ko': '에어컨',
+    'en': 'Air Conditioner',
+    'lo': 'ເຄື່ອງປັບອາກາດ',
+  },
+  'appliance_fridge': {
+    'ko': '냉장고',
+    'en': 'Refrigerator',
+    'lo': 'ຕູ້ເຢັນ',
+  },
+  'appliance_washer': {
+    'ko': '세탁기',
+    'en': 'Washing Machine',
+    'lo': 'ເຄື່ອງຊັກຜ້າ',
+  },
+  'appliance_tv': {
+    'ko': 'TV',
+    'en': 'Television',
+    'lo': 'ໂທລະທັດ',
+  },
+  'appliance_water_purifier': {
+    'ko': '정수기',
+    'en': 'Water Purifier',
+    'lo': 'ເຄື່ອງກັ່ນນ້ຳ',
+  },
+  'appliance_fan': {
+    'ko': '선풍기',
+    'en': 'Electric Fan',
+    'lo': 'ພັດລົມ',
+  },
+  'appliance_rice_cooker': {
+    'ko': '전기밥솥',
+    'en': 'Rice Cooker',
+    'lo': 'ໝໍ້ຫຸງເຂົ້າໄຟຟ້າ',
+  },
+  'appliance_generator': {
+    'ko': '발전기',
+    'en': 'Generator',
+    'lo': 'ເຄື່ອງປັ່ນໄຟ',
+  },
+  'appliance_other': {
+    'ko': '기타 가전',
+    'en': 'Other Appliance',
+    'lo': 'ເຄື່ອງໃຊ້ໄຟຟ້າອື່ນ',
+  },
+  'sub_repair_appliance': {'ko': '가전제품 수리', 'en': 'Appliance Repair', 'lo': 'ສ້ອມແປງເຄື່ອງໃຊ້ໄຟຟ້າ'},
+  'request_step1_title': {'ko': '어떤 증상인가요?', 'en': 'What is the symptom?', 'lo': 'ມີອາການຫຍັງ?'},
+  'request_step1_desc': {'ko': '해당하는 증상을 모두 선택해 주세요', 'en': 'Select all symptoms that apply', 'lo': 'ເລືອກອາການທີ່ກົງກັນທັງໝົດ'},
+  'symptom_other': {'ko': '기타', 'en': 'Other', 'lo': 'ອື່ນໆ'},
+  'symptom_ac_no_cold_air': {'ko': '냉방이 안 돼요', 'en': 'No cold air', 'lo': 'ບໍ່ເຢັນ'},
+  'symptom_ac_noise': {'ko': '소음이 심해요', 'en': 'Making noise', 'lo': 'ມີສຽງດັງ'},
+  'symptom_ac_water_sound': {'ko': '물 소리가 나요', 'en': 'Water sound', 'lo': 'ມີສຽງນ້ຳ'},
+  'symptom_ac_not_cool': {'ko': '시원하지 않아요', 'en': 'Not cooling enough', 'lo': 'ບໍ່ເຢັນພໍ'},
+  'service_electric': {'ko': '전기', 'en': 'Electrical', 'lo': 'ໄຟຟ້າ'},
+  'service_plumbing': {'ko': '배관', 'en': 'Plumbing', 'lo': 'ທໍ່ນ້ຳ'},
+  'wizard_repair_sub_roof_paint': {'ko': '페인트 및 지붕 보수', 'en': 'Paint & Roof Repair', 'lo': 'ທາສີ ແລະ ສ້ອມຫຼັງຄາ'},
+  'symptom_fridge_no_cool': {
+    'ko': '냉각이 안 돼요',
+    'en': 'Not cooling',
+    'lo': 'ບໍ່ເຢັນ',
+  },
+  'symptom_fridge_noise': {
+    'ko': '소음이 심해요',
+    'en': 'Making noise',
+    'lo': 'ມີສຽງດັງ',
+  },
+  'symptom_fridge_door': {
+    'ko': '문이 안 닫혀요',
+    'en': 'Door not closing',
+    'lo': 'ປະຕູບໍ່ປິດ',
+  },
+  'symptom_fridge_ice': {
+    'ko': '성에가 심해요',
+    'en': 'Excessive frost',
+    'lo': 'ນ້ຳກ້ອນຫຼາຍ',
+  },
+  'symptom_washer_no_spin': {
+    'ko': '탈수가 안 돼요',
+    'en': 'Not spinning',
+    'lo': 'ບໍ່ປັ່ນ',
+  },
+  'symptom_washer_water_leak': {
+    'ko': '물이 새요',
+    'en': 'Water leaking',
+    'lo': 'ນ້ຳຮົ່ວ',
+  },
+  'symptom_washer_noise': {
+    'ko': '소음이 심해요',
+    'en': 'Making noise',
+    'lo': 'ມີສຽງດັງ',
+  },
+  'symptom_washer_no_power': {
+    'ko': '전원이 안 켜져요',
+    'en': 'No power',
+    'lo': 'ບໍ່ເປີດໄດ້',
+  },
+  'symptom_tv_no_display': {
+    'ko': '화면이 안 나와요',
+    'en': 'No display',
+    'lo': 'ໜ້າຈໍບໍ່ສະແດງ',
+  },
+  'symptom_tv_no_sound': {
+    'ko': '소리가 안 나와요',
+    'en': 'No sound',
+    'lo': 'ບໍ່ມີສຽງ',
+  },
+  'symptom_tv_no_power': {
+    'ko': '전원이 안 켜져요',
+    'en': 'No power',
+    'lo': 'ບໍ່ເປີດໄດ້',
+  },
+  'symptom_tv_remote': {
+    'ko': '리모컨이 안 돼요',
+    'en': 'Remote not working',
+    'lo': 'ລີໂມດບໍ່ເຮັດວຽກ',
+  },
+  'symptom_wp_water_leak': {
+    'ko': '물이 새요',
+    'en': 'Water leaking',
+    'lo': 'ນ້ຳຮົ່ວ',
+  },
+  'symptom_wp_no_cold': {
+    'ko': '냉수가 안 나와요',
+    'en': 'No cold water',
+    'lo': 'ນ້ຳເຢັນບໍ່ອອກ',
+  },
+  'symptom_wp_no_hot': {
+    'ko': '온수가 안 나와요',
+    'en': 'No hot water',
+    'lo': 'ນ້ຳຮ້ອນບໍ່ອອກ',
+  },
+  'symptom_wp_filter': {
+    'ko': '필터 교체 필요해요',
+    'en': 'Filter replacement needed',
+    'lo': 'ຕ້ອງການປ່ຽນຕົວກອງ',
+  },
+  'symptom_fan_no_spin': {
+    'ko': '날개가 안 돌아요',
+    'en': 'Fan not spinning',
+    'lo': 'ໃບພັດບໍ່ໝຸນ',
+  },
+  'symptom_fan_noise': {
+    'ko': '소음이 심해요',
+    'en': 'Making noise',
+    'lo': 'ມີສຽງດັງ',
+  },
+  'symptom_fan_no_power': {
+    'ko': '전원이 안 켜져요',
+    'en': 'No power',
+    'lo': 'ບໍ່ເປີດໄດ້',
+  },
+  'symptom_rc_no_cook': {
+    'ko': '밥이 안 지어져요',
+    'en': 'Not cooking rice',
+    'lo': 'ຫຸງເຂົ້າບໍ່ໄດ້',
+  },
+  'symptom_rc_no_heat': {
+    'ko': '가열이 안 돼요',
+    'en': 'Not heating',
+    'lo': 'ບໍ່ຮ້ອນ',
+  },
+  'symptom_rc_no_power': {
+    'ko': '전원이 안 켜져요',
+    'en': 'No power',
+    'lo': 'ບໍ່ເປີດໄດ້',
+  },
+  'symptom_gen_no_start': {
+    'ko': '시동이 안 걸려요',
+    'en': "Won't start",
+    'lo': 'ບໍ່ຕິດເຄື່ອງ',
+  },
+  'symptom_gen_no_power': {
+    'ko': '전기가 안 나와요',
+    'en': 'No power output',
+    'lo': 'ໄຟຟ້າບໍ່ອອກ',
+  },
+  'symptom_gen_noise': {
+    'ko': '소음이 심해요',
+    'en': 'Making noise',
+    'lo': 'ມີສຽງດັງ',
+  },
+  'symptom_gen_fuel_leak': {
+    'ko': '연료가 새요',
+    'en': 'Fuel leaking',
+    'lo': 'ນໍ້າມັນຮົ່ວ',
+  },
+  'symptom_other_broken': {
+    'ko': '작동이 안 돼요',
+    'en': 'Not working',
+    'lo': 'ບໍ່ເຮັດວຽກ',
+  },
+  'symptom_other_noise': {
+    'ko': '소음이 심해요',
+    'en': 'Making noise',
+    'lo': 'ມີສຽງດັງ',
+  },
+  'symptom_other_no_power': {
+    'ko': '전원이 안 켜져요',
+    'en': 'No power',
+    'lo': 'ບໍ່ເປີດໄດ້',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

@@ -80,6 +80,7 @@ class _RequestFlowScreenState extends State<RequestFlowScreen> {
     await saveRequestOfflineFirst(
       category: _state.category,
       payload: {
+        'appliance': _state.selectedApplianceId,
         'symptoms': _state.selectedSymptomIds,
         'location': _state.location,
         'wishedTime': _state.wishedTime,

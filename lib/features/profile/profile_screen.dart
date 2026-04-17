@@ -474,6 +474,30 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
                 value: '+82',
                 child: Text(context.l10n('phone_auth_country_korea')),
               ),
+              DropdownMenuItem(
+                value: '+1',
+                child: Text(context.l10n('phone_auth_country_usa')),
+              ),
+              DropdownMenuItem(
+                value: '+66',
+                child: Text(context.l10n('phone_auth_country_thailand')),
+              ),
+              DropdownMenuItem(
+                value: '+84',
+                child: Text(context.l10n('phone_auth_country_vietnam')),
+              ),
+              DropdownMenuItem(
+                value: '+86',
+                child: Text(context.l10n('phone_auth_country_china')),
+              ),
+              DropdownMenuItem(
+                value: '+81',
+                child: Text(context.l10n('phone_auth_country_japan')),
+              ),
+              DropdownMenuItem(
+                value: '+44',
+                child: Text(context.l10n('phone_auth_country_uk')),
+              ),
             ],
             onChanged: (v) {
               if (v == null) return;

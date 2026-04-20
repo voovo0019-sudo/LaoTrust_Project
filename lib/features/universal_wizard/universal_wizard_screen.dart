@@ -274,19 +274,36 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             _interiorParts.isNotEmpty ||
             _step2OtherController.text.trim().isNotEmpty;
       case 'expert_business':
-        return _businessLangs.isNotEmpty && _documentTypeController.text.trim().isNotEmpty;
+        final sub = _state.step1SubTypeId;
+        if (sub == 'translate_docs' || sub == 'legal_doc') {
+          // 번역문서·법률문서는 언어 + 문서종류 둘 다 필요
+          return _businessLangs.isNotEmpty &&
+              _documentTypeController.text.trim().isNotEmpty;
+        }
+        if (sub == 'visa_permit' || sub == 'company_setup' || sub == 'accounting') {
+          // 비자/사업자/회계는 언어만 선택해도 진행 가능
+          return _businessLangs.isNotEmpty;
+        }
+        // 통역·기타는 언어만 선택하면 진행
+        return _businessLangs.isNotEmpty;
       case 'expert_beauty':
-        final kindOk = _step2Selections.isNotEmpty || _step2OtherSelected;
-        if (!kindOk) return false;
-        if (_step2OtherSelected && _step2OtherController.text.trim().isEmpty) return false;
         return _beautyPeopleController.text.trim().isNotEmpty;
       case 'expert_tutoring':
-        return _tutoringLevels.isNotEmpty;
+        return _tutoringLevels.isNotEmpty || _tutorGoalController.text.trim().isNotEmpty;
       case 'expert_events':
-        return _eventPeopleController.text.trim().isNotEmpty;
+        return _eventPeopleController.text.trim().isNotEmpty ||
+            _step2OtherController.text.trim().isNotEmpty;
       case 'expert_vehicle':
-        return _vehicleBrandController.text.trim().isNotEmpty &&
-            (_vehicleSymptoms.isNotEmpty || _step2OtherSelected);
+        final sub = _state.step1SubTypeId;
+        if (sub == 'car_repair' || sub == 'moto_repair') {
+          return _vehicleBrandController.text.trim().isNotEmpty ||
+              _vehicleSymptoms.isNotEmpty;
+        }
+        if (sub == 'car_rental' || sub == 'moto_rental') {
+          return _vehicleSymptoms.isNotEmpty || _step2Selections.isNotEmpty;
+        }
+        return _vehicleBrandController.text.trim().isNotEmpty ||
+            _repairSymptomMemoController.text.trim().isNotEmpty;
       default:
         return _step2Selections.isNotEmpty || _step2OtherSelected;
     }
@@ -430,30 +447,40 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return {
           'languages': _businessLangs.toList(),
           'documentKind': _documentTypeController.text.trim(),
-          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+          'selections': _step2Selections.toList(),
+          if (_step2OtherSelected)
+            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_beauty':
         return {
           'kinds': _step2Selections.toList(),
           'people': _beautyPeopleController.text.trim(),
-          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+          if (_step2OtherController.text.trim().isNotEmpty)
+            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_tutoring':
         return {
           'subject': _state.step1SubTypeId,
           'levels': _tutoringLevels.toList(),
+          'classType': _step2Selections.toList(),
           'goal': _tutorGoalController.text.trim(),
-          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
+          if (_step2OtherSelected)
+            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_events':
         return {
           'eventKind': _state.step1SubTypeId,
           'expectedPeople': _eventPeopleController.text.trim(),
+          'selections': _step2Selections.toList(),
+          if (_step2OtherController.text.trim().isNotEmpty)
+            'eventDetail': _step2OtherController.text.trim(),
         };
       case 'expert_vehicle':
         return {
           'brandOrModel': _vehicleBrandController.text.trim(),
           'symptoms': _vehicleSymptoms.toList(),
+          'rentalOptions': _step2Selections.toList(),
+          'symptomDetail': _repairSymptomMemoController.text.trim(),
           if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
         };
       default:
@@ -471,34 +498,159 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     return 'en';
   }
 
-  String _tripleUiText(String key, {required String fallback}) {
-    final lang = _currentLangCode();
-    return kStaticUiTripleByMessageKey[key]?[lang] ?? fallback;
-  }
-
   String _depth2DisplayLine(String key, dynamic value) {
+    final lang = _currentLangCode();
+    String t(String k) => kStaticUiTripleByMessageKey[k]?[lang] ?? k;
+
+    // 빈값 필터링
+    if (value == null) return '';
     final rawValue = value is List
-        ? value.map((e) => '$e').where((e) => e.trim().isNotEmpty).join(', ')
-        : '$value';
-    final trimmedValue = rawValue.trim();
+        ? value.map((e) {
+            final s = '$e'.trim();
+            return kStaticUiTripleByMessageKey[s]?[lang] ?? s;
+          }).where((e) => e.isNotEmpty).join(', ')
+        : '$value'.trim();
+    if (rawValue.isEmpty) return '';
 
     switch (key) {
+      // ── 공통 ──────────────────────────────────
       case 'areaOrSize':
-        return '${_tripleUiText('area_or_size', fallback: '硫댁쟻 / ?ш린')}: $trimmedValue';
+        return '${t('area_or_size')}: $rawValue';
       case 'scale':
-        final normalized = trimmedValue.toUpperCase();
-        if (normalized == 'S') {
-          return _tripleUiText('scale_small', fallback: '?뚰삎 (S)');
-        }
-        if (normalized == 'M') {
-          return _tripleUiText('scale_medium', fallback: '以묓삎 (M)');
-        }
-        if (normalized == 'L') {
-          return _tripleUiText('scale_large', fallback: '???(L)');
-        }
-        return trimmedValue;
+        final n = rawValue.toUpperCase();
+        if (n == 'S') return t('scale_small');
+        if (n == 'M') return t('scale_medium');
+        if (n == 'L') return t('scale_large');
+        return rawValue;
+      case 'houseType':
+        return '${t('cleaning_house_type')}: ${t('cleaning_house_$rawValue')}';
+      case 'roomCount':
+        return '${t('cleaning_room_count')}: $rawValue';
+      case 'bathroomCount':
+        return '${t('cleaning_bathroom_count')}: $rawValue';
+      case 'otherNote':
+        return '${t('wizard_other_service_label')}: $rawValue';
+      case 'customService':
+        return '${t('wizard_other_service_label')}: $rawValue';
+
+      // ── 청소 ──────────────────────────────────
+      case 'industry':
+        return '${t('wizard_cleaning_restaurant_label')}: $rawValue';
+      case 'target':
+        return '${t('cleaning_visit_target')}: $rawValue';
+      case 'visitCycle':
+        return '${t('cleaning_visit_cycle')}: $rawValue';
+      case 'beddingType':
+        return '${t('cleaning_bedding_type')}: $rawValue';
+      case 'beddingCount':
+        return '${t('cleaning_appliance_count')}: $rawValue';
+      case 'applianceTypes':
+        return '${t('cleaning_appliance_type')}: $rawValue';
+      case 'applianceCount':
+        return '${t('cleaning_appliance_count')}: $rawValue';
+
+      // ── 이사 ──────────────────────────────────
+      case 'vehicleType':
+        return '${t('moving_vehicle_type')}: $rawValue';
+      case 'floorFrom':
+        return '${t('moving_floor_from')}: $rawValue';
+      case 'floorTo':
+        return '${t('moving_floor_to')}: $rawValue';
+      case 'elevator':
+        return '${t('moving_elevator')}: $rawValue';
+      case 'cargoTypes':
+        return '${t('moving_cargo_type')}: $rawValue';
+      case 'weightKg':
+        return '${t('moving_weight')}: $rawValue kg';
+      case 'distance':
+        return '${t('moving_distance')}: $rawValue';
+      case 'fromLandmark':
+        return '${t('moving_floor_from')}: $rawValue';
+      case 'toLandmark':
+        return '${t('moving_floor_to')}: $rawValue';
+
+      // ── 가전수리 ───────────────────────────────
+      case 'brand':
+        final brandLabel = kStaticUiTripleByMessageKey['appliance_$rawValue']?[lang];
+        return '${t('appliance_select_title')}: ${brandLabel ?? rawValue}';
+      case 'symptomDetail':
+        if (rawValue.isEmpty) return '';
+        final memoLabel = _state.categoryKey == 'expert_vehicle'
+            ? 'vehicle_symptom_memo_label'
+            : 'wizard_repair_symptom_memo_label';
+        return '${t(memoLabel)}: $rawValue';
+
+      // ── 인테리어 ───────────────────────────────
+      case 'parts':
+        return '${t('interior_housing_type')}: $rawValue';
+      case 'budgetRange':
+        return '${t('interior_budget_label')}: $rawValue';
+
+      // ── 비즈니스·번역 ──────────────────────────
+      case 'languages':
+        return '${t('wizard_business_lang_title')}: $rawValue';
+      case 'documentKind':
+        return '${t('wizard_business_doc_type_label')}: $rawValue';
+      case 'selections':
+        if (rawValue.isEmpty) return '';
+        final lang = _currentLangCode();
+        String t(String k) => kStaticUiTripleByMessageKey[k]?[lang] ?? k;
+        return '${t('wizard_step2_title')}: $rawValue';
+
+      // ── 미용 ───────────────────────────────────
+      case 'kinds':
+        if (rawValue.isEmpty) return '';
+        return '${t('beauty_visit_type_title')}: $rawValue';
+      case 'people':
+        return '${t('wizard_beauty_people_label')}: $rawValue';
+
+      // ── 과외·레슨 ──────────────────────────────
+      case 'subject':
+        if (rawValue.isEmpty) return '';
+        final subjectKey = 'sub_tutor_$rawValue';
+        final subjectLabel = kStaticUiTripleByMessageKey[subjectKey]?[lang]
+            ?? kStaticUiTripleByMessageKey[rawValue]?[lang];
+        return subjectLabel != null
+            ? '${t('wizard_tutoring_subject_from_step1')}: $subjectLabel'
+            : '';
+      case 'classType':
+        if (rawValue.isEmpty) return '';
+        return '${t('tutor_class_type_title')}: $rawValue';
+      case 'levels':
+        if (rawValue.isEmpty) return '';
+        return '${t('wizard_tutoring_level_title')}: $rawValue';
+      case 'goal':
+        if (rawValue.isEmpty) return '';
+        return '${t('wizard_learning_goal_label')}: $rawValue';
+
+      // ── 이벤트 ────────────────────────────────
+      case 'eventKind':
+        if (rawValue.isEmpty) return '';
+        final eventLabel = kStaticUiTripleByMessageKey['sub_events_$rawValue']?[lang]
+            ?? kStaticUiTripleByMessageKey[rawValue]?[lang];
+        return eventLabel != null
+            ? '${t('wizard_events_kind_from_step1')}: $eventLabel'
+            : '';
+      case 'expectedPeople':
+        if (rawValue.isEmpty) return '';
+        return '${t('wizard_event_people_label')}: $rawValue';
+      case 'eventDetail':
+        if (rawValue.isEmpty) return '';
+        return '${t('events_detail_label')}: $rawValue';
+
+      // ── 자동차 ────────────────────────────────
+      case 'brandOrModel':
+        if (rawValue.isEmpty) return '';
+        return '${t('wizard_vehicle_brand_label')}: $rawValue';
+      case 'symptoms':
+        if (rawValue.isEmpty) return '';
+        return '${t('wizard_vehicle_symptom_title')}: $rawValue';
+      case 'rentalOptions':
+        if (rawValue.isEmpty) return '';
+        return '${t('vehicle_rental_duration_title')}: $rawValue';
+
       default:
-        return '$key: $trimmedValue';
+        return rawValue.isNotEmpty ? rawValue : '';
     }
   }
 
@@ -2280,247 +2432,961 @@ List<Widget> _buildStep2RepairV5() {
   }
 
   List<Widget> _buildStep2Business() {
-    const langs = [
-      'lang_ko',
-      'lang_lo',
-      'lang_en',
-      'wizard_lang_zh',
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    const langOptions = [
+      ('lang_ko', 'lang_ko'),
+      ('lang_lo', 'lang_lo'),
+      ('lang_en', 'lang_en'),
+      ('lang_zh', 'wizard_lang_zh'),
+      ('lang_th', 'wizard_lang_th'),
     ];
-    return [
-      Text(
-        context.l10n('wizard_business_lang_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      for (final k in langs)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(k),
-            selected: _businessLangs.contains(k),
-            onTap: () => setState(() {
-              if (_businessLangs.contains(k)) {
-                _businessLangs.remove(k);
-              } else {
-                _businessLangs.add(k);
-              }
-            }),
+
+    Widget langSection() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          t('wizard_business_lang_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+        ),
+        const SizedBox(height: 10),
+        for (final k in langOptions)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _outlineToggleTile(
+              label: context.l10n(k.$2),
+              selected: _businessLangs.contains(k.$1),
+              onTap: () => setState(() {
+                if (_businessLangs.contains(k.$1)) {
+                  _businessLangs.remove(k.$1);
+                } else {
+                  _businessLangs.add(k.$1);
+                }
+              }),
+            ),
+          ),
+      ],
+    );
+
+    // 번역문서 / 법률문서 → 언어 + 문서종류
+    if (sub == 'translate_docs' || sub == 'legal_doc') {
+      return [
+        langSection(),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _documentTypeController,
+          onChanged: (_) => setState(() {}),
+          decoration: _outlineFieldDecoration(
+            t('wizard_business_doc_type_label'),
+            hint: t('wizard_business_doc_type_hint'),
           ),
         ),
-      const SizedBox(height: 12),
+      ];
+    }
+
+    // 통역 → 언어 + 통역 분야 선택
+    if (sub == 'interpret') {
+      const interpretFields = [
+        'wizard_interpret_field_business',
+        'wizard_interpret_field_medical',
+        'wizard_interpret_field_legal',
+        'wizard_interpret_field_event',
+        'wizard_interpret_field_daily',
+      ];
+      return [
+        langSection(),
+        const SizedBox(height: 16),
+        Text(
+          t('wizard_interpret_field_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+        ),
+        const SizedBox(height: 10),
+        for (final f in interpretFields)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _outlineToggleTile(
+              label: t(f),
+              selected: _step2Selections.contains(f),
+              onTap: () => setState(() {
+                if (_step2Selections.contains(f)) {
+                  _step2Selections.remove(f);
+                } else {
+                  _step2Selections.add(f);
+                }
+              }),
+            ),
+          ),
+      ];
+    }
+
+    // 비자/허가증 → 언어 + 비자 종류
+    if (sub == 'visa_permit') {
+      const visaTypes = [
+        'wizard_visa_type_business',
+        'wizard_visa_type_work',
+        'wizard_visa_type_tourist',
+        'wizard_visa_type_extend',
+        'wizard_visa_type_ngo',
+      ];
+      return [
+        langSection(),
+        const SizedBox(height: 16),
+        Text(
+          t('wizard_visa_type_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
+        ),
+        const SizedBox(height: 10),
+        for (final v in visaTypes)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _outlineToggleTile(
+              label: t(v),
+              selected: _step2Selections.contains(v),
+              onTap: () => setState(() {
+                if (_step2Selections.contains(v)) {
+                  _step2Selections.remove(v);
+                } else {
+                  _step2Selections.add(v);
+                }
+              }),
+            ),
+          ),
+      ];
+    }
+
+    // 사업자등록 / 회계·세무 / 기타 → 언어 + 메모
+    return [
+      langSection(),
+      const SizedBox(height: 16),
       TextField(
         controller: _documentTypeController,
+        onChanged: (_) => setState(() {}),
         decoration: _outlineFieldDecoration(
-          context.l10n('wizard_business_doc_type_label'),
-          hint: context.l10n('wizard_business_doc_type_hint'),
+          t('wizard_business_detail_label'),
+          hint: t('wizard_business_detail_hint'),
         ),
+        maxLines: 3,
       ),
     ];
   }
 
   List<Widget> _buildStep2BeautyV5() {
-    const options = [
-      'wizard_beauty_massage',
-      'wizard_beauty_option_nail',
-      'wizard_beauty_option_cut',
-      'wizard_beauty_option_care',
-      'wizard_beauty_option_makeup',
-    ];
-    return [
-      for (final o in options)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(o),
-            selected: _step2Selections.contains(o),
-            onTap: () => setState(() {
-              if (_step2Selections.contains(o)) {
-                _step2Selections.remove(o);
-              } else {
-                _step2Selections.add(o);
-              }
-            }),
-          ),
-        ),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    // 공통: 인원수 입력
+    Widget peopleField() => TextField(
+      controller: _beautyPeopleController,
+      keyboardType: TextInputType.number,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('wizard_beauty_people_label'),
+        hint: t('wizard_beauty_people_hint'),
       ),
-      if (_step2OtherSelected) ...[
-        const SizedBox(height: 10),
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_beauty_other_hint'),
+    );
+
+    // 마사지 공통: 시간 선택
+    Widget massageDurationRow() {
+      const durations = [
+        ('60min', 'beauty_duration_60'),
+        ('90min', 'beauty_duration_90'),
+        ('120min', 'beauty_duration_120'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('beauty_duration_title'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: durations.map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: t(e.$2),
+                selected: selected,
+                onTap: () => setState(() {
+                  if (selected) {
+                    _step2Selections.remove(e.$1);
+                  } else {
+                    _step2Selections.add(e.$1);
+                  }
+                }),
+              );
+            }).toList(),
           ),
-          maxLines: 2,
+        ],
+      );
+    }
+
+    // 방문/샵 선택
+    Widget visitTypeRow() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('beauty_visit_type_title'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: _outlineToggleTile(
+              label: t('beauty_visit_home'),
+              selected: _step2Selections.contains('visit_home'),
+              onTap: () => setState(() {
+                _step2Selections.remove('visit_shop');
+                if (_step2Selections.contains('visit_home')) {
+                  _step2Selections.remove('visit_home');
+                } else {
+                  _step2Selections.add('visit_home');
+                }
+              }),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: _outlineToggleTile(
+              label: t('beauty_visit_shop'),
+              selected: _step2Selections.contains('visit_shop'),
+              onTap: () => setState(() {
+                _step2Selections.remove('visit_home');
+                if (_step2Selections.contains('visit_shop')) {
+                  _step2Selections.remove('visit_shop');
+                } else {
+                  _step2Selections.add('visit_shop');
+                }
+              }),
+            )),
+          ]),
+        ],
+      );
+    }
+
+    // 전통 마사지
+    if (sub == 'massage_traditional') {
+      return [
+        massageDurationRow(),
+        const SizedBox(height: 16),
+        visitTypeRow(),
+        const SizedBox(height: 16),
+        peopleField(),
+      ];
+    }
+
+    // 아로마/스파 마사지
+    if (sub == 'massage_aroma') {
+      const aromaTypes = [
+        ('swedish', 'beauty_aroma_swedish'),
+        ('deep_tissue', 'beauty_aroma_deep_tissue'),
+        ('hot_stone', 'beauty_aroma_hot_stone'),
+        ('foot', 'beauty_aroma_foot'),
+      ];
+      return [
+        Text(t('beauty_aroma_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: aromaTypes.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
         ),
-      ],
-      const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        massageDurationRow(),
+        const SizedBox(height: 16),
+        visitTypeRow(),
+        const SizedBox(height: 16),
+        peopleField(),
+      ];
+    }
+
+    // 네일
+    if (sub == 'nail') {
+      const nailTypes = [
+        ('gel', 'beauty_nail_gel'),
+        ('acrylic', 'beauty_nail_acrylic'),
+        ('art', 'beauty_nail_art'),
+        ('removal', 'beauty_nail_removal'),
+      ];
+      return [
+        Text(t('beauty_nail_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: nailTypes.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        visitTypeRow(),
+        const SizedBox(height: 16),
+        peopleField(),
+      ];
+    }
+
+    // 헤어
+    if (sub == 'hair') {
+      const hairTypes = [
+        ('cut', 'beauty_hair_cut'),
+        ('perm', 'beauty_hair_perm'),
+        ('color', 'beauty_hair_color'),
+        ('treatment', 'beauty_hair_treatment'),
+        ('styling', 'beauty_hair_styling'),
+      ];
+      return [
+        Text(t('beauty_hair_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: hairTypes.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        visitTypeRow(),
+        const SizedBox(height: 16),
+        peopleField(),
+      ];
+    }
+
+    // 메이크업
+    if (sub == 'makeup') {
+      const makeupTypes = [
+        ('wedding', 'beauty_makeup_wedding'),
+        ('event', 'beauty_makeup_event'),
+        ('daily', 'beauty_makeup_daily'),
+        ('photo', 'beauty_makeup_photo'),
+      ];
+      return [
+        Text(t('beauty_makeup_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: makeupTypes.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        visitTypeRow(),
+        const SizedBox(height: 16),
+        peopleField(),
+      ];
+    }
+
+    // 왁싱 / 피부관리 / 기타
+    return [
+      visitTypeRow(),
+      const SizedBox(height: 16),
+      peopleField(),
+      const SizedBox(height: 16),
       TextField(
-        controller: _beautyPeopleController,
-        keyboardType: TextInputType.number,
+        controller: _step2OtherController,
+        onChanged: (_) => setState(() {}),
         decoration: _outlineFieldDecoration(
-          context.l10n('wizard_beauty_people_label'),
-          hint: context.l10n('wizard_beauty_people_hint'),
+          t('wizard_other_service_label'),
+          hint: t('wizard_beauty_other_hint'),
         ),
+        maxLines: 2,
       ),
     ];
   }
 
   List<Widget> _buildStep2TutoringV5() {
-    const levels = [
-      'wizard_level_elem',
-      'wizard_level_mid',
-      'wizard_level_high',
-      'wizard_level_adult',
-    ];
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    // 공통: 학습 목표 입력
+    Widget goalField() => TextField(
+      controller: _tutorGoalController,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('wizard_learning_goal_label'),
+        hint: t('wizard_learning_goal_hint'),
+      ),
+      maxLines: 2,
+    );
+
+    // 공통: 수업 방식 (온라인/방문/센터)
+    Widget classTypeRow() {
+      const types = [
+        ('online', 'tutor_class_online'),
+        ('visit', 'tutor_class_visit'),
+        ('center', 'tutor_class_center'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('tutor_class_type_title'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: types.map((e) {
+              final selected = _step2Selections.contains(e.$1);
+              return _outlineToggleTile(
+                label: t(e.$2),
+                selected: selected,
+                onTap: () => setState(() {
+                  if (selected) {
+                    _step2Selections.remove(e.$1);
+                  } else {
+                    _step2Selections.add(e.$1);
+                  }
+                }),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    // 공통: 레벨 선택 (언어/수학 등 학습 과목용)
+    Widget levelRow() {
+      const levels = [
+        ('elem', 'wizard_level_elem'),
+        ('mid', 'wizard_level_mid'),
+        ('high', 'wizard_level_high'),
+        ('adult', 'wizard_level_adult'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('wizard_tutoring_level_title'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: levels.map((e) {
+              final selected = _tutoringLevels.contains(e.$1);
+              return _outlineToggleTile(
+                label: t(e.$2),
+                selected: selected,
+                onTap: () => setState(() {
+                  if (selected) {
+                    _tutoringLevels.remove(e.$1);
+                  } else {
+                    _tutoringLevels.add(e.$1);
+                  }
+                }),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    // 공통: 경험 수준 (악기/무술/요리 등 실기 과목용)
+    Widget experienceRow() {
+      const levels = [
+        ('beginner', 'tutor_exp_beginner'),
+        ('intermediate', 'tutor_exp_intermediate'),
+        ('advanced', 'tutor_exp_advanced'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t('tutor_exp_title'),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: levels.map((e) {
+              final selected = _tutoringLevels.contains(e.$1);
+              return _outlineToggleTile(
+                label: t(e.$2),
+                selected: selected,
+                onTap: () => setState(() {
+                  if (selected) {
+                    _tutoringLevels.remove(e.$1);
+                  } else {
+                    _tutoringLevels.add(e.$1);
+                  }
+                }),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    // 언어 과외 (영어/한국어/라오어/중국어)
+    if (sub == 'lang_en' || sub == 'lang_ko' ||
+        sub == 'lang_lo' || sub == 'lang_zh') {
+      return [
+        levelRow(),
+        const SizedBox(height: 16),
+        classTypeRow(),
+        const SizedBox(height: 16),
+        goalField(),
+      ];
+    }
+
+    // 수학·과학
+    if (sub == 'math_science') {
+      return [
+        levelRow(),
+        const SizedBox(height: 16),
+        classTypeRow(),
+        const SizedBox(height: 16),
+        goalField(),
+      ];
+    }
+
+    // 음악/무술/요리/컴퓨터/미술 → 경험 수준
+    if (sub == 'music' || sub == 'martial_arts' ||
+        sub == 'cooking' || sub == 'computer' || sub == 'art') {
+      return [
+        experienceRow(),
+        const SizedBox(height: 16),
+        classTypeRow(),
+        const SizedBox(height: 16),
+        goalField(),
+      ];
+    }
+
+    // 기타
     return [
-      Text(
-        context.l10n('wizard_tutoring_subject_from_step1'),
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
-      ),
-      const SizedBox(height: 6),
-      if (_state.step1SubTypeLabel.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Text(
-            context.l10n(_state.step1SubTypeLabel),
-            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-          ),
-        ),
-      Text(
-        context.l10n('wizard_tutoring_level_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      for (final l in levels)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(l),
-            selected: _tutoringLevels.contains(l),
-            onTap: () => setState(() {
-              if (_tutoringLevels.contains(l)) {
-                _tutoringLevels.remove(l);
-              } else {
-                _tutoringLevels.add(l);
-              }
-            }),
-          ),
-        ),
-      const SizedBox(height: 12),
-      TextField(
-        controller: _tutorGoalController,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_learning_goal_label'),
-          hint: context.l10n('wizard_learning_goal_hint'),
-        ),
-        maxLines: 2,
-      ),
-      const SizedBox(height: 10),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected)
-        TextField(
-          controller: _step2OtherController,
-          decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_tutoring_other_hint'),
-          ),
-          maxLines: 2,
-        ),
+      classTypeRow(),
+      const SizedBox(height: 16),
+      goalField(),
     ];
   }
 
   List<Widget> _buildStep2EventsV5() {
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    // 공통: 예상 인원
+    Widget peopleField() => TextField(
+      controller: _eventPeopleController,
+      keyboardType: TextInputType.number,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('wizard_event_people_label'),
+        hint: t('wizard_event_people_hint'),
+      ),
+    );
+
+    // 공통: 행사 날짜 메모
+    Widget memoField() => TextField(
+      controller: _step2OtherController,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('events_detail_label'),
+        hint: t('events_detail_hint'),
+      ),
+      maxLines: 3,
+    );
+
+    // 사진·촬영 서비스 (웨딩/인물/상업/드론)
+    if (sub == 'wedding_photo' || sub == 'portrait' ||
+        sub == 'commercial' || sub == 'drone') {
+
+      const photoStyles = [
+        ('natural', 'events_photo_natural'),
+        ('studio', 'events_photo_studio'),
+        ('outdoor', 'events_photo_outdoor'),
+        ('indoor', 'events_photo_indoor'),
+      ];
+
+      return [
+        Text(t('events_photo_style_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: photoStyles.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Text(t('events_deliverable_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ('photo_only', 'events_deliverable_photo'),
+            ('video_only', 'events_deliverable_video'),
+            ('both', 'events_deliverable_both'),
+          ].map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        peopleField(),
+        const SizedBox(height: 16),
+        memoField(),
+      ];
+    }
+
+    // 파티/케이터링/MC·DJ
+    if (sub == 'party' || sub == 'catering' || sub == 'mc_dj') {
+      const scales = [
+        ('scale_s', 'events_scale_s'),
+        ('scale_m', 'events_scale_m'),
+        ('scale_l', 'events_scale_l'),
+      ];
+      return [
+        Text(t('events_scale_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: scales.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        peopleField(),
+        const SizedBox(height: 16),
+        memoField(),
+      ];
+    }
+
+    // 기타
     return [
-      Text(
-        context.l10n('wizard_events_kind_from_step1'),
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
-      ),
-      const SizedBox(height: 8),
-      if (_state.step1SubTypeLabel.isNotEmpty)
-        Text(
-          context.l10n(_state.step1SubTypeLabel),
-          style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-        ),
-      const SizedBox(height: 20),
-      TextField(
-        controller: _eventPeopleController,
-        keyboardType: TextInputType.number,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_event_people_label'),
-          hint: context.l10n('wizard_event_people_hint'),
-        ),
-      ),
+      peopleField(),
+      const SizedBox(height: 16),
+      memoField(),
     ];
   }
 
   List<Widget> _buildStep2Vehicle() {
-    const syms = [
-      'wizard_vehicle_sym_engine',
-      'wizard_vehicle_sym_tire',
-      'wizard_vehicle_sym_accident',
-      'wizard_vehicle_sym_electrical',
-    ];
-    return [
-      TextField(
-        controller: _vehicleBrandController,
-        decoration: _outlineFieldDecoration(
-          context.l10n('wizard_vehicle_brand_label'),
-          hint: context.l10n('wizard_vehicle_brand_hint'),
+    final lang = _currentLangCode();
+    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
+    final sub = _state.step1SubTypeId;
+
+    Widget brandField() => TextField(
+      controller: _vehicleBrandController,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('wizard_vehicle_brand_label'),
+        hint: t('wizard_vehicle_brand_hint'),
+      ),
+    );
+
+    Widget symptomMemo() => TextField(
+      controller: _repairSymptomMemoController,
+      onChanged: (_) => setState(() {}),
+      decoration: _outlineFieldDecoration(
+        t('vehicle_symptom_memo_label'),
+        hint: t('vehicle_symptom_memo_hint'),
+      ),
+      maxLines: 3,
+    );
+
+    if (sub == 'car_repair') {
+      const symptoms = [
+        ('engine', 'wizard_vehicle_sym_engine'),
+        ('tire', 'wizard_vehicle_sym_tire'),
+        ('accident', 'wizard_vehicle_sym_accident'),
+        ('electrical', 'wizard_vehicle_sym_electrical'),
+        ('brake', 'vehicle_sym_brake'),
+        ('ac', 'vehicle_sym_ac'),
+        ('other', 'symptom_other'),
+      ];
+      return [
+        brandField(),
+        const SizedBox(height: 16),
+        Text(t('wizard_vehicle_symptom_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: symptoms.map((e) {
+            final selected = _vehicleSymptoms.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _vehicleSymptoms.remove(e.$1);
+                } else {
+                  _vehicleSymptoms.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
         ),
-      ),
-      const SizedBox(height: 16),
-      Text(
-        context.l10n('wizard_vehicle_symptom_title'),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue),
-      ),
-      const SizedBox(height: 10),
-      for (final s in syms)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _outlineToggleTile(
-            label: context.l10n(s),
-            selected: _vehicleSymptoms.contains(s),
-            onTap: () => setState(() {
-              if (_vehicleSymptoms.contains(s)) {
-                _vehicleSymptoms.remove(s);
-              } else {
-                _vehicleSymptoms.add(s);
-              }
-            }),
-          ),
+        const SizedBox(height: 16),
+        symptomMemo(),
+      ];
+    }
+
+    if (sub == 'moto_repair') {
+      const symptoms = [
+        ('engine', 'wizard_vehicle_sym_engine'),
+        ('tire', 'wizard_vehicle_sym_tire'),
+        ('brake', 'vehicle_sym_brake'),
+        ('electrical', 'wizard_vehicle_sym_electrical'),
+        ('chain', 'vehicle_sym_chain'),
+        ('other', 'symptom_other'),
+      ];
+      return [
+        brandField(),
+        const SizedBox(height: 16),
+        Text(t('wizard_vehicle_symptom_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: symptoms.map((e) {
+            final selected = _vehicleSymptoms.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _vehicleSymptoms.remove(e.$1);
+                } else {
+                  _vehicleSymptoms.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
         ),
-      _outlineToggleTile(
-        label: context.l10n('symptom_other'),
-        selected: _step2OtherSelected,
-        onTap: () => setState(() {
-          _step2OtherSelected = !_step2OtherSelected;
-          if (!_step2OtherSelected) _step2OtherController.clear();
-        }),
-      ),
-      if (_step2OtherSelected)
+        const SizedBox(height: 16),
+        symptomMemo(),
+      ];
+    }
+
+    if (sub == 'car_rental') {
+      const carTypes = [
+        ('sedan', 'vehicle_car_sedan'),
+        ('suv', 'vehicle_car_suv'),
+        ('van', 'vehicle_car_van'),
+        ('pickup', 'vehicle_car_pickup'),
+      ];
+      const durations = [
+        ('half_day', 'vehicle_rental_half_day'),
+        ('full_day', 'vehicle_rental_full_day'),
+        ('weekly', 'vehicle_rental_weekly'),
+        ('monthly', 'vehicle_rental_monthly'),
+      ];
+      return [
+        Text(t('vehicle_car_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: carTypes.map((e) {
+            final selected = _vehicleSymptoms.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _vehicleSymptoms.remove(e.$1);
+                } else {
+                  _vehicleSymptoms.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Text(t('vehicle_rental_duration_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: durations.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
         TextField(
-          controller: _step2OtherController,
+          controller: _vehicleBrandController,
+          onChanged: (_) => setState(() {}),
           decoration: _outlineFieldDecoration(
-            context.l10n('wizard_other_direct_input_label'),
-            hint: context.l10n('wizard_vehicle_other_hint'),
+            t('vehicle_rental_brand_label'),
+            hint: t('vehicle_rental_brand_hint'),
           ),
-          maxLines: 2,
         ),
+      ];
+    }
+
+    if (sub == 'moto_rental') {
+      const motoTypes = [
+        ('scooter', 'vehicle_moto_scooter'),
+        ('semi_auto', 'vehicle_moto_semi_auto'),
+        ('manual', 'vehicle_moto_manual'),
+        ('big_bike', 'vehicle_moto_big_bike'),
+      ];
+      const durations = [
+        ('half_day', 'vehicle_rental_half_day'),
+        ('full_day', 'vehicle_rental_full_day'),
+        ('weekly', 'vehicle_rental_weekly'),
+        ('monthly', 'vehicle_rental_monthly'),
+      ];
+      return [
+        Text(t('vehicle_moto_type_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: motoTypes.map((e) {
+            final selected = _vehicleSymptoms.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _vehicleSymptoms.remove(e.$1);
+                } else {
+                  _vehicleSymptoms.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Text(t('vehicle_rental_duration_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: _kRoyalBlue)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: durations.map((e) {
+            final selected = _step2Selections.contains(e.$1);
+            return _outlineToggleTile(
+              label: t(e.$2),
+              selected: selected,
+              onTap: () => setState(() {
+                if (selected) {
+                  _step2Selections.remove(e.$1);
+                } else {
+                  _step2Selections.add(e.$1);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _vehicleBrandController,
+          onChanged: (_) => setState(() {}),
+          decoration: _outlineFieldDecoration(
+            t('vehicle_rental_brand_label'),
+            hint: t('vehicle_moto_rental_brand_hint'),
+          ),
+        ),
+      ];
+    }
+
+    return [
+      brandField(),
+      const SizedBox(height: 16),
+      symptomMemo(),
     ];
   }
 

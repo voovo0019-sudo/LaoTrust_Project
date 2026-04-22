@@ -1153,6 +1153,31 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'vehicle_moto_semi_auto': {'ko': '세미오토', 'en': 'Semi-Auto', 'lo': 'ເຄິ່ງອັດຕະໂນມັດ'},
   'vehicle_moto_manual': {'ko': '수동', 'en': 'Manual', 'lo': 'ມານວນ'},
   'vehicle_moto_big_bike': {'ko': '빅바이크', 'en': 'Big Bike', 'lo': 'ບິກໄບຄ໌'},
+  'vehicle_carwash_type_title': {
+    'ko': '세차 종류',
+    'en': 'Car Wash Type',
+    'lo': 'ປະເພດລ້າງລົດ',
+  },
+  'vehicle_carwash_basic': {
+    'ko': '외부 세차',
+    'en': 'Basic Wash',
+    'lo': 'ລ້າງພາຍນອກ',
+  },
+  'vehicle_carwash_interior': {
+    'ko': '실내 세차',
+    'en': 'Interior Clean',
+    'lo': 'ທຳຄວາມສະອາດພາຍໃນ',
+  },
+  'vehicle_carwash_full': {
+    'ko': '내외부 풀케어',
+    'en': 'Full Care',
+    'lo': 'ດູແລທັງໝົດ',
+  },
+  'vehicle_carwash_coating': {
+    'ko': '코팅/왁싱',
+    'en': 'Coating/Waxing',
+    'lo': 'ເຄືອບ/ແວັກຊິງ',
+  },
   'sedan': {'ko': '세단', 'en': 'Sedan', 'lo': 'ເຊດານ'},
   'suv': {'ko': 'SUV', 'en': 'SUV', 'lo': 'SUV'},
   'van': {'ko': '밴', 'en': 'Van', 'lo': 'ແວນ'},

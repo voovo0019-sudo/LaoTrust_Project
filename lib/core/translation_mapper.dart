@@ -528,6 +528,111 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Select Size (S/M/L)',
     'lo': 'ເລືອກຂະໜາດ (S/M/L)',
   },
+  'wizard_step3_mode_title': {
+    'ko': '서비스 방식을 선택해주세요',
+    'en': 'How would you like the service?',
+    'lo': 'ກະລຸນາເລືອກຮູບແບບບໍລິການ',
+  },
+  'wizard_step3_mode_remote': {
+    'ko': '원격/비대면',
+    'en': 'Remote / Online',
+    'lo': 'ທາງໄກ / ອອນລາຍ',
+  },
+  'wizard_step3_mode_remote_desc': {
+    'ko': '파일 전송·화상·전화로 진행',
+    'en': 'Via file, video call, or phone',
+    'lo': 'ຜ່ານໄຟລ໌, ວິດີໂອ ຫຼື ໂທລະສັບ',
+  },
+  'wizard_step3_mode_visit': {
+    'ko': '전문가 방문',
+    'en': 'Expert Visits You',
+    'lo': 'ຜູ້ຊ່ຽວຊານມາຫາທ່ານ',
+  },
+  'wizard_step3_mode_visit_desc': {
+    'ko': '전문가가 고객님께 직접 방문',
+    'en': 'The expert comes to your location',
+    'lo': 'ຜູ້ຊ່ຽວຊານຈະມາຮອດສະຖານທີ່ຂອງທ່ານ',
+  },
+  'wizard_step3_mode_go_to_shop': {
+    'ko': '샵/정비소 방문',
+    'en': 'Visit Shop / Garage',
+    'lo': 'ໄປຮ້ານ / ອູ່ສ້ອມ',
+  },
+  'wizard_step3_mode_go_to_shop_desc': {
+    'ko': '고객님이 직접 방문',
+    'en': 'You visit the expert\'s location',
+    'lo': 'ທ່ານໄປຮອດສະຖານທີ່ຂອງຜູ້ຊ່ຽວຊານ',
+  },
+  'wizard_step3_location_title': {
+    'ko': '방문 위치 정보',
+    'en': 'Visit Location',
+    'lo': 'ຂໍ້ມູນສະຖານທີ່ເຂົ້າເຖິງ',
+  },
+  'wizard_field_required': {
+    'ko': '필수 항목입니다',
+    'en': 'This field is required',
+    'lo': 'ຕ້ອງການຂໍ້ມູນນີ້',
+  },
+  'wizard_field_select_required': {
+    'ko': '항목을 선택해주세요',
+    'en': 'Please select an option',
+    'lo': 'ກະລຸນາເລືອກລາຍການ',
+  },
+  'wizard_field_date_required': {
+    'ko': '날짜를 선택해주세요',
+    'en': 'Please select a date',
+    'lo': 'ກະລຸນາເລືອກວັນທີ',
+  },
+  'wizard_field_time_required': {
+    'ko': '시간을 선택해주세요',
+    'en': 'Please select a time',
+    'lo': 'ກະລຸນາເລືອກເວລາ',
+  },
+  'wizard_field_service_mode_required': {
+    'ko': '서비스 방식을 선택해주세요',
+    'en': 'Please select a service type',
+    'lo': 'ກະລຸນາເລືອກຮູບແບບບໍລິການ',
+  },
+  'beauty_people_label': {
+    'ko': '인원',
+    'en': 'Number of People',
+    'lo': 'ຈຳນວນຄົນ',
+  },
+  'beauty_people_hint': {
+    'ko': '몇 명인지 입력해주세요',
+    'en': 'Enter number of people',
+    'lo': 'ກະລຸນາໃສ່ຈຳນວນຄົນ',
+  },
+  'events_people_label': {
+    'ko': '예상 인원',
+    'en': 'Expected Attendance',
+    'lo': 'ຈຳນວນຄົນທີ່ຄາດໄວ້',
+  },
+  'events_people_hint': {
+    'ko': '예상 참석 인원을 입력해주세요',
+    'en': 'Enter expected number of attendees',
+    'lo': 'ກະລຸນາໃສ່ຈຳນວນຄົນທີ່ຄາດໄວ້',
+  },
+  'vehicle_brand_label': {
+    'ko': '차량 브랜드/모델',
+    'en': 'Vehicle Brand / Model',
+    'lo': 'ຍີ່ຫໍ້ / ລຸ້ນລົດ',
+  },
+  'vehicle_brand_hint': {
+    'ko': '예: 토요타, BYD, 현대',
+    'en': 'e.g. Toyota, BYD, Hyundai',
+    'lo': 'ຕົວຢ່າງ: Toyota, BYD, Hyundai',
+  },
+  'tutor_goal_label': {
+    'ko': '학습 목표',
+    'en': 'Learning Goal',
+    'lo': 'ເປົ້າໝາຍການຮຽນ',
+  },
+  'tutor_goal_hint': {
+    'ko': '원하시는 학습 목표를 입력해주세요',
+    'en': 'Enter your learning goal',
+    'lo': 'ກະລຸນາໃສ່ເປົ້າໝາຍການຮຽນ',
+  },
   'cleaning_size_s': {
     'ko': 'S (30㎡ 이하)',
     'en': 'S (under 30㎡)',
@@ -1053,7 +1158,6 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'beauty_makeup_event': {'ko': '행사 메이크업', 'en': 'Event Makeup', 'lo': 'ແຕ່ງໜ້າງານກິດຈະກຳ'},
   'beauty_makeup_daily': {'ko': '데일리 메이크업', 'en': 'Daily Makeup', 'lo': 'ແຕ່ງໜ້າປະຈຳວັນ'},
   'beauty_makeup_photo': {'ko': '사진 촬영용', 'en': 'Photo Shoot', 'lo': 'ແຕ່ງໜ້າຖ່າຍຮູບ'},
-  'wizard_beauty_people_label': {'ko': '인원', 'en': 'Number of People', 'lo': 'ຈຳນວນຄົນ'},
   'wizard_beauty_people_hint': {'ko': '몇 명인지 입력해주세요', 'en': 'Please enter the number of people', 'lo': 'ກະລຸນາໃສ່ຈຳນວນຄົນ'},
   '60min': {'ko': '60분', 'en': '60 min', 'lo': '60 ນາທີ'},
   '90min': {'ko': '90분', 'en': '90 min', 'lo': '90 ນາທີ'},
@@ -1123,8 +1227,6 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'sub_vehicle_moto_rental': {'ko': '오토바이 렌탈', 'en': 'Motorcycle Rental', 'lo': 'ເຊົ່າລົດຈັກ'},
   'sub_vehicle_tire_battery': {'ko': '타이어·배터리 교체', 'en': 'Tire & Battery', 'lo': 'ປ່ຽນຢາງ ແລະ ແບດເຕີຣີ'},
   'sub_vehicle_carwash': {'ko': '세차·광택', 'en': 'Car Wash & Polish', 'lo': 'ລ້າງລົດ ແລະ ຂັດເງົາ'},
-  'wizard_vehicle_brand_label': {'ko': '차량 브랜드·모델', 'en': 'Vehicle Brand/Model', 'lo': 'ແບຣນດີ້ / ລຸ້ນ'},
-  'wizard_vehicle_brand_hint': {'ko': '예: 토요타, BYD, 현대', 'en': 'e.g. Toyota, BYD, Hyundai', 'lo': 'ຕົວຢ່າງ: Toyota, BYD, Hyundai'},
   'wizard_vehicle_symptom_title': {'ko': '증상 선택', 'en': 'Select Symptom', 'lo': 'ເລືອກອາການ'},
   'wizard_vehicle_sym_engine': {'ko': '엔진 이상', 'en': 'Engine Issue', 'lo': 'ບັນຫາເຄື່ອງ'},
   'wizard_vehicle_sym_tire': {'ko': '타이어', 'en': 'Tire', 'lo': 'ຢາງ'},

@@ -15,6 +15,7 @@ class WizardStep2Tutoring extends StatelessWidget {
   final void Function(String, bool) onLevelToggled;
   final void Function(String, bool) onSelectionToggled;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Tutoring({
     super.key,
@@ -26,6 +27,7 @@ class WizardStep2Tutoring extends StatelessWidget {
     required this.onLevelToggled,
     required this.onSelectionToggled,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -35,8 +37,11 @@ class WizardStep2Tutoring extends StatelessWidget {
         controller: goalController,
         onChanged: (_) => onStateChanged(),
         decoration: wizardOutlineFieldDecoration(
-          _t('wizard_learning_goal_label'),
-          hint: _t('wizard_learning_goal_hint'),
+          _t('tutor_goal_label'),
+          hint: _t('tutor_goal_hint'),
+          isRequired: true,
+          hasError: fieldErrors.contains('tutoringLevel'),
+          errorText: _t('wizard_field_required'),
         ),
         maxLines: 2,
       );

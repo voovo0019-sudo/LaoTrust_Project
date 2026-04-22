@@ -16,6 +16,7 @@ class WizardStep2Business extends StatelessWidget {
   final void Function(String, bool) onLangToggled;
   final void Function(String, bool) onSelectionToggled;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Business({
     super.key,
@@ -28,6 +29,7 @@ class WizardStep2Business extends StatelessWidget {
     required this.onLangToggled,
     required this.onSelectionToggled,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -62,20 +64,55 @@ class WizardStep2Business extends StatelessWidget {
         children: [
           Text(
             _t('wizard_business_lang_title'),
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: fieldErrors.contains('businessLang')
+                  ? Colors.red.shade600
+                  : kWizardRoyalBlue,
+            ),
           ),
-          const SizedBox(height: 10),
-          for (final k in _langOptions)
+          if (fieldErrors.contains('businessLang'))
             Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: wizardOutlineToggleTile(
-                label: l10n(k.$2),
-                selected: businessLangs.contains(k.$1),
-                onTap: () =>
-                    onLangToggled(k.$1, businessLangs.contains(k.$1)),
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: Text(
+                _t('wizard_field_select_required'),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.red.shade600,
+                ),
               ),
             ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: fieldErrors.contains('businessLang')
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.red.shade400,
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            padding: fieldErrors.contains('businessLang')
+                ? const EdgeInsets.all(8)
+                : EdgeInsets.zero,
+            child: Column(
+              children: [
+                for (final k in _langOptions)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: wizardOutlineToggleTile(
+                      label: l10n(k.$2),
+                      selected: businessLangs.contains(k.$1),
+                      onTap: () {
+                        onLangToggled(k.$1, businessLangs.contains(k.$1));
+                        onStateChanged();
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       );
 
@@ -93,6 +130,9 @@ class WizardStep2Business extends StatelessWidget {
             decoration: wizardOutlineFieldDecoration(
               _t('wizard_business_doc_type_label'),
               hint: _t('wizard_business_doc_type_hint'),
+              isRequired: true,
+              hasError: fieldErrors.contains('documentType'),
+              errorText: _t('wizard_field_required'),
             ),
           ),
         ],
@@ -160,8 +200,11 @@ class WizardStep2Business extends StatelessWidget {
           controller: documentTypeController,
           onChanged: (_) => onStateChanged(),
           decoration: wizardOutlineFieldDecoration(
-            _t('wizard_business_detail_label'),
-            hint: _t('wizard_business_detail_hint'),
+            _t('wizard_business_doc_type_label'),
+            hint: _t('wizard_business_doc_type_hint'),
+            isRequired: true,
+            hasError: fieldErrors.contains('documentType'),
+            errorText: _t('wizard_field_required'),
           ),
           maxLines: 3,
         ),

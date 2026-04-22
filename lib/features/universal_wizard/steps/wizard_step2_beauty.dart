@@ -15,6 +15,7 @@ class WizardStep2Beauty extends StatelessWidget {
   final void Function(String, bool) onSelectionToggled;
   final void Function(String) onVisitTypeSelected;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Beauty({
     super.key,
@@ -26,6 +27,7 @@ class WizardStep2Beauty extends StatelessWidget {
     required this.onSelectionToggled,
     required this.onVisitTypeSelected,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -36,8 +38,11 @@ class WizardStep2Beauty extends StatelessWidget {
         keyboardType: TextInputType.number,
         onChanged: (_) => onStateChanged(),
         decoration: wizardOutlineFieldDecoration(
-          _t('wizard_beauty_people_label'),
-          hint: _t('wizard_beauty_people_hint'),
+          _t('beauty_people_label'),
+          hint: _t('beauty_people_hint'),
+          isRequired: true,
+          hasError: fieldErrors.contains('beautyPeople'),
+          errorText: _t('wizard_field_required'),
         ),
       );
 

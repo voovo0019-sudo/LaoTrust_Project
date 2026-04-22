@@ -16,6 +16,7 @@ class WizardStep2Vehicle extends StatelessWidget {
   final void Function(String, bool) onSymptomToggled;
   final void Function(String, bool) onSelectionToggled;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Vehicle({
     super.key,
@@ -28,6 +29,7 @@ class WizardStep2Vehicle extends StatelessWidget {
     required this.onSymptomToggled,
     required this.onSelectionToggled,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -37,8 +39,11 @@ class WizardStep2Vehicle extends StatelessWidget {
         controller: brandController,
         onChanged: (_) => onStateChanged(),
         decoration: wizardOutlineFieldDecoration(
-          _t('wizard_vehicle_brand_label'),
-          hint: _t('wizard_vehicle_brand_hint'),
+          _t('vehicle_brand_label'),
+          hint: _t('vehicle_brand_hint'),
+          isRequired: true,
+          hasError: fieldErrors.contains('vehicleBrand'),
+          errorText: _t('wizard_field_required'),
         ),
       );
 

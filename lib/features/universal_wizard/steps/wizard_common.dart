@@ -9,24 +9,47 @@ const Color kWizardRoyalBlue = Color(0xFF1E3A8A);
 InputDecoration wizardOutlineFieldDecoration(
   String label, {
   String? hint,
+  bool isRequired = false,
+  bool hasError = false,
+  String? errorText,
 }) {
+  final displayLabel = isRequired ? '$label *' : label;
   return InputDecoration(
-    labelText: label,
+    labelText: displayLabel,
     hintText: hint,
+    errorText: hasError ? errorText : null,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(28),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(28),
-      borderSide: BorderSide(color: Colors.grey.shade300),
+      borderSide: BorderSide(
+        color: hasError ? Colors.red.shade400 : Colors.grey.shade300,
+        width: hasError ? 1.5 : 1.0,
+      ),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(28),
-      borderSide: const BorderSide(color: kWizardRoyalBlue, width: 1.5),
+      borderSide: BorderSide(
+        color: hasError ? Colors.red.shade400 : kWizardRoyalBlue,
+        width: 1.5,
+      ),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(28),
+      borderSide: BorderSide(color: Colors.red.shade400, width: 1.5),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(28),
+      borderSide: BorderSide(color: Colors.red.shade600, width: 2.0),
     ),
     filled: true,
-    fillColor: Colors.white,
+    fillColor: hasError ? Colors.red.shade50 : Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    labelStyle: isRequired ? const TextStyle(color: Colors.black87) : null,
+    floatingLabelStyle: TextStyle(
+      color: hasError ? Colors.red.shade600 : kWizardRoyalBlue,
+    ),
   );
 }
 

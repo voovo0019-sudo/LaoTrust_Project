@@ -61,6 +61,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   UniversalWizardConfig? _config;
   int _currentStep = 0;
   bool _isSubmitting = false;
+  // 필수항목 검증 오류 표시용
+  final Set<String> _fieldErrors = {};
 
   final ImagePicker _imagePicker = ImagePicker();
   final List<XFile> _pickedImages = <XFile>[];
@@ -135,6 +137,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         }
       });
     }
+    _d3LandmarkController.addListener(() {
+      if (_d3LandmarkController.text.trim().isNotEmpty) {
+        setState(() => _fieldErrors.remove('landmark'));
+      }
+    });
+    _d3MovingFromController.addListener(() {
+      if (_d3MovingFromController.text.trim().isNotEmpty) {
+        setState(() => _fieldErrors.remove('movingFrom'));
+      }
+    });
+    _d3MovingToController.addListener(() {
+      if (_d3MovingToController.text.trim().isNotEmpty) {
+        setState(() => _fieldErrors.remove('movingTo'));
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAuthAndRedirect();
     });
@@ -247,108 +264,112 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
 
-  bool _canProceedStep2() {
-    if (_state.step1SubTypeId == 'other' &&
-        _state.categoryKey != 'expert_moving' &&
-        _state.categoryKey != 'expert_interior') {
-      return _step1OtherServiceController.text.trim().isNotEmpty;
+  void _onNextPressed() {
+    final errors = _validateCurrentStep();
+    if (errors.isNotEmpty) {
+      setState(() => _fieldErrors
+        ..clear()
+        ..addAll(errors));
+      return;
     }
+    setState(() => _fieldErrors.clear());
+    _goNext();
+  }
+
+  Set<String> _validateCurrentStep() {
+    final errors = <String>{};
+    switch (_currentStep) {
+      case 0:
+        if (!_canProceedStep1()) errors.add('step1SubType');
+      case 1:
+        _validateStep2(errors);
+      case 2:
+        _validateStep3(errors);
+      case 3:
+        break;
+    }
+    return errors;
+  }
+
+  void _validateStep2(Set<String> errors) {
     switch (_state.categoryKey) {
-      case 'expert_moving':
-        final sub = _state.step1SubTypeId;
-        if (sub == 'small') return _movingVehicleType.isNotEmpty;
-        if (sub == 'home') return _movingRoomCountController.text.trim().isNotEmpty;
-        if (sub == 'cargo') return _movingCargoTypes.isNotEmpty;
-        return true;
       case 'expert_cleaning':
-        final sub = _state.step1SubTypeId;
-        if (sub == 'move_in') {
-          return _cleaningRoomCount.isNotEmpty;
+        if (_cleaningAreaController.text.trim().isEmpty) {
+          errors.add('cleaningArea');
         }
-        final hasBase =
-            _cleaningAreaController.text.trim().isNotEmpty ||
-            _cleaningScale.isNotEmpty;
-        if (!hasBase) return false;
-        if (sub == 'restaurant_cafe') {
-          return _cleaningIndustryController.text.trim().isNotEmpty;
-        }
-        if (sub == 'regular_visit') {
-          return _cleaningTargetController.text.trim().isNotEmpty;
-        }
-        if (sub == 'bedding') {
-          return _cleaningBeddingCountController.text.trim().isNotEmpty;
-        }
-        return true;
-      case 'expert_repair':
-        if (_state.step1SubTypeId == 'appliance') {
-          return _repairBrand.isNotEmpty && _step2Selections.isNotEmpty;
-        }
-        if (_state.step1SubTypeId == 'other') {
-          return _step1OtherServiceController.text.trim().isNotEmpty;
-        }
-        return _repairSymptomMemoController.text.trim().isNotEmpty;
-      case 'expert_interior':
-        if (_state.step1SubTypeId == 'other') {
-          return _step1OtherServiceController.text.trim().isNotEmpty;
-        }
-        return _interiorBudgetController.text.trim().isNotEmpty ||
-            _step2Selections.isNotEmpty ||
-            _interiorParts.isNotEmpty ||
-            _step2OtherController.text.trim().isNotEmpty;
+        break;
       case 'expert_business':
+        if (_businessLangs.isEmpty) errors.add('businessLang');
         final sub = _state.step1SubTypeId;
         if (sub == 'translate_docs' || sub == 'legal_doc') {
-          // 번역문서·법률문서는 언어 + 문서종류 둘 다 필요
-          return _businessLangs.isNotEmpty &&
-              _documentTypeController.text.trim().isNotEmpty;
+          if (_documentTypeController.text.trim().isEmpty) {
+            errors.add('documentType');
+          }
         }
-        if (sub == 'visa_permit' || sub == 'company_setup' || sub == 'accounting') {
-          // 비자/사업자/회계는 언어만 선택해도 진행 가능
-          return _businessLangs.isNotEmpty;
-        }
-        // 통역·기타는 언어만 선택하면 진행
-        return _businessLangs.isNotEmpty;
+        break;
       case 'expert_beauty':
-        return _beautyPeopleController.text.trim().isNotEmpty;
-      case 'expert_tutoring':
-        return _tutoringLevels.isNotEmpty || _tutorGoalController.text.trim().isNotEmpty;
+        if (_beautyPeopleController.text.trim().isEmpty) {
+          errors.add('beautyPeople');
+        }
+        break;
       case 'expert_events':
-        return _eventPeopleController.text.trim().isNotEmpty ||
-            _step2OtherController.text.trim().isNotEmpty;
+        if (_eventPeopleController.text.trim().isEmpty) {
+          errors.add('eventPeople');
+        }
+        break;
       case 'expert_vehicle':
         final sub = _state.step1SubTypeId;
         if (sub == 'car_repair' || sub == 'moto_repair') {
-          return _vehicleBrandController.text.trim().isNotEmpty ||
-              _vehicleSymptoms.isNotEmpty;
+          if (_vehicleBrandController.text.trim().isEmpty &&
+              _vehicleSymptoms.isEmpty) {
+            errors.add('vehicleBrand');
+          }
         }
-        if (sub == 'car_rental' || sub == 'moto_rental') {
-          return _vehicleSymptoms.isNotEmpty || _step2Selections.isNotEmpty;
+        break;
+      case 'expert_tutoring':
+        if (_tutoringLevels.isEmpty && _tutorGoalController.text.trim().isEmpty) {
+          errors.add('tutoringLevel');
         }
-        return _vehicleBrandController.text.trim().isNotEmpty ||
-            _repairSymptomMemoController.text.trim().isNotEmpty;
+        break;
       default:
-        return _step2Selections.isNotEmpty || _step2OtherSelected;
+        break;
     }
   }
 
-  bool _canProceedStep3() {
-    final dateOk = _state.preferredDateStr.isNotEmpty;
-    final timeOk = _state.preferredTimeStr.isNotEmpty;
-    if (!dateOk || !timeOk) return false;
+  void _validateStep3(Set<String> errors) {
+    if (_state.preferredDateStr.isEmpty) errors.add('preferredDate');
+    if (_state.preferredTimeStr.isEmpty) errors.add('preferredTime');
 
-    if (_state.categoryKey == 'expert_moving') {
-      return _d3MovingFromController.text.trim().isNotEmpty &&
-          _d3MovingToController.text.trim().isNotEmpty;
+    final config = _config;
+    if (config == null) return;
+
+    switch (config.step3Mode) {
+      case Step3LocationMode.routing:
+        if (_d3MovingFromController.text.trim().isEmpty) {
+          errors.add('movingFrom');
+        }
+        if (_d3MovingToController.text.trim().isEmpty) {
+          errors.add('movingTo');
+        }
+        break;
+      case Step3LocationMode.flexible:
+        if (_state.step3ServiceMode == null) errors.add('serviceMode');
+        final mode = _state.step3ServiceMode;
+        if (mode != null && mode != ServiceModeChoice.remote) {
+          if (_d3LandmarkController.text.trim().isEmpty &&
+              _state.step3Lat == null) {
+            errors.add('landmark');
+          }
+        }
+        break;
+      case Step3LocationMode.onsite:
+        if (_d3LandmarkController.text.trim().isEmpty &&
+            _state.step3Lat == null) {
+          errors.add('landmark');
+        }
+        break;
     }
-
-    final hasPin = _state.step3Lat != null && _state.step3Lng != null;
-    final hasLandmark = _d3LandmarkController.text.trim().isNotEmpty;
-    if (!hasPin && !hasLandmark) return false;
-
-    return true;
   }
-
-  bool _canProceedStep4() => true;
 
   String _categoryEnglish(String key) {
     return switch (key) {
@@ -381,11 +402,30 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         .join('\n')
         .trim();
 
-    final locStr = _state.categoryKey == 'expert_moving'
-        ? '${context.l10n('wizard_depth3_from_label')}: ${_d3MovingFromController.text}\n'
+    final config = _config;
+    if (config == null) return {};
+
+    String locStr;
+    switch (config.step3Mode) {
+      case Step3LocationMode.routing:
+        locStr =
+            '${context.l10n('wizard_depth3_from_label')}: ${_d3MovingFromController.text}\n'
             '${context.l10n('wizard_depth3_to_label')}: ${_d3MovingToController.text}\n'
-            '${context.l10n('wizard_depth3_landmark_label')}: ${_d3LandmarkController.text}'
-        : _d3LandmarkController.text;
+            '${context.l10n('wizard_depth3_landmark_label')}: ${_d3LandmarkController.text}';
+      case Step3LocationMode.flexible:
+        final mode = _state.step3ServiceMode;
+        if (mode == ServiceModeChoice.remote) {
+          locStr = context.l10n('wizard_step3_mode_remote');
+        } else if (mode == ServiceModeChoice.goToShop) {
+          locStr =
+              '${context.l10n('wizard_step3_mode_go_to_shop')}: ${_d3LandmarkController.text}';
+        } else {
+          locStr =
+              '${context.l10n('wizard_step3_mode_visit')}: ${_d3LandmarkController.text}';
+        }
+      case Step3LocationMode.onsite:
+        locStr = _d3LandmarkController.text;
+    }
 
     final titleStr = [
       context.l10n(config.categoryKey),
@@ -802,13 +842,30 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         print('[SUBMIT] ?좏깮???ъ쭊 ?놁쓬 ??諛붾줈 踰덉뿭 ?④퀎');
       }
 
+      final step3Mode = _config?.step3Mode ?? Step3LocationMode.onsite;
+      final serviceMode = _state.step3ServiceMode;
       final location = <String, dynamic>{
         'lat': _state.step3Lat ?? 0.0,
         'lng': _state.step3Lng ?? 0.0,
         'landmark': _d3LandmarkController.text.trim(),
-        if (_state.categoryKey == 'expert_moving') ...{
+        // 서비스 방식 저장 (flexible 모드)
+        if (step3Mode == Step3LocationMode.flexible && serviceMode != null)
+          'serviceMode': switch (serviceMode) {
+            ServiceModeChoice.remote => 'remote',
+            ServiceModeChoice.visit => 'visit',
+            ServiceModeChoice.goToShop => 'goToShop',
+          },
+        // 이동형(이사): 출발지 + 도착지
+        if (step3Mode == Step3LocationMode.routing) ...{
           'fromLandmark': _d3MovingFromController.text.trim(),
           'toLandmark': _d3MovingToController.text.trim(),
+        },
+        // 원격 선택 시 위치 초기화
+        if (step3Mode == Step3LocationMode.flexible &&
+            serviceMode == ServiceModeChoice.remote) ...{
+          'lat': 0.0,
+          'lng': 0.0,
+          'landmark': '',
         },
       };
 
@@ -1056,7 +1113,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     final y = d.year.toString().padLeft(4, '0');
     final m = d.month.toString().padLeft(2, '0');
     final day = d.day.toString().padLeft(2, '0');
-    setState(() => _state = _state.copyWith(preferredDateStr: '$y-$m-$day'));
+    setState(() {
+      _state = _state.copyWith(preferredDateStr: '$y-$m-$day');
+      _fieldErrors.remove('preferredDate');
+    });
   }
 
   Future<void> _pickPreferredTime() async {
@@ -1067,7 +1127,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     if (t == null || !mounted) return;
     final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
-    setState(() => _state = _state.copyWith(preferredTimeStr: '$h:$m'));
+    setState(() {
+      _state = _state.copyWith(preferredTimeStr: '$h:$m');
+      _fieldErrors.remove('preferredTime');
+    });
   }
 
   Widget _buildProgressBar() {
@@ -1270,7 +1333,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             _cleaningApplianceTypes.add(id);
           }
         }),
-        onStateChanged: () => setState(() {}),
+        onStateChanged: () => setState(() {
+          if (_cleaningAreaController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('cleaningArea');
+          }
+        }),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1389,7 +1457,15 @@ List<Widget> _buildStep2RepairV5() {
             _step2Selections.add(id);
           }
         }),
-        onStateChanged: () => setState(() {}),
+        onStateChanged: () => setState(() {
+          if (_documentTypeController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('documentType');
+          }
+          if (_businessLangs.isNotEmpty) {
+            _fieldErrors.remove('businessLang');
+          }
+        }),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1418,7 +1494,12 @@ List<Widget> _buildStep2RepairV5() {
             _step2Selections.add(type);
           }
         }),
-        onStateChanged: () => setState(() {}),
+        onStateChanged: () => setState(() {
+          if (_beautyPeopleController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('beautyPeople');
+          }
+        }),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1445,7 +1526,12 @@ List<Widget> _buildStep2RepairV5() {
             _step2Selections.add(id);
           }
         }),
-        onStateChanged: () => setState(() {}),
+        onStateChanged: () => setState(() {
+          if (_eventPeopleController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('eventPeople');
+          }
+        }),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1465,7 +1551,15 @@ List<Widget> _buildStep2RepairV5() {
             _step2Selections.add(id);
           }
         }),
-        onStateChanged: () => setState(() {}),
+        onStateChanged: () => setState(() {
+          if (_vehicleBrandController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('vehicleBrand');
+          }
+          if (_vehicleSymptoms.isNotEmpty) {
+            _fieldErrors.remove('vehicleBrand');
+          }
+        }),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1494,6 +1588,7 @@ List<Widget> _buildStep2RepairV5() {
           }
         }),
         onStateChanged: () => setState(() {}),
+        fieldErrors: _fieldErrors,
       ),
     ];
   }
@@ -1524,7 +1619,10 @@ List<Widget> _buildStep2RepairV5() {
   Widget _buildStep3Unified(UniversalWizardConfig config) {
     return WizardStep3(
       state: _state,
+      fieldErrors: _fieldErrors,
+      step3Mode: config.step3Mode,
       pickedImages: _pickedImages,
+      photoSlotCount: config.photoSlotCount,
       photoPrompt: _photoPromptForCategory(),
       l10n: context.l10n,
       onPickGallery: () => _pickImagesFromGallery(maxCount: 5),
@@ -1534,6 +1632,12 @@ List<Widget> _buildStep2RepairV5() {
       onPickTime: _pickPreferredTime,
       onUrgentChanged: (v) =>
           setState(() => _state = _state.copyWith(scheduleIsUrgent: v)),
+      onServiceModeChanged: (choice) => setState(() {
+        _state = _state.copyWith(step3ServiceMode: choice);
+        if (choice != null) {
+          _fieldErrors.remove('serviceMode');
+        }
+      }),
       landmarkController: _d3LandmarkController,
       movingFromController: _d3MovingFromController,
       movingToController: _d3MovingToController,
@@ -1563,21 +1667,6 @@ List<Widget> _buildStep2RepairV5() {
   }
 
   Widget _buildBottomButton(UniversalWizardConfig config) {
-    var canProceed = false;
-    switch (_currentStep) {
-      case 0:
-        canProceed = _canProceedStep1();
-        break;
-      case 1:
-        canProceed = _canProceedStep2();
-        break;
-      case 2:
-        canProceed = _canProceedStep3();
-        break;
-      case 3:
-        canProceed = _canProceedStep4();
-        break;
-    }
     final isLast = _currentStep == totalSteps - 1;
     return SafeArea(
       child: Padding(
@@ -1586,19 +1675,21 @@ List<Widget> _buildStep2RepairV5() {
           width: double.infinity,
           height: 56,
           child: OutlinedButton(
-            onPressed: (_isSubmitting || !canProceed)
+            onPressed: _isSubmitting
                 ? null
                 : () {
-                    // ignore: avoid_print
-                    print('[BUTTON] 버튼 클릭');
-                    _goNext();
+                    if (_currentStep == totalSteps - 1) {
+                      _goNext();
+                    } else {
+                      _onNextPressed();
+                    }
                   },
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _kRoyalBlue,
               disabledBackgroundColor: Colors.grey.shade300,
               disabledForegroundColor: Colors.grey.shade600,
-              side: BorderSide(color: canProceed ? _kRoyalBlue : Colors.grey.shade400, width: 1.2),
+              side: const BorderSide(color: _kRoyalBlue, width: 1.2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             ),
             child: Text(isLast ? context.t('apply_final') : context.t('next_step')),

@@ -32,6 +32,7 @@ class WizardStep2Cleaning extends StatelessWidget {
   final void Function(String) onApplianceCountChanged;
   final void Function(String, bool) onApplianceTypeToggled;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Cleaning({
     super.key,
@@ -60,6 +61,7 @@ class WizardStep2Cleaning extends StatelessWidget {
     required this.onApplianceCountChanged,
     required this.onApplianceTypeToggled,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -68,9 +70,13 @@ class WizardStep2Cleaning extends StatelessWidget {
   Widget _areaField() => TextField(
         controller: areaController,
         keyboardType: TextInputType.number,
+        onChanged: (_) => onStateChanged(),
         decoration: wizardOutlineFieldDecoration(
           _t('cleaning_area_m2'),
           hint: _t('cleaning_area_hint'),
+          isRequired: true,
+          hasError: fieldErrors.contains('cleaningArea'),
+          errorText: _t('wizard_field_required'),
         ),
       );
 

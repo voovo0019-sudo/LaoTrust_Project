@@ -1,6 +1,16 @@
 // =============================================================================
-// v5.0: 유니버설 4단계 위저드 상태 — D3 현장 정보(사진·위치·일시) + 요약/신청
+// universal_wizard_state.dart
+// v5.1: step3ServiceMode 추가 - flexible 모드 선택 결과 저장
 // =============================================================================
+
+/// flexible 모드에서 사용자가 선택한 서비스 방식
+enum ServiceModeChoice {
+  remote, // 원격/온라인
+  visit, // 방문 (전문가가 고객에게)
+  goToShop, // 고객이 샵/정비소로 방문
+}
+
+const Object _kUnsetServiceMode = Object();
 
 /// 위저드 전체 상태
 class UniversalWizardState {
@@ -23,6 +33,7 @@ class UniversalWizardState {
     this.step3Schedule = '',
     this.step3SymptomIds = const [],
     this.step3ExtraNote = '',
+    this.step3ServiceMode,
   });
 
   final String categoryKey;
@@ -32,16 +43,19 @@ class UniversalWizardState {
   final String step2SelectedLabel;
   final List<String> step3PhotoPaths;
 
-  /// D3: 랜드마크/주소 설명 (GPS 미사용 시 필수)
+  /// 현장형/이동형: 위치 랜드마크 (GPS 보조)
   final String step3Landmark;
-  /// 이사: 출발지 설명
+
+  /// 이동형: 출발지 랜드마크
   final String step3MovingFromLandmark;
-  /// 이사: 도착지 설명
+
+  /// 이동형: 도착지 랜드마크
   final String step3MovingToLandmark;
+
   final double? step3Lat;
   final double? step3Lng;
 
-  /// D3: 희망 일시 (라오스 현지 기준 입력)
+  /// 일정 선택
   final String preferredDateStr;
   final String preferredTimeStr;
   final bool scheduleIsUrgent;
@@ -50,6 +64,10 @@ class UniversalWizardState {
   final String step3Schedule;
   final List<String> step3SymptomIds;
   final String step3ExtraNote;
+
+  /// flexible 모드 선택 결과 (비즈니스/과외/미용/차량)
+  /// null = 아직 선택 안 함
+  final ServiceModeChoice? step3ServiceMode;
 
   UniversalWizardState copyWith({
     String? categoryKey,
@@ -70,6 +88,7 @@ class UniversalWizardState {
     String? step3Schedule,
     List<String>? step3SymptomIds,
     String? step3ExtraNote,
+    Object? step3ServiceMode = _kUnsetServiceMode,
   }) {
     return UniversalWizardState(
       categoryKey: categoryKey ?? this.categoryKey,
@@ -90,6 +109,9 @@ class UniversalWizardState {
       step3Schedule: step3Schedule ?? this.step3Schedule,
       step3SymptomIds: step3SymptomIds ?? this.step3SymptomIds,
       step3ExtraNote: step3ExtraNote ?? this.step3ExtraNote,
+      step3ServiceMode: identical(step3ServiceMode, _kUnsetServiceMode)
+          ? this.step3ServiceMode
+          : step3ServiceMode as ServiceModeChoice?,
     );
   }
 }

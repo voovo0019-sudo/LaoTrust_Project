@@ -1,11 +1,18 @@
 // =============================================================================
-// v5.0: 9대 카테고리 유니버설 4단계 위저드 설정 (집도 최종본)
-// D1 유형 → D2 전문 질문 → D3 사진·위치·일시 → D4 요약·신청
+// universal_wizard_config.dart
+// v5.1: Step3LocationMode 추가 - 글로벌 구조 확장
 // =============================================================================
 
 import 'package:flutter/material.dart';
 
-/// 3단계 시각적 가이드 유형 (레거시 필드 — v5에서는 D3가 카테고리 공통)
+/// Step3 위치/방문 방식 모드
+enum Step3LocationMode {
+  onsite, // 현장형: 청소/수리/인테리어/이벤트 - GPS/주소 필수
+  routing, // 이동형: 이사 - 출발지+도착지
+  flexible, // 선택형: 비즈니스/과외/미용/차량 - 원격or방문 선택
+}
+
+/// 3단계 시각 가이드 타입
 enum VisualGuideType {
   photoUpload,
   mapPick,
@@ -13,7 +20,7 @@ enum VisualGuideType {
   symptomAndNote,
 }
 
-/// 2단계 선택 유형 (레거시)
+/// 2단계 선택 타입
 enum Step2ChoiceType {
   scaleSML,
   targetAudience,
@@ -21,7 +28,7 @@ enum Step2ChoiceType {
   none,
 }
 
-/// 카테고리별 위저드 설정 (1: 세부유형, 2: 규모/대상, 3·4: 공통 로직에서 처리)
+/// 위저드 설정 클래스
 class UniversalWizardConfig {
   const UniversalWizardConfig({
     required this.categoryKey,
@@ -31,6 +38,7 @@ class UniversalWizardConfig {
     this.step2Ids = const [],
     required this.visualGuideType,
     this.photoSlotCount = 5,
+    required this.step3Mode,
   });
 
   final String categoryKey;
@@ -40,11 +48,12 @@ class UniversalWizardConfig {
   final List<String> step2Ids;
   final VisualGuideType visualGuideType;
   final int photoSlotCount;
+  final Step3LocationMode step3Mode;
 
   static const Color royalNavy = Color(0xFF1E293B);
 }
 
-/// 9대 카테고리 (홈 그리드 키와 1:1)
+/// 9개 카테고리 설정
 const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
   'expert_cleaning': UniversalWizardConfig(
     categoryKey: 'expert_cleaning',
@@ -62,6 +71,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: ['S', 'M', 'L'],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.onsite,
   ),
   'expert_moving': UniversalWizardConfig(
     categoryKey: 'expert_moving',
@@ -76,6 +86,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.routing,
   ),
   'expert_repair': UniversalWizardConfig(
     categoryKey: 'expert_repair',
@@ -91,6 +102,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: ['S', 'M', 'L'],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.onsite,
   ),
   'expert_interior': UniversalWizardConfig(
     categoryKey: 'expert_interior',
@@ -108,6 +120,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.onsite,
   ),
   'expert_business': UniversalWizardConfig(
     categoryKey: 'expert_business',
@@ -124,7 +137,8 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Labels: [],
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
-    photoSlotCount: 5,
+    photoSlotCount: 3,
+    step3Mode: Step3LocationMode.flexible,
   ),
   'expert_beauty': UniversalWizardConfig(
     categoryKey: 'expert_beauty',
@@ -142,7 +156,8 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Labels: [],
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
-    photoSlotCount: 5,
+    photoSlotCount: 3,
+    step3Mode: Step3LocationMode.flexible,
   ),
   'expert_tutoring': UniversalWizardConfig(
     categoryKey: 'expert_tutoring',
@@ -163,7 +178,8 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Labels: [],
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
-    photoSlotCount: 5,
+    photoSlotCount: 3,
+    step3Mode: Step3LocationMode.flexible,
   ),
   'expert_events': UniversalWizardConfig(
     categoryKey: 'expert_events',
@@ -182,6 +198,7 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.onsite,
   ),
   'expert_vehicle': UniversalWizardConfig(
     categoryKey: 'expert_vehicle',
@@ -199,5 +216,6 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
     step2Ids: [],
     visualGuideType: VisualGuideType.photoUpload,
     photoSlotCount: 5,
+    step3Mode: Step3LocationMode.flexible,
   ),
 };

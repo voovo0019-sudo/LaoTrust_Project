@@ -14,6 +14,7 @@ class WizardStep2Events extends StatelessWidget {
   final String currentLangCode;
   final void Function(String, bool) onSelectionToggled;
   final VoidCallback onStateChanged;
+  final Set<String> fieldErrors;
 
   const WizardStep2Events({
     super.key,
@@ -24,6 +25,7 @@ class WizardStep2Events extends StatelessWidget {
     required this.currentLangCode,
     required this.onSelectionToggled,
     required this.onStateChanged,
+    required this.fieldErrors,
   });
 
   String _t(String key) =>
@@ -34,8 +36,11 @@ class WizardStep2Events extends StatelessWidget {
         keyboardType: TextInputType.number,
         onChanged: (_) => onStateChanged(),
         decoration: wizardOutlineFieldDecoration(
-          _t('wizard_event_people_label'),
-          hint: _t('wizard_event_people_hint'),
+          _t('events_people_label'),
+          hint: _t('events_people_hint'),
+          isRequired: true,
+          hasError: fieldErrors.contains('eventPeople'),
+          errorText: _t('wizard_field_required'),
         ),
       );
 

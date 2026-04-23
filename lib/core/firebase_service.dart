@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 
 /// Firebase 초기화 여부. main()에서 초기화 실패 시 false.
@@ -60,16 +60,6 @@ Future<void> enableFirestoreOfflinePersistence() async {
     );
   }
   registerAuthForegroundGuard();
-
-  // 익명 로그인 자동 적용: 로그인 안 된 경우 자동으로 익명 인증
-  if (auth.currentUser == null) {
-    try {
-      await auth.signInAnonymously();
-      debugPrint('[Auth] 익명 로그인 자동 적용 완료');
-    } catch (e) {
-      debugPrint('[Auth] 익명 로그인 실패 (무시): $e');
-    }
-  }
 }
 
 // -----------------------------------------------------------------------------

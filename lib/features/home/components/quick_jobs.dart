@@ -435,15 +435,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         const SizedBox(height: 10),
         _buildPremiumPostCard(context),
         const SizedBox(height: 10),
-        ListenableBuilder(
-          listenable: whitelistDisplayPhoneNotifier,
-          builder: (context, _) {
-            return StreamBuilder(
-              stream: auth.authStateChanges(),
-              builder: (context, __) {
-                return StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: _jobsStream,
-                  builder: (context, snapshot) {
+        StreamBuilder(
+          stream: auth.authStateChanges(),
+          builder: (context, __) {
+            return StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _jobsStream,
+              builder: (context, snapshot) {
             final remote = snapshot.data ?? const <Map<String, dynamic>>[];
 
             final realJobs = <Map<String, dynamic>>[
@@ -695,85 +692,78 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                   },
                 );
               },
-            );
-          },
-        ),
+            ),
       ],
     );
   }
 
   Widget _buildPremiumPostCard(BuildContext context) {
-    return ListenableBuilder(
-      listenable: whitelistDisplayPhoneNotifier,
-      builder: (context, _) {
-        return StreamBuilder(
-          stream: auth.authStateChanges(),
-          builder: (context, __) {
-            return InkWell(
-              borderRadius: BorderRadius.circular(28),
-              onTap: () async {
-                await finalizeAppAuthState();
-                if (!context.mounted) return;
-                if (isFirebaseEnabled && !hasRecognizedUserSession) {
-                  await _promptLoginRequired(context);
-                  return;
-                }
-                final result = await Navigator.pushNamed(context, quickJobPostRouteName);
-                if (!context.mounted) return;
-                if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
-                  await Future.delayed(const Duration(milliseconds: 3000));
-                  if (!context.mounted) return;
-                  _invalidateQuickJobsRemoteCache();
-                  setState(() {});
-                  await Future.delayed(const Duration(milliseconds: 1000));
-                  if (!context.mounted) return;
-                  _invalidateQuickJobsRemoteCache();
-                  setState(() {});
-                  return;
-                }
-                if (result is Map<String, dynamic>) {
-                  setState(() {
-                    _localJobs.insert(0, {...result, 'isSample': false});
-                  });
-                }
-              },
-              child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(28.0),
-          border: Border.all(color: const Color(0xFF1E3A8A), width: 1.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 4,
-              spreadRadius: 0,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A), size: 32),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                context.l10n('quick_job_post_card_title'),
-                style: const TextStyle(
-                  color: Color(0xFF1E3A8A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
-          ],
-        ),
-              ),
-            );
+    return StreamBuilder(
+      stream: auth.authStateChanges(),
+      builder: (context, __) {
+        return InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: () async {
+            await finalizeAppAuthState();
+            if (!context.mounted) return;
+            if (isFirebaseEnabled && !hasRecognizedUserSession) {
+              await _promptLoginRequired(context);
+              return;
+            }
+            final result = await Navigator.pushNamed(context, quickJobPostRouteName);
+            if (!context.mounted) return;
+            if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
+              await Future.delayed(const Duration(milliseconds: 3000));
+              if (!context.mounted) return;
+              _invalidateQuickJobsRemoteCache();
+              setState(() {});
+              await Future.delayed(const Duration(milliseconds: 1000));
+              if (!context.mounted) return;
+              _invalidateQuickJobsRemoteCache();
+              setState(() {});
+              return;
+            }
+            if (result is Map<String, dynamic>) {
+              setState(() {
+                _localJobs.insert(0, {...result, 'isSample': false});
+              });
+            }
           },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28.0),
+              border: Border.all(color: const Color(0xFF1E3A8A), width: 1.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  spreadRadius: 0,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A), size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.l10n('quick_job_post_card_title'),
+                    style: const TextStyle(
+                      color: Color(0xFF1E3A8A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+              ],
+            ),
+          ),
         );
       },
     );

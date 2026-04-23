@@ -1,6 +1,6 @@
-// =============================================================================
-// LT-09 Feature: profile — 내 정보 관리, [포인트/결제], [나의 신청 현황], [고객센터]
-// Trust-first: Verified 상태 표시. 유지: 하단 내비에서 진입.
+﻿// =============================================================================
+// LT-09 Feature: profile 화면 - 전화번호 로그인, 인증 배지, 프로필 메뉴
+// Trust-first: Verified 배지 시스템. 화이트리스트 완전 제거 - Firebase Phone Auth 단일화
 // =============================================================================
 
 import 'package:flutter/material.dart';
@@ -19,12 +19,10 @@ class ProfileScreen extends StatefulWidget {
     super.key,
     this.openPhoneAuthOnStart = false,
     this.popToHomeOnAuthSuccess = false,
-    /// true면 진입 시 보류 중인 로그인 리다이렉트를 비움(앱바·/login 전용 로그인 등).
     this.discardPendingPostLoginRedirect = false,
   });
 
   final bool openPhoneAuthOnStart;
-  /// v7.9: 전화 인증(또는 화이트리스트) 성공 직후 루트(홈 탭)까지 복귀.
   final bool popToHomeOnAuthSuccess;
   final bool discardPendingPostLoginRedirect;
 
@@ -57,7 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() => _verified = v);
   }
 
-  /// PC 웹에서도 확실히 페이지 이동되도록 MaterialPageRoute 사용 (pushNamed 대신).
   void _openBcelOnepay(BuildContext context) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified());
   }
@@ -132,7 +129,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: _verified
                 ? context.l10n('profile_verified_done')
                 : context.l10n('profile_verified_todo'),
-            // PC 웹에서도 먹통 방지: 인증 여부와 무관하게 항상 진입 가능
             onTap: () => _openBcelOnepay(context),
           ),
           _buildMenuTile(
@@ -181,7 +177,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: context.l10n('logout_sub'),
             onTap: () async {
               await auth.signOut();
-              whitelistDisplayPhoneNotifier.value = null;
               if (!context.mounted) return;
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
@@ -192,19 +187,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
-    return ListenableBuilder(
-      listenable: whitelistDisplayPhoneNotifier,
-      builder: (context, _) {
-        return StreamBuilder(
-          stream: auth.authStateChanges(),
-          builder: (context, snapshot) {
-            final user = snapshot.data;
-            final phone = user?.phoneNumber ?? whitelistDisplayPhoneNotifier.value ?? '';
-            final digits = _digitsOnly(phone);
-            final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-            final displayName = last4.isNotEmpty
-                ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
-                : context.l10n('profile_user_name');
+    return StreamBuilder(
+      stream: auth.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final phone = user?.phoneNumber ?? '';
+        final digits = _digitsOnly(phone);
+        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
+        final displayName = last4.isNotEmpty
+            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+            : context.l10n('profile_user_name');
 
         return Container(
           decoration: BoxDecoration(
@@ -260,8 +252,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
-      },
-    );
   }
 
   void _openPhoneAuthSheet(BuildContext context) {
@@ -291,8 +281,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right),
-      // web에서 Container+ListTile 조합이 간헐적으로 클릭이 씹히는 케이스 방지:
-      // 실제 탭 핸들링은 InkWell에서만 처리한다.
       onTap: null,
     );
 
@@ -336,7 +324,6 @@ class _PhoneAuthSheet extends StatefulWidget {
 }
 
 class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
-  // 모바일 포커스 이동/키보드 리사이즈에도 초기화되지 않도록 State 멤버로 고정
   String selectedCountryCode = '+856';
   String phone = '';
   String code = '';
@@ -344,15 +331,6 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
   bool isLoggingIn = false;
 
   String _normalizeDigits(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
-
-  bool _isWhitelistKorea(String digits) {
-    const whitelist = {
-      '1027550019', // 사령관님
-      '1056781452', // 동생분
-      '1033889963', // 라오스 지사장님
-    };
-    return whitelist.contains(digits);
-  }
 
   Future<void> _sendCode() async {
     final digits = _normalizeDigits(phone);
@@ -402,16 +380,8 @@ class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
       return;
     }
 
-    final currentContext = context;
-    // 대한민국(+82) 화이트리스트 예외: 인증번호 123456으로 즉시 로그인 처리.
-    if (selectedCountryCode == '+82' && _isWhitelistKorea(digits) && inputCode == '123456') {
-      if (!currentContext.mounted) return;
-      whitelistDisplayPhoneNotifier.value = '$selectedCountryCode$digits';
-      _finishAuthSuccessNavigate();
-      return;
-    }
-
     setState(() => isLoggingIn = true);
+    final currentContext = context;
     try {
       await signInWithPhoneCode(inputCode);
       if (!currentContext.mounted) return;

@@ -1,5 +1,5 @@
-// LT-08 미션02: Firebase(Firestore + 전화번호 인증) 개통.
-// 지사 인계용: Firestore 오프라인 지속 저장 활성화, Auth 전화번호 로그인 진입점 제공.
+﻿// LT-08 태스크02: Firebase(Firestore + 인증 서비스) 초기화.
+// 화이트리스트 완전 제거 - Firebase Phone Auth 단일화 완료
 
 import 'dart:async';
 
@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 
-/// Firebase 초기화 여부. main()에서 초기화 실패 시 false.
+/// Firebase 활성화 여부. main()에서 초기화 후 설정. 기본값 false.
 bool get isFirebaseEnabled => _firebaseEnabled;
 bool _firebaseEnabled = false;
 
@@ -16,37 +16,28 @@ void setFirebaseEnabled(bool value) {
   _firebaseEnabled = value;
 }
 
-/// Firestore 인스턴스. 오프라인 persistence는 [main] 또는 최초 사용 전에 설정.
+/// Firestore 인스턴스. 오프라인 persistence는 [main] 초기화 후 별도 설정.
 FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
-/// Auth 인스턴스 (전화번호 인증 등).
+/// Auth 인스턴스 (전역 접근용).
 FirebaseAuth get auth => FirebaseAuth.instance;
 
-/// 화이트리스트 로그인 시 Firebase signIn 없이 표시용 전화번호만 저장. 배너/프로필에서 last4 노출용.
-final ValueNotifier<String?> whitelistDisplayPhoneNotifier = ValueNotifier<String?>(null);
-
-/// Firebase Auth 세션 **또는** 화이트리스트 표시 로그인(위 notifier에 번호가 있음)이면 true.
-/// 환영 배너(0019 엔진)와 급구 알바 등록 가드의 기준을 통일한다.
+/// Firebase Phone Auth 기반 로그인 여부 확인
+/// 정식 전화번호 로그인 유저만 true 반환 (익명 유저 제외)
 bool get hasRecognizedUserSession {
   final user = auth.currentUser;
-  if (user != null && !user.isAnonymous) return true;
-  final v = whitelistDisplayPhoneNotifier.value?.trim();
-  return v != null && v.isNotEmpty;
+  return user != null && !user.isAnonymous;
 }
 
-/// `jobs.employerId` 저장·소유권 비교용: Auth UID 우선, 없으면 `whitelist_` + 숫자만(안정 키).
+/// jobs.employerId 저장용: Firebase Auth UID 반환
+/// 미로그인 시 null 반환
 String? employerIdForCurrentSession() {
   final uid = auth.currentUser?.uid;
   if (uid != null && uid.isNotEmpty) return uid;
-  final raw = whitelistDisplayPhoneNotifier.value?.trim();
-  if (raw == null || raw.isEmpty) return null;
-  final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
-  if (digits.isEmpty) return null;
-  return 'whitelist_$digits';
+  return null;
 }
 
-/// Firestore 오프라인 우선: 기기에 먼저 캐시하고 연결 시 서버와 동기화.
-/// 앱 시작 시 한 번 호출. (미션02: 인터넷 불안정 지역 대비)
+/// Firestore 오프라인 설정: 플랫폼별 퍼시스턴스 설정 후 Auth 포그라운드 감시 등록.
 Future<void> enableFirestoreOfflinePersistence() async {
   if (!_firebaseEnabled) return;
   if (kIsWeb) {
@@ -61,11 +52,6 @@ Future<void> enableFirestoreOfflinePersistence() async {
   }
   registerAuthForegroundGuard();
 }
-
-// -----------------------------------------------------------------------------
-// v10.1 과제 C: 포그라운드 복귀 시 토큰 갱신 → Auth 스트림·세션 인지와 동기화
-// (AuthService와 순환 import 방지를 위해 core에 둠. 전화 인증 API는 auth_service.)
-// -----------------------------------------------------------------------------
 
 bool _authForegroundGuardRegistered = false;
 
@@ -85,20 +71,17 @@ Future<void> _syncAuthOnResume() async {
   try {
     await u.getIdToken(true);
     await u.reload();
-  } catch (_) {
-    // 네트워크·토큰 오류는 이후 authStateChanges / UI 가드가 처리
-  }
+  } catch (_) {}
 }
 
-/// 앱 생명주기당 1회 등록. [enableFirestoreOfflinePersistence] 성공 시 호출.
+/// 앱 포그라운드 복귀 시 Auth 토큰 갱신. 1회만 등록.
 void registerAuthForegroundGuard() {
   if (_authForegroundGuardRegistered || !_firebaseEnabled) return;
   _authForegroundGuardRegistered = true;
   WidgetsBinding.instance.addObserver(_AuthForegroundGuard());
 }
 
-/// 전화번호 인증: 번호로 인증 코드 발송 후, 코드 입력으로 로그인.
-/// (실제 사용 시 reCAPTCHA 등 플랫폼별 설정 필요.)
+/// 전화번호 인증 코드 발송
 Future<void> sendPhoneCode(String phoneNumber) async {
   if (!_firebaseEnabled) throw StateError('Firebase is not enabled');
   await auth.verifyPhoneNumber(
@@ -110,7 +93,6 @@ Future<void> sendPhoneCode(String phoneNumber) async {
       throw e;
     },
     codeSent: (String verificationId, int? resendToken) {
-      // 호출 측에서 verificationId 저장 후, code 입력 시 signInWithCredential 사용
       _lastVerificationId = verificationId;
     },
     codeAutoRetrievalTimeout: (String verificationId) {
@@ -121,7 +103,7 @@ Future<void> sendPhoneCode(String phoneNumber) async {
 
 String? _lastVerificationId;
 
-/// 발송된 인증 코드로 로그인.
+/// SMS 코드로 로그인
 Future<UserCredential> signInWithPhoneCode(String smsCode) async {
   if (!_firebaseEnabled || _lastVerificationId == null) {
     throw StateError('Firebase is not enabled or verification not started');

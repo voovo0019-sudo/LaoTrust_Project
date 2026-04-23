@@ -196,12 +196,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   void _checkAuthAndRedirect() {
     if (!mounted) return;
-    // ?꾪솕踰덊샇 濡쒓렇?몃쭔 ?듦낵 (?듬챸 濡쒓렇?몄? ?듦낵 遺덇?)
-    final user = auth.currentUser;
-    if (user != null && !user.isAnonymous) return;
-    // ?붿씠?몃━?ㅽ듃 濡쒓렇???뺤씤 (whitelistDisplayPhoneNotifier??媛믪씠 ?덉쑝硫??듦낵)
-    final whitePhone = whitelistDisplayPhoneNotifier.value?.trim() ?? '';
-    if (whitePhone.isNotEmpty) return;
+    // Firebase Phone Auth 단일 로그인 체크
+    if (hasRecognizedUserSession) return;
     showDialog<void>(
       context: context,
       barrierDismissible: false,

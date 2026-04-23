@@ -7,7 +7,6 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/translation_mapper.dart';
@@ -124,9 +123,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     await finalizeAppAuthState();
     if (!mounted) return;
     if (isFirebaseEnabled) {
-      final user = FirebaseAuth.instance.currentUser;
-      final isAnonymous = user == null || user.isAnonymous;
-      if (isAnonymous) {
+      if (!hasRecognizedUserSession) {
         await _showLoginRequiredDialog();
         return;
       }

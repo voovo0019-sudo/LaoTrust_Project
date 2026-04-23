@@ -1,12 +1,11 @@
-// LT-08 미션02: 오프라인 우선(Offline-First) — 잠복 수사 모드.
-// 데이터를 기기에 먼저 임시 저장하고, 연결 시 자동 전송.
-
+// LT-08 태스크02: 오프라인 우선 저장 + 사진 업로드 실패 방어 강화
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:lao_trust/firebase_options.dart';
@@ -17,7 +16,6 @@ import 'firebase_service.dart';
 
 const String _keyPending = 'laotrust_pending_requests';
 
-/// v5.0 Firestore: `artifacts/{appId}/public/data/requests` (appId = Firebase projectId)
 CollectionReference<Map<String, dynamic>> expertRequestsV5Collection() {
   final appId = DefaultFirebaseOptions.currentPlatform.projectId;
   return firestore
@@ -28,7 +26,6 @@ CollectionReference<Map<String, dynamic>> expertRequestsV5Collection() {
       .collection('requests');
 }
 
-/// 전문가 요청 v5 규격 — 온라인 즉시 저장 또는 오프라인 큐.
 Future<void> saveExpertRequestV5OfflineFirst(Map<String, dynamic> body) async {
   final uid = auth.currentUser?.uid ?? employerIdForCurrentSession() ?? '';
   final map = Map<String, dynamic>.from(body);
@@ -47,7 +44,16 @@ Future<void> saveExpertRequestV5OfflineFirst(Map<String, dynamic> body) async {
       if (pending is List && pending.isNotEmpty) {
         final paths = pending.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
         final uid = map['userId'] as String? ?? '';
-        map['photos'] = await uploadExpertRequestImagesFromLocalPaths(paths: paths, userId: uid);
+        // 사진 업로드 실패해도 Firestore 저장은 반드시 진행
+        try {
+          map['photos'] = await uploadExpertRequestImagesFromLocalPaths(
+            paths: paths,
+            userId: uid,
+          );
+        } catch (e) {
+          if (kDebugMode) debugPrint('[OfflineFirst] 사진 업로드 실패 → photos=[] 로 저장 진행: $e');
+          map['photos'] = <String>[];
+        }
         map.remove('_photoLocalPaths');
       }
       await _sendExpertV5ToFirestore(map);
@@ -65,7 +71,6 @@ Future<void> saveExpertRequestV5OfflineFirst(Map<String, dynamic> body) async {
   await prefs.setStringList(_keyPending, list);
 }
 
-/// v5.1: 내부 키 `_photoLocalPaths` 제거 후 저장.
 Future<void> _sendExpertV5ToFirestore(Map<String, dynamic> body) async {
   final data = Map<String, dynamic>.from(body);
   data.remove('_photoLocalPaths');
@@ -76,7 +81,6 @@ Future<void> _sendExpertV5ToFirestore(Map<String, dynamic> body) async {
   await expertRequestsV5Collection().doc(uuid).set(data);
 }
 
-/// 오프라인 시 로컬에 적재해 두었다가, 온라인 시 Firestore로 전송.
 Future<void> saveRequestOfflineFirst({
   required String category,
   required Map<String, dynamic> payload,
@@ -121,7 +125,6 @@ Future<void> _sendToFirestore({
   });
 }
 
-/// 연결 복구 시 대기 중인 요청 일괄 전송. 앱 시작·포그라운드 시 호출 권장.
 Future<int> flushPendingRequestsWhenOnline() async {
   if (!isFirebaseEnabled) return 0;
   final result = await Connectivity().checkConnectivity();
@@ -146,8 +149,17 @@ Future<int> flushPendingRequestsWhenOnline() async {
         if (pending is List && pending.isNotEmpty && isFirebaseEnabled) {
           final paths = pending.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
           final uid = (payload['userId'] as String?)?.trim() ?? '';
-          final urls = await uploadExpertRequestImagesFromLocalPaths(paths: paths, userId: uid);
-          payload['photos'] = urls;
+          // 사진 업로드 실패해도 Firestore 저장은 반드시 진행
+          try {
+            final urls = await uploadExpertRequestImagesFromLocalPaths(
+              paths: paths,
+              userId: uid,
+            );
+            payload['photos'] = urls;
+          } catch (e) {
+            if (kDebugMode) debugPrint('[Flush] 사진 업로드 실패 → photos=[] 로 저장 진행: $e');
+            payload['photos'] = <String>[];
+          }
           payload.remove('_photoLocalPaths');
         }
         await _sendExpertV5ToFirestore(payload);

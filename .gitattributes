@@ -1,0 +1,24 @@
+# LaoTrust - 줄바꿈 통일 설정
+# Windows/Mac/Linux 협업 시 CRLF 경고 방지
+
+* text=auto
+
+# Dart/Flutter 소스코드 → LF 고정
+*.dart text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+
+# 바이너리 파일 → 줄바꿈 변환 안 함
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary

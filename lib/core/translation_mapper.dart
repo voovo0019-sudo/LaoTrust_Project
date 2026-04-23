@@ -1080,6 +1080,26 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'interior_budget_l': {'ko': '2000만원 이상', 'en': 'Over \$2,000', 'lo': 'ສູງກວ່າ 2,000USD'},
   'request_success_title': {'ko': '신청 완료', 'en': 'Request Sent!', 'lo': 'ສົ່ງຄຳຂໍແລ້ວ!'},
   'request_success_message': {'ko': '전문가에게 성공적으로 전달되었습니다.\n잠시 후 전문가가 연락드립니다.', 'en': 'Your request has been sent.\nAn expert will contact you shortly.', 'lo': 'ຄຳຂໍຂອງທ່ານໄດ້ຖືກສົ່ງແລ້ວ.\nຜູ້ຊ່ຽວຊານຈະຕິດຕໍ່ທ່ານໃນໄວໆນີ້.'},
+  'request_success_receipt': {
+    'ko': '접수번호',
+    'en': 'Receipt No.',
+    'lo': 'ໝາຍເລກ',
+  },
+  'request_success_contact_time': {
+    'ko': '전문가가 2시간 내 연락드립니다',
+    'en': 'An expert will contact you within 2 hours',
+    'lo': 'ຜູ້ຊ່ຽວຊານຈະຕິດຕໍ່ພາຍໃນ 2 ຊົ່ວໂມງ',
+  },
+  'request_success_view_history': {
+    'ko': '내 신청 내역 보기',
+    'en': 'View My Requests',
+    'lo': 'ເບິ່ງຄຳຂໍຂອງຂ້ອຍ',
+  },
+  'request_success_go_home': {
+    'ko': '홈으로 돌아가기',
+    'en': 'Go to Home',
+    'lo': 'ກັບໄປໜ້າຫຼັກ',
+  },
   'confirm': {'ko': '확인', 'en': 'Confirm', 'lo': 'ຢືນຢັນ'},
   'wizard_other_service_label': {'ko': '기타 (직접 입력)', 'en': 'Other (direct input)', 'lo': 'ອື່ນໆ (ປ້ອນເອງ)'},
   'wizard_other_service_hint': {'ko': '원하시는 서비스를 직접 입력해 주세요', 'en': 'Please describe the service you need', 'lo': 'ກະລຸນາອະທິບາຍການບໍລິການທີ່ທ່ານຕ້ອງການ'},

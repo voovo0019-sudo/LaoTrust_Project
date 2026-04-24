@@ -4,6 +4,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
@@ -112,7 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.assignment,
             title: context.l10n('profile_menu_my_requests'),
             subtitle: context.l10n('profile_menu_my_requests_sub'),
-            onTap: () => _showInfoDialog(context, messageKey: 'profile_my_requests_empty'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const _MyRequestsScreen()),
+              );
+            },
           ),
           _buildMenuTile(
             context,
@@ -321,6 +327,94 @@ class _PhoneAuthSheet extends StatefulWidget {
 
   @override
   State<_PhoneAuthSheet> createState() => _PhoneAuthSheetState();
+}
+
+class _MyRequestsScreen extends StatelessWidget {
+  const _MyRequestsScreen();
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _loadMyRequests() async {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) return const [];
+    final snapshot = await FirebaseFirestore.instance
+        .collectionGroup('requests')
+        .where('uid', isEqualTo: currentUser.uid)
+        .orderBy('createdAt', descending: true)
+        .get();
+    return snapshot.docs;
+  }
+
+  String _formatDate(dynamic createdAt) {
+    if (createdAt is Timestamp) {
+      final dt = createdAt.toDate();
+      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+    }
+    return '-';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
+        title: Text(context.l10n('profile_menu_my_requests')),
+      ),
+      body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+        future: _loadMyRequests(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                context.l10n('quick_job_save_failed'),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final docs = snapshot.data ?? const [];
+          if (docs.isEmpty) {
+            return Center(
+              child: Text(context.l10n('profile_my_requests_empty')),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+              final category = (data['category'] ?? '').toString();
+              final status = (data['status'] ?? context.l10n('status')).toString();
+              final location = (data['locationText'] ?? data['location'] ?? '-').toString();
+              final createdAt = _formatDate(data['createdAt']);
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.assignment_turned_in_outlined),
+                  title: Text(category.isEmpty ? context.l10n('request_complete_title') : category),
+                  subtitle: Text('$location\n$createdAt'),
+                  trailing: Text(
+                    status,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  isThreeLine: true,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {

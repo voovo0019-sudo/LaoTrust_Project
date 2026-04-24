@@ -25,6 +25,7 @@
   "request_success_contact_time": "An expert will contact you within 2 hours",
   "request_success_view_history": "View My Requests",
   "request_success_go_home": "Go to Home",
+  "request_success_home": "Back to Home",
   "request_complete_title": "Request Complete",
   "request_complete_message": "Your request has been submitted.",
   "verified_badge_apply": "Apply for Verified Badge",
@@ -333,6 +334,8 @@
   "radar_stage_3km": "Searching 3km",
   "radar_stage_5km_plus": "Searching 5km+",
   "radar_complete_delivered": "Delivered",
+  "radar_searching": "Searching for nearby experts...",
+  "radar_found": "Expert found!",
 
   "partner_upload_removed": "Deselected",
   "partner_support_center_title": "LaoTrust Partner Support",
@@ -777,6 +780,7 @@
   "wizard_repair_symptom_memo_hint": "When it started, what happens, model name, etc.",
   "wizard_need_firebase_for_photos": "Connect Firebase to upload photos.",
   "wizard_upload_failed": "Photo upload failed. Check network and Storage rules.",
+  "wizard_submit_error": "An error occurred. Please try again.",
   "wizard_events_kind_from_step1": "Event type was selected in step 1.",
   "wizard_tutoring_subject_from_step1": "Subject (step 1)"
 }

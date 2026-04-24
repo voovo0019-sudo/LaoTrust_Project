@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   bool _shownDefaultLocationInfo = false;
+  final ScrollController _scrollController = ScrollController();
 
   /// 레이더 강제 제어: 위저드 복귀 시 result==true 이면 여기서 시퀀스 구동
   bool _isSearching = false;
@@ -95,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _etcController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -330,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_currentView == HomeView.main) const WelcomeBanner(),
         Expanded(
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 8),
             child: Column(
@@ -378,8 +381,18 @@ class _HomeScreenState extends State<HomeScreen> {
         'categoryKey': categoryKey,
       },
     );
-    if (result == true) {
+    if (result == true || result == 'showRadar') {
       setState(() => _isSearching = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final targetOffset = _scrollController.position.maxScrollExtent * 0.35;
+          _scrollController.animateTo(
+            targetOffset,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
       Future.delayed(const Duration(seconds: 3), () {
         if (!mounted) return;
         setState(() {
@@ -388,7 +401,8 @@ class _HomeScreenState extends State<HomeScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28)),
             content: Text(context.l10n('radar_complete_delivered')),
             actions: [
               TextButton(

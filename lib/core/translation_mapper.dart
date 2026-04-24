@@ -388,6 +388,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Wide search beyond 5km...',
     'lo': 'ກຳລັງຊອກຫາໄກກວ່າ 5km...',
   },
+  'radar_complete_delivered': {
+    'ko': '전달 완료',
+    'en': 'Delivered',
+    'lo': 'ສົ່ງສຳເລັດ',
+  },
   'area_or_size': {
     'ko': '면적 / 크기',
     'en': 'Area / Size',
@@ -417,6 +422,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '현재 계정에서 로그아웃합니다',
     'en': 'Sign out from current account',
     'lo': 'ອອກຈາກບັນຊີປັດຈຸບັນ',
+  },
+  'profile_my_requests_empty': {
+    'ko': '아직 신청된 서비스 현황이 없습니다',
+    'en': 'You have no submitted service requests yet.',
+    'lo': 'ຍັງບໍ່ມີການຮ້ອງຂໍບໍລິການທີ່ສົ່ງແລ້ວ.',
   },
   'inbox_title': {
     'ko': '수신함',
@@ -1100,6 +1110,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Go to Home',
     'lo': 'ກັບໄປໜ້າຫຼັກ',
   },
+  'request_success_home': {
+    'ko': '홈으로 돌아가기',
+    'en': 'Back to Home',
+    'lo': 'ກັບໄປໜ້າຫຼັກ',
+  },
   'confirm': {'ko': '확인', 'en': 'Confirm', 'lo': 'ຢືນຢັນ'},
   'wizard_other_service_label': {'ko': '기타 (직접 입력)', 'en': 'Other (direct input)', 'lo': 'ອື່ນໆ (ປ້ອນເອງ)'},
   'wizard_other_service_hint': {'ko': '원하시는 서비스를 직접 입력해 주세요', 'en': 'Please describe the service you need', 'lo': 'ກະລຸນາອະທິບາຍການບໍລິການທີ່ທ່ານຕ້ອງການ'},
@@ -1236,6 +1251,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '예: 여행 회화, 비즈니스 영어',
     'en': 'e.g. Travel conversation, Business English',
     'lo': 'ຕົວຢ່າງ: ສົນທະນາທ່ອງທ່ຽວ',
+  },
+  'wizard_submit_error': {
+    'ko': '신청 중 오류가 발생했습니다. 다시 시도해주세요.',
+    'en': 'An error occurred. Please try again.',
+    'lo': 'ເກີດຂໍ້ຜິດພາດ. ກະລຸນາລອງໃໝ່.',
   },
   'wizard_events_kind_from_step1': {'ko': '이벤트 종류', 'en': 'Event Type', 'lo': 'ປະເພດງານ'},
   'wizard_event_people_label': {'ko': '예상 인원 *', 'en': 'Expected People *', 'lo': 'ຈຳນວນຄາດການ *'},

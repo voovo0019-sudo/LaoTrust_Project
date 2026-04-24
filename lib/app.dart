@@ -18,6 +18,7 @@ import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
 import 'features/profile/partner_support_center_screen.dart';
 import 'features/universal_wizard/universal_wizard_screen.dart';
+import 'features/universal_wizard/request_complete_screen.dart';
 import 'features/home/quick_job_post_screen.dart';
 
 class LaoTrustApp extends StatefulWidget {
@@ -134,6 +135,13 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
             categoryKey: args?['categoryKey'] as String? ?? 'expert_repair',
             initialSubTypeId: args?['initialSubTypeId'] as String?,
             initialSubTypeLabel: args?['initialSubTypeLabel'] as String?,
+          );
+        },
+        RequestCompleteScreen.routeName: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return RequestCompleteScreen(
+            receiptNo: args?['receiptNo'] as String? ?? 'LT-000000',
           );
         },
       },

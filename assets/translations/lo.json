@@ -25,6 +25,7 @@
   "request_success_contact_time": "ຜູ້ຊ່ຽວຊານຈະຕິດຕໍ່ພາຍໃນ 2 ຊົ່ວໂມງ",
   "request_success_view_history": "ເບິ່ງຄຳຂໍຂອງຂ້ອຍ",
   "request_success_go_home": "ກັບໄປໜ້າຫຼັກ",
+  "request_success_home": "ກັບໄປໜ້າຫຼັກ",
   "request_complete_title": "ສົ່ງຄຳຂໍແລ້ວ",
   "request_complete_message": "ຄຳຂໍຂອງທ່ານຖືກສົ່ງແລ້ວ.",
   "verified_badge_apply": "ສະໝັກໃບຢືນຢັນ",
@@ -333,6 +334,8 @@
   "radar_stage_3km": "ກຳລັງຄົ້ນຫາ 3km",
   "radar_stage_5km_plus": "ກຳລັງຄົ້ນຫາ 5km+",
   "radar_complete_delivered": "ສົ່ງສຳເລັດ",
+  "radar_searching": "ກຳລັງຄົ້ນຫາຜູ້ຊ່ຽວຊານໃກ້ຄຽງ...",
+  "radar_found": "ພົບຜູ້ຊ່ຽວຊານແລ້ວ!",
 
   "partner_upload_removed": "ຍົກເລີກການເລືອກແລ້ວ",
   "partner_support_center_title": "ສູນຊ່ວຍເຫຼືອພາກສ່ວນ LaoTrust",
@@ -777,6 +780,7 @@
   "wizard_repair_symptom_memo_hint": "ອະທິບາຍອາການ, ລຸ້ນ, ເວລາ ແລະ ອື່ນໆ.",
   "wizard_need_firebase_for_photos": "ເຊື່ອມ Firebase ເພື່ອອັບໂຫຼດຮູບ.",
   "wizard_upload_failed": "ອັບໂຫຼດຮູບບໍ່ສຳເລັດ.",
+  "wizard_submit_error": "ເກີດຂໍ້ຜິດພາດ. ກະລຸນາລອງໃໝ່.",
   "wizard_events_kind_from_step1": "ປະເພດງານເລືອກໃນຂັ້ນຕອນທີ 1.",
   "wizard_tutoring_subject_from_step1": "ວິຊາ (ຂັ້ນຕອນທີ 1)"
 }

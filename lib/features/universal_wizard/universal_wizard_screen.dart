@@ -15,8 +15,8 @@ import '../../core/expert_request_photo_upload.dart';
 import '../../core/firebase_service.dart';
 import '../../core/location_service.dart';
 import '../../core/offline_first_sync.dart';
-import '../../core/search_trigger_bus.dart';
 import '../../core/translation_mapper.dart';
+import 'request_complete_screen.dart';
 import 'universal_wizard_config.dart';
 import 'universal_wizard_state.dart';
 import 'steps/wizard_step1.dart';
@@ -983,198 +983,35 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         Navigator.of(context).pop();
       }
     } on Object catch (e) {
-      // ignore: avoid_print
-      print('[SUBMIT] ?먮윭: $e');
-      rethrow;
+      debugPrint('[SUBMIT] 에러: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n('wizard_submit_error'))),
+      );
+      return;
     } finally {
-      // ignore: avoid_print
-      print('[SUBMIT] finally ?ㅽ뻾');
+      debugPrint('[SUBMIT] finally 실행');
       if (mounted) setState(() => _isSubmitting = false);
     }
 
-    // finally ?꾩쟾???앸궃 ??    debugPrint('[SUBMIT] ?좎? ?묐떟???뺣낫瑜??꾪빐 利됱떆 ?앹뾽 ?몄텧');
     if (!mounted) return;
+    debugPrint('[RADAR] _showSuccessDialog 호출');
     _showSuccessDialog();
   }
 
-  /// ?꾨Ц媛 ?좎껌 ?꾨즺 ?앹뾽 (利됱떆 ?몄텧??
   void _showSuccessDialog() {
-    final lang = _currentLangCode();
-    String t(String key) => kStaticUiTripleByMessageKey[key]?[lang] ?? key;
-
-    // 접수번호 생성 (날짜 + 랜덤 4자리)
+    debugPrint('[RADAR] _showSuccessDialog 호출');
+    if (!mounted) {
+      debugPrint('[RADAR] context unmounted 종료');
+      return;
+    }
     final now = DateTime.now();
     final receiptNo =
         'LT-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(1000 + (now.millisecondsSinceEpoch % 9000)).toString()}';
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 성공 아이콘
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_rounded,
-                    color: Color(0xFF3F51B5),
-                    size: 48,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // 제목
-                Text(
-                  t('request_success_title'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A1A),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-
-                // 부제목
-                Text(
-                  t('request_success_message'),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-
-                // 접수번호 박스
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F7FF),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFF3F51B5).withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        t('request_success_receipt'),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        receiptNo,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF3F51B5),
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // 연락 시간 안내
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.access_time_rounded,
-                      size: 16,
-                      color: Color(0xFF888888),
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        t('request_success_contact_time'),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF888888),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-
-                // 내 신청 내역 보기 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      if (mounted) {
-                        Navigator.of(context).pop(true);
-                        Navigator.pushNamed(context, '/profile');
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF3F51B5),
-                      side: const BorderSide(color: Color(0xFF3F51B5)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      t('request_success_view_history'),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // 홈으로 돌아가기 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      SearchTriggerBus.trigger();
-                      Navigator.of(dialogContext).pop();
-                      if (mounted) Navigator.of(context).pop(true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3F51B5),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      t('request_success_go_home'),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    debugPrint('[RADAR] 신청완료 페이지로 이동: $receiptNo');
+    Navigator.of(context).pushReplacementNamed(
+      RequestCompleteScreen.routeName,
+      arguments: {'receiptNo': receiptNo},
     );
   }
 

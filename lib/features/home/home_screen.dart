@@ -1,6 +1,7 @@
 // 메인 탭 진입: `features/home/home_screen.dart`에서 re-export. v7.5 실시간 알바는 QuickJobsSection.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lao_trust/services/firebase_service.dart';
 import '../../core/app_localizations.dart';
 import '../../core/location_service.dart';
@@ -1226,45 +1227,121 @@ class _HomeAccountStatusAction extends StatelessWidget {
   }
 }
 
-/// 근처 전문가 섹션 본문: 샘플 3인 노출 (레이더/완료 메시지는 HomeScreen에서 제어)
-class _NearbyExpertsSectionBody extends StatelessWidget {
+class _NearbyExpertsSectionBody extends StatefulWidget {
+  @override
+  State<_NearbyExpertsSectionBody> createState() =>
+      _NearbyExpertsSectionBodyState();
+}
+
+class _NearbyExpertsSectionBodyState
+    extends State<_NearbyExpertsSectionBody> {
+  
+  // 카테고리별 아이콘 매핑
+  IconData _iconForCategory(String category, String? subCategory) {
+    switch (subCategory) {
+      case 'ac': return Icons.ac_unit;
+      case 'plumbing': return Icons.plumbing;
+      case 'electric': return Icons.electrical_services;
+      case 'household': return Icons.home_repair_service;
+      default:
+        switch (category) {
+          case 'expert_repair': return Icons.build;
+          case 'expert_cleaning': return Icons.cleaning_services;
+          case 'expert_moving': return Icons.local_shipping;
+          case 'expert_beauty': return Icons.face;
+          case 'expert_tutoring': return Icons.school;
+          case 'expert_events': return Icons.celebration;
+          case 'expert_vehicle': return Icons.directions_car;
+          case 'expert_interior': return Icons.chair;
+          case 'expert_business': return Icons.translate;
+          default: return Icons.person;
+        }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const sampleExperts = <({String nameKey, LocationPoint location, IconData icon})>[
-      (
-        nameKey: 'chat_sample_name_1',
-        location: LocationPoint(17.9722, 102.6205),
-        icon: Icons.ac_unit,
-      ),
-      (
-        nameKey: 'chat_sample_name_2',
-        location: LocationPoint(17.9790, 102.6350),
-        icon: Icons.plumbing,
-      ),
-      (
-        nameKey: 'chat_sample_name_3',
-        location: LocationPoint(17.9650, 102.6100),
-        icon: Icons.electrical_services,
-      ),
-    ];
+    final lang = Localizations.localeOf(context)
+        .languageCode.toLowerCase().startsWith('ko')
+        ? 'ko'
+        : Localizations.localeOf(context)
+            .languageCode.toLowerCase().startsWith('lo')
+            ? 'lo'
+            : 'en';
 
-    final tiles = <Widget>[];
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('experts')
+          .where('isAvailable', isEqualTo: true)
+          .limit(5)
+          .snapshots(),
+      builder: (context, snapshot) {
+        // 로딩 중
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF3B5BDB),
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
 
-    // 샘플 데이터는 항상 고정 3인 노출
-    for (final e in sampleExperts) {
-      tiles.add(
-        ExpertCard(
-          name: context.l10n(e.nameKey),
-          expertLocation: e.location,
-          icon: e.icon,
-          subtitle: context.l10n('experts_nearby_subtitle'),
-          onTap: () {},
-        ),
-      );
-    }
+        // 에러
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: Text(
+                context.l10n('experts_nearby_empty'),
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+          );
+        }
 
-    return Column(
-      children: tiles,
+        // 데이터 없음
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Center(
+              child: Text(
+                context.l10n('experts_nearby_empty'),
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+          );
+        }
+
+        // 전문가 카드 목록
+        return Column(
+          children: docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final name = (data['name_$lang'] as String?)
+                ?? (data['name_ko'] as String?)
+                ?? 'Expert';
+            final category = data['category'] as String? ?? '';
+            final subCategory = data['subCategory'] as String? ?? '';
+            final lat = (data['latitude'] as num?)?.toDouble() ?? 17.9757;
+            final lng = (data['longitude'] as num?)?.toDouble() ?? 102.6331;
+            final isVerified = data['isVerified'] as bool? ?? false;
+
+            return ExpertCard(
+              name: name,
+              expertLocation: LocationPoint(lat, lng),
+              icon: _iconForCategory(category, subCategory),
+              subtitle: context.l10n('experts_nearby_subtitle'),
+              commanderApproved: isVerified,
+              onTap: () {
+                // TODO: 전문가 상세 페이지 연결 (다음 지시서)
+              },
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

@@ -28,6 +28,8 @@ class RadarScanningWidget extends StatefulWidget {
 
 class _RadarScanningWidgetState extends State<RadarScanningWidget>
     with TickerProviderStateMixin {
+  late List<_PinData> _pins;
+  final _random = math.Random();
   late AnimationController _scanController;
   late AnimationController _breathController;
   late AnimationController _pin1Controller;
@@ -36,15 +38,20 @@ class _RadarScanningWidgetState extends State<RadarScanningWidget>
   late AnimationController _stageController;
   late AnimationController _completeController;
 
-  static const List<_PinData> _pins = [
-    _PinData(angle: 0.8, radiusFactor: 0.35),
-    _PinData(angle: 2.5, radiusFactor: 0.62),
-    _PinData(angle: 4.2, radiusFactor: 0.82),
-  ];
-
   @override
   void initState() {
     super.initState();
+    // 핀 위치 랜덤 생성 (매번 다른 위치!)
+    _pins = List.generate(3, (i) {
+      // 각 핀마다 반경 구간 고정 (1km/3km/5km 느낌)
+      // 각도만 랜덤!
+      final radiusFactor = 0.25 + (i * 0.28) + _random.nextDouble() * 0.1;
+      final angle = _random.nextDouble() * 2 * math.pi;
+      return _PinData(
+        angle: angle,
+        radiusFactor: radiusFactor.clamp(0.2, 0.9),
+      );
+    });
 
     _scanController = AnimationController(
       vsync: this,

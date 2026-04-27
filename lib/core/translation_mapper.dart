@@ -393,6 +393,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Delivered',
     'lo': 'ສົ່ງສຳເລັດ',
   },
+  'radar_expert_contact_soon': {
+    'ko': '전문가가 곧 연락드립니다',
+    'en': 'An expert will contact you soon',
+    'lo': 'ຜູ້ຊ່ຽວຊານຈະຕິດຕໍ່ທ່ານໃນໄວໆນີ້',
+  },
   'area_or_size': {
     'ko': '면적 / 크기',
     'en': 'Area / Size',

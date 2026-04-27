@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/firebase_service.dart';
@@ -31,5 +32,5 @@ void main() async {
   // LT-08 미션05: 푸시 알림(긴급 출동) 초기화 — 토픽 구독
   await initPushNotificationService();
 
-  runApp(const LaoTrustApp());
+  runApp(const ProviderScope(child: LaoTrustApp()));
 }

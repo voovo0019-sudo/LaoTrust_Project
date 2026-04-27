@@ -30,6 +30,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   # Noto Sans / Noto Sans Lao 전역 타이포 (작전 B)
   google_fonts: ^6.2.1
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.7
 
 dev_dependencies:
   flutter_test:

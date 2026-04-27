@@ -1,10 +1,16 @@
+// =============================================================================
+// LaoTrust — 신청완료 화면
+// radarProvider로 레이더 트리거 전송
+// =============================================================================
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/translation_mapper.dart';
+import '../../core/providers/radar_provider.dart';
 import '../main_tab/main_tab_screen.dart';
 
 const String requestCompleteRouteName = '/request-complete';
 
-class RequestCompleteScreen extends StatelessWidget {
+class RequestCompleteScreen extends ConsumerWidget {
   const RequestCompleteScreen({
     super.key,
     required this.receiptNo,
@@ -14,7 +20,7 @@ class RequestCompleteScreen extends StatelessWidget {
   final String receiptNo;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final lang = Localizations.localeOf(context).languageCode
             .toLowerCase()
             .startsWith('ko')
@@ -34,7 +40,6 @@ class RequestCompleteScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 체크 아이콘
               Container(
                 width: 100,
                 height: 100,
@@ -49,7 +54,6 @@ class RequestCompleteScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              // 제목
               Text(
                 t('request_success_title'),
                 style: const TextStyle(
@@ -60,7 +64,6 @@ class RequestCompleteScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              // 부제목
               Text(
                 t('request_success_message'),
                 style: const TextStyle(
@@ -71,11 +74,10 @@ class RequestCompleteScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              // 접수번호
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F7FF),
                   borderRadius: BorderRadius.circular(16),
@@ -106,7 +108,6 @@ class RequestCompleteScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // 연락 예정 시간
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -126,7 +127,6 @@ class RequestCompleteScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 40),
-              // 내 신청 내역 보기
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
@@ -152,16 +152,18 @@ class RequestCompleteScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              // 홈으로 돌아가기
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // 1. 먼저 홈으로 이동 (home_screen 빌드 시작)
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       MainTabScreen.routeName,
                       (route) => false,
-                      arguments: {'showRadar': true},
                     );
+                    // 2. home_screen 빌드 완료 후 레이더 트리거
+                    await Future.delayed(const Duration(milliseconds: 300));
+                    ref.read(radarProvider.notifier).trigger();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3B5BDB),

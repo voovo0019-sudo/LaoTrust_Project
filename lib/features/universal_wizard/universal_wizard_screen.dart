@@ -716,7 +716,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
     // ignore: avoid_print
-    print('[SUBMIT] ?쒖옉');
+    debugPrint('[SUBMIT] ?쒖옉');
 
     final cfg = _config ?? kUniversalWizardConfigs['expert_repair']!;
     final txInput = _wizardTranslationInput(cfg);
@@ -730,7 +730,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       if (_pickedImages.isNotEmpty) {
         if (!isFirebaseEnabled) {
           // ignore: avoid_print
-          print('[SUBMIT] Firebase 鍮꾪솢?????ъ쭊 ?놁씠 ?좎껌 怨꾩냽');
+          debugPrint('[SUBMIT] Firebase 鍮꾪솢?????ъ쭊 ?놁씠 ?좎껌 怨꾩냽');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
@@ -739,7 +739,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           photoUrls = <String>[];
         } else {
           // ignore: avoid_print
-          print('[SUBMIT] ?곌껐 ?뺤씤 ?쒖옉');
+          debugPrint('[SUBMIT] ?곌껐 ?뺤씤 ?쒖옉');
           List<ConnectivityResult> conn = <ConnectivityResult>[];
           try {
             conn = await Connectivity()
@@ -760,7 +760,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               e == ConnectivityResult.wifi ||
               e == ConnectivityResult.ethernet);
           // ignore: avoid_print
-          print('[SUBMIT] ?곌껐 ?뺤씤 ?꾨즺 (online=$online)');
+          debugPrint('[SUBMIT] ?곌껐 ?뺤씤 ?꾨즺 (online=$online)');
           if (online) {
             if (!mounted) return;
             final lang = Localizations.localeOf(context).languageCode;
@@ -791,17 +791,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             );
             try {
               // ignore: avoid_print
-              print('[SUBMIT] ?ъ쭊?낅줈???쒖옉');
+              debugPrint('[SUBMIT] ?ъ쭊?낅줈???쒖옉');
               photoUrls = await uploadExpertRequestImagesFromXFiles(
                 files: _pickedImages,
                 userId: uid,
               ).timeout(const Duration(seconds: 30));
               // ignore: avoid_print
-              print('[SUBMIT] ?ъ쭊?낅줈??寃곌낵: ${photoUrls.length}媛?URL');
+              debugPrint('[SUBMIT] ?ъ쭊?낅줈??寃곌낵: ${photoUrls.length}媛?URL');
             } on TimeoutException catch (e) {
               if (kDebugMode) debugPrint('UniversalWizard: ?ъ쭊 ?낅줈????꾩븘?? $e');
               // ignore: avoid_print
-              print('[SUBMIT] ?ъ쭊?낅줈????꾩븘????photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽');
+              debugPrint('[SUBMIT] ?ъ쭊?낅줈????꾩븘????photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -814,7 +814,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 debugPrint('$st');
               }
               // ignore: avoid_print
-              print('[SUBMIT] ?ъ쭊?낅줈???ㅽ뙣 ??photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽: $e');
+              debugPrint('[SUBMIT] ?ъ쭊?낅줈???ㅽ뙣 ??photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽: $e');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -823,19 +823,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               }
             } finally {
               // ignore: avoid_print
-              print('[SUBMIT] ?ъ쭊?낅줈??釉붾줉 finally (?ㅼ씠?쇰줈洹??リ린)');
+              debugPrint('[SUBMIT] ?ъ쭊?낅줈??釉붾줉 finally (?ㅼ씠?쇰줈洹??リ린)');
               if (mounted) Navigator.of(context).pop();
             }
           } else {
             photoLocalPaths =
                 _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
             // ignore: avoid_print
-            print('[SUBMIT] ?ㅽ봽?쇱씤 ??濡쒖뺄 寃쎈줈 ${_pickedImages.length}嫄? ?낅줈???앸왂');
+            debugPrint('[SUBMIT] ?ㅽ봽?쇱씤 ??濡쒖뺄 寃쎈줈 ${_pickedImages.length}嫄? ?낅줈???앸왂');
           }
         }
       } else {
         // ignore: avoid_print
-        print('[SUBMIT] ?좏깮???ъ쭊 ?놁쓬 ??諛붾줈 踰덉뿭 ?④퀎');
+        debugPrint('[SUBMIT] ?좏깮???ъ쭊 ?놁쓬 ??諛붾줈 踰덉뿭 ?④퀎');
       }
 
       final step3Mode = _config?.step3Mode ?? Step3LocationMode.onsite;
@@ -898,7 +898,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      print('[SUBMIT] 踰덉뿭 ?쒖옉');
+      debugPrint('[SUBMIT] 踰덉뿭 ?쒖옉');
       try {
         final tResult = await TranslationMapper.translateAllFieldsStrict(
           txInput,
@@ -919,7 +919,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         Navigator.of(context).pop();
       }
       // ignore: avoid_print
-      print('[SUBMIT] 踰덉뿭 ?꾨즺');
+      debugPrint('[SUBMIT] 踰덉뿭 ?꾨즺');
 
       final body = <String, dynamic>{
         'category': _categoryEnglish(_state.categoryKey),
@@ -971,7 +971,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      print('[SUBMIT] Firestore ????쒖옉 (photos=${photoUrls.length}媛?');
+      debugPrint('[SUBMIT] Firestore ????쒖옉 (photos=${photoUrls.length}媛?');
       unawaited(
         saveExpertRequestV5OfflineFirst(body).then((_) {
           debugPrint('[SUBMIT] Firestore ????깃났 (Background)');

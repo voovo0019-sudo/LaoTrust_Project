@@ -74,6 +74,7 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: 'NotoSansLao',
       colorScheme: const ColorScheme.light(
         primary: indigoBlue,
         onPrimary: white,
@@ -219,6 +220,7 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      fontFamily: 'NotoSansLao',
       colorScheme: const ColorScheme.dark(
         primary: indigoBlue,
         onPrimary: white,

@@ -1,4 +1,5 @@
 // 메인 탭 진입: `features/home/home_screen.dart`에서 re-export. v7.5 실시간 알바는 QuickJobsSection.
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
 import '../universal_wizard/universal_wizard_screen.dart';
 import '../expert_inbox/expert_inbox_screen.dart';
+import 'expert_detail_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -63,6 +65,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// 레이더 강제 제어: 위저드 복귀 시 result==true 이면 여기서 시퀀스 구동
   bool _isSearching = false;
   bool _isRadarComplete = false;
+  Timer? _radarCompleteTimer;
+  Timer? _radarResetTimer;
+  Timer? _wizardRadarTimer;
 
   static const String _symptomOtherKey = 'symptom_other';
 
@@ -91,14 +96,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _triggerRadar() {
     if (!mounted) return;
-
-    // 1단계: 레이더 표시 + 스크롤
+    _radarCompleteTimer?.cancel();
+    _radarResetTimer?.cancel();
     setState(() {
       _isSearching = true;
       _isRadarComplete = false;
     });
-
-    // 2단계: 레이더 영역으로 스크롤
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         final targetOffset =
@@ -110,15 +113,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       }
     });
-
-    // 2단계: 4.5초 수색 완료 → 완료 상태 전환
-    Future.delayed(const Duration(milliseconds: 4500), () {
+    _radarCompleteTimer = Timer(const Duration(milliseconds: 4500), () {
       if (!mounted) return;
       setState(() => _isRadarComplete = true);
     });
-
-    // 3단계: 6.5초 후 레이더 종료
-    Future.delayed(const Duration(milliseconds: 6500), () {
+    _radarResetTimer = Timer(const Duration(milliseconds: 6500), () {
       if (!mounted) return;
       setState(() {
         _isSearching = false;
@@ -145,6 +144,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
+    _radarCompleteTimer?.cancel();
+    _radarResetTimer?.cancel();
+    _wizardRadarTimer?.cancel();
     _etcController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
@@ -444,7 +446,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           );
         }
       });
-      Future.delayed(const Duration(seconds: 3), () {
+      _wizardRadarTimer?.cancel();
+      _wizardRadarTimer = Timer(const Duration(seconds: 3), () {
         if (!mounted) return;
         setState(() {
           _isSearching = false;
@@ -1336,7 +1339,15 @@ class _NearbyExpertsSectionBodyState
               subtitle: context.l10n('experts_nearby_subtitle'),
               commanderApproved: isVerified,
               onTap: () {
-                // TODO: 전문가 상세 페이지 연결 (다음 지시서)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ExpertDetailScreen(
+                      expertId: doc.id,
+                      data: data,
+                    ),
+                  ),
+                );
               },
             );
           }).toList(),

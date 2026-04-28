@@ -15,7 +15,7 @@ import 'firebase_service.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
-    print('[LT-08 Push] Background message: ${message.messageId}');
+    debugPrint('[LT-08 Push] Background message: ${message.messageId}');
   }
 }
 

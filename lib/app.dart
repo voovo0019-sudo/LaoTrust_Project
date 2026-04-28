@@ -20,6 +20,7 @@ import 'features/profile/partner_support_center_screen.dart';
 import 'features/universal_wizard/universal_wizard_screen.dart';
 import 'features/universal_wizard/request_complete_screen.dart';
 import 'features/home/quick_job_post_screen.dart';
+import 'features/home/expert_detail_screen.dart';
 
 class LaoTrustApp extends StatefulWidget {
   const LaoTrustApp({super.key});
@@ -142,6 +143,14 @@ class _LaoTrustAppState extends State<LaoTrustApp> {
               as Map<String, dynamic>?;
           return RequestCompleteScreen(
             receiptNo: args?['receiptNo'] as String? ?? 'LT-000000',
+          );
+        },
+        '/expert_detail': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ExpertDetailScreen(
+            expertId: args?['expertId'] as String? ?? '',
+            data: args?['data'] as Map<String, dynamic>? ?? {},
           );
         },
       },

@@ -8,3 +8,6 @@ pubspec.lock
 
 # Firebase options (contains API keys)
 lib/firebase_options.dart
+
+# Firebase hosting cache
+.firebase/

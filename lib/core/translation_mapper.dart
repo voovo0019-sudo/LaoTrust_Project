@@ -443,6 +443,41 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'No requests received',
     'lo': 'ບໍ່ມີຄໍາຮ້ອງຂໍ',
   },
+  'expert_verified_badge': {
+    'ko': '인증 전문가',
+    'en': 'Verified Expert',
+    'lo': 'ຜູ້ຊ່ຽວຊານຢັ້ງຢືນ',
+  },
+  'expert_status_available': {
+    'ko': '지금 가능',
+    'en': 'Available',
+    'lo': 'ພ້ອມໃຫ້ບໍລິການ',
+  },
+  'expert_status_unavailable': {
+    'ko': '현재 불가',
+    'en': 'Unavailable',
+    'lo': 'ບໍ່ພ້ອມ',
+  },
+  'expert_rating_label': {
+    'ko': '평균 평점',
+    'en': 'Average Rating',
+    'lo': 'ຄະແນນສະເລ່ຍ',
+  },
+  'expert_request_service': {
+    'ko': '서비스 신청하기',
+    'en': 'Request Service',
+    'lo': 'ຂໍບໍລິການ',
+  },
+  'expert_reviews_title': {
+    'ko': '리뷰',
+    'en': 'Reviews',
+    'lo': 'ລີວິວ',
+  },
+  'expert_reviews_empty': {
+    'ko': '아직 리뷰가 없습니다.',
+    'en': 'No reviews yet.',
+    'lo': 'ຍັງບໍ່ມີລີວິວ.',
+  },
   'inbox_status_pending': {
     'ko': '대기중',
     'en': 'Pending',

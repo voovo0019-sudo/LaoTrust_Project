@@ -4,20 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lao_trust/services/firebase_service.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/app_localizations.dart';
 import '../../core/location_service.dart';
 import '../../core/providers/radar_provider.dart';
 import '../../core/translation_mapper.dart';
-import '../profile/profile_screen.dart';
 import '../home/components/welcome_banner.dart';
 import '../home/components/category_grid.dart';
 import '../home/components/quick_jobs.dart';
 import '../home/components/section_title_style.dart';
 import '../home/components/radar_scanning_widget.dart';
 import '../profile/widgets/commander_verified_badge.dart';
-import '../universal_wizard/universal_wizard_screen.dart';
-import '../expert_inbox/expert_inbox_screen.dart';
-import 'expert_detail_screen.dart';
 
 /// 홈 화면: 3단계(메인 카테고리 → 세부 종목 → 증상 선택) + 급구 알바 카드
 /// 상단바 푸른색 #1E3A8A, 언어(한/라오/영) PopupMenuButton, 설정·알림 아이콘.
@@ -272,17 +269,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (_currentView == HomeView.main)
           _HomeAccountStatusAction(
             onLoginTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const ProfileScreen(
-                        openPhoneAuthOnStart: true,
-                        popToHomeOnAuthSuccess: true,
-                        discardPendingPostLoginRedirect: true,
-                      ),
-                ),
-              );
+              context.push('/login');
             },
           ),
         if (widget.onLocaleChanged != null)
@@ -330,12 +317,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ] ??
                 '수신함',
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ExpertInboxScreen(),
-              ),
-            );
+            context.push('/expert_inbox');
           },
         ),
         PopupMenuButton<String>(
@@ -427,10 +409,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// 셋째 지침: 위저드 이동 함수 — result==true 시 레이더 강제 구동
   Future<void> _openWizard(String categoryKey) async {
-    final result = await Navigator.pushNamed(
-      context,
-      UniversalWizardScreen.routeName,
-      arguments: <String, dynamic>{
+    final result = await context.push<dynamic>(
+      '/wizard',
+      extra: <String, dynamic>{
         'categoryKey': categoryKey,
       },
     );
@@ -1339,14 +1320,12 @@ class _NearbyExpertsSectionBodyState
               subtitle: context.l10n('experts_nearby_subtitle'),
               commanderApproved: isVerified,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ExpertDetailScreen(
-                      expertId: doc.id,
-                      data: data,
-                    ),
-                  ),
+                context.push(
+                  '/expert_detail',
+                  extra: <String, dynamic>{
+                    'expertId': doc.id,
+                    'data': data,
+                  },
                 );
               },
             );

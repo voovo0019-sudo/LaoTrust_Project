@@ -8,6 +8,7 @@ import 'dart:async' show TimeoutException, unawaited;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/app_localizations.dart';
@@ -16,7 +17,6 @@ import '../../core/firebase_service.dart';
 import '../../core/location_service.dart';
 import '../../core/offline_first_sync.dart';
 import '../../core/translation_mapper.dart';
-import 'request_complete_screen.dart';
 import 'universal_wizard_config.dart';
 import 'universal_wizard_state.dart';
 import 'steps/wizard_step1.dart';
@@ -220,14 +220,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               Navigator.of(ctx).pop();
               Navigator.of(context).pop();
               setPostLoginRedirect(
-                UniversalWizardScreen.routeName,
+                '/wizard',
                 <String, dynamic>{
                   'categoryKey': catKey,
                   'initialSubTypeId': subId,
                   'initialSubTypeLabel': subLabel,
                 },
               );
-              Navigator.of(context).pushNamed('/login');
+              context.push('/login');
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF1E3A8A),
@@ -716,7 +716,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
     // ignore: avoid_print
-    debugPrint('[SUBMIT] ?쒖옉');
+    debugPrint('[SUBMIT] Start');
 
     final cfg = _config ?? kUniversalWizardConfigs['expert_repair']!;
     final txInput = _wizardTranslationInput(cfg);
@@ -730,7 +730,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       if (_pickedImages.isNotEmpty) {
         if (!isFirebaseEnabled) {
           // ignore: avoid_print
-          debugPrint('[SUBMIT] Firebase 鍮꾪솢?????ъ쭊 ?놁씠 ?좎껌 怨꾩냽');
+          debugPrint('[SUBMIT] No Firebase, skipping save');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n('wizard_need_firebase_for_photos'))),
@@ -739,7 +739,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           photoUrls = <String>[];
         } else {
           // ignore: avoid_print
-          debugPrint('[SUBMIT] ?곌껐 ?뺤씤 ?쒖옉');
+          debugPrint('[SUBMIT] Checking online status');
           List<ConnectivityResult> conn = <ConnectivityResult>[];
           try {
             conn = await Connectivity()
@@ -760,7 +760,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               e == ConnectivityResult.wifi ||
               e == ConnectivityResult.ethernet);
           // ignore: avoid_print
-          debugPrint('[SUBMIT] ?곌껐 ?뺤씤 ?꾨즺 (online=$online)');
+          debugPrint('[SUBMIT] Network status checked (online=$online)');
           if (online) {
             if (!mounted) return;
             final lang = Localizations.localeOf(context).languageCode;
@@ -791,17 +791,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             );
             try {
               // ignore: avoid_print
-              debugPrint('[SUBMIT] ?ъ쭊?낅줈???쒖옉');
+              debugPrint('[SUBMIT] Photo upload started');
               photoUrls = await uploadExpertRequestImagesFromXFiles(
                 files: _pickedImages,
                 userId: uid,
               ).timeout(const Duration(seconds: 30));
               // ignore: avoid_print
-              debugPrint('[SUBMIT] ?ъ쭊?낅줈??寃곌낵: ${photoUrls.length}媛?URL');
+              debugPrint('[SUBMIT] Photo upload done: ${photoUrls.length} URLs');
             } on TimeoutException catch (e) {
               if (kDebugMode) debugPrint('UniversalWizard: ?ъ쭊 ?낅줈????꾩븘?? $e');
               // ignore: avoid_print
-              debugPrint('[SUBMIT] ?ъ쭊?낅줈????꾩븘????photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽');
+              debugPrint('[SUBMIT] Photo upload skipped, proceeding with photoUrls=[]');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -814,7 +814,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 debugPrint('$st');
               }
               // ignore: avoid_print
-              debugPrint('[SUBMIT] ?ъ쭊?낅줈???ㅽ뙣 ??photoUrls=[] 濡?踰덉뿭쨌???怨꾩냽: $e');
+              debugPrint('[SUBMIT] Photo upload failed, proceeding with photoUrls=[]: $e');
               photoUrls = <String>[];
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -823,19 +823,19 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               }
             } finally {
               // ignore: avoid_print
-              debugPrint('[SUBMIT] ?ъ쭊?낅줈??釉붾줉 finally (?ㅼ씠?쇰줈洹??リ린)');
+              debugPrint('[SUBMIT] Photo upload finally (continuing regardless)');
               if (mounted) Navigator.of(context).pop();
             }
           } else {
             photoLocalPaths =
                 _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
             // ignore: avoid_print
-            debugPrint('[SUBMIT] ?ㅽ봽?쇱씤 ??濡쒖뺄 寃쎈줈 ${_pickedImages.length}嫄? ?낅줈???앸왂');
+            debugPrint('[SUBMIT] No Firebase, skipping ${_pickedImages.length} photos');
           }
         }
       } else {
         // ignore: avoid_print
-        debugPrint('[SUBMIT] ?좏깮???ъ쭊 ?놁쓬 ??諛붾줈 踰덉뿭 ?④퀎');
+        debugPrint('[SUBMIT] No Firebase, skipping save');
       }
 
       final step3Mode = _config?.step3Mode ?? Step3LocationMode.onsite;
@@ -898,7 +898,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      debugPrint('[SUBMIT] 踰덉뿭 ?쒖옉');
+      debugPrint('[SUBMIT] Save started');
       try {
         final tResult = await TranslationMapper.translateAllFieldsStrict(
           txInput,
@@ -919,7 +919,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         Navigator.of(context).pop();
       }
       // ignore: avoid_print
-      debugPrint('[SUBMIT] 踰덉뿭 ?꾨즺');
+      debugPrint('[SUBMIT] Save complete');
 
       final body = <String, dynamic>{
         'category': _categoryEnglish(_state.categoryKey),
@@ -971,26 +971,26 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         );
       }
       // ignore: avoid_print
-      debugPrint('[SUBMIT] Firestore ????쒖옉 (photos=${photoUrls.length}媛?');
+      debugPrint('[SUBMIT] Firestore save started (photos=${photoUrls.length})');
       unawaited(
         saveExpertRequestV5OfflineFirst(body).then((_) {
-          debugPrint('[SUBMIT] Firestore ????깃났 (Background)');
+          debugPrint('[SUBMIT] Firestore save complete (Background)');
         }).catchError((e) {
-          debugPrint('[SUBMIT ERROR] 諛깃렇?쇱슫?????以?踰붿씤 諛쒖깮: $e');
+          debugPrint('[SUBMIT ERROR] Firestore background save failed: $e');
         }),
       );
       if (submitProgressShown && mounted) {
         Navigator.of(context).pop();
       }
     } on Object catch (e) {
-      debugPrint('[SUBMIT] 에러: $e');
+      debugPrint('[SUBMIT] Error: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n('wizard_submit_error'))),
       );
       return;
     } finally {
-      debugPrint('[SUBMIT] finally 실행');
+      debugPrint('[SUBMIT] Finally executed');
       if (mounted) setState(() => _isSubmitting = false);
     }
 
@@ -1009,10 +1009,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     final receiptNo =
         'LT-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(1000 + (now.millisecondsSinceEpoch % 9000)).toString()}';
     debugPrint('[RADAR] 신청완료 페이지로 이동: $receiptNo');
-    Navigator.of(context).pushReplacementNamed(
-      RequestCompleteScreen.routeName,
-      arguments: {'receiptNo': receiptNo},
-    );
+    context.go('/request_complete', extra: {'receiptNo': receiptNo});
   }
 
   String _photoPromptForCategory() {

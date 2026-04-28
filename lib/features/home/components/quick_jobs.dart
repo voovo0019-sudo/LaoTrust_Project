@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/app_localizations.dart';
 import '../../../core/firebase_service.dart';
@@ -9,8 +10,6 @@ import '../../../core/translation_mapper.dart';
 import '../../../data/firestore_schema.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/firebase_service.dart';
-import '../../profile/profile_screen.dart';
-import '../quick_job_post_screen.dart';
 import 'section_title_style.dart';
 
 /// v13.9: 급구 표시는 [pickQuickJobI18nForDisplay](힐링 포함) — EN/LO 한글 숨김 유지.
@@ -229,15 +228,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     );
     if (!context.mounted) return;
     if (goProfile == true) {
-      setPostLoginRedirect(quickJobPostRouteName);
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
-          builder: (_) => const ProfileScreen(
-            openPhoneAuthOnStart: true,
-            popToHomeOnAuthSuccess: true,
-          ),
-        ),
-      );
+      setPostLoginRedirect('/quick_job_post');
+      context.push('/login');
     }
   }
 
@@ -285,10 +277,9 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     required String detail,
     required DateTime deadlineAt,
   }) {
-    Navigator.pushNamed(
-      context,
-      quickJobPostRouteName,
-      arguments: <String, dynamic>{
+    context.push(
+      '/quick_job_post',
+      extra: <String, dynamic>{
         'documentId': job['documentId'],
         'title': title,
         'location': location,
@@ -710,7 +701,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
               await _promptLoginRequired(context);
               return;
             }
-            final result = await Navigator.pushNamed(context, quickJobPostRouteName);
+            final result = await context.push('/quick_job_post');
             if (!context.mounted) return;
             if (result is Map<String, dynamic> && result['_firebaseHandled'] == true) {
               await Future.delayed(const Duration(milliseconds: 3000));

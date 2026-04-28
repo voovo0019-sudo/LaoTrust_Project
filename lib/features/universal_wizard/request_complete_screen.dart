@@ -4,9 +4,9 @@
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/translation_mapper.dart';
 import '../../core/providers/radar_provider.dart';
-import '../main_tab/main_tab_screen.dart';
 
 const String requestCompleteRouteName = '/request-complete';
 
@@ -131,10 +131,7 @@ class RequestCompleteScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/profile',
-                      (route) => route.isFirst,
-                    );
+                    context.go('/profile');
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF3B5BDB),
@@ -157,10 +154,7 @@ class RequestCompleteScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     // 1. 먼저 홈으로 이동 (home_screen 빌드 시작)
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      MainTabScreen.routeName,
-                      (route) => false,
-                    );
+                    context.go('/main');
                     // 2. home_screen 빌드 완료 후 레이더 트리거
                     await Future.delayed(const Duration(milliseconds: 300));
                     ref.read(radarProvider.notifier).trigger();

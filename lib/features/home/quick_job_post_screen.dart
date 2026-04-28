@@ -6,6 +6,7 @@
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
@@ -13,7 +14,6 @@ import '../../core/translation_mapper.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
-import '../profile/profile_screen.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
@@ -98,7 +98,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     if (!mounted) return;
     if (goProfile == true) {
       setPostLoginRedirect(
-        quickJobPostRouteName,
+        '/quick_job_post',
         <String, dynamic>{
           'documentId': widget.editDocumentId,
           'title': _titleController.text,
@@ -108,14 +108,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           'deadline': _deadline,
         },
       );
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const ProfileScreen(
-            openPhoneAuthOnStart: true,
-            popToHomeOnAuthSuccess: true,
-          ),
-        ),
-      );
+      context.push('/login');
     }
   }
 

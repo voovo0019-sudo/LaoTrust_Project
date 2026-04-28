@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/translation_mapper.dart';
-import 'expert_inbox_detail_screen.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 
@@ -112,14 +112,12 @@ class ExpertInboxScreen extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ExpertInboxDetailScreen(
-                          docId: docId,
-                          data: data,
-                        ),
-                      ),
+                    context.push(
+                      '/expert_inbox_detail',
+                      extra: <String, dynamic>{
+                        'docId': docId,
+                        'data': data,
+                      },
                     );
                   },
                   child: Padding(

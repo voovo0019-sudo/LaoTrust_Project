@@ -5,13 +5,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
 import '../../services/auth_service.dart';
-import 'bcel_onepay_screen.dart';
-import 'expert_dashboard_screen.dart';
-import 'partner_support_center_screen.dart';
 
 const String profileRouteName = '/profile';
 
@@ -57,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openBcelOnepay(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified());
+    context.push('/bcel_onepay').then((_) => _loadVerified());
   }
 
   void _showInfoDialog(BuildContext context, {required String messageKey}) {
@@ -106,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.account_balance_wallet,
             title: context.l10n('profile_menu_payment'),
             subtitle: context.l10n('profile_menu_payment_sub'),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BcelOnepayScreen())).then((_) => _loadVerified()),
+            onTap: () => context.push('/bcel_onepay').then((_) => _loadVerified()),
           ),
           _buildMenuTile(
             context,
@@ -146,11 +144,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await finalizeAppAuthState();
               if (!context.mounted) return;
               if (isFirebaseEnabled && !hasRecognizedUserSession) {
-                setPostLoginRedirect(expertDashboardRouteName);
+                setPostLoginRedirect('/expert_dashboard');
                 _openPhoneAuthSheet(context);
                 return;
               }
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertDashboardScreen()));
+              context.push('/expert_dashboard');
             },
           ),
           _buildMenuTile(
@@ -162,11 +160,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await finalizeAppAuthState();
               if (!context.mounted) return;
               if (isFirebaseEnabled && !hasRecognizedUserSession) {
-                setPostLoginRedirect(partnerSupportCenterRouteName);
+                setPostLoginRedirect('/partner_support');
                 _openPhoneAuthSheet(context);
                 return;
               }
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const PartnerSupportCenterScreen()));
+              context.push('/partner_support');
             },
           ),
           _buildMenuTile(
@@ -184,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onTap: () async {
               await auth.signOut();
               if (!context.mounted) return;
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              context.go('/main');
             },
           ),
         ],

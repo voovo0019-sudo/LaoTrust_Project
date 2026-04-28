@@ -4,9 +4,9 @@
 // =============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/app_localizations.dart';
 import '../../core/translation_mapper.dart';
-import '../universal_wizard/universal_wizard_screen.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 const Color _kRoyalNavy = Color(0xFF1E293B);
@@ -352,10 +352,9 @@ class ExpertDetailScreen extends StatelessWidget {
               height: 60,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    UniversalWizardScreen.routeName,
-                    arguments: <String, dynamic>{
+                  context.push(
+                    '/wizard',
+                    extra: <String, dynamic>{
                       'categoryKey': category.isNotEmpty ? category : 'expert_repair',
                     },
                   );

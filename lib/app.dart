@@ -1,15 +1,14 @@
 // =============================================================================
-import 'package:flutter_localizations/flutter_localizations.dart';
-// LT-10 라오트러스트 앱 루트 · Firebase 연동 및 하이브리드 아키텍처
-// Indigo Blue #3F51B5 전역 고정. 하단 탭(Home, Jobs, Chat, Profile) + 상태 보존.
-// 한/영 주석 병기.
+// LaoTrust App v2.0 - GoRouter 기반
 // =============================================================================
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme.dart';
-import 'core/theme_service.dart';
 import 'core/locale_service.dart';
 import 'core/app_localizations.dart';
+import 'core/providers/providers.dart';
 import 'features/main_tab/main_tab_screen.dart';
 import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
@@ -21,138 +20,138 @@ import 'features/universal_wizard/universal_wizard_screen.dart';
 import 'features/universal_wizard/request_complete_screen.dart';
 import 'features/home/quick_job_post_screen.dart';
 import 'features/home/expert_detail_screen.dart';
+import 'features/expert_inbox/expert_inbox_screen.dart';
+import 'features/expert_inbox/expert_inbox_detail_screen.dart';
 
-class LaoTrustApp extends StatefulWidget {
+final _router = GoRouter(
+  initialLocation: '/main',
+  routes: [
+    GoRoute(
+      path: '/main',
+      builder: (context, state) => const MainTabScreen(),
+    ),
+    GoRoute(
+      path: '/request_flow',
+      builder: (context, state) => const RequestFlowScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/bcel_onepay',
+      builder: (context, state) => const BcelOnepayScreen(),
+    ),
+    GoRoute(
+      path: '/expert_dashboard',
+      builder: (context, state) => const ExpertDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/partner_support',
+      builder: (context, state) => const PartnerSupportCenterScreen(),
+    ),
+    GoRoute(
+      path: '/quick_job_post',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        if (args == null || args.isEmpty) {
+          return const QuickJobPostScreen();
+        }
+        return QuickJobPostScreen(
+          editDocumentId: args['documentId'] as String?,
+          initialTitle: args['title'] as String? ?? '',
+          initialLocation: args['location'] as String? ?? '',
+          initialSalary: args['salary'] as String? ?? '',
+          initialDetail: args['detail'] as String? ?? '',
+          initialDeadline: args['deadline'] as DateTime?,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/wizard',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return UniversalWizardScreen(
+          categoryKey: args?['categoryKey'] as String? ?? 'expert_repair',
+          initialSubTypeId: args?['initialSubTypeId'] as String?,
+          initialSubTypeLabel: args?['initialSubTypeLabel'] as String?,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/request_complete',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return RequestCompleteScreen(
+          receiptNo: args?['receiptNo'] as String? ?? 'LT-000000',
+        );
+      },
+    ),
+    GoRoute(
+      path: '/expert_detail',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return ExpertDetailScreen(
+          expertId: args?['expertId'] as String? ?? '',
+          data: args?['data'] as Map<String, dynamic>? ?? {},
+        );
+      },
+    ),
+    GoRoute(
+      path: '/expert_inbox_detail',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return ExpertInboxDetailScreen(
+          docId: args?['docId'] as String? ?? '',
+          data: args?['data'] as Map<String, dynamic>? ?? {},
+        );
+      },
+    ),
+    GoRoute(
+      path: '/expert_inbox',
+      builder: (context, state) => const ExpertInboxScreen(),
+    ),
+  ],
+);
+
+class LaoTrustApp extends ConsumerWidget {
   const LaoTrustApp({super.key});
 
   @override
-  State<LaoTrustApp> createState() => _LaoTrustAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+    final themeMode = ref.watch(themeProvider);
 
-class _LaoTrustAppState extends State<LaoTrustApp> {
-  ThemeMode _themeMode = ThemeMode.dark;
-  Locale _locale = const Locale('ko');
-  Map<String, String> _strings = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _loadThemeMode();
-    _loadLocaleAndStrings();
-  }
-
-  Future<void> _loadThemeMode() async {
-    final mode = await ThemeService.getThemeMode();
-    if (mounted) setState(() => _themeMode = mode);
-  }
-
-  Future<void> _loadLocaleAndStrings() async {
-    final locale = await getSavedLocale();
-    final strings = await loadStringsForLocale(locale);
-    if (mounted) {
-      setState(() {
-      _locale = locale;
-      _strings = strings;
-    });
-    }
-  }
-
-  void _setThemeMode(ThemeMode mode) {
-    setState(() => _themeMode = mode);
-    ThemeService.setThemeMode(mode);
-  }
-
-  Future<void> _setLocale(Locale locale) async {
-    if (_locale == locale) return;
-    await saveLocale(locale);
-    final strings = await loadStringsForLocale(locale);
-    if (mounted) {
-      setState(() {
-      _locale = locale;
-      _strings = strings;
-    });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LaoTrust',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.light,
-      themeMode: ThemeMode.light,
-      locale: _locale,
-      supportedLocales: supportedLocales,
-      // 여기에 75번 줄 바로 아래에 붙여넣으세요!
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      builder: (context, child) {
-        return AppLocalizationsScope(
-          locale: _locale,
-          strings: _strings,
-          child: child!,
+    return FutureBuilder<Map<String, String>>(
+      future: loadStringsForLocale(locale),
+      builder: (context, snapshot) {
+        final strings = snapshot.data ?? {};
+        return MaterialApp.router(
+          title: 'LaoTrust',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.light,
+          themeMode: themeMode,
+          locale: locale,
+          supportedLocales: supportedLocales,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          builder: (context, child) {
+            return AppLocalizationsScope(
+              locale: locale,
+              strings: strings,
+              child: child!,
+            );
+          },
+          routerConfig: _router,
         );
-      },
-      home: MainTabScreen(
-        themeMode: _themeMode,
-        onThemeModeChanged: _setThemeMode,
-        locale: _locale,
-        onLocaleChanged: _setLocale,
-      ),
-      routes: {
-        MainTabScreen.routeName: (_) => MainTabScreen(
-              themeMode: _themeMode,
-              onThemeModeChanged: _setThemeMode,
-              locale: _locale,
-              onLocaleChanged: _setLocale,
-            ),
-        RequestFlowScreen.routeName: (_) => const RequestFlowScreen(),
-        profileRouteName: (_) => const ProfileScreen(),
-        loginScreenRouteName: (_) => const LoginScreen(),
-        bcelOnepayRouteName: (_) => const BcelOnepayScreen(),
-        expertDashboardRouteName: (_) => const ExpertDashboardScreen(),
-        partnerSupportCenterRouteName: (_) => const PartnerSupportCenterScreen(),
-        quickJobPostRouteName: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-          if (args == null || args.isEmpty) {
-            return const QuickJobPostScreen();
-          }
-          return QuickJobPostScreen(
-            editDocumentId: args['documentId'] as String?,
-            initialTitle: args['title'] as String? ?? '',
-            initialLocation: args['location'] as String? ?? '',
-            initialSalary: args['salary'] as String? ?? '',
-            initialDetail: args['detail'] as String? ?? '',
-            initialDeadline: args['deadline'] as DateTime?,
-          );
-        },
-        UniversalWizardScreen.routeName: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-          return UniversalWizardScreen(
-            categoryKey: args?['categoryKey'] as String? ?? 'expert_repair',
-            initialSubTypeId: args?['initialSubTypeId'] as String?,
-            initialSubTypeLabel: args?['initialSubTypeLabel'] as String?,
-          );
-        },
-        RequestCompleteScreen.routeName: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments
-              as Map<String, dynamic>?;
-          return RequestCompleteScreen(
-            receiptNo: args?['receiptNo'] as String? ?? 'LT-000000',
-          );
-        },
-        '/expert_detail': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments
-              as Map<String, dynamic>?;
-          return ExpertDetailScreen(
-            expertId: args?['expertId'] as String? ?? '',
-            data: args?['data'] as Map<String, dynamic>? ?? {},
-          );
-        },
       },
     );
   }

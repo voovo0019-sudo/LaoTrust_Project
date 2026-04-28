@@ -1,48 +1,41 @@
 // =============================================================================
-// LT-10 [Navigation] 하단 탭 바(Home, Jobs, Chat, Profile) + 상태 보존(State Persistence)
-// IndexedStack으로 4개 화면을 항상 유지하여 탭 전환 시 스크롤/입력 상태 유지.
-// 디지털 캡슐 v1.5 / LT-04 일치. 한/영 주석 병기.
+// LT-10 메인탭 v2.0 - Riverpod 기반 (GoRouter 호환)
 // =============================================================================
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../home/home_screen.dart';
 import '../jobs/jobs_screen.dart';
 import '../chat/chat_screen.dart';
 import '../profile/profile_screen.dart';
 import '../home/components/custom_bottom_nav.dart';
+import '../../core/providers/providers.dart';
 
-class MainTabScreen extends StatefulWidget {
-  const MainTabScreen({
-    super.key,
-    required this.themeMode,
-    required this.onThemeModeChanged,
-    required this.locale,
-    required this.onLocaleChanged,
-  });
+class MainTabScreen extends ConsumerStatefulWidget {
+  const MainTabScreen({super.key});
 
   static const String routeName = '/main';
 
-  final ThemeMode themeMode;
-  final ValueChanged<ThemeMode> onThemeModeChanged;
-  final Locale locale;
-  final ValueChanged<Locale> onLocaleChanged;
-
   @override
-  State<MainTabScreen> createState() => _MainTabScreenState();
+  ConsumerState<MainTabScreen> createState() => _MainTabScreenState();
 }
 
-class _MainTabScreenState extends State<MainTabScreen> {
+class _MainTabScreenState extends ConsumerState<MainTabScreen> {
   int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
+    final themeMode = ref.watch(themeProvider);
+    // ignore: unused_local_variable
+    final _ = themeMode;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: [
           HomeScreen(
-            locale: widget.locale,
-            onLocaleChanged: widget.onLocaleChanged,
+            locale: locale,
+            onLocaleChanged: (l) => ref.read(localeProvider.notifier).setLocale(l),
           ),
           const JobsScreen(),
           const ChatScreen(),

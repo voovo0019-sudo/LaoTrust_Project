@@ -234,6 +234,7 @@
   "job_apply_success": "Your application has been received successfully. The expert will review it and contact you soon.",
   "chat_enter_message": "Entering the 1:1 chat with {name}. Please wait a moment.",
   "profile_my_requests_empty": "You have no submitted service requests yet.",
+  "profile_my_requests_load_failed": "Failed to load requests. Please try again later.",
   "profile_customer_service_ready": "Coming soon.",
   "search_ready_title": "Search coming soon",
   "search_ready_body": "Search is being prepared. Choose a recommended keyword or type your own.",
@@ -783,5 +784,7 @@
   "wizard_upload_failed": "Photo upload failed. Check network and Storage rules.",
   "wizard_submit_error": "An error occurred. Please try again.",
   "wizard_events_kind_from_step1": "Event type was selected in step 1.",
-  "wizard_tutoring_subject_from_step1": "Subject (step 1)"
+  "wizard_tutoring_subject_from_step1": "Subject (step 1)",
+  "saving_message": "Saving your request securely...",
+  "save_complete_message": "Saved! You can now view your history."
 }

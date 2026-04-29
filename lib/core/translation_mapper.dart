@@ -1140,6 +1140,16 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'An expert will contact you within 2 hours',
     'lo': 'ຜູ້ຊ່ຽວຊານຈະຕິດຕໍ່ພາຍໃນ 2 ຊົ່ວໂມງ',
   },
+  'saving_message': {
+    'ko': '내역을 안전하게 저장하고 있습니다...',
+    'en': 'Saving your request securely...',
+    'lo': 'ກຳລັງບັນທຶກຂໍ້ມູນຂອງທ່ານຢ່າງປອດໄພ...',
+  },
+  'save_complete_message': {
+    'ko': '저장 완료! 내역을 확인할 수 있습니다.',
+    'en': 'Saved! You can now view your history.',
+    'lo': 'ບັນທຶກສຳເລັດ! ທ່ານສາມາດກວດສອບປະຫວັດໄດ້ແລ້ວ.',
+  },
   'request_success_view_history': {
     'ko': '내 신청 내역 보기',
     'en': 'View My Requests',
@@ -1156,10 +1166,64 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ກັບໄປໜ້າຫຼັກ',
   },
   'confirm': {'ko': '확인', 'en': 'Confirm', 'lo': 'ຢືນຢັນ'},
+  'retry': {
+    'ko': '다시 시도',
+    'en': 'Retry',
+    'lo': 'ລອງໃໝ່',
+  },
   'wizard_other_service_label': {'ko': '기타 (직접 입력)', 'en': 'Other (direct input)', 'lo': 'ອື່ນໆ (ປ້ອນເອງ)'},
   'wizard_other_service_hint': {'ko': '원하시는 서비스를 직접 입력해 주세요', 'en': 'Please describe the service you need', 'lo': 'ກະລຸນາອະທິບາຍການບໍລິການທີ່ທ່ານຕ້ອງການ'},
   'wizard_other_service_name_label': {'ko': '기타 서비스명', 'en': 'Other service name', 'lo': 'ຊື່ການບໍລິການອື່ນ'},
-  'wizard_other_service_name_hint': {'ko': '예: 베란다 수리, 창문 교체', 'en': 'e.g. Balcony repair, Window replacement', 'lo': 'ຕົວຢ່າງ: ສ້ອມລະເບຽງ, ປ່ຽນປ່ອງຢ້ຽມ'},
+  'wizard_other_service_name_hint': {
+    'ko': '예: 게스트하우스 청소, 에어컨 필터 청소',
+    'en': 'e.g. Guesthouse cleaning, AC filter cleaning',
+    'lo': 'ຕົວຢ່າງ: ທຳຄວາມສະອາດເກດສ໌ເຮົາສ໌, ລ້າງແຜ່ນກອງແອ',
+  },
+  'wizard_other_hint_cleaning': {
+    'ko': '예: 게스트하우스 청소, 에어컨 필터 청소',
+    'en': 'e.g. Guesthouse cleaning, AC filter cleaning',
+    'lo': 'ຕົວຢ່າງ: ທຳຄວາມສະອາດເກດສ໌ເຮົາສ໌, ລ້າງແຜ່ນກອງແອ',
+  },
+  'wizard_other_hint_moving': {
+    'ko': '예: 오토바이 이전, 가구 운반',
+    'en': 'e.g. Motorbike relocation, Furniture transport',
+    'lo': 'ຕົວຢ່າງ: ຍ້າຍລົດຈັກ, ຂົນສົ່ງເຟີນິເຈີ',
+  },
+  'wizard_other_hint_repair': {
+    'ko': '예: 천장 선풍기 수리, 수도관 누수',
+    'en': 'e.g. Ceiling fan repair, Water pipe leak',
+    'lo': 'ຕົວຢ່າງ: ສ້ອມພັດລົມເພດານ, ທໍ່ນ້ຳຮົ່ວ',
+  },
+  'wizard_other_hint_interior': {
+    'ko': '예: 목재 바닥 시공, 타일 교체',
+    'en': 'e.g. Wooden floor installation, Tile replacement',
+    'lo': 'ຕົວຢ່າງ: ປູພື້ນໄມ້, ປ່ຽນກະເບື້ອງ',
+  },
+  'wizard_other_hint_beauty': {
+    'ko': '예: 전통 허브볼 마사지, 두피 케어',
+    'en': 'e.g. Herbal ball massage, Scalp treatment',
+    'lo': 'ຕົວຢ່າງ: ນວດລູກປະຄົບສະໝຸນໄພ, ດູແລຫົວ',
+  },
+  'wizard_other_hint_tutoring': {
+    'ko': '예: 킥복싱, 영어 회화, 한국어 회화, 라오어 회화',
+    'en': 'e.g. Kickboxing, English conversation, Korean, Lao language',
+    'lo': 'ຕົວຢ່າງ: ກິກບັອກຊິ່ງ, ສົນທະນາພາສາອັງກິດ, ພາສາເກົາຫຼີ, ພາສາລາວ',
+  },
+  'wizard_other_hint_events': {
+    'ko': '예: 바시 행사, 결혼식 촬영',
+    'en': 'e.g. Baci ceremony, Wedding photography',
+    'lo': 'ຕົວຢ່າງ: ງານບາສີ, ຖ່າຍຮູບງານແຕ່ງງານ',
+  },
+  'wizard_other_hint_business': {
+    'ko': '예: 라오어↔한국어 통역, 비자 대행',
+    'en': 'e.g. Lao-Korean interpretation, Visa service',
+    'lo': 'ຕົວຢ່າງ: ແປພາສາລາວ-ເກົາຫຼີ, ບໍລິການວີຊາ',
+  },
+  'wizard_other_hint_vehicle': {
+    'ko': '예: 오토바이 수리, 툭툭 정비',
+    'en': 'e.g. Motorbike repair, Tuk-tuk maintenance',
+    'lo': 'ຕົວຢ່າງ: ສ້ອມລົດຈັກ, ສ້ອມຕຸກຕຸກ',
+  },
   'sub_business_visa': {'ko': '비자·허가증 대행', 'en': 'Visa & Permit Assistance', 'lo': 'ບໍລິການວີຊ່າ ແລະ ໃບອະນຸຍາດ'},
   'sub_business_company_setup': {'ko': '사업자등록 대행', 'en': 'Company Registration', 'lo': 'ຈົດທະບຽນທຸລະກິດ'},
   'sub_business_accounting': {'ko': '회계·세무 서비스', 'en': 'Accounting & Tax', 'lo': 'ບັນຊີ ແລະ ພາສີ'},

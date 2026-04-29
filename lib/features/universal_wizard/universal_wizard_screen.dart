@@ -3,7 +3,7 @@
 // Firestore: artifacts/{projectId}/public/data/requests
 // =============================================================================
 
-import 'dart:async' show TimeoutException, unawaited;
+import 'dart:async' show Completer, TimeoutException, unawaited;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -61,6 +61,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   UniversalWizardConfig? _config;
   int _currentStep = 0;
   bool _isSubmitting = false;
+  Completer<void>? _pendingSaveCompleter;
   // 필수항목 검증 오류 표시용
   final Set<String> _fieldErrors = {};
 
@@ -182,18 +183,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     super.dispose();
   }
 
-  void _goNext() {
-    if (_currentStep < totalSteps - 1) {
-      setState(() => _currentStep++);
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      _submit();
-    }
-  }
-
   void _checkAuthAndRedirect() {
     if (!mounted) return;
     // Firebase Phone Auth 단일 로그인 체크
@@ -258,6 +247,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     }
   }
 
+  void _goNext() {
+    if (_currentStep < totalSteps - 1) {
+      setState(() => _currentStep++);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
 
   void _onNextPressed() {
@@ -288,6 +287,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   void _validateStep2(Set<String> errors) {
+    if (_state.step1SubTypeId == 'other') {
+      if (_step1OtherServiceController.text.trim().isEmpty) {
+        errors.add('otherService');
+      }
+      return;
+    }
     switch (_state.categoryKey) {
       case 'expert_cleaning':
         if (_cleaningAreaController.text.trim().isEmpty) {
@@ -323,7 +328,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         }
         break;
       case 'expert_tutoring':
-        if (_tutoringLevels.isEmpty && _tutorGoalController.text.trim().isEmpty) {
+        if (_tutoringLevels.isEmpty &&
+            _tutorGoalController.text.trim().isEmpty) {
           errors.add('tutoringLevel');
         }
         break;
@@ -975,8 +981,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       unawaited(
         saveExpertRequestV5OfflineFirst(body).then((_) {
           debugPrint('[SUBMIT] Firestore save complete (Background)');
+          _pendingSaveCompleter?.complete();
         }).catchError((e) {
           debugPrint('[SUBMIT ERROR] Firestore background save failed: $e');
+          _pendingSaveCompleter?.complete();
         }),
       );
       if (submitProgressShown && mounted) {
@@ -1001,15 +1009,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   void _showSuccessDialog() {
     debugPrint('[RADAR] _showSuccessDialog 호출');
-    if (!mounted) {
-      debugPrint('[RADAR] context unmounted 종료');
-      return;
-    }
+    if (!mounted) return;
     final now = DateTime.now();
     final receiptNo =
         'LT-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(1000 + (now.millisecondsSinceEpoch % 9000)).toString()}';
     debugPrint('[RADAR] 신청완료 페이지로 이동: $receiptNo');
-    context.go('/request_complete', extra: {'receiptNo': receiptNo});
+    final saveCompleter = Completer<void>();
+    _pendingSaveCompleter = saveCompleter;
+    context.go('/request_complete', extra: {
+      'receiptNo': receiptNo,
+      'saveCompleter': saveCompleter,
+    });
   }
 
   String _photoPromptForCategory() {
@@ -1216,13 +1226,36 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   List<Widget> _buildStep2FieldsByCategory() {
     if (_state.step1SubTypeId == 'other') {
+      final hintKey = switch (_state.categoryKey) {
+        'expert_cleaning' => 'wizard_other_hint_cleaning',
+        'expert_moving' => 'wizard_other_hint_moving',
+        'expert_repair' => 'wizard_other_hint_repair',
+        'expert_interior' => 'wizard_other_hint_interior',
+        'expert_beauty' => 'wizard_other_hint_beauty',
+        'expert_tutoring' => 'wizard_other_hint_tutoring',
+        'expert_events' => 'wizard_other_hint_events',
+        'expert_business' => 'wizard_other_hint_business',
+        'expert_vehicle' => 'wizard_other_hint_vehicle',
+        _ => 'wizard_other_service_name_hint',
+      };
+      final lang = _currentLangCode();
+      final hint = kStaticUiTripleByMessageKey[hintKey]?[lang] ??
+          kStaticUiTripleByMessageKey['wizard_other_service_name_hint']?[lang] ??
+          '';
       return [
         TextField(
           controller: _step1OtherServiceController,
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => setState(() {
+            if (_step1OtherServiceController.text.trim().isNotEmpty) {
+              _fieldErrors.remove('otherService');
+            }
+          }),
           decoration: wizardOutlineFieldDecoration(
             context.l10n('wizard_other_service_name_label'),
-            hint: context.l10n('wizard_other_service_name_hint'),
+            hint: hint,
+            isRequired: true,
+            hasError: _fieldErrors.contains('otherService'),
+            errorText: context.l10n('wizard_field_required'),
           ),
           maxLines: 2,
         ),
@@ -1647,7 +1680,7 @@ List<Widget> _buildStep2RepairV5() {
                 ? null
                 : () {
                     if (_currentStep == totalSteps - 1) {
-                      _goNext();
+                      _submit();
                     } else {
                       _onNextPressed();
                     }

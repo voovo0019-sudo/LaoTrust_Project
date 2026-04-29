@@ -234,6 +234,7 @@
   "job_apply_success": "ຮັບໃບສະໝັກສຳເລັດແລ້ວ. ຊ່ຽວຊານຈະກວດແລະຕິດຕໍ່ກັບທ່ານ.",
   "chat_enter_message": "ກຳລັງເຂົ້າຫ້ອງສົນທະນາ 1:1 ກັບ {name}. ກະລຸນາລໍຖ້າແປບໜຶ່ງ.",
   "profile_my_requests_empty": "ຍັງບໍ່ມີສະຖານະການສະໝັກບໍລິການ.",
+  "profile_my_requests_load_failed": "ບໍ່ສາມາດໂຫລດລາຍການໄດ້. ກະລຸນາລອງໃໝ່ພາຍຫຼັງ.",
   "profile_customer_service_ready": "ກຳລັງຈັດກຽມ.",
   "search_ready_title": "ກຳລັງຈັດກຽມການຄົ້ນຫາ",
   "search_ready_body": "ກຳລັງຈັດກຽມການຄົ້ນຫາບໍລິການ/ພື້ນທີ່. ເລືອກຄຳແນະນຳ ຫຼື ພິມເອງ.",
@@ -783,5 +784,7 @@
   "wizard_upload_failed": "ອັບໂຫຼດຮູບບໍ່ສຳເລັດ.",
   "wizard_submit_error": "ເກີດຂໍ້ຜິດພາດ. ກະລຸນາລອງໃໝ່.",
   "wizard_events_kind_from_step1": "ປະເພດງານເລືອກໃນຂັ້ນຕອນທີ 1.",
-  "wizard_tutoring_subject_from_step1": "ວິຊາ (ຂັ້ນຕອນທີ 1)"
+  "wizard_tutoring_subject_from_step1": "ວິຊາ (ຂັ້ນຕອນທີ 1)",
+  "saving_message": "ກຳລັງບັນທຶກຂໍ້ມູນຂອງທ່ານຢ່າງປອດໄພ...",
+  "save_complete_message": "ບັນທຶກສຳເລັດ! ທ່ານສາມາດກວດສອບປະຫວັດໄດ້ແລ້ວ."
 }

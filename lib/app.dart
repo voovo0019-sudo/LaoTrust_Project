@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:async' show Completer;
 import 'core/theme.dart';
 import 'core/locale_service.dart';
 import 'core/app_localizations.dart';
@@ -12,6 +13,7 @@ import 'core/providers/providers.dart';
 import 'features/main_tab/main_tab_screen.dart';
 import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
+import 'features/profile/my_requests_screen.dart';
 import 'features/profile/login_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
@@ -37,6 +39,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/my_requests',
+      builder: (context, state) => const MyRequestsScreen(),
     ),
     GoRoute(
       path: '/login',
@@ -88,6 +94,7 @@ final _router = GoRouter(
         final args = state.extra as Map<String, dynamic>?;
         return RequestCompleteScreen(
           receiptNo: args?['receiptNo'] as String? ?? 'LT-000000',
+          saveCompleter: args?['saveCompleter'] as Completer<void>?,
         );
       },
     ),

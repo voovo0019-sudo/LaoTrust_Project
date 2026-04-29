@@ -251,6 +251,7 @@
   "job_apply_success": "지원서가 성공적으로 접수되었습니다. 전문가가 확인 후 연락드릴 예정입니다.",
   "chat_enter_message": "{name} 전문가님과 1:1 채팅방에 입장합니다. 잠시만 기다려 주세요.",
   "profile_my_requests_empty": "아직 신청된 서비스 현황이 없습니다",
+  "profile_my_requests_load_failed": "신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
   "profile_customer_service_ready": "준비 중",
 
   "search_ready_title": "검색 준비 중",
@@ -805,5 +806,7 @@
   "wizard_upload_failed": "사진 업로드에 실패했습니다. 네트워크와 Storage 규칙을 확인해 주세요.",
   "wizard_submit_error": "신청 중 오류가 발생했습니다. 다시 시도해주세요.",
   "wizard_events_kind_from_step1": "행사 종류는 1단계에서 선택한 항목입니다.",
-  "wizard_tutoring_subject_from_step1": "과목(1단계 선택)"
+  "wizard_tutoring_subject_from_step1": "과목(1단계 선택)",
+  "saving_message": "내역을 안전하게 저장하고 있습니다...",
+  "save_complete_message": "저장 완료! 내역을 확인할 수 있습니다."
 }

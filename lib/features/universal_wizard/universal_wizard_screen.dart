@@ -929,6 +929,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
       final body = <String, dynamic>{
         'category': _categoryEnglish(_state.categoryKey),
+        'categoryKey': _state.categoryKey,
         'subType': _subTypePascal(_state.step1SubTypeId),
         'depth2Data': _buildDepth2Map(),
         'location': location,
@@ -1098,9 +1099,28 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Future<void> _pickPreferredTime() async {
+    // 라오어일 때만 영어 locale 강제 (Flutter lo locale 24시간제 버그 대응)
+    // 한국어/영어는 각자 언어 그대로 유지
+    final currentLocale = Localizations.localeOf(context);
+    final overrideLocale = currentLocale.languageCode == 'lo'
+        ? const Locale('en')
+        : currentLocale;
+
     final t = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Localizations.override(
+          context: context,
+          locale: overrideLocale,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false,
+            ),
+            child: child!,
+          ),
+        );
+      },
     );
     if (t == null || !mounted) return;
     final h = t.hour.toString().padLeft(2, '0');

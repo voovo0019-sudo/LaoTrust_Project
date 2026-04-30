@@ -721,6 +721,7 @@
   "sub_vehicle_tire_battery": "ປ່ຽນຢາງ ແລະ ແບດເຕີຣີ",
   "sub_vehicle_carwash": "ລ້າງລົດ ແລະ ຂັດເງົາ",
   "wizard_vehicle_symptom_title": "ອາການ",
+  "wizard_vehicle_brand_label": "ຍີ່ຫໍ້/ຮຸ່ນລົດ",
   "wizard_vehicle_sym_engine": "ເຄື່ອງ / ສະຕາດ",
   "wizard_vehicle_sym_tire": "ຢາງ",
   "wizard_vehicle_sym_accident": "ອຸບັດຕິເຫດ",
@@ -786,5 +787,12 @@
   "wizard_events_kind_from_step1": "ປະເພດງານເລືອກໃນຂັ້ນຕອນທີ 1.",
   "wizard_tutoring_subject_from_step1": "ວິຊາ (ຂັ້ນຕອນທີ 1)",
   "saving_message": "ກຳລັງບັນທຶກຂໍ້ມູນຂອງທ່ານຢ່າງປອດໄພ...",
-  "save_complete_message": "ບັນທຶກສຳເລັດ! ທ່ານສາມາດກວດສອບປະຫວັດໄດ້ແລ້ວ."
+  "save_complete_message": "ບັນທຶກສຳເລັດ! ທ່ານສາມາດກວດສອບປະຫວັດໄດ້ແລ້ວ.",
+  "retry": "ລອງໃໝ່",
+  "status_pending": "ຮັບແລ້ວ",
+  "status_in_progress": "ກຳລັງດຳເນີນການ",
+  "status_completed": "ສຳເລັດ",
+  "status_cancelled": "ຍົກເລີກ",
+  "location_none": "-",
+  "category_other": "ອື່ນໆ"
 }

@@ -721,6 +721,7 @@
   "sub_vehicle_tire_battery": "Tire & Battery",
   "sub_vehicle_carwash": "Car Wash & Polish",
   "wizard_vehicle_symptom_title": "Symptoms",
+  "wizard_vehicle_brand_label": "Vehicle Brand/Model",
   "wizard_vehicle_sym_engine": "Engine / start",
   "wizard_vehicle_sym_tire": "Tires",
   "wizard_vehicle_sym_accident": "Accident / body",
@@ -786,5 +787,12 @@
   "wizard_events_kind_from_step1": "Event type was selected in step 1.",
   "wizard_tutoring_subject_from_step1": "Subject (step 1)",
   "saving_message": "Saving your request securely...",
-  "save_complete_message": "Saved! You can now view your history."
+  "save_complete_message": "Saved! You can now view your history.",
+  "retry": "Retry",
+  "status_pending": "Received",
+  "status_in_progress": "In Progress",
+  "status_completed": "Completed",
+  "status_cancelled": "Cancelled",
+  "location_none": "-",
+  "category_other": "Other"
 }

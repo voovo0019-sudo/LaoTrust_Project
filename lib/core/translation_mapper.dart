@@ -719,9 +719,94 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ເຮືອນດ່ຽວ',
   },
   'cleaning_house_officetel': {
-    'ko': '오피스텔',
-    'en': 'Studio/Officetel',
-    'lo': 'ສະຕູດິໂອ',
+    'ko': '게스트하우스',
+    'en': 'Guesthouse',
+    'lo': 'ເກດສ໌ເຮົາສ໌',
+  },
+  'cleaning_house_townhouse': {
+    'ko': '타운하우스',
+    'en': 'Townhouse',
+    'lo': 'ທາວນ໌ເຮົາສ໌',
+  },
+  'sub_cleaning_guesthouse': {
+    'ko': '게스트하우스/리조트',
+    'en': 'Guesthouse/Resort',
+    'lo': 'ເກດສ໌ເຮົາສ໌/ລີສອດ',
+  },
+  'cleaning_visit_guesthouse': {
+    'ko': '게스트하우스',
+    'en': 'Guesthouse',
+    'lo': 'ເກດສ໌ເຮົາສ໌',
+  },
+  'cleaning_area_label': {
+    'ko': '면적(㎡)',
+    'en': 'Area (㎡)',
+    'lo': 'ເນື້ອທີ່ (㎡)',
+  },
+  'cleaning_scale_label': {
+    'ko': '규모(객실 수)',
+    'en': 'Scale (rooms)',
+    'lo': 'ຂະໜາດ (ຫ້ອງ)',
+  },
+  'cleaning_frequency_label': {
+    'ko': '방문 주기',
+    'en': 'Visit frequency',
+    'lo': 'ຄວາມຖີ່ການເຂົ້າຢ້ຽມ',
+  },
+  'area_under10': {
+    'ko': '50㎡ 이하',
+    'en': 'Under 50㎡',
+    'lo': 'ຕ່ຳກວ່າ 50㎡',
+  },
+  'area_10to20': {
+    'ko': '50~100㎡',
+    'en': '50~100㎡',
+    'lo': '50~100㎡',
+  },
+  'area_20to30': {
+    'ko': '100~150㎡',
+    'en': '100~150㎡',
+    'lo': '100~150㎡',
+  },
+  'area_over30': {
+    'ko': '150㎡ 이상',
+    'en': 'Over 150㎡',
+    'lo': 'ຫຼາຍກວ່າ 150㎡',
+  },
+  'cleaning_gh_scale_small': {
+    'ko': '소규모(~10실)',
+    'en': 'Small (~10 rooms)',
+    'lo': 'ນ້ອຍ (~10 ຫ້ອງ)',
+  },
+  'cleaning_gh_scale_medium': {
+    'ko': '중규모(~30실)',
+    'en': 'Medium (~30 rooms)',
+    'lo': 'ກາງ (~30 ຫ້ອງ)',
+  },
+  'cleaning_gh_scale_large': {
+    'ko': '대규모(30실+)',
+    'en': 'Large (30+ rooms)',
+    'lo': 'ໃຫຍ່ (30+ ຫ້ອງ)',
+  },
+  'freq_daily': {
+    'ko': '매일',
+    'en': 'Daily',
+    'lo': 'ທຸກວັນ',
+  },
+  'freq_2to3week': {
+    'ko': '주 2~3회',
+    'en': '2~3 times a week',
+    'lo': '2~3 ຄັ້ງ/ອາທິດ',
+  },
+  'freq_weekly': {
+    'ko': '주 1회',
+    'en': 'Once a week',
+    'lo': '1 ຄັ້ງ/ອາທິດ',
+  },
+  'freq_biweekly': {
+    'ko': '2주에 1회',
+    'en': 'Every 2 weeks',
+    'lo': 'ທຸກໆ 2 ອາທິດ',
   },
   'cleaning_room_count': {
     'ko': '방 개수',
@@ -874,24 +959,24 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ປະເພດລົດ',
   },
   'moving_vehicle_damas': {
-    'ko': '소형 밴',
-    'en': 'Small Van',
-    'lo': 'ລົດຕູ້ນ້ອຍ',
-  },
-  'moving_vehicle_labo': {
-    'ko': '픽업 트럭',
+    'ko': '픽업트럭',
     'en': 'Pickup Truck',
     'lo': 'ລົດກະບະ',
   },
+  'moving_vehicle_labo': {
+    'ko': '밴',
+    'en': 'Van',
+    'lo': 'ລົດຕູ້',
+  },
   'moving_vehicle_truck_1t': {
-    'ko': '1톤 트럭',
-    'en': '1-Ton Truck',
-    'lo': 'ລົດບັນທຸກ 1 ໂຕນ',
+    'ko': '소형트럭',
+    'en': 'Small Truck',
+    'lo': 'ລົດໃຫຍ່ນ້ອຍ',
   },
   'moving_vehicle_truck_2t': {
-    'ko': '2.5톤 트럭',
-    'en': '2.5-Ton Truck',
-    'lo': 'ລົດບັນທຸກ 2.5 ໂຕນ',
+    'ko': '오토바이',
+    'en': 'Motorcycle',
+    'lo': 'ລົດຈັກ',
   },
   'moving_floor_from': {
     'ko': '출발 층수',
@@ -1002,6 +1087,36 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '도시 간 이동',
     'en': 'Between Cities',
     'lo': 'ລະຫວ່າງເມືອງ',
+  },
+  'sub_moving_tuktuk': {
+    'ko': '툭툭 운반',
+    'en': 'Tuktuk Transport',
+    'lo': 'ຂົນສົ່ງດ້ວຍຕຸກໆ',
+  },
+  'moving_tuktuk_cargo_title': {
+    'ko': '운반 물품',
+    'en': 'Items to Transport',
+    'lo': 'ສິນຄ້າທີ່ຕ້ອງການຂົນ',
+  },
+  'moving_tuktuk_small_items': {
+    'ko': '소형 짐',
+    'en': 'Small Items',
+    'lo': 'ເຄື່ອງຂອງຂະໜາດນ້ອຍ',
+  },
+  'moving_tuktuk_furniture': {
+    'ko': '가구',
+    'en': 'Furniture',
+    'lo': 'ເຄື່ອງເຮືອນ',
+  },
+  'moving_tuktuk_market_goods': {
+    'ko': '시장 짐',
+    'en': 'Market Goods',
+    'lo': 'ສິນຄ້າຕະຫຼາດ',
+  },
+  'moving_tuktuk_other': {
+    'ko': '기타',
+    'en': 'Other',
+    'lo': 'ອື່ນໆ',
   },
   'login_required_title': {
     'ko': '로그인이 필요합니다',
@@ -1386,6 +1501,31 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'sub_vehicle_moto_rental': {'ko': '오토바이 렌탈', 'en': 'Motorcycle Rental', 'lo': 'ເຊົ່າລົດຈັກ'},
   'sub_vehicle_tire_battery': {'ko': '타이어·배터리 교체', 'en': 'Tire & Battery', 'lo': 'ປ່ຽນຢາງ ແລະ ແບດເຕີຣີ'},
   'sub_vehicle_carwash': {'ko': '세차·광택', 'en': 'Car Wash & Polish', 'lo': 'ລ້າງລົດ ແລະ ຂັດເງົາ'},
+  'sub_vehicle_tuktuk': {
+    'ko': '툭툭',
+    'en': 'Tuktuk',
+    'lo': 'ຕຸກໆ',
+  },
+  'vehicle_tuktuk_type_title': {
+    'ko': '툭툭 종류',
+    'en': 'Tuktuk Type',
+    'lo': 'ປະເພດຕຸກໆ',
+  },
+  'vehicle_tuktuk_standard': {
+    'ko': '일반 툭툭',
+    'en': 'Standard Tuktuk',
+    'lo': 'ຕຸກໆທົ່ວໄປ',
+  },
+  'vehicle_tuktuk_electric': {
+    'ko': '전기 툭툭',
+    'en': 'Electric Tuktuk',
+    'lo': 'ຕຸກໆໄຟຟ້າ',
+  },
+  'vehicle_tuktuk_cargo': {
+    'ko': '화물 툭툭',
+    'en': 'Cargo Tuktuk',
+    'lo': 'ຕຸກໆບັນທຸກ',
+  },
   'wizard_vehicle_brand_label': {'ko': '차량 브랜드/모델', 'en': 'Vehicle Brand/Model', 'lo': 'ຍີ່ຫໍ້/ຮຸ່ນລົດ'},
   'wizard_vehicle_symptom_title': {'ko': '증상', 'en': 'Symptoms', 'lo': 'ອາການ'},
   'wizard_vehicle_sym_engine': {'ko': '엔진 이상', 'en': 'Engine Issue', 'lo': 'ບັນຫາເຄື່ອງ'},
@@ -1465,6 +1605,41 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'sub_events_party': {'ko': '파티·행사 기획', 'en': 'Party & Event Planning', 'lo': 'ຈັດງານລ້ຽງ'},
   'sub_events_catering': {'ko': '케이터링', 'en': 'Catering', 'lo': 'ບໍລິການອາຫານ'},
   'sub_events_mc_dj': {'ko': 'MC·DJ', 'en': 'MC & DJ', 'lo': 'MC ແລະ DJ'},
+  'sub_events_baci': {
+    'ko': '바시 행사',
+    'en': 'Baci Ceremony',
+    'lo': 'ບາສີ (ສູ່ຂວັນ)',
+  },
+  'events_baci_type_title': {
+    'ko': '바시 행사 종류',
+    'en': 'Baci Ceremony Type',
+    'lo': 'ປະເພດພິທີບາສີ',
+  },
+  'events_baci_wedding': {
+    'ko': '결혼 바시',
+    'en': 'Wedding Baci',
+    'lo': 'ບາສີແຕ່ງງານ',
+  },
+  'events_baci_newborn': {
+    'ko': '출산 바시',
+    'en': 'Newborn Baci',
+    'lo': 'ບາສີເດັກເກີດໃໝ່',
+  },
+  'events_baci_housewarming': {
+    'ko': '집들이 바시',
+    'en': 'Housewarming Baci',
+    'lo': 'ບາສີຂຶ້ນເຮືອນໃໝ່',
+  },
+  'events_baci_farewell': {
+    'ko': '송별 바시',
+    'en': 'Farewell Baci',
+    'lo': 'ບາສີສົ່ງຄົນເດີນທາງ',
+  },
+  'events_baci_other': {
+    'ko': '기타 바시',
+    'en': 'Other Baci',
+    'lo': 'ບາສີອື່ນໆ',
+  },
   'events_photo_style_title': {'ko': '촬영 스타일', 'en': 'Photo Style', 'lo': 'ສໄຕລ໌ການຖ່າຍ'},
   'events_photo_natural': {'ko': '자연광', 'en': 'Natural Light', 'lo': 'ແສງທຳມະຊາດ'},
   'events_photo_studio': {'ko': '스튜디오', 'en': 'Studio', 'lo': 'ສະຕູດິໂອ'},

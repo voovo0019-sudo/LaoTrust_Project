@@ -28,6 +28,12 @@ class WizardStep2Cleaning extends StatelessWidget {
   final void Function(String) onRoomCountChanged;
   final void Function(String) onBathroomCountChanged;
   final void Function(String) onVisitCycleChanged;
+  final String guesthouseSelectedArea;
+  final String guesthouseSelectedScale;
+  final String guesthouseSelectedFrequency;
+  final void Function(String) onGuesthouseAreaChanged;
+  final void Function(String) onGuesthouseScaleChanged;
+  final void Function(String) onGuesthouseFrequencyChanged;
   final void Function(String) onBeddingTypeChanged;
   final void Function(String) onApplianceCountChanged;
   final void Function(String, bool) onApplianceTypeToggled;
@@ -57,6 +63,12 @@ class WizardStep2Cleaning extends StatelessWidget {
     required this.onRoomCountChanged,
     required this.onBathroomCountChanged,
     required this.onVisitCycleChanged,
+    required this.guesthouseSelectedArea,
+    required this.guesthouseSelectedScale,
+    required this.guesthouseSelectedFrequency,
+    required this.onGuesthouseAreaChanged,
+    required this.onGuesthouseScaleChanged,
+    required this.onGuesthouseFrequencyChanged,
     required this.onBeddingTypeChanged,
     required this.onApplianceCountChanged,
     required this.onApplianceTypeToggled,
@@ -104,6 +116,39 @@ class WizardStep2Cleaning extends StatelessWidget {
           ),
         ],
       );
+
+  Widget _guesthouseChipSection({
+    required String titleKey,
+    required List<String> optionKeys,
+    required String selectedKey,
+    required void Function(String) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _t(titleKey),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: kWizardRoyalBlue,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: optionKeys.map((k) {
+            final selected = selectedKey == k;
+            return wizardOutlineToggleTile(
+              label: _t(k),
+              selected: selected,
+              onTap: () => onChanged(selected ? '' : k),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 
   Widget _housingTypeRow() {
     final types = [
@@ -269,6 +314,47 @@ class WizardStep2Cleaning extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _areaField(),
+          ],
+        );
+
+      case 'guesthouse':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _guesthouseChipSection(
+              titleKey: 'cleaning_area_label',
+              optionKeys: const [
+                'area_under10',
+                'area_10to20',
+                'area_20to30',
+                'area_over30',
+              ],
+              selectedKey: guesthouseSelectedArea,
+              onChanged: onGuesthouseAreaChanged,
+            ),
+            const SizedBox(height: 16),
+            _guesthouseChipSection(
+              titleKey: 'cleaning_scale_label',
+              optionKeys: const [
+                'cleaning_gh_scale_small',
+                'cleaning_gh_scale_medium',
+                'cleaning_gh_scale_large',
+              ],
+              selectedKey: guesthouseSelectedScale,
+              onChanged: onGuesthouseScaleChanged,
+            ),
+            const SizedBox(height: 16),
+            _guesthouseChipSection(
+              titleKey: 'cleaning_frequency_label',
+              optionKeys: const [
+                'freq_daily',
+                'freq_2to3week',
+                'freq_weekly',
+                'freq_biweekly',
+              ],
+              selectedKey: guesthouseSelectedFrequency,
+              onChanged: onGuesthouseFrequencyChanged,
+            ),
           ],
         );
 

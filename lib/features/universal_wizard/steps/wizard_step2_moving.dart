@@ -130,10 +130,10 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('damas', _t('moving_vehicle_damas')),
-                ('labo', _t('moving_vehicle_labo')),
-                ('truck_1t', _t('moving_vehicle_truck_1t')),
-                ('truck_2t', _t('moving_vehicle_truck_2t')),
+                ('pickup', _t('moving_vehicle_damas')),
+                ('van', _t('moving_vehicle_labo')),
+                ('small_truck', _t('moving_vehicle_truck_1t')),
+                ('motorcycle', _t('moving_vehicle_truck_2t')),
               ].map((e) {
                 final selected = movingVehicleType == e.$1;
                 return wizardOutlineToggleTile(
@@ -170,6 +170,7 @@ class WizardStep2Moving extends StatelessWidget {
                 ('villa', _t('cleaning_house_villa')),
                 ('detached', _t('cleaning_house_detached')),
                 ('officetel', _t('cleaning_house_officetel')),
+                ('townhouse', _t('cleaning_house_townhouse')),
               ].map((e) {
                 final selected = movingHouseType == e.$1;
                 return wizardOutlineToggleTile(
@@ -265,6 +266,61 @@ class WizardStep2Moving extends StatelessWidget {
                   selected: selected,
                   onTap: () =>
                       onDistanceChanged(selected ? '' : e.$1),
+                );
+              }).toList(),
+            ),
+          ],
+        );
+
+      case 'tuktuk':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _t('moving_tuktuk_cargo_title'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: kWizardRoyalBlue),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ('small_items', 'moving_tuktuk_small_items'),
+                ('furniture', 'moving_tuktuk_furniture'),
+                ('market_goods', 'moving_tuktuk_market_goods'),
+                ('other', 'moving_tuktuk_other'),
+              ].map((e) {
+                final selected = movingCargoTypes.contains(e.$1);
+                return wizardOutlineToggleTile(
+                  label: _t(e.$2),
+                  selected: selected,
+                  onTap: () => onCargoTypeToggled(e.$1, selected),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _t('moving_distance'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: kWizardRoyalBlue),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ('local', 'moving_distance_local'),
+                ('city', 'moving_distance_city'),
+                ('intercity', 'moving_distance_intercity'),
+              ].map((e) {
+                final selected = movingDistance == e.$1;
+                return wizardOutlineToggleTile(
+                  label: _t(e.$2),
+                  selected: selected,
+                  onTap: () => onDistanceChanged(selected ? '' : e.$1),
                 );
               }).toList(),
             ),

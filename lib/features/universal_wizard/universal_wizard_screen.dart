@@ -92,6 +92,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   String _cleaningRoomCount = '';
   String _cleaningBathroomCount = '';
   String _cleaningVisitCycle = '';
+  String _guesthouseSelectedArea = '';
+  String _guesthouseSelectedScale = '';
+  String _guesthouseSelectedFrequency = '';
   String _cleaningBeddingType = '';
   String _cleaningApplianceCount = '';
   final Set<String> _cleaningApplianceTypes = {};
@@ -295,7 +298,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     }
     switch (_state.categoryKey) {
       case 'expert_cleaning':
-        if (_cleaningAreaController.text.trim().isEmpty) {
+        if (_state.step1SubTypeId == 'guesthouse') {
+          if (_guesthouseSelectedArea.isEmpty) {
+            errors.add('guesthouseArea');
+          }
+          if (_guesthouseSelectedScale.isEmpty) {
+            errors.add('guesthouseScale');
+          }
+          if (_guesthouseSelectedFrequency.isEmpty) {
+            errors.add('guesthouseFrequency');
+          }
+        } else if (_cleaningAreaController.text.trim().isEmpty) {
           errors.add('cleaningArea');
         }
         break;
@@ -469,6 +482,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'target': _cleaningTargetController.text.trim(),
             'visitCycle': _cleaningVisitCycle,
           },
+          if (_state.step1SubTypeId == 'guesthouse')
+            'guesthouse': <String, String>{
+              'selectedArea': _guesthouseSelectedArea,
+              'selectedScale': _guesthouseSelectedScale,
+              'selectedFrequency': _guesthouseSelectedFrequency,
+            },
           if (_state.step1SubTypeId == 'bedding') ...{
             'beddingType': _cleaningBeddingType,
             'beddingCount': _cleaningBeddingCountController.text.trim(),
@@ -481,10 +500,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_moving':
+        final isTuktukMoving = _state.step1SubTypeId == 'tuktuk';
         return {
           'fromLandmark': _d3MovingFromController.text.trim(),
           'toLandmark': _d3MovingToController.text.trim(),
-          'vehicleType': _movingVehicleType,
+          'vehicleType': isTuktukMoving ? 'tuktuk' : _movingVehicleType,
           'houseType': _movingHouseType,
           'roomCount': _movingRoomCountController.text.trim(),
           'floorFrom': _movingFloorFrom,
@@ -493,6 +513,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           if (_state.step1SubTypeId == 'cargo') ...{
             'cargoTypes': _movingCargoTypes.toList(),
             'weightKg': _weightKgController.text.trim(),
+            'distance': _movingDistance,
+          },
+          if (isTuktukMoving) ...{
+            'cargoTypes': _movingCargoTypes.toList(),
             'distance': _movingDistance,
           },
         };
@@ -532,19 +556,22 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_events':
+        final isBaci = _state.step1SubTypeId == 'baci';
         return {
-          'eventKind': _state.step1SubTypeId,
+          'eventKind': isBaci ? _step2Selections.toList() : _state.step1SubTypeId,
           'expectedPeople': _eventPeopleController.text.trim(),
-          'selections': _step2Selections.toList(),
+          if (!isBaci) 'selections': _step2Selections.toList(),
           if (_step2OtherController.text.trim().isNotEmpty)
             'eventDetail': _step2OtherController.text.trim(),
         };
       case 'expert_vehicle':
+        final isTuktuk = _state.step1SubTypeId == 'tuktuk';
         return {
           'brandOrModel': _vehicleBrandController.text.trim(),
           'symptoms': _vehicleSymptoms.toList(),
-          'rentalOptions': _step2Selections.toList(),
+          if (!isTuktuk) 'rentalOptions': _step2Selections.toList(),
           'symptomDetail': _repairSymptomMemoController.text.trim(),
+          if (isTuktuk) 'tuktukType': _step2Selections.toList(),
           if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
         };
       default:
@@ -565,6 +592,63 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   String _depth2DisplayLine(String key, dynamic value) {
     final lang = _currentLangCode();
     String t(String k) => kStaticUiTripleByMessageKey[k]?[lang] ?? k;
+
+    if (key == 'guesthouse' && value is Map) {
+      final m = Map<Object?, Object?>.from(value);
+      String gv(String k) => '${m[k] ?? ''}'.trim();
+      final area = gv('selectedArea');
+      final scale = gv('selectedScale');
+      final freq = gv('selectedFrequency');
+      final areaStr = area.isNotEmpty ? t(area) : '';
+      final scaleStr = scale.isNotEmpty ? t(scale) : '';
+      final freqStr = freq.isNotEmpty ? t(freq) : '';
+      return [areaStr, scaleStr, freqStr]
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+    }
+
+    if (key == 'tuktukType' && value is List) {
+      return value
+          .map((e) => t(e.toString()))
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+    }
+
+    if (key == 'vehicleType' && value == 'tuktuk') {
+      return t('sub_moving_tuktuk');
+    }
+
+    if (key == 'cargoTypes' &&
+        value is List &&
+        _state.categoryKey == 'expert_moving' &&
+        _state.step1SubTypeId == 'tuktuk') {
+      String tuktukCargoLabel(String id) {
+        return switch (id) {
+          'small_items' => t('moving_tuktuk_small_items'),
+          'furniture' => t('moving_tuktuk_furniture'),
+          'market_goods' => t('moving_tuktuk_market_goods'),
+          'other' => t('moving_tuktuk_other'),
+          _ => t(id),
+        };
+      }
+
+      return value
+          .map((e) => tuktukCargoLabel(e.toString()))
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+    }
+
+    if (key == 'eventKind' && value is List) {
+      return value
+          .map((e) {
+            final id = e.toString();
+            final labelKey =
+                id.startsWith('baci_') ? 'events_$id' : 'sub_events_$id';
+            return t(labelKey);
+          })
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+    }
 
     // 빈값 필터링
     if (value == null) return '';
@@ -1344,6 +1428,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         onBathroomCountChanged: (v) =>
             setState(() => _cleaningBathroomCount = v),
         onVisitCycleChanged: (v) => setState(() => _cleaningVisitCycle = v),
+        guesthouseSelectedArea: _guesthouseSelectedArea,
+        guesthouseSelectedScale: _guesthouseSelectedScale,
+        guesthouseSelectedFrequency: _guesthouseSelectedFrequency,
+        onGuesthouseAreaChanged: (v) => setState(() {
+          _guesthouseSelectedArea = v;
+          if (v.isNotEmpty) _fieldErrors.remove('guesthouseArea');
+        }),
+        onGuesthouseScaleChanged: (v) => setState(() {
+          _guesthouseSelectedScale = v;
+          if (v.isNotEmpty) _fieldErrors.remove('guesthouseScale');
+        }),
+        onGuesthouseFrequencyChanged: (v) => setState(() {
+          _guesthouseSelectedFrequency = v;
+          if (v.isNotEmpty) _fieldErrors.remove('guesthouseFrequency');
+        }),
         onBeddingTypeChanged: (v) => setState(() => _cleaningBeddingType = v),
         onApplianceCountChanged: (v) =>
             setState(() => _cleaningApplianceCount = v),

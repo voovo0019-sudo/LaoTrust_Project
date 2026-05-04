@@ -146,6 +146,44 @@ class WizardStep2Events extends StatelessWidget {
       );
     }
 
+    if (subTypeId == 'baci') {
+      const baciTypes = [
+        ('baci_wedding', 'events_baci_wedding'),
+        ('baci_newborn', 'events_baci_newborn'),
+        ('baci_housewarming', 'events_baci_housewarming'),
+        ('baci_farewell', 'events_baci_farewell'),
+        ('baci_other', 'events_baci_other'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _t('events_baci_type_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: baciTypes.map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          _peopleField(),
+          const SizedBox(height: 16),
+          _memoField(),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

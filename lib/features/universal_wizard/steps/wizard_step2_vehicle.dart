@@ -312,6 +312,40 @@ class WizardStep2Vehicle extends StatelessWidget {
       );
     }
 
+    if (subTypeId == 'tuktuk') {
+      const tuktukTypes = [
+        ('standard', 'vehicle_tuktuk_standard'),
+        ('electric', 'vehicle_tuktuk_electric'),
+        ('cargo', 'vehicle_tuktuk_cargo'),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _t('vehicle_tuktuk_type_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: tuktukTypes.map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          _durationRow(),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

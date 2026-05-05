@@ -108,11 +108,45 @@ class WizardStep2Beauty extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            _t('beauty_body_part_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('full', 'beauty_body_full'),
+              ('back', 'beauty_body_back'),
+              ('leg', 'beauty_body_leg'),
+              ('head', 'beauty_body_head'),
+            ].map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
           _massageDurationRow(),
           const SizedBox(height: 16),
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -149,6 +183,16 @@ class WizardStep2Beauty extends StatelessWidget {
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -183,6 +227,16 @@ class WizardStep2Beauty extends StatelessWidget {
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -218,6 +272,16 @@ class WizardStep2Beauty extends StatelessWidget {
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -228,6 +292,7 @@ class WizardStep2Beauty extends StatelessWidget {
         ('event', 'beauty_makeup_event'),
         ('daily', 'beauty_makeup_daily'),
         ('photo', 'beauty_makeup_photo'),
+        ('baci', 'beauty_makeup_baci'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,6 +317,16 @@ class WizardStep2Beauty extends StatelessWidget {
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -260,9 +335,44 @@ class WizardStep2Beauty extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            _t('beauty_waxing_area_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('arms_legs', 'beauty_waxing_arms_legs'),
+              ('bikini', 'beauty_waxing_bikini'),
+              ('underarm', 'beauty_waxing_underarm'),
+              ('face', 'beauty_waxing_face'),
+              ('full', 'beauty_waxing_full'),
+            ].map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -271,9 +381,45 @@ class WizardStep2Beauty extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            _t('beauty_skin_type_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('basic', 'beauty_skin_basic'),
+              ('deep', 'beauty_skin_deep'),
+              ('moisture', 'beauty_skin_moisture'),
+              ('whitening', 'beauty_skin_whitening'),
+              ('antiaging', 'beauty_skin_antiaging'),
+              ('acne', 'beauty_skin_acne'),
+            ].map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
           _visitTypeRow(),
           const SizedBox(height: 16),
           _peopleField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('beauty_other_label'),
+              hint: _t('beauty_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }

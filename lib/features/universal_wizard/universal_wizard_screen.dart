@@ -35,6 +35,16 @@ import 'steps/wizard_step3.dart';
 import 'steps/wizard_step4.dart';
 import '../../services/auth_service.dart';
 
+const _kBusinessDocChipIds = {
+  'passport',
+  'contract',
+  'certificate',
+  'medical',
+  'corporate',
+  'property',
+  'customs',
+};
+
 class UniversalWizardScreen extends StatefulWidget {
   const UniversalWizardScreen({
     super.key,
@@ -82,6 +92,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   String _movingHouseType = '';
   String _movingDistance = '';
   final Set<String> _movingCargoTypes = {};
+  final TextEditingController _movingCargoOtherController =
+      TextEditingController();
 
   final TextEditingController _cleaningAreaController = TextEditingController();
   String _cleaningScale = '';
@@ -168,6 +180,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     _step1OtherServiceController.dispose();
     _weightKgController.dispose();
     _movingRoomCountController.dispose();
+    _movingCargoOtherController.dispose();
     _cleaningAreaController.dispose();
     _cleaningTargetController.dispose();
     _cleaningIndustryController.dispose();
@@ -315,8 +328,15 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'expert_business':
         if (_businessLangs.isEmpty) errors.add('businessLang');
         final sub = _state.step1SubTypeId;
-        if (sub == 'translate_docs' || sub == 'legal_doc') {
-          if (_documentTypeController.text.trim().isEmpty) {
+        if (sub == 'translate_docs' ||
+            sub == 'legal_doc' ||
+            sub == 'property' ||
+            sub == 'customs') {
+          final hasDocChip = _step2Selections
+              .where((e) => _kBusinessDocChipIds.contains(e))
+              .isNotEmpty;
+          final hasNote = _documentTypeController.text.trim().isNotEmpty;
+          if (!hasDocChip && !hasNote) {
             errors.add('documentType');
           }
         }
@@ -501,6 +521,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         };
       case 'expert_moving':
         final isTuktukMoving = _state.step1SubTypeId == 'tuktuk';
+        final isSmallOrHomeMoving = _state.step1SubTypeId == 'small' ||
+            _state.step1SubTypeId == 'home';
         return {
           'fromLandmark': _d3MovingFromController.text.trim(),
           'toLandmark': _d3MovingToController.text.trim(),
@@ -514,10 +536,20 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'cargoTypes': _movingCargoTypes.toList(),
             'weightKg': _weightKgController.text.trim(),
             'distance': _movingDistance,
+            if (_movingCargoOtherController.text.trim().isNotEmpty)
+              'cargoOtherDetail': _movingCargoOtherController.text.trim(),
           },
           if (isTuktukMoving) ...{
             'cargoTypes': _movingCargoTypes.toList(),
             'distance': _movingDistance,
+            if (_movingCargoOtherController.text.trim().isNotEmpty)
+              'cargoOtherDetail': _movingCargoOtherController.text.trim(),
+          },
+          if (isSmallOrHomeMoving) ...{
+            if (_movingCargoTypes.isNotEmpty)
+              'cargoTypes': _movingCargoTypes.toList(),
+            if (_movingCargoOtherController.text.trim().isNotEmpty)
+              'cargoOtherDetail': _movingCargoOtherController.text.trim(),
           },
         };
       case 'expert_repair':
@@ -638,6 +670,33 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           .join(' · ');
     }
 
+    if (key == 'cargoTypes' &&
+        value is List &&
+        _state.categoryKey == 'expert_moving' &&
+        (_state.step1SubTypeId == 'small' ||
+            _state.step1SubTypeId == 'home' ||
+            _state.step1SubTypeId == 'cargo')) {
+      String movingStandardCargoLabel(String id) {
+        return switch (id) {
+          'furniture' => t('moving_cargo_furniture'),
+          'appliance' => t('moving_cargo_appliance'),
+          'box' => t('moving_cargo_box'),
+          'etc' => t('moving_cargo_etc'),
+          'motorcycle' => t('moving_cargo_motorcycle'),
+          'instrument' => t('moving_cargo_instrument'),
+          'buddha' => t('moving_cargo_buddha'),
+          _ => id,
+        };
+      }
+
+      final body = value
+          .map((e) => movingStandardCargoLabel(e.toString()))
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+      if (body.isEmpty) return '';
+      return '${t('moving_cargo_type')}: $body';
+    }
+
     if (key == 'eventKind' && value is List) {
       return value
           .map((e) {
@@ -648,6 +707,31 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           })
           .where((s) => s.isNotEmpty)
           .join(' · ');
+    }
+
+    if (key == 'selections' &&
+        value is List &&
+        _state.categoryKey == 'expert_business') {
+      String bizSelLabel(String id) {
+        final trimmed = id.trim();
+        return switch (trimmed) {
+          'passport' => t('business_doc_passport'),
+          'contract' => t('business_doc_contract'),
+          'certificate' => t('business_doc_certificate'),
+          'medical' => t('business_doc_medical'),
+          'corporate' => t('business_doc_corporate'),
+          'property' => t('business_doc_property'),
+          'customs' => t('business_doc_customs'),
+          _ => kStaticUiTripleByMessageKey[trimmed]?[lang] ?? trimmed,
+        };
+      }
+
+      final body = value
+          .map((e) => bizSelLabel(e.toString()))
+          .where((s) => s.isNotEmpty)
+          .join(', ');
+      if (body.isEmpty) return '';
+      return '${t('wizard_step2_title')}: $body';
     }
 
     // 빈값 필터링
@@ -708,6 +792,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return '${t('moving_elevator')}: $rawValue';
       case 'cargoTypes':
         return '${t('moving_cargo_type')}: $rawValue';
+      case 'cargoOtherDetail':
+        return '${t('moving_cargo_other_label')}: $rawValue';
       case 'weightKg':
         return '${t('moving_weight')}: $rawValue kg';
       case 'distance':
@@ -1296,6 +1382,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       state: _state,
       onSubTypeSelected: (id, label) {
         setState(() {
+          if (config.categoryKey == 'expert_moving' &&
+              _state.step1SubTypeId != id) {
+            _movingCargoOtherController.clear();
+            _movingCargoTypes.clear();
+          }
+          if (config.categoryKey == 'expert_business' &&
+              _state.step1SubTypeId != id) {
+            _documentTypeController.clear();
+            _step2Selections.clear();
+          }
           _state = _state.copyWith(
             step1SubTypeId: id,
             step1SubTypeLabel: label,
@@ -1476,7 +1572,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         movingCargoTypes: _movingCargoTypes,
         roomCountController: _movingRoomCountController,
         weightKgController: _weightKgController,
-        otherController: _step1OtherServiceController,
+        otherController: _movingCargoOtherController,
         currentLangCode: _currentLangCode(),
         onVehicleTypeChanged: (v) =>
             setState(() => _movingVehicleType = v),
@@ -1576,9 +1672,15 @@ List<Widget> _buildStep2RepairV5() {
           } else {
             _step2Selections.add(id);
           }
+          if (_step2Selections.any(_kBusinessDocChipIds.contains)) {
+            _fieldErrors.remove('documentType');
+          }
         }),
         onStateChanged: () => setState(() {
           if (_documentTypeController.text.trim().isNotEmpty) {
+            _fieldErrors.remove('documentType');
+          }
+          if (_step2Selections.any(_kBusinessDocChipIds.contains)) {
             _fieldErrors.remove('documentType');
           }
           if (_businessLangs.isNotEmpty) {

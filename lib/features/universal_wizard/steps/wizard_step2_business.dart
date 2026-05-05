@@ -41,6 +41,8 @@ class WizardStep2Business extends StatelessWidget {
     ('lang_en', 'lang_en'),
     ('lang_zh', 'wizard_lang_zh'),
     ('lang_th', 'wizard_lang_th'),
+    ('lang_ja', 'lang_ja'),
+    ('lang_vi', 'lang_vi'),
   ];
 
   static const _interpretFields = [
@@ -49,6 +51,8 @@ class WizardStep2Business extends StatelessWidget {
     'wizard_interpret_field_legal',
     'wizard_interpret_field_event',
     'wizard_interpret_field_daily',
+    'wizard_interpret_field_realestate',
+    'wizard_interpret_field_construction',
   ];
 
   static const _visaTypes = [
@@ -57,6 +61,18 @@ class WizardStep2Business extends StatelessWidget {
     'wizard_visa_type_tourist',
     'wizard_visa_type_extend',
     'wizard_visa_type_ngo',
+    'wizard_visa_type_investor',
+    'wizard_visa_type_student',
+  ];
+
+  static const _docTypes = [
+    ('passport', 'business_doc_passport'),
+    ('contract', 'business_doc_contract'),
+    ('certificate', 'business_doc_certificate'),
+    ('medical', 'business_doc_medical'),
+    ('corporate', 'business_doc_corporate'),
+    ('property', 'business_doc_property'),
+    ('customs', 'business_doc_customs'),
   ];
 
   Widget _langSection() => Column(
@@ -118,22 +134,40 @@ class WizardStep2Business extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (subTypeId == 'translate_docs' || subTypeId == 'legal_doc') {
+    if (subTypeId == 'translate_docs' ||
+        subTypeId == 'legal_doc' ||
+        subTypeId == 'property' ||
+        subTypeId == 'customs') {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _langSection(),
           const SizedBox(height: 16),
+          Text(
+            _t('business_doc_type_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 10),
+          for (final d in _docTypes)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: wizardOutlineToggleTile(
+                label: _t(d.$2),
+                selected: step2Selections.contains(d.$1),
+                onTap: () =>
+                    onSelectionToggled(d.$1, step2Selections.contains(d.$1)),
+              ),
+            ),
+          const SizedBox(height: 16),
           TextField(
             controller: documentTypeController,
             onChanged: (_) => onStateChanged(),
             decoration: wizardOutlineFieldDecoration(
-              _t('wizard_business_doc_type_label'),
-              hint: _t('wizard_business_doc_type_hint'),
-              isRequired: true,
-              hasError: fieldErrors.contains('documentType'),
-              errorText: _t('wizard_field_required'),
+              _t('business_doc_other_label'),
+              hint: _t('business_doc_other_hint'),
             ),
+            maxLines: 2,
           ),
         ],
       );
@@ -161,6 +195,16 @@ class WizardStep2Business extends StatelessWidget {
                     onSelectionToggled(f, step2Selections.contains(f)),
               ),
             ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: documentTypeController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('business_interpret_other_label'),
+              hint: _t('business_interpret_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -187,6 +231,16 @@ class WizardStep2Business extends StatelessWidget {
                     onSelectionToggled(v, step2Selections.contains(v)),
               ),
             ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: documentTypeController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('business_visa_other_label'),
+              hint: _t('business_visa_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }

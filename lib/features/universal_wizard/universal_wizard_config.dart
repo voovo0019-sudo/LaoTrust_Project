@@ -133,6 +133,8 @@ const Map<String, UniversalWizardConfig> kUniversalWizardConfigs = {
       MapEntry('company_setup', 'sub_business_company_setup'),
       MapEntry('accounting', 'sub_business_accounting'),
       MapEntry('legal_doc', 'sub_business_legal'),
+      MapEntry('property', 'sub_business_property'),
+      MapEntry('customs', 'sub_business_customs'),
       MapEntry('other', 'symptom_other'),
     ],
     step2ChoiceType: Step2ChoiceType.none,

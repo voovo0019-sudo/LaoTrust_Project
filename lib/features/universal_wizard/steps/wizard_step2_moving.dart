@@ -130,10 +130,10 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('pickup', _t('moving_vehicle_damas')),
-                ('van', _t('moving_vehicle_labo')),
-                ('small_truck', _t('moving_vehicle_truck_1t')),
-                ('motorcycle', _t('moving_vehicle_truck_2t')),
+                ('pickup', _t('moving_vehicle_pickup')),
+                ('van', _t('moving_vehicle_van')),
+                ('small_truck', _t('moving_vehicle_small_truck')),
+                ('motorcycle', _t('moving_vehicle_motorcycle')),
               ].map((e) {
                 final selected = movingVehicleType == e.$1;
                 return wizardOutlineToggleTile(
@@ -149,6 +149,41 @@ class WizardStep2Moving extends StatelessWidget {
                 onFloorFromChanged),
             const SizedBox(height: 12),
             _floorRow('moving_floor_to', movingFloorTo, onFloorToChanged),
+            const SizedBox(height: 12),
+            Text(
+              _t('moving_cargo_title'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: kWizardRoyalBlue),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ('furniture', 'moving_cargo_furniture'),
+                ('appliance', 'moving_cargo_appliance'),
+                ('box', 'moving_cargo_box'),
+                ('motorcycle', 'moving_cargo_motorcycle'),
+              ].map((e) {
+                final selected = movingCargoTypes.contains(e.$1);
+                return wizardOutlineToggleTile(
+                  label: _t(e.$2),
+                  selected: selected,
+                  onTap: () => onCargoTypeToggled(e.$1, selected),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: otherController,
+              onChanged: (_) => onStateChanged(),
+              decoration: wizardOutlineFieldDecoration(
+                _t('moving_cargo_other_label'),
+                hint: _t('moving_cargo_other_hint'),
+              ),
+              maxLines: 2,
+            ),
             const SizedBox(height: 12),
             _elevatorRow(),
           ],
@@ -209,6 +244,43 @@ class WizardStep2Moving extends StatelessWidget {
             const SizedBox(height: 12),
             _floorRow('moving_floor_to', movingFloorTo, onFloorToChanged),
             const SizedBox(height: 12),
+            Text(
+              _t('moving_cargo_title'),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: kWizardRoyalBlue),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ('furniture', 'moving_cargo_furniture'),
+                ('appliance', 'moving_cargo_appliance'),
+                ('box', 'moving_cargo_box'),
+                ('instrument', 'moving_cargo_instrument'),
+                ('buddha', 'moving_cargo_buddha'),
+                ('motorcycle', 'moving_cargo_motorcycle'),
+              ].map((e) {
+                final selected = movingCargoTypes.contains(e.$1);
+                return wizardOutlineToggleTile(
+                  label: _t(e.$2),
+                  selected: selected,
+                  onTap: () => onCargoTypeToggled(e.$1, selected),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: otherController,
+              onChanged: (_) => onStateChanged(),
+              decoration: wizardOutlineFieldDecoration(
+                _t('moving_cargo_other_label'),
+                hint: _t('moving_cargo_other_hint'),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 12),
             _elevatorRow(),
           ],
         );
@@ -228,7 +300,6 @@ class WizardStep2Moving extends StatelessWidget {
                 ('furniture', _t('moving_cargo_furniture')),
                 ('appliance', _t('moving_cargo_appliance')),
                 ('box', _t('moving_cargo_box')),
-                ('etc', _t('moving_cargo_etc')),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -269,6 +340,16 @@ class WizardStep2Moving extends StatelessWidget {
                 );
               }).toList(),
             ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: otherController,
+              onChanged: (_) => onStateChanged(),
+              decoration: wizardOutlineFieldDecoration(
+                _t('moving_cargo_other_label'),
+                hint: _t('moving_cargo_other_hint'),
+              ),
+              maxLines: 2,
+            ),
           ],
         );
 
@@ -290,7 +371,6 @@ class WizardStep2Moving extends StatelessWidget {
                 ('small_items', 'moving_tuktuk_small_items'),
                 ('furniture', 'moving_tuktuk_furniture'),
                 ('market_goods', 'moving_tuktuk_market_goods'),
-                ('other', 'moving_tuktuk_other'),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -323,6 +403,16 @@ class WizardStep2Moving extends StatelessWidget {
                   onTap: () => onDistanceChanged(selected ? '' : e.$1),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: otherController,
+              onChanged: (_) => onStateChanged(),
+              decoration: wizardOutlineFieldDecoration(
+                _t('moving_cargo_other_label'),
+                hint: _t('moving_cargo_other_hint'),
+              ),
+              maxLines: 2,
             ),
           ],
         );

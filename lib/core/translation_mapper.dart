@@ -958,22 +958,22 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Vehicle Type',
     'lo': 'ປະເພດລົດ',
   },
-  'moving_vehicle_damas': {
+  'moving_vehicle_pickup': {
     'ko': '픽업트럭',
     'en': 'Pickup Truck',
     'lo': 'ລົດກະບະ',
   },
-  'moving_vehicle_labo': {
+  'moving_vehicle_van': {
     'ko': '밴',
     'en': 'Van',
     'lo': 'ລົດຕູ້',
   },
-  'moving_vehicle_truck_1t': {
+  'moving_vehicle_small_truck': {
     'ko': '소형트럭',
     'en': 'Small Truck',
     'lo': 'ລົດໃຫຍ່ນ້ອຍ',
   },
-  'moving_vehicle_truck_2t': {
+  'moving_vehicle_motorcycle': {
     'ko': '오토바이',
     'en': 'Motorcycle',
     'lo': 'ລົດຈັກ',
@@ -1057,6 +1057,36 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '기타',
     'en': 'Other',
     'lo': 'ອື່ນໆ',
+  },
+  'moving_cargo_motorcycle': {
+    'ko': '오토바이',
+    'en': 'Motorcycle',
+    'lo': 'ລົດຈັກ',
+  },
+  'moving_cargo_buddha': {
+    'ko': '불상/제단',
+    'en': 'Buddha Shrine',
+    'lo': 'ພະພຸດທະຮູບ/ແທ່ນບູຊາ',
+  },
+  'moving_cargo_instrument': {
+    'ko': '피아노/악기',
+    'en': 'Piano/Instrument',
+    'lo': 'ເປຍໂນ/ເຄື່ອງດົນຕີ',
+  },
+  'moving_cargo_title': {
+    'ko': '짐 종류',
+    'en': 'Items to Move',
+    'lo': 'ປະເພດເຄື່ອງຂອງ',
+  },
+  'moving_cargo_other_hint': {
+    'ko': '예) 금고, 수족관, 대형화분, 냉동고, 특수장비 등',
+    'en': 'e.g. Safe, Aquarium, Large Plant, Freezer, Special Equipment',
+    'lo': 'ຕົວຢ່າງ: ຕູ້ເຊັບ, ຕູ້ປາ, ຕົ້ນໄມ້ໃຫຍ່, ຕູ້ແຊ່, ອຸປະກອນພິເສດ',
+  },
+  'moving_cargo_other_label': {
+    'ko': '추가 요청사항',
+    'en': 'Additional Requests',
+    'lo': 'ຄຳຮ້ອງຂໍເພີ່ມເຕີມ',
   },
   'moving_weight': {
     'ko': '무게 (kg)',
@@ -1358,27 +1388,137 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'sub_business_company_setup': {'ko': '사업자등록 대행', 'en': 'Company Registration', 'lo': 'ຈົດທະບຽນທຸລະກິດ'},
   'sub_business_accounting': {'ko': '회계·세무 서비스', 'en': 'Accounting & Tax', 'lo': 'ບັນຊີ ແລະ ພາສີ'},
   'sub_business_legal': {'ko': '법률문서 번역·공증', 'en': 'Legal Document Translation', 'lo': 'ແປເອກະສານກົດໝາຍ'},
+  'sub_business_property': {
+    'ko': '부동산 계약 번역',
+    'en': 'Property Contract Translation',
+    'lo': 'ການແປສັນຍາອະສັງຫາລິມະສັບ',
+  },
+  'sub_business_customs': {
+    'ko': '세관/수출입 서류',
+    'en': 'Customs & Import/Export Docs',
+    'lo': 'ເອກະສານພາສີ ແລະ ນຳເຂົ້າ-ສົ່ງອອກ',
+  },
   'lang_ko': {'ko': '한국어', 'en': 'Korean', 'lo': 'ພາສາເກົາຫຼີ'},
   'lang_lo': {'ko': '라오어', 'en': 'Lao', 'lo': 'ພາສາລາວ'},
   'lang_en': {'ko': '영어', 'en': 'English', 'lo': 'ພາສາອັງກິດ'},
   'wizard_lang_zh': {'ko': '중국어', 'en': 'Chinese', 'lo': 'ພາສາຈີນ'},
   'wizard_lang_th': {'ko': '태국어', 'en': 'Thai', 'lo': 'ພາສາໄທ'},
+  'lang_ja': {
+    'ko': '일본어',
+    'en': 'Japanese',
+    'lo': 'ພາສາຍີ່ປຸ່ນ',
+  },
+  'lang_vi': {
+    'ko': '베트남어',
+    'en': 'Vietnamese',
+    'lo': 'ພາສາຫວຽດນາມ',
+  },
   'wizard_interpret_field_title': {'ko': '통역 분야', 'en': 'Interpretation Field', 'lo': 'ສາຂາການແປ'},
   'wizard_interpret_field_business': {'ko': '비즈니스 미팅', 'en': 'Business Meeting', 'lo': 'ກອງປະຊຸມທຸລະກິດ'},
   'wizard_interpret_field_medical': {'ko': '병원·의료', 'en': 'Hospital & Medical', 'lo': 'ໂຮງໝໍ ແລະ ການແພດ'},
   'wizard_interpret_field_legal': {'ko': '법률·계약', 'en': 'Legal & Contract', 'lo': 'ກົດໝາຍ ແລະ ສັນຍາ'},
   'wizard_interpret_field_event': {'ko': '행사·세미나', 'en': 'Event & Seminar', 'lo': 'ກິດຈະກຳ ແລະ ສໍາມະນາ'},
   'wizard_interpret_field_daily': {'ko': '일상·동행', 'en': 'Daily & Accompaniment', 'lo': 'ຊີວິດປະຈໍາວັນ'},
+  'wizard_interpret_field_realestate': {
+    'ko': '부동산',
+    'en': 'Real Estate',
+    'lo': 'ອະສັງຫາລິມະສັບ',
+  },
+  'wizard_interpret_field_construction': {
+    'ko': '건설/현장',
+    'en': 'Construction',
+    'lo': 'ການກໍ່ສ້າງ',
+  },
   'wizard_visa_type_title': {'ko': '비자 종류', 'en': 'Visa Type', 'lo': 'ປະເພດວີຊ່າ'},
   'wizard_visa_type_business': {'ko': '비즈니스 비자', 'en': 'Business Visa', 'lo': 'ວີຊ່າທຸລະກິດ'},
   'wizard_visa_type_work': {'ko': '취업 비자', 'en': 'Work Visa', 'lo': 'ວີຊ່າເຮັດວຽກ'},
   'wizard_visa_type_tourist': {'ko': '관광 비자 연장', 'en': 'Tourist Visa Extension', 'lo': 'ຕໍ່ວີຊ່າທ່ອງທ່ຽວ'},
   'wizard_visa_type_extend': {'ko': '체류 기간 연장', 'en': 'Stay Extension', 'lo': 'ຕໍ່ໄລຍະເວລາ'},
   'wizard_visa_type_ngo': {'ko': 'NGO·봉사 비자', 'en': 'NGO & Volunteer Visa', 'lo': 'ວີຊ່າ NGO'},
+  'wizard_visa_type_investor': {
+    'ko': '투자자 비자',
+    'en': 'Investor Visa',
+    'lo': 'ວີຊານັກລົງທຶນ',
+  },
+  'wizard_visa_type_student': {
+    'ko': '학생 비자',
+    'en': 'Student Visa',
+    'lo': 'ວີຊານັກສຶກສາ',
+  },
   'wizard_business_lang_title': {
     'ko': '언어 선택',
     'en': 'Select Language',
     'lo': 'ເລືອກພາສາ',
+  },
+  'business_doc_type_title': {
+    'ko': '문서 종류',
+    'en': 'Document Type',
+    'lo': 'ປະເພດເອກະສານ',
+  },
+  'business_doc_passport': {
+    'ko': '여권/신분증',
+    'en': 'Passport/ID',
+    'lo': 'ໜັງສືຜ່ານແດນ/ບັດປະຈຳຕົວ',
+  },
+  'business_doc_contract': {
+    'ko': '계약서',
+    'en': 'Contract',
+    'lo': 'ສັນຍາ',
+  },
+  'business_doc_certificate': {
+    'ko': '졸업/재학증명서',
+    'en': 'Graduation/Enrollment Certificate',
+    'lo': 'ໃບຢັ້ງຢືນຈົບ/ກຳລັງຮຽນ',
+  },
+  'business_doc_medical': {
+    'ko': '의료서류',
+    'en': 'Medical Documents',
+    'lo': 'ເອກະສານການແພດ',
+  },
+  'business_doc_corporate': {
+    'ko': '법인서류',
+    'en': 'Corporate Documents',
+    'lo': 'ເອກະສານບໍລິສັດ',
+  },
+  'business_doc_property': {
+    'ko': '부동산서류',
+    'en': 'Property Documents',
+    'lo': 'ເອກະສານອະສັງຫາລິມະສັບ',
+  },
+  'business_doc_customs': {
+    'ko': '세관/통관서류',
+    'en': 'Customs/Clearance Documents',
+    'lo': 'ເອກະສານພາສີ/ຜ່ານດ່ານ',
+  },
+  'business_doc_other_label': {
+    'ko': '추가 요청사항',
+    'en': 'Additional Requests',
+    'lo': 'ຄຳຮ້ອງຂໍເພີ່ມເຕີມ',
+  },
+  'business_doc_other_hint': {
+    'ko': '예) 공증 필요, 번역 납기일, 특이사항 등',
+    'en': 'e.g. Notarization needed, Deadline, Special requirements',
+    'lo': 'ຕົວຢ່າງ: ຕ້ອງການຢັ້ງຢືນ, ກຳນົດສົ່ງ, ຂໍ້ກຳນົດພິເສດ',
+  },
+  'business_interpret_other_label': {
+    'ko': '추가 요청사항',
+    'en': 'Additional Requests',
+    'lo': 'ຄຳຮ້ອງຂໍເພີ່ມເຕີມ',
+  },
+  'business_interpret_other_hint': {
+    'ko': '예) 기술 세미나, 공장 현장, VIP 의전 등',
+    'en': 'e.g. Technical seminar, Factory site, VIP protocol',
+    'lo': 'ຕົວຢ່າງ: ສໍາມະນາເຕັກນິກ, ໂຮງງານ, VIP',
+  },
+  'business_visa_other_label': {
+    'ko': '추가 요청사항',
+    'en': 'Additional Requests',
+    'lo': 'ຄຳຮ້ອງຂໍເພີ່ມເຕີມ',
+  },
+  'business_visa_other_hint': {
+    'ko': '예) 결혼비자, 은퇴비자, 특수목적 등',
+    'en': 'e.g. Marriage visa, Retirement visa, Special purpose',
+    'lo': 'ຕົວຢ່າງ: ວີຊາແຕ່ງງານ, ວີຊາບຳນານ, ຈຸດປະສົງພິເສດ',
   },
   'wizard_business_doc_type_label': {
     'ko': '문서 종류',
@@ -1428,6 +1568,111 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'beauty_makeup_daily': {'ko': '데일리 메이크업', 'en': 'Daily Makeup', 'lo': 'ແຕ່ງໜ້າປະຈຳວັນ'},
   'beauty_makeup_photo': {'ko': '사진 촬영용', 'en': 'Photo Shoot', 'lo': 'ແຕ່ງໜ້າຖ່າຍຮູບ'},
   'wizard_beauty_people_hint': {'ko': '몇 명인지 입력해주세요', 'en': 'Please enter the number of people', 'lo': 'ກະລຸນາໃສ່ຈຳນວນຄົນ'},
+  'beauty_body_part_title': {
+    'ko': '마사지 부위',
+    'en': 'Massage Area',
+    'lo': 'ບໍລິເວນນວດ',
+  },
+  'beauty_body_full': {
+    'ko': '전신',
+    'en': 'Full Body',
+    'lo': 'ທົ່ວຮ່າງກາຍ',
+  },
+  'beauty_body_back': {
+    'ko': '등·어깨',
+    'en': 'Back & Shoulder',
+    'lo': 'ຫຼັງ ແລະ ບ່າ',
+  },
+  'beauty_body_leg': {
+    'ko': '발·다리',
+    'en': 'Foot & Leg',
+    'lo': 'ຕີນ ແລະ ຂາ',
+  },
+  'beauty_body_head': {
+    'ko': '머리·목',
+    'en': 'Head & Neck',
+    'lo': 'ຫົວ ແລະ ຄໍ',
+  },
+  'beauty_waxing_area_title': {
+    'ko': '왁싱 부위',
+    'en': 'Waxing Area',
+    'lo': 'ບໍລິເວນແວັກຊິ່ງ',
+  },
+  'beauty_waxing_arms_legs': {
+    'ko': '팔/다리',
+    'en': 'Arms/Legs',
+    'lo': 'ແຂນ/ຂາ',
+  },
+  'beauty_waxing_bikini': {
+    'ko': '비키니',
+    'en': 'Bikini',
+    'lo': 'ບິກິນີ',
+  },
+  'beauty_waxing_underarm': {
+    'ko': '겨드랑이',
+    'en': 'Underarm',
+    'lo': 'ໃຕ້ແຂນ',
+  },
+  'beauty_waxing_face': {
+    'ko': '얼굴',
+    'en': 'Face',
+    'lo': 'ໜ້າ',
+  },
+  'beauty_waxing_full': {
+    'ko': '전신',
+    'en': 'Full Body',
+    'lo': 'ທົ່ວຮ່າງກາຍ',
+  },
+  'beauty_skin_type_title': {
+    'ko': '피부관리 종류',
+    'en': 'Skin Care Type',
+    'lo': 'ປະເພດການດູແລຜິວ',
+  },
+  'beauty_skin_basic': {
+    'ko': '기본관리',
+    'en': 'Basic Care',
+    'lo': 'ການດູແລພື້ນຖານ',
+  },
+  'beauty_skin_deep': {
+    'ko': '딥클렌징',
+    'en': 'Deep Cleansing',
+    'lo': 'ທຳຄວາມສະອາດເລິກ',
+  },
+  'beauty_skin_moisture': {
+    'ko': '수분관리',
+    'en': 'Moisture Care',
+    'lo': 'ການດູແລຄວາມຊຸ່ມຊື່ນ',
+  },
+  'beauty_skin_whitening': {
+    'ko': '미백관리',
+    'en': 'Whitening Care',
+    'lo': 'ການດູແລຜິວຂາວ',
+  },
+  'beauty_skin_antiaging': {
+    'ko': '안티에이징',
+    'en': 'Anti-Aging',
+    'lo': 'ຕ້ານການແກ່',
+  },
+  'beauty_skin_acne': {
+    'ko': '여드름관리',
+    'en': 'Acne Care',
+    'lo': 'ການດູແລສິວ',
+  },
+  'beauty_makeup_baci': {
+    'ko': '바시 행사 메이크업',
+    'en': 'Baci Ceremony Makeup',
+    'lo': 'ເມກອັບພິທີບາສີ',
+  },
+  'beauty_other_label': {
+    'ko': '추가 요청사항',
+    'en': 'Additional Requests',
+    'lo': 'ຄຳຮ້ອງຂໍເພີ່ມເຕີມ',
+  },
+  'beauty_other_hint': {
+    'ko': '예) 알레르기, 선호 향, 특이사항 등',
+    'en': 'e.g. Allergies, Preferred scent, Special requests',
+    'lo': 'ຕົວຢ່າງ: ແພ້, ກິ່ນທີ່ຕ້ອງການ, ຄຳຮ້ອງຂໍພິເສດ',
+  },
   '60min': {'ko': '60분', 'en': '60 min', 'lo': '60 ນາທີ'},
   '90min': {'ko': '90분', 'en': '90 min', 'lo': '90 ນາທີ'},
   '120min': {'ko': '120분', 'en': '120 min', 'lo': '120 ນາທີ'},

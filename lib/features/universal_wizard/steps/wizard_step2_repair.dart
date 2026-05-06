@@ -82,6 +82,19 @@ class WizardStep2Repair extends StatelessWidget {
       ('fuel_leak', 'symptom_gen_fuel_leak'),
       ('other', 'symptom_other'),
     ],
+    'water_pump': [
+      ('no_water', 'symptom_wp_no_water'),
+      ('low_pressure', 'symptom_wp_low_pressure'),
+      ('noise', 'symptom_wp_noise'),
+      ('no_start', 'symptom_wp_no_start'),
+      ('other', 'symptom_other'),
+    ],
+    'solar_panel': [
+      ('no_charge', 'symptom_sp_no_charge'),
+      ('low_output', 'symptom_sp_low_output'),
+      ('panel_damage', 'symptom_sp_panel_damage'),
+      ('other', 'symptom_other'),
+    ],
     'other': [
       ('broken', 'symptom_other_broken'),
       ('noise', 'symptom_other_noise'),
@@ -99,6 +112,8 @@ class WizardStep2Repair extends StatelessWidget {
     'fan': '🌀',
     'rice_cooker': '🍚',
     'generator': '⚡',
+    'water_pump': '💧',
+    'solar_panel': '☀️',
     'other': '🔧',
   };
 
@@ -111,6 +126,8 @@ class WizardStep2Repair extends StatelessWidget {
     'fan': 'appliance_fan',
     'rice_cooker': 'appliance_rice_cooker',
     'generator': 'appliance_generator',
+    'water_pump': 'appliance_water_pump',
+    'solar_panel': 'appliance_solar_panel',
     'other': 'appliance_other',
   };
 
@@ -257,8 +274,197 @@ class WizardStep2Repair extends StatelessWidget {
                                     step2Selections.contains(e.$1)),
                           ),
                         )),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: symptomMemoController,
+                      decoration: wizardOutlineFieldDecoration(
+                        _t('repair_other_label'),
+                        hint: _t('repair_other_hint'),
+                      ),
+                      maxLines: 2,
+                    ),
                   ],
                 ),
+        ),
+      ],
+    );
+  }
+}
+
+class WizardStep2Electric extends StatelessWidget {
+  final Set<String> step2Selections;
+  final TextEditingController otherController;
+  final String currentLangCode;
+  final void Function(String, bool) onSelectionToggled;
+  final VoidCallback onStateChanged;
+
+  const WizardStep2Electric({
+    super.key,
+    required this.step2Selections,
+    required this.otherController,
+    required this.currentLangCode,
+    required this.onSelectionToggled,
+    required this.onStateChanged,
+  });
+
+  String _t(String key) =>
+      kStaticUiTripleByMessageKey[key]?[currentLangCode] ?? key;
+
+  @override
+  Widget build(BuildContext context) {
+    const types = [
+      ('outlet', 'symptom_elec_outlet'),
+      ('lighting', 'symptom_elec_lighting'),
+      ('breaker', 'symptom_elec_breaker'),
+      ('aircon', 'symptom_elec_aircon'),
+      ('intercom', 'symptom_elec_intercom'),
+      ('other', 'symptom_other'),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_t('service_electric'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue)),
+        const SizedBox(height: 12),
+        ...types.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: step2Selections.contains(e.$1),
+                onTap: () => onSelectionToggled(
+                    e.$1, step2Selections.contains(e.$1)),
+              ),
+            )),
+        const SizedBox(height: 12),
+        TextField(
+          controller: otherController,
+          onChanged: (_) => onStateChanged(),
+          decoration: wizardOutlineFieldDecoration(
+            _t('repair_other_label'),
+            hint: _t('repair_other_hint'),
+          ),
+          maxLines: 2,
+        ),
+      ],
+    );
+  }
+}
+
+class WizardStep2Plumbing extends StatelessWidget {
+  final Set<String> step2Selections;
+  final TextEditingController otherController;
+  final String currentLangCode;
+  final void Function(String, bool) onSelectionToggled;
+  final VoidCallback onStateChanged;
+
+  const WizardStep2Plumbing({
+    super.key,
+    required this.step2Selections,
+    required this.otherController,
+    required this.currentLangCode,
+    required this.onSelectionToggled,
+    required this.onStateChanged,
+  });
+
+  String _t(String key) =>
+      kStaticUiTripleByMessageKey[key]?[currentLangCode] ?? key;
+
+  @override
+  Widget build(BuildContext context) {
+    const types = [
+      ('leak', 'symptom_plumb_leak'),
+      ('toilet', 'symptom_plumb_toilet'),
+      ('sink', 'symptom_plumb_sink'),
+      ('water_heater', 'symptom_plumb_water_heater'),
+      ('drain', 'symptom_plumb_drain'),
+      ('other', 'symptom_other'),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_t('service_plumbing'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue)),
+        const SizedBox(height: 12),
+        ...types.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: step2Selections.contains(e.$1),
+                onTap: () => onSelectionToggled(
+                    e.$1, step2Selections.contains(e.$1)),
+              ),
+            )),
+        const SizedBox(height: 12),
+        TextField(
+          controller: otherController,
+          onChanged: (_) => onStateChanged(),
+          decoration: wizardOutlineFieldDecoration(
+            _t('repair_other_label'),
+            hint: _t('repair_other_hint'),
+          ),
+          maxLines: 2,
+        ),
+      ],
+    );
+  }
+}
+
+class WizardStep2RoofPaint extends StatelessWidget {
+  final Set<String> step2Selections;
+  final TextEditingController otherController;
+  final String currentLangCode;
+  final void Function(String, bool) onSelectionToggled;
+  final VoidCallback onStateChanged;
+
+  const WizardStep2RoofPaint({
+    super.key,
+    required this.step2Selections,
+    required this.otherController,
+    required this.currentLangCode,
+    required this.onSelectionToggled,
+    required this.onStateChanged,
+  });
+
+  String _t(String key) =>
+      kStaticUiTripleByMessageKey[key]?[currentLangCode] ?? key;
+
+  @override
+  Widget build(BuildContext context) {
+    const types = [
+      ('interior', 'symptom_roof_interior'),
+      ('exterior', 'symptom_roof_exterior'),
+      ('leak', 'symptom_roof_leak'),
+      ('replace', 'symptom_roof_replace'),
+      ('waterproof', 'symptom_roof_waterproof'),
+      ('other', 'symptom_other'),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_t('wizard_repair_sub_roof_paint'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue)),
+        const SizedBox(height: 12),
+        ...types.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: step2Selections.contains(e.$1),
+                onTap: () => onSelectionToggled(
+                    e.$1, step2Selections.contains(e.$1)),
+              ),
+            )),
+        const SizedBox(height: 12),
+        TextField(
+          controller: otherController,
+          onChanged: (_) => onStateChanged(),
+          decoration: wizardOutlineFieldDecoration(
+            _t('repair_other_label'),
+            hint: _t('repair_other_hint'),
+          ),
+          maxLines: 2,
         ),
       ],
     );

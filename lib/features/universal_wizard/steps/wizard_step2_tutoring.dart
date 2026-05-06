@@ -11,6 +11,7 @@ class WizardStep2Tutoring extends StatelessWidget {
   final Set<String> tutoringLevels;
   final Set<String> step2Selections;
   final TextEditingController goalController;
+  final TextEditingController otherController;
   final String currentLangCode;
   final void Function(String, bool) onLevelToggled;
   final void Function(String, bool) onSelectionToggled;
@@ -23,6 +24,7 @@ class WizardStep2Tutoring extends StatelessWidget {
     required this.tutoringLevels,
     required this.step2Selections,
     required this.goalController,
+    required this.otherController,
     required this.currentLangCode,
     required this.onLevelToggled,
     required this.onSelectionToggled,
@@ -137,7 +139,8 @@ class WizardStep2Tutoring extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (subTypeId == 'lang_en' || subTypeId == 'lang_ko' ||
-        subTypeId == 'lang_lo' || subTypeId == 'lang_zh') {
+        subTypeId == 'lang_lo' || subTypeId == 'lang_zh' ||
+        subTypeId == 'lang_th' || subTypeId == 'lang_ja') {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -146,6 +149,16 @@ class WizardStep2Tutoring extends StatelessWidget {
           _classTypeRow(),
           const SizedBox(height: 16),
           _goalField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('tutor_other_label'),
+              hint: _t('tutor_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
@@ -159,13 +172,24 @@ class WizardStep2Tutoring extends StatelessWidget {
           _classTypeRow(),
           const SizedBox(height: 16),
           _goalField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('tutor_other_label'),
+              hint: _t('tutor_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }
 
     if (subTypeId == 'music' || subTypeId == 'martial_arts' ||
         subTypeId == 'cooking' || subTypeId == 'computer' ||
-        subTypeId == 'art') {
+        subTypeId == 'art' || subTypeId == 'traditional_dance' ||
+        subTypeId == 'buddhism') {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -174,6 +198,16 @@ class WizardStep2Tutoring extends StatelessWidget {
           _classTypeRow(),
           const SizedBox(height: 16),
           _goalField(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: otherController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('tutor_other_label'),
+              hint: _t('tutor_other_hint'),
+            ),
+            maxLines: 2,
+          ),
         ],
       );
     }

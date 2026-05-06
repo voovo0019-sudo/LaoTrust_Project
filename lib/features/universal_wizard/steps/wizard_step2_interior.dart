@@ -53,19 +53,45 @@ class WizardStep2Interior extends StatelessWidget {
         ],
       );
 
+  Widget _budgetRow() => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Text(
+            _t('interior_budget_title'),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: kWizardRoyalBlue),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ('budget_s', 'interior_budget_s'),
+              ('budget_m', 'interior_budget_m'),
+              ('budget_l', 'interior_budget_l'),
+            ].map((e) {
+              final selected = step2Selections.contains(e.$1);
+              return wizardOutlineToggleTile(
+                label: _t(e.$2),
+                selected: selected,
+                onTap: () => onSelectionToggled(e.$1, selected),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+
   Widget _otherField() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          Text(_t('wizard_other_service_label'),
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: kWizardRoyalBlue)),
-          const SizedBox(height: 8),
           TextField(
             controller: otherController,
+            onChanged: (_) => onStateChanged(),
             decoration: wizardOutlineFieldDecoration(
-              _t('wizard_other_service_label'),
-              hint: _t('wizard_other_service_hint'),
+              _t('interior_other_label'),
+              hint: _t('interior_other_hint'),
             ),
             maxLines: 2,
           ),
@@ -78,6 +104,9 @@ class WizardStep2Interior extends StatelessWidget {
       ('apartment', _t('interior_housing_apartment')),
       ('condo', _t('interior_housing_condo')),
       ('commercial', _t('interior_housing_commercial')),
+      ('villa', _t('interior_housing_villa')),
+      ('townhouse', _t('interior_housing_townhouse')),
+      ('guesthouse', _t('interior_housing_guesthouse')),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,6 +162,7 @@ class WizardStep2Interior extends StatelessWidget {
                 );
               }).toList(),
             ),
+            _budgetRow(),
             _otherField(),
           ],
         );
@@ -166,6 +196,7 @@ class WizardStep2Interior extends StatelessWidget {
                 );
               }).toList(),
             ),
+            _budgetRow(),
             _otherField(),
           ],
         );
@@ -198,6 +229,7 @@ class WizardStep2Interior extends StatelessWidget {
                 );
               }).toList(),
             ),
+            _budgetRow(),
             _otherField(),
           ],
         );
@@ -230,6 +262,7 @@ class WizardStep2Interior extends StatelessWidget {
                 );
               }).toList(),
             ),
+            _budgetRow(),
             _otherField(),
           ],
         );
@@ -261,6 +294,7 @@ class WizardStep2Interior extends StatelessWidget {
                 );
               }).toList(),
             ),
+            _budgetRow(),
             _otherField(),
           ],
         );

@@ -113,6 +113,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   final Set<String> _tutoringLevels = <String>{};
   final TextEditingController _tutorGoalController = TextEditingController();
+  final TextEditingController _tutorOtherController = TextEditingController();
 
   final TextEditingController _eventPeopleController = TextEditingController();
 
@@ -186,6 +187,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     _cleaningIndustryController.dispose();
     _cleaningBeddingCountController.dispose();
     _tutorGoalController.dispose();
+    _tutorOtherController.dispose();
     _eventPeopleController.dispose();
     _interiorBudgetController.dispose();
     _documentTypeController.dispose();
@@ -584,7 +586,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           'levels': _tutoringLevels.toList(),
           'classType': _step2Selections.toList(),
           'goal': _tutorGoalController.text.trim(),
-          if (_step2OtherSelected)
+          if (_tutorOtherController.text.trim().isNotEmpty)
+            'otherNote': _tutorOtherController.text.trim()
+          else if (_step2OtherSelected)
             'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_events':
@@ -1392,6 +1396,43 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             _documentTypeController.clear();
             _step2Selections.clear();
           }
+          if (config.categoryKey == 'expert_tutoring' &&
+              _state.step1SubTypeId != id) {
+            _tutoringLevels.clear();
+            _step2Selections.clear();
+            _tutorGoalController.clear();
+            _tutorOtherController.clear();
+          }
+          if (config.categoryKey == 'expert_repair' &&
+              _state.step1SubTypeId != id) {
+            _repairBrand = '';
+            _step2Selections.clear();
+          }
+          if (config.categoryKey == 'expert_interior' &&
+              _state.step1SubTypeId != id) {
+            _interiorParts.clear();
+            _step2Selections.clear();
+          }
+          if (config.categoryKey == 'expert_cleaning' &&
+              _state.step1SubTypeId != id) {
+            _step2Selections.clear();
+          }
+          if (config.categoryKey == 'expert_beauty' &&
+              _state.step1SubTypeId != id) {
+            _step2Selections.clear();
+            _beautyPeopleController.clear();
+          }
+          if (config.categoryKey == 'expert_events' &&
+              _state.step1SubTypeId != id) {
+            _step2Selections.clear();
+            _eventPeopleController.clear();
+          }
+          if (config.categoryKey == 'expert_vehicle' &&
+              _state.step1SubTypeId != id) {
+            _step2Selections.clear();
+            _vehicleBrandController.clear();
+            _vehicleSymptoms.clear();
+          }
           _state = _state.copyWith(
             step1SubTypeId: id,
             step1SubTypeLabel: label,
@@ -1468,20 +1509,55 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return _buildStep2Moving();
       case 'expert_repair':
         final sub = _state.step1SubTypeId;
-        if (sub == 'appliance') return _buildStep2RepairV5();
-        // 전기/배관/페인트/기타는 메모 입력
-        return [
-          TextField(
-            controller: _repairSymptomMemoController,
-            onChanged: (_) => setState(() {}),
-            decoration: wizardOutlineFieldDecoration(
-              context.l10n('wizard_repair_symptom_memo_label'),
-              hint: context.l10n('wizard_repair_symptom_memo_hint'),
-            ),
-            minLines: 4,
-            maxLines: 8,
-          ),
-        ];
+        if (sub == 'appliance') {
+          return _buildStep2RepairV5();
+        }
+        if (sub == 'electric') {
+          return [
+              WizardStep2Electric(
+                step2Selections: _step2Selections,
+                otherController: _repairSymptomMemoController,
+                currentLangCode: _currentLangCode(),
+                onSelectionToggled: (id, selected) => setState(() {
+                  selected
+                      ? _step2Selections.remove(id)
+                      : _step2Selections.add(id);
+                }),
+                onStateChanged: () => setState(() {}),
+              ),
+            ];
+        }
+        if (sub == 'plumbing') {
+          return [
+              WizardStep2Plumbing(
+                step2Selections: _step2Selections,
+                otherController: _repairSymptomMemoController,
+                currentLangCode: _currentLangCode(),
+                onSelectionToggled: (id, selected) => setState(() {
+                  selected
+                      ? _step2Selections.remove(id)
+                      : _step2Selections.add(id);
+                }),
+                onStateChanged: () => setState(() {}),
+              ),
+            ];
+        }
+        if (sub == 'roof') {
+          return [
+              WizardStep2RoofPaint(
+                step2Selections: _step2Selections,
+                otherController: _repairSymptomMemoController,
+                currentLangCode: _currentLangCode(),
+                onSelectionToggled: (id, selected) => setState(() {
+                  selected
+                      ? _step2Selections.remove(id)
+                      : _step2Selections.add(id);
+                }),
+                onStateChanged: () => setState(() {}),
+              ),
+            ];
+        }
+        return _buildStep2GenericMultiSelect();
       case 'expert_interior':
         return _buildStep2Interior();
       case 'expert_business':
@@ -1733,6 +1809,7 @@ List<Widget> _buildStep2RepairV5() {
         tutoringLevels: _tutoringLevels,
         step2Selections: _step2Selections,
         goalController: _tutorGoalController,
+        otherController: _tutorOtherController,
         currentLangCode: _currentLangCode(),
         onLevelToggled: (id, wasSelected) => setState(() {
           if (wasSelected) {

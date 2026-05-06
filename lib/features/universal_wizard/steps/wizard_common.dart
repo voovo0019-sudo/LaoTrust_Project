@@ -13,7 +13,7 @@ InputDecoration wizardOutlineFieldDecoration(
   bool hasError = false,
   String? errorText,
 }) {
-  final displayLabel = isRequired ? '$label *' : label;
+  final displayLabel = label;
   return InputDecoration(
     labelText: displayLabel,
     hintText: hint,
@@ -46,7 +46,7 @@ InputDecoration wizardOutlineFieldDecoration(
     filled: true,
     fillColor: hasError ? Colors.red.shade50 : Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    labelStyle: isRequired ? const TextStyle(color: Colors.black87) : null,
+    labelStyle: null,
     floatingLabelStyle: TextStyle(
       color: hasError ? Colors.red.shade600 : kWizardRoyalBlue,
     ),

@@ -14,7 +14,7 @@ dependencies:
   shared_preferences: ^2.2.2
   # LT-08 미션02: Firebase (Firestore + Auth)
   firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
+  firebase_auth: 5.3.1
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.6
   connectivity_plus: ^6.0.5
@@ -51,3 +51,6 @@ flutter:
         - asset: assets/fonts/NotoSansLao-Regular.ttf
         - asset: assets/fonts/NotoSansLao-Bold.ttf
           weight: 700
+
+dependency_overrides:
+  firebase_auth_web: 5.15.1

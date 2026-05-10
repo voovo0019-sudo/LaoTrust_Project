@@ -82,35 +82,53 @@ void registerAuthForegroundGuard() {
 }
 
 /// 전화번호 인증 코드 발송
+ConfirmationResult? _webConfirmationResult;
+
 Future<void> sendPhoneCode(String phoneNumber) async {
   if (!_firebaseEnabled) throw StateError('Firebase is not enabled');
-  await auth.verifyPhoneNumber(
-    phoneNumber: phoneNumber,
-    verificationCompleted: (PhoneAuthCredential credential) async {
-      await auth.signInWithCredential(credential);
-    },
-    verificationFailed: (FirebaseAuthException e) {
-      throw e;
-    },
-    codeSent: (String verificationId, int? resendToken) {
-      _lastVerificationId = verificationId;
-    },
-    codeAutoRetrievalTimeout: (String verificationId) {
-      _lastVerificationId = verificationId;
-    },
-  );
+
+  if (kIsWeb) {
+    // Web 전용: verifier 인자를 생략하면 Firebase JS SDK가
+    // 자동으로 invisible reCAPTCHA를 처리합니다 (별도 컨테이너 div 불필요).
+    _webConfirmationResult = await auth.signInWithPhoneNumber(phoneNumber);
+  } else {
+    await auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        await auth.signInWithCredential(credential);
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        throw e;
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        _lastVerificationId = verificationId;
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        _lastVerificationId = verificationId;
+      },
+    );
+  }
 }
 
 String? _lastVerificationId;
 
 /// SMS 코드로 로그인
 Future<UserCredential> signInWithPhoneCode(String smsCode) async {
-  if (!_firebaseEnabled || _lastVerificationId == null) {
-    throw StateError('Firebase is not enabled or verification not started');
+  if (!_firebaseEnabled) {
+    throw StateError('Firebase is not enabled');
   }
-  final credential = PhoneAuthProvider.credential(
-    verificationId: _lastVerificationId!,
-    smsCode: smsCode,
-  );
-  return auth.signInWithCredential(credential);
+
+  if (kIsWeb && _webConfirmationResult != null) {
+    // Flutter Web 전용
+    return _webConfirmationResult!.confirm(smsCode);
+  } else {
+    if (_lastVerificationId == null) {
+      throw StateError('No verification started');
+    }
+    final credential = PhoneAuthProvider.credential(
+      verificationId: _lastVerificationId!,
+      smsCode: smsCode,
+    );
+    return auth.signInWithCredential(credential);
+  }
 }

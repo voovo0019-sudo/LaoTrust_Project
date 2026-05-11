@@ -478,6 +478,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'No reviews yet.',
     'lo': 'ຍັງບໍ່ມີລີວິວ.',
   },
+  'experts_nearby_empty': {
+    'ko': '근처에 전문가가 없습니다',
+    'en': 'No experts nearby',
+    'lo': 'ບໍ່ມີຜູ້ຊ່ຽວຊານຢູ່ໃກ້ຄຽງ',
+  },
   'inbox_status_pending': {
     'ko': '대기중',
     'en': 'Pending',

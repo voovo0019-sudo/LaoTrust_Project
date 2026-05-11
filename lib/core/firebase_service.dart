@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:flutter/widgets.dart';
 
 /// Firebase 활성화 여부. main()에서 초기화 후 설정. 기본값 false.
@@ -40,6 +40,13 @@ String? employerIdForCurrentSession() {
 /// Firestore 오프라인 설정: 플랫폼별 퍼시스턴스 설정 후 Auth 포그라운드 감시 등록.
 Future<void> enableFirestoreOfflinePersistence() async {
   if (!_firebaseEnabled) return;
+  if (kIsWeb && kDebugMode) {
+    try {
+      await FirebaseAuth.instance.setSettings(
+        appVerificationDisabledForTesting: true,
+      );
+    } catch (_) {}
+  }
   if (kIsWeb) {
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: false,

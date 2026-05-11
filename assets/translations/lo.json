@@ -288,6 +288,7 @@
   "welcome_message_prefix": "ຍິນດີຕ້ອນຮັບ ",
   "welcome_message_suffix": "",
   "experts_nearby_title": "ຊ່ຽວຊານໃກ້ຄຽງ",
+  "experts_nearby_empty": "ບໍ່ມີຜູ້ຊ່ຽວຊານຢູ່ໃກ້ຄຽງ",
   "experts_nearby_subtitle": "ເບິ່ງຊ່ຽວຊານທີ່ພ້ອມເຊື່ອມຕໍ່ທັນທີ",
   "distance_calculating": "ກຳລັງຄຳນວນໄລຍະທາງ...",
   "distance_from_me": "ຈາກຕຳແໜ່ງຂອງທ່ານ {km}km",

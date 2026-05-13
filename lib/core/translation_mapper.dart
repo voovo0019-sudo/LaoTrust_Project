@@ -428,6 +428,26 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Sign out from current account',
     'lo': 'ອອກຈາກບັນຊີປັດຈຸບັນ',
   },
+  'google_login_title': {
+    'ko': '구글 계정으로 로그인',
+    'en': 'Sign in with Google',
+    'lo': 'ເຂົ້າສູ່ລະບົບດ້ວຍ Google',
+  },
+  'google_login_subtitle': {
+    'ko': 'Google 계정으로 간편하게 시작하세요',
+    'en': 'Get started easily with your Google account',
+    'lo': 'ເລີ່ມຕົ້ນງ່າຍໆດ້ວຍບັນຊີ Google ຂອງທ່ານ',
+  },
+  'google_login_error': {
+    'ko': '구글 로그인에 실패했습니다. 다시 시도해주세요.',
+    'en': 'Google sign-in failed. Please try again.',
+    'lo': 'ການເຂົ້າສູ່ລະບົບ Google ລົ້ມເຫລວ. ກະລຸນາລອງໃໝ່.',
+  },
+  'google_already_logged_in': {
+    'ko': '이미 구글 계정으로 로그인되어 있습니다.',
+    'en': 'You are already signed in with Google.',
+    'lo': 'ທ່ານເຂົ້າສູ່ລະບົບດ້ວຍ Google ແລ້ວ.',
+  },
   'profile_my_requests_empty': {
     'ko': '아직 신청된 서비스 현황이 없습니다',
     'en': 'You have no submitted service requests yet.',

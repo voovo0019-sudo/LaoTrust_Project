@@ -32,6 +32,9 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_riverpod: ^2.5.1
   go_router: ^14.2.7
+  # 2026.05.12: Google 로그인 (Phone Auth 대체)
+  # Flutter Web reCAPTCHA Enterprise 미해결 버그로 인한 전환
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

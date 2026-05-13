@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/translation_mapper.dart';
+import '../../firebase_options.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 
@@ -62,7 +63,7 @@ class ExpertInboxScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('artifacts')
-            .doc('laotrust-web')
+            .doc(DefaultFirebaseOptions.currentPlatform.projectId)
             .collection('public')
             .doc('data')
             .collection('requests')

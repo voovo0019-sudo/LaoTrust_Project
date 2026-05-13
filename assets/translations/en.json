@@ -910,5 +910,10 @@
   "status_completed": "Completed",
   "status_cancelled": "Cancelled",
   "location_none": "-",
-  "category_other": "Other"
+  "category_other": "Other",
+
+  "google_login_title": "Sign in with Google",
+  "google_login_subtitle": "Get started easily with your Google account",
+  "google_login_error": "Google sign-in failed. Please try again.",
+  "google_already_logged_in": "You are already signed in with Google."
 }

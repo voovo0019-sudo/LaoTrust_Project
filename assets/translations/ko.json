@@ -932,5 +932,10 @@
   "status_completed": "완료",
   "status_cancelled": "취소됨",
   "location_none": "-",
-  "category_other": "기타"
+  "category_other": "기타",
+
+  "google_login_title": "구글 계정으로 로그인",
+  "google_login_subtitle": "Google 계정으로 간편하게 시작하세요",
+  "google_login_error": "구글 로그인에 실패했습니다. 다시 시도해주세요.",
+  "google_already_logged_in": "이미 구글 계정으로 로그인되어 있습니다."
 }

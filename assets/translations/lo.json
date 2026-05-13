@@ -910,5 +910,10 @@
   "status_completed": "ສຳເລັດ",
   "status_cancelled": "ຍົກເລີກ",
   "location_none": "-",
-  "category_other": "ອື່ນໆ"
+  "category_other": "ອື່ນໆ",
+
+  "google_login_title": "ເຂົ້າສູ່ລະບົບດ້ວຍ Google",
+  "google_login_subtitle": "ເລີ່ມຕົ້ນງ່າຍໆດ້ວຍບັນຊີ Google ຂອງທ່ານ",
+  "google_login_error": "ການເຂົ້າສູ່ລະບົບ Google ລົ້ມເຫລວ. ກະລຸນາລອງໃໝ່.",
+  "google_already_logged_in": "ທ່ານເຂົ້າສູ່ລະບົບດ້ວຍ Google ແລ້ວ."
 }

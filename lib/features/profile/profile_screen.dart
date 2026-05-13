@@ -9,6 +9,7 @@ import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/google_auth_service.dart';
 
 const String profileRouteName = '/profile';
 
@@ -43,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (widget.openPhoneAuthOnStart) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        _openPhoneAuthSheet(context);
+        _openGoogleAuthFlow(context);
       });
     }
   }
@@ -139,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (!context.mounted) return;
               if (isFirebaseEnabled && !hasRecognizedUserSession) {
                 setPostLoginRedirect('/expert_dashboard');
-                _openPhoneAuthSheet(context);
+                _openGoogleAuthFlow(context);
                 return;
               }
               context.push('/expert_dashboard');
@@ -155,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (!context.mounted) return;
               if (isFirebaseEnabled && !hasRecognizedUserSession) {
                 setPostLoginRedirect('/partner_support');
-                _openPhoneAuthSheet(context);
+                _openGoogleAuthFlow(context);
                 return;
               }
               context.push('/partner_support');
@@ -163,10 +164,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           _buildMenuTile(
             context,
-            icon: Icons.phone_iphone,
-            title: context.l10n('phone_auth_title'),
-            subtitle: context.l10n('phone_auth_phone_label'),
-            onTap: () => _openPhoneAuthSheet(context),
+            icon: Icons.g_mobiledata,
+            title: context.l10n('google_login_title'),
+            subtitle: context.l10n('google_login_subtitle'),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isGoogleSignedIn) {
+                _showInfoDialog(context, messageKey: 'google_already_logged_in');
+                return;
+              }
+              try {
+                final result = await signInWithGoogle();
+                if (result == null) return;
+                if (!context.mounted) return;
+                schedulePostLoginNavigationAfterAuth(
+                  sheetContext: context,
+                  closeSheet: () {},
+                  popToAppRoot: widget.popToHomeOnAuthSuccess,
+                );
+              } catch (_) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n('google_login_error'))),
+                );
+              }
+            },
           ),
           _buildMenuTile(
             context,
@@ -174,7 +197,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: context.l10n('logout'),
             subtitle: context.l10n('logout_sub'),
             onTap: () async {
-              await auth.signOut();
+              if (isGoogleSignedIn) {
+                await signOutGoogle();
+              } else {
+                await auth.signOut();
+              }
               if (!context.mounted) return;
               context.go('/main');
             },
@@ -189,13 +216,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       stream: auth.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
-        final phone = user?.phoneNumber ?? '';
-        final digits = _digitsOnly(phone);
-        final last4 = digits.length >= 4 ? digits.substring(digits.length - 4) : '';
-        final displayName = last4.isNotEmpty
-            ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
-            : context.l10n('profile_user_name');
-
+        final isGoogle = isGoogleSignedIn;
+        final displayName = isGoogle
+            ? (user?.displayName ?? user?.email ?? context.l10n('profile_user_name'))
+            : () {
+                final phone = user?.phoneNumber ?? '';
+                final digits = _digitsOnly(phone);
+                final last4 = digits.length >= 4
+                    ? digits.substring(digits.length - 4)
+                    : '';
+                return last4.isNotEmpty
+                    ? context.l10n('home_logged_in_greeting').replaceAll('{last4}', last4)
+                    : context.l10n('profile_user_name');
+              }();
+        final photoUrl = user?.photoURL;
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -215,7 +249,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: 32,
                   backgroundColor: colorScheme.primaryContainer,
-                  child: Icon(Icons.person, size: 36, color: colorScheme.onPrimaryContainer),
+                  backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                  child: photoUrl == null
+                      ? Icon(Icons.person, size: 36, color: colorScheme.onPrimaryContainer)
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -224,9 +261,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            displayName,
-                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              displayName,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           if (_verified) ...[
                             const SizedBox(width: 6),
@@ -239,7 +281,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _verified
                             ? context.l10n('profile_status_verified')
                             : context.l10n('profile_status_unverified'),
-                        style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -252,18 +296,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _openPhoneAuthSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => _PhoneAuthSheet(
-        onClose: () => Navigator.of(ctx).pop(),
-        popToHomeOnAuthSuccess: widget.popToHomeOnAuthSuccess,
-      ),
-    );
+  Future<void> _openGoogleAuthFlow(BuildContext context) async {
+    try {
+      final result = await signInWithGoogle();
+      if (result == null) return;
+      if (!context.mounted) return;
+      schedulePostLoginNavigationAfterAuth(
+        sheetContext: context,
+        closeSheet: () {},
+        popToAppRoot: widget.popToHomeOnAuthSuccess,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n('google_login_error'))),
+      );
+    }
   }
 
   Widget _buildMenuTile(
@@ -305,238 +353,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: tile,
               ),
             ),
-    );
-  }
-}
-
-class _PhoneAuthSheet extends StatefulWidget {
-  const _PhoneAuthSheet({
-    required this.onClose,
-    this.popToHomeOnAuthSuccess = false,
-  });
-  final VoidCallback onClose;
-  final bool popToHomeOnAuthSuccess;
-
-  @override
-  State<_PhoneAuthSheet> createState() => _PhoneAuthSheetState();
-}
-
-class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
-  String selectedCountryCode = '+856';
-  String phone = '';
-  String code = '';
-  bool isSending = false;
-  bool isLoggingIn = false;
-
-  String _normalizeDigits(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
-
-  Future<void> _sendCode() async {
-    final digits = _normalizeDigits(phone);
-    if (digits.isEmpty) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
-      );
-      return;
-    }
-
-    setState(() => isSending = true);
-    final currentContext = context;
-    try {
-      final fullNumber = '$selectedCountryCode$digits';
-      await sendPhoneCode(fullNumber);
-      if (!currentContext.mounted) return;
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(currentContext.l10n('phone_auth_code_label'))),
-      );
-    } catch (_) {
-      if (!currentContext.mounted) return;
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(currentContext.l10n('phone_auth_error_invalid'))),
-      );
-    } finally {
-      if (mounted) setState(() => isSending = false);
-    }
-  }
-
-  void _finishAuthSuccessNavigate() {
-    schedulePostLoginNavigationAfterAuth(
-      sheetContext: context,
-      closeSheet: widget.onClose,
-      popToAppRoot: widget.popToHomeOnAuthSuccess,
-    );
-  }
-
-  Future<void> _login() async {
-    final digits = _normalizeDigits(phone);
-    final inputCode = code.trim();
-    if (digits.isEmpty || inputCode.isEmpty) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n('phone_auth_error_invalid'))),
-      );
-      return;
-    }
-
-    setState(() => isLoggingIn = true);
-    final currentContext = context;
-    try {
-      await signInWithPhoneCode(inputCode);
-      if (!currentContext.mounted) return;
-      _finishAuthSuccessNavigate();
-    } catch (_) {
-      if (!currentContext.mounted) return;
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(currentContext.l10n('phone_auth_error_invalid'))),
-      );
-    } finally {
-      if (mounted) setState(() => isLoggingIn = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(100),
-              ),
-            ),
-          ),
-          Text(
-            context.l10n('phone_auth_title'),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n('phone_auth_country_label'),
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            key: ValueKey<String>(selectedCountryCode),
-            initialValue: selectedCountryCode,
-            items: [
-              DropdownMenuItem(
-                value: '+856',
-                child: Text(context.l10n('phone_auth_country_laos')),
-              ),
-              DropdownMenuItem(
-                value: '+82',
-                child: Text(context.l10n('phone_auth_country_korea')),
-              ),
-              DropdownMenuItem(
-                value: '+1',
-                child: Text(context.l10n('phone_auth_country_usa')),
-              ),
-              DropdownMenuItem(
-                value: '+66',
-                child: Text(context.l10n('phone_auth_country_thailand')),
-              ),
-              DropdownMenuItem(
-                value: '+84',
-                child: Text(context.l10n('phone_auth_country_vietnam')),
-              ),
-              DropdownMenuItem(
-                value: '+86',
-                child: Text(context.l10n('phone_auth_country_china')),
-              ),
-              DropdownMenuItem(
-                value: '+81',
-                child: Text(context.l10n('phone_auth_country_japan')),
-              ),
-              DropdownMenuItem(
-                value: '+44',
-                child: Text(context.l10n('phone_auth_country_uk')),
-              ),
-            ],
-            onChanged: (v) {
-              if (v == null) return;
-              setState(() => selectedCountryCode = v);
-            },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: context.l10n('phone_auth_phone_label'),
-              hintText: context.l10n('phone_auth_phone_hint'),
-              border: const OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.phone,
-            onChanged: (v) => setState(() => phone = v),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: context.l10n('phone_auth_code_label'),
-              hintText: context.l10n('phone_auth_code_hint'),
-              border: const OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (v) => setState(() => code = v),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: isSending ? null : _sendCode,
-                  child: isSending
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(context.l10n('phone_auth_send_code')),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: isLoggingIn ? null : _login,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E3A8A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
-                  child: isLoggingIn
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(context.l10n('phone_auth_login')),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

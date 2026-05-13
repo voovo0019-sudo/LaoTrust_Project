@@ -88,15 +88,21 @@ void registerAuthForegroundGuard() {
   WidgetsBinding.instance.addObserver(_AuthForegroundGuard());
 }
 
-/// 전화번호 인증 코드 발송
+// =============================================================================
+// [PHONE AUTH 격리 - 2026.05.12]
+// 사유: Flutter Web reCAPTCHA Enterprise 미해결 버그
+// 대체: Google 로그인 (google_auth_service.dart)
+// 부활: Native 앱 출시 시 주석 해제하여 사용
+// 관련 이슈: GitHub flutterfire #13102, #12594, firebase-ios-sdk #15345
+// =============================================================================
+/*
+/// 인증코드 발송 요청
 ConfirmationResult? _webConfirmationResult;
 
 Future<void> sendPhoneCode(String phoneNumber) async {
   if (!_firebaseEnabled) throw StateError('Firebase is not enabled');
 
   if (kIsWeb) {
-    // Web 전용: verifier 인자를 생략하면 Firebase JS SDK가
-    // 자동으로 invisible reCAPTCHA를 처리합니다 (별도 컨테이너 div 불필요).
     _webConfirmationResult = await auth.signInWithPhoneNumber(phoneNumber);
   } else {
     await auth.verifyPhoneNumber(
@@ -126,7 +132,6 @@ Future<UserCredential> signInWithPhoneCode(String smsCode) async {
   }
 
   if (kIsWeb && _webConfirmationResult != null) {
-    // Flutter Web 전용
     return _webConfirmationResult!.confirm(smsCode);
   } else {
     if (_lastVerificationId == null) {
@@ -139,3 +144,7 @@ Future<UserCredential> signInWithPhoneCode(String smsCode) async {
     return auth.signInWithCredential(credential);
   }
 }
+*/
+// =============================================================================
+// [PHONE AUTH 격리 끝]
+// =============================================================================

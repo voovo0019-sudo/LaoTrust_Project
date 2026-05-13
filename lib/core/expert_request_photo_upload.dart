@@ -2,9 +2,10 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'firebase_service.dart';
+import '../firebase_options.dart';
 
 String _storageSafeSegment(String raw) {
   if (raw.isEmpty) return 'anon';
@@ -67,9 +68,15 @@ Future<List<String>> uploadExpertRequestImagesFromXFiles({
     return [];
   }
 
-  final storage = FirebaseStorage.instanceFor(
-    bucket: 'laotrust-web.firebasestorage.app',
-  );
+  late final FirebaseStorage storage;
+  if (kIsWeb) {
+    final webBucket = DefaultFirebaseOptions.web.storageBucket;
+    storage = (webBucket != null && webBucket.isNotEmpty)
+        ? FirebaseStorage.instanceFor(bucket: webBucket)
+        : FirebaseStorage.instance;
+  } else {
+    storage = FirebaseStorage.instance;
+  }
   final safeUser = _storageSafeSegment(userId);
   final batch = DateTime.now().millisecondsSinceEpoch;
   final urls = <String>[];

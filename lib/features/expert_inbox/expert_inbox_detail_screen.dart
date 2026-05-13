@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../core/translation_mapper.dart';
+import '../../firebase_options.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 
@@ -38,7 +39,7 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
     try {
       await FirebaseFirestore.instance
           .collection('artifacts')
-          .doc('laotrust-web')
+          .doc(DefaultFirebaseOptions.currentPlatform.projectId)
           .collection('public')
           .doc('data')
           .collection('requests')

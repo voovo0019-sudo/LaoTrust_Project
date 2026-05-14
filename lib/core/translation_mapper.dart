@@ -1189,9 +1189,9 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ຕ້ອງການເຂົ້າສູ່ລະບົບ',
   },
   'login_required_content': {
-    'ko': '서비스를 이용하려면 전화번호로 로그인해 주세요.',
-    'en': 'Please log in with your phone number to use this service.',
-    'lo': 'ກະລຸນາເຂົ້າສູ່ລະບົບດ້ວຍເບີໂທລະສັບເພື່ອໃຊ້ບໍລິການ.',
+    'ko': '서비스를 이용하려면 Google 계정으로 로그인해 주세요.',
+    'en': 'Please log in with your Google account to use this service.',
+    'lo': 'ກະລຸນາເຂົ້າສູ່ລະບົບດ້ວຍບັນຊີ Google ເພື່ອໃຊ້ບໍລິການນີ້.',
   },
   'login_required_btn': {
     'ko': '로그인하기',

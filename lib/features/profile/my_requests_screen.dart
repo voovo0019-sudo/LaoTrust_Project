@@ -5,6 +5,7 @@
 import 'dart:async' show TimeoutException;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lao_trust/firebase_options.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/translation_mapper.dart';
@@ -55,18 +56,23 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     if (currentUser == null) return const [];
     try {
       final snapshot = await FirebaseFirestore.instance
-          .collectionGroup('requests')
+          .collection('artifacts')
+          .doc(DefaultFirebaseOptions.currentPlatform.projectId)
+          .collection('public')
+          .doc('data')
+          .collection('requests')
           .where('userId', isEqualTo: currentUser.uid)
           .orderBy('createdAt', descending: true)
           .limit(50)
           .get()
           .timeout(const Duration(seconds: 10));
-      final docs = snapshot.docs;
-
-      return docs;
-    } on TimeoutException catch (_) {
+      return snapshot.docs;
+    } on TimeoutException catch (e) {
+      debugPrint('[MyRequests] 타임아웃 에러: $e');
       return const [];
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[MyRequests] 조회 에러: $e');
+      debugPrint('[MyRequests] 스택: $stack');
       return const [];
     }
   }

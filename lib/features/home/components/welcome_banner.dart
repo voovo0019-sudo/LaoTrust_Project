@@ -31,7 +31,6 @@ class WelcomeBanner extends StatelessWidget {
                 style: const TextStyle(
                   color: Color(0xFF1E293B),
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Noto Sans',
                   letterSpacing: 0.1,
                 ),
               ),
@@ -58,7 +57,6 @@ class WelcomeBanner extends StatelessWidget {
               style: const TextStyle(
                 color: Color(0xFF1E293B),
                 fontWeight: FontWeight.w600,
-                fontFamily: 'Noto Sans',
                 letterSpacing: 0.1,
               ),
             ),

@@ -9,6 +9,7 @@ import 'package:lao_trust/firebase_options.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/translation_mapper.dart';
+import 'my_request_detail_screen.dart';
 
 class MyRequestsScreen extends StatefulWidget {
   const MyRequestsScreen({super.key});
@@ -92,36 +93,6 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
       final dt = createdAt.toDate();
       return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
     }
-    return '-';
-  }
-
-  // location 텍스트 추출 (현재 언어 기준)
-  // 우선순위: wizardI18n.location[locale] → location.landmark → '-'
-  String _extractLocationText(dynamic location, dynamic wizardI18n, BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
-
-    // 1단계: wizardI18n.location에서 현재 언어 텍스트 찾기
-    if (wizardI18n is Map) {
-      final i18nLocation = wizardI18n['location'];
-      if (i18nLocation is Map) {
-        final localized = i18nLocation[locale]?.toString() ?? '';
-        if (localized.isNotEmpty) return localized;
-        // fallback: 영어
-        final en = i18nLocation['en']?.toString() ?? '';
-        if (en.isNotEmpty) return en;
-      }
-    }
-
-    // 2단계: location Map에서 추출
-    if (location is Map) {
-      final landmark = location['landmark']?.toString() ?? '';
-      if (landmark.isNotEmpty) return landmark;
-      final from = location['from']?.toString() ?? '';
-      final to = location['to']?.toString() ?? '';
-      if (from.isNotEmpty && to.isNotEmpty) return '$from → $to';
-      if (from.isNotEmpty) return from;
-    }
-    if (location is String && location.isNotEmpty) return location;
     return '-';
   }
 
@@ -244,26 +215,142 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                   : context.l10n('request_complete_title');
               final rawStatus = (data['status'] ?? 'pending').toString();
               final statusName = _resolveStatusName(rawStatus, context);
-              final locationText = _extractLocationText(
-                data['location'],
-                data['wizardI18n'],
-                context,
-              );
               final createdAt = _formatDate(data['createdAt']);
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.assignment_turned_in_outlined),
-                  title: Text(categoryName),
-                  subtitle: Text('$locationText\n$createdAt'),
-                  trailing: Text(
-                    statusName,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+              // wizardI18n.title 우선 표시
+              final wizardI18n = data['wizardI18n'];
+              String displayTitle = categoryName;
+              if (wizardI18n is Map) {
+                final title = wizardI18n['title'];
+                if (title is Map) {
+                  final locale = Localizations.localeOf(context).languageCode;
+                  final localized = title[locale]?.toString() ?? title['ko']?.toString() ?? title['en']?.toString() ?? '';
+                  if (localized.isNotEmpty) displayTitle = localized;
+                }
+              }
+
+              // 상태별 색상
+              Color statusColor;
+              switch (rawStatus.toLowerCase()) {
+                case 'accepted':
+                  statusColor = const Color(0xFF4CAF50);
+                  break;
+                case 'cancelled':
+                  statusColor = Colors.red;
+                  break;
+                case 'completed':
+                  statusColor = const Color(0xFF3F51B5);
+                  break;
+                default:
+                  statusColor = const Color(0xFFFF9800);
+              }
+
+              return GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MyRequestDetailScreen(
+                        docId: docs[index].id,
+                        data: data,
+                      ),
+                    ),
+                  );
+                  if (result == true) _retry();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF3F51B5).withValues(alpha: 0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  isThreeLine: true,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 왼쪽 아이콘
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.assignment_turned_in_outlined,
+                            color: Color(0xFF3F51B5),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // 중앙 텍스트
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayTitle,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    size: 12,
+                                    color: Color(0xFF888888),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    createdAt,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF888888),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // 오른쪽 상태 뱃지
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            statusName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },

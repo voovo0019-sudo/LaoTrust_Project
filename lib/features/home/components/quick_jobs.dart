@@ -60,7 +60,6 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     Color? color,
   }) {
     return TextStyle(
-      fontFamily: 'Noto Sans',
       fontFamilyFallback: AppTheme.notoSansLaoFallback,
       letterSpacing: 0.1,
       fontSize: fontSize,

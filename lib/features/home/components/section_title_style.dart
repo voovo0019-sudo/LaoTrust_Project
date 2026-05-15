@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 const TextStyle kHomeSectionTitleTextStyle = TextStyle(
   fontSize: 16,
   fontWeight: FontWeight.bold,
-  fontFamily: 'Noto Sans',
   letterSpacing: 0.1,
 );
 

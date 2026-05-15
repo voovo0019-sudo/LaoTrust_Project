@@ -75,7 +75,6 @@ class CategoryGrid extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Noto Sans',
                   letterSpacing: 0.1,
                 ),
                 textAlign: TextAlign.center,

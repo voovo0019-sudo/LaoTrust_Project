@@ -453,6 +453,66 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'You have no submitted service requests yet.',
     'lo': 'ຍັງບໍ່ມີການຮ້ອງຂໍບໍລິການທີ່ສົ່ງແລ້ວ.',
   },
+  'my_request_detail_title': {
+    'ko': '신청 상세',
+    'en': 'Request Detail',
+    'lo': 'ລາຍລະອຽດການສະໝັກ',
+  },
+  'my_request_cancel_confirm': {
+    'ko': '신청을 취소하시겠습니까?',
+    'en': 'Are you sure you want to cancel this request?',
+    'lo': 'ທ່ານຕ້ອງການຍົກເລີກການສະໝັກນີ້ບໍ?',
+  },
+  'my_request_cancel_btn': {
+    'ko': '신청 취소',
+    'en': 'Cancel Request',
+    'lo': 'ຍົກເລີກການສະໝັກ',
+  },
+  'category_label': {
+    'ko': '카테고리',
+    'en': 'Category',
+    'lo': 'ໝວດໝູ່',
+  },
+  'schedule_label': {
+    'ko': '희망 일시',
+    'en': 'Preferred Schedule',
+    'lo': 'ເວລາທີ່ຕ້ອງການ',
+  },
+  'detail_label': {
+    'ko': '상세 내용',
+    'en': 'Details',
+    'lo': 'ລາຍລະອຽດ',
+  },
+  'memo_label': {
+    'ko': '추가 메모',
+    'en': 'Additional Memo',
+    'lo': 'ບັນທຶກເພີ່ມເຕີມ',
+  },
+  'no_memo': {
+    'ko': '없음',
+    'en': 'None',
+    'lo': 'ບໍ່ມີ',
+  },
+  'photos_label': {
+    'ko': '사진',
+    'en': 'Photos',
+    'lo': 'ຮູບພາບ',
+  },
+  'status': {
+    'ko': '상태',
+    'en': 'Status',
+    'lo': 'ສະຖານະ',
+  },
+  'close_btn': {
+    'ko': '닫기',
+    'en': 'Close',
+    'lo': 'ປິດ',
+  },
+  'status_accepted': {
+    'ko': '수락됨',
+    'en': 'Accepted',
+    'lo': 'ຮັບແລ້ວ',
+  },
   'inbox_title': {
     'ko': '수신함',
     'en': 'Inbox',

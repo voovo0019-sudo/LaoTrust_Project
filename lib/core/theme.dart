@@ -74,7 +74,9 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'NotoSansLao',
+      // 기본 폰트는 시스템 폰트 사용
+      // 라오어 전용 폰트(NotoSansLao)는 locale 감지 후 별도 적용
+      // (app_localizations.dart의 DefaultTextStyle.merge로 처리)
       colorScheme: const ColorScheme.light(
         primary: indigoBlue,
         onPrimary: white,
@@ -205,11 +207,9 @@ class AppTheme {
       ),
     );
 
-    final sans = GoogleFonts.notoSans().fontFamily!;
     final sansLao = GoogleFonts.notoSansLao().fontFamily!;
     return base.copyWith(
-      textTheme: GoogleFonts.notoSansTextTheme(base.textTheme).apply(
-        fontFamily: sans,
+      textTheme: base.textTheme.apply(
         fontFamilyFallback: [sansLao],
       ),
     );
@@ -220,7 +220,9 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: 'NotoSansLao',
+      // 기본 폰트는 시스템 폰트 사용
+      // 라오어 전용 폰트(NotoSansLao)는 locale 감지 후 별도 적용
+      // (app_localizations.dart의 DefaultTextStyle.merge로 처리)
       colorScheme: const ColorScheme.dark(
         primary: indigoBlue,
         onPrimary: white,
@@ -308,11 +310,9 @@ class AppTheme {
       ),
     );
 
-    final sans = GoogleFonts.notoSans().fontFamily!;
     final sansLao = GoogleFonts.notoSansLao().fontFamily!;
     return base.copyWith(
-      textTheme: GoogleFonts.notoSansTextTheme(base.textTheme).apply(
-        fontFamily: sans,
+      textTheme: base.textTheme.apply(
         fontFamilyFallback: [sansLao],
       ),
     );

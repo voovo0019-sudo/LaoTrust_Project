@@ -131,11 +131,37 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
     }
 
     final location = data['location'] as Map<String, dynamic>?;
-    final locationStr = location?['landmark'] as String? ?? '';
+    String locationStr = '';
+    if (wizardI18n != null) {
+      final loc = wizardI18n['location'];
+      if (loc is Map) {
+        locationStr = loc[lang]?.toString() ??
+            loc['ko']?.toString() ??
+            loc['en']?.toString() ??
+            '';
+      }
+    }
+    if (locationStr.isEmpty) {
+      locationStr = location?['landmark']?.toString() ?? '';
+      final fromLandmark = location?['fromLandmark']?.toString() ?? '';
+      final toLandmark = location?['toLandmark']?.toString() ?? '';
+      if (fromLandmark.isNotEmpty && toLandmark.isNotEmpty) {
+        locationStr = '$fromLandmark → $toLandmark';
+      }
+    }
     final schedule = data['schedule'] as Map<String, dynamic>?;
     final scheduleStr =
         schedule != null ? '${schedule['date'] ?? ''} ${schedule['time'] ?? ''}' : '';
-    final memo = data['memo'] as String? ?? '';
+    final detail = getI18n('detail');
+    final memoI18n = data['memoI18n'];
+    String memo = '';
+    if (memoI18n is Map) {
+      memo = memoI18n[lang]?.toString() ??
+          memoI18n['ko']?.toString() ??
+          memoI18n['en']?.toString() ??
+          '';
+    }
+    if (memo.isEmpty) memo = data['memo']?.toString() ?? '';
     final photos = data['photos'] as List<dynamic>? ?? [];
 
     return Scaffold(
@@ -159,6 +185,7 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _infoRow(_t('inbox_category'), getI18n('title')),
+                  _infoRow(_t('inbox_detail'), detail),
                   _infoRow(_t('inbox_location'), locationStr),
                   _infoRow(_t('inbox_schedule'), scheduleStr),
                   if (memo.isNotEmpty) _infoRow(_t('inbox_memo'), memo),

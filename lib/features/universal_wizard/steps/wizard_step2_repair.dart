@@ -13,6 +13,7 @@ class WizardStep2Repair extends StatelessWidget {
   final String currentLangCode;
   final void Function(String) onBrandChanged;
   final void Function(String, bool) onSymptomToggled;
+  final VoidCallback onStateChanged;
 
   const WizardStep2Repair({
     super.key,
@@ -22,6 +23,7 @@ class WizardStep2Repair extends StatelessWidget {
     required this.currentLangCode,
     required this.onBrandChanged,
     required this.onSymptomToggled,
+    required this.onStateChanged,
   });
 
   String _t(String key) =>
@@ -29,77 +31,77 @@ class WizardStep2Repair extends StatelessWidget {
 
   static const _symptomsByAppliance = <String, List<(String, String)>>{
     'ac': [
-      ('no_cold', 'symptom_ac_no_cold_air'),
-      ('noise', 'symptom_ac_noise'),
-      ('water_leak', 'symptom_ac_water_sound'),
-      ('not_cool', 'symptom_ac_not_cool'),
-      ('other', 'symptom_other'),
+      ('symptom_ac_no_cold_air', 'symptom_ac_no_cold_air'),
+      ('symptom_ac_noise', 'symptom_ac_noise'),
+      ('symptom_ac_water_sound', 'symptom_ac_water_sound'),
+      ('symptom_ac_not_cool', 'symptom_ac_not_cool'),
+      ('symptom_other', 'symptom_other'),
     ],
     'fridge': [
-      ('no_cool', 'symptom_fridge_no_cool'),
-      ('noise', 'symptom_fridge_noise'),
-      ('door', 'symptom_fridge_door'),
-      ('ice', 'symptom_fridge_ice'),
-      ('other', 'symptom_other'),
+      ('symptom_fridge_no_cool', 'symptom_fridge_no_cool'),
+      ('symptom_fridge_noise', 'symptom_fridge_noise'),
+      ('symptom_fridge_door', 'symptom_fridge_door'),
+      ('symptom_fridge_ice', 'symptom_fridge_ice'),
+      ('symptom_other', 'symptom_other'),
     ],
     'washer': [
-      ('no_spin', 'symptom_washer_no_spin'),
-      ('water_leak', 'symptom_washer_water_leak'),
-      ('noise', 'symptom_washer_noise'),
-      ('no_power', 'symptom_washer_no_power'),
-      ('other', 'symptom_other'),
+      ('symptom_washer_no_spin', 'symptom_washer_no_spin'),
+      ('symptom_washer_water_leak', 'symptom_washer_water_leak'),
+      ('symptom_washer_noise', 'symptom_washer_noise'),
+      ('symptom_washer_no_power', 'symptom_washer_no_power'),
+      ('symptom_other', 'symptom_other'),
     ],
     'tv': [
-      ('no_display', 'symptom_tv_no_display'),
-      ('no_sound', 'symptom_tv_no_sound'),
-      ('no_power', 'symptom_tv_no_power'),
-      ('remote', 'symptom_tv_remote'),
-      ('other', 'symptom_other'),
+      ('symptom_tv_no_display', 'symptom_tv_no_display'),
+      ('symptom_tv_no_sound', 'symptom_tv_no_sound'),
+      ('symptom_tv_no_power', 'symptom_tv_no_power'),
+      ('symptom_tv_remote', 'symptom_tv_remote'),
+      ('symptom_other', 'symptom_other'),
     ],
     'water_purifier': [
-      ('water_leak', 'symptom_wp_water_leak'),
-      ('no_cold', 'symptom_wp_no_cold'),
-      ('no_hot', 'symptom_wp_no_hot'),
-      ('filter', 'symptom_wp_filter'),
-      ('other', 'symptom_other'),
+      ('symptom_wp_water_leak', 'symptom_wp_water_leak'),
+      ('symptom_wp_no_cold', 'symptom_wp_no_cold'),
+      ('symptom_wp_no_hot', 'symptom_wp_no_hot'),
+      ('symptom_wp_filter', 'symptom_wp_filter'),
+      ('symptom_other', 'symptom_other'),
     ],
     'fan': [
-      ('no_spin', 'symptom_fan_no_spin'),
-      ('noise', 'symptom_fan_noise'),
-      ('no_power', 'symptom_fan_no_power'),
-      ('other', 'symptom_other'),
+      ('symptom_fan_no_spin', 'symptom_fan_no_spin'),
+      ('symptom_fan_noise', 'symptom_fan_noise'),
+      ('symptom_fan_no_power', 'symptom_fan_no_power'),
+      ('symptom_other', 'symptom_other'),
     ],
     'rice_cooker': [
-      ('no_cook', 'symptom_rc_no_cook'),
-      ('no_heat', 'symptom_rc_no_heat'),
-      ('no_power', 'symptom_rc_no_power'),
-      ('other', 'symptom_other'),
+      ('symptom_rc_no_cook', 'symptom_rc_no_cook'),
+      ('symptom_rc_no_heat', 'symptom_rc_no_heat'),
+      ('symptom_rc_no_power', 'symptom_rc_no_power'),
+      ('symptom_other', 'symptom_other'),
     ],
     'generator': [
-      ('no_start', 'symptom_gen_no_start'),
-      ('no_power', 'symptom_gen_no_power'),
-      ('noise', 'symptom_gen_noise'),
-      ('fuel_leak', 'symptom_gen_fuel_leak'),
-      ('other', 'symptom_other'),
+      ('symptom_gen_no_start', 'symptom_gen_no_start'),
+      ('symptom_gen_no_power', 'symptom_gen_no_power'),
+      ('symptom_gen_noise', 'symptom_gen_noise'),
+      ('symptom_gen_fuel_leak', 'symptom_gen_fuel_leak'),
+      ('symptom_other', 'symptom_other'),
     ],
     'water_pump': [
-      ('no_water', 'symptom_wp_no_water'),
-      ('low_pressure', 'symptom_wp_low_pressure'),
-      ('noise', 'symptom_wp_noise'),
-      ('no_start', 'symptom_wp_no_start'),
-      ('other', 'symptom_other'),
+      ('symptom_wp_no_water', 'symptom_wp_no_water'),
+      ('symptom_wp_low_pressure', 'symptom_wp_low_pressure'),
+      ('symptom_wp_noise', 'symptom_wp_noise'),
+      ('symptom_wp_no_start', 'symptom_wp_no_start'),
+      ('symptom_other', 'symptom_other'),
     ],
     'solar_panel': [
-      ('no_charge', 'symptom_sp_no_charge'),
-      ('low_output', 'symptom_sp_low_output'),
-      ('panel_damage', 'symptom_sp_panel_damage'),
-      ('other', 'symptom_other'),
+      ('symptom_sp_no_charge', 'symptom_sp_no_charge'),
+      ('symptom_sp_low_output', 'symptom_sp_low_output'),
+      ('symptom_sp_panel_damage', 'symptom_sp_panel_damage'),
+      ('symptom_other', 'symptom_other'),
     ],
     'other': [
-      ('broken', 'symptom_other_broken'),
-      ('noise', 'symptom_other_noise'),
-      ('no_power', 'symptom_other_no_power'),
-      ('other', 'symptom_other'),
+      ('symptom_other_broken', 'symptom_other_broken'),
+      ('symptom_other_noise', 'symptom_other_noise'),
+      ('symptom_other_no_power', 'symptom_other_no_power'),
+      ('symptom_other', 'symptom_other'),
     ],
   };
 
@@ -277,6 +279,7 @@ class WizardStep2Repair extends StatelessWidget {
                     const SizedBox(height: 16),
                     TextField(
                       controller: symptomMemoController,
+                      onChanged: (_) => onStateChanged(),
                       decoration: wizardOutlineFieldDecoration(
                         _t('repair_other_label'),
                         hint: _t('repair_other_hint'),

@@ -474,15 +474,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
     final detailParts = <String>[
       if (depth2Str.isNotEmpty) depth2Str,
-      if (_d3MemoController.text.trim().isNotEmpty) _d3MemoController.text.trim(),
     ];
     final detailStr = detailParts.join('\n');
 
+    final memoStr = _d3MemoController.text.trim();
     return {
       'title': titleStr.trim(),
       'location': locStr.trim(),
       'salary': scheduleStr.trim(),
       'detail': detailStr.trim(),
+      if (memoStr.isNotEmpty) 'memo': memoStr,
     };
   }
 
@@ -557,6 +558,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'expert_repair':
         return {
           'brand': _repairBrand,
+          'symptoms': _step2Selections.toList(),
           'symptomDetail': _repairSymptomMemoController.text.trim(),
         };
       case 'expert_interior':
@@ -738,12 +740,114 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       return '${t('wizard_step2_title')}: $body';
     }
 
-    // 빈값 필터링
+    // 저장ID → 번역키 변환 테이블 (글로벌 i18n 표준 - 9개 카테고리 전체)
+    const idToTranslationKey = <String, String>{
+      // [beauty]
+      'full': 'beauty_body_full',
+      'back': 'beauty_body_back',
+      'leg': 'beauty_body_leg',
+      'head': 'beauty_body_head',
+      '60min': 'beauty_duration_60',
+      '90min': 'beauty_duration_90',
+      '120min': 'beauty_duration_120',
+      'visit_home': 'beauty_visit_home',
+      'visit_shop': 'beauty_visit_shop',
+      'swedish': 'beauty_aroma_swedish',
+      'deep_tissue': 'beauty_aroma_deep_tissue',
+      'hot_stone': 'beauty_aroma_hot_stone',
+      'foot': 'beauty_aroma_foot',
+      // [business]
+      'lang_zh': 'wizard_lang_zh',
+      'lang_th': 'wizard_lang_th',
+      'passport': 'business_doc_passport',
+      'contract': 'business_doc_contract',
+      'certificate': 'business_doc_certificate',
+      'medical': 'business_doc_medical',
+      'corporate': 'business_doc_corporate',
+      'property': 'business_doc_property',
+      'customs': 'business_doc_customs',
+      // [interior]
+      'house': 'interior_housing_house',
+      'apartment': 'interior_housing_apartment',
+      'condo': 'interior_housing_condo',
+      'commercial': 'interior_housing_commercial',
+      'villa': 'interior_housing_villa',
+      'townhouse': 'interior_housing_townhouse',
+      'guesthouse': 'interior_housing_guesthouse',
+      'paper': 'interior_wallpaper_paper',
+      'fabric': 'interior_wallpaper_fabric',
+      'paint': 'interior_wallpaper_paint',
+      'tile': 'interior_floor_tile',
+      'wood': 'interior_floor_wood',
+      'marble': 'interior_floor_marble',
+      'vinyl': 'interior_floor_vinyl',
+      'budget_s': 'interior_budget_s',
+      'budget_m': 'interior_budget_m',
+      'budget_l': 'interior_budget_l',
+      // [moving]
+      'pickup': 'moving_vehicle_pickup',
+      'van': 'moving_vehicle_van',
+      'small_truck': 'moving_vehicle_small_truck',
+      'motorcycle': 'moving_vehicle_motorcycle',
+      'furniture': 'moving_cargo_furniture',
+      'appliance': 'moving_cargo_appliance',
+      'box': 'moving_cargo_box',
+      'instrument': 'moving_cargo_instrument',
+      'buddha': 'moving_cargo_buddha',
+      'yes': 'moving_elevator_yes',
+      'no': 'moving_elevator_no',
+      'detached': 'cleaning_house_detached',
+      'officetel': 'cleaning_house_officetel',
+      // [tutoring]
+      'online': 'tutor_class_online',
+      'visit': 'tutor_class_visit',
+      'center': 'tutor_class_center',
+      'elem': 'wizard_level_elem',
+      'mid': 'wizard_level_mid',
+      'high': 'wizard_level_high',
+      'adult': 'wizard_level_adult',
+      'beginner': 'tutor_exp_beginner',
+      'intermediate': 'tutor_exp_intermediate',
+      'advanced': 'tutor_exp_advanced',
+      // [vehicle]
+      'engine': 'wizard_vehicle_sym_engine',
+      'tire': 'wizard_vehicle_sym_tire',
+      'accident': 'wizard_vehicle_sym_accident',
+      'electrical': 'wizard_vehicle_sym_electrical',
+      'brake': 'vehicle_sym_brake',
+      'chain': 'vehicle_sym_chain',
+      'sedan': 'vehicle_car_sedan',
+      'suv': 'vehicle_car_suv',
+      'half_day': 'vehicle_rental_half_day',
+      'full_day': 'vehicle_rental_full_day',
+      'weekly': 'vehicle_rental_weekly',
+      'monthly': 'vehicle_rental_monthly',
+      // [events]
+      'natural': 'events_photo_natural',
+      'studio': 'events_photo_studio',
+      'outdoor': 'events_photo_outdoor',
+      'indoor': 'events_photo_indoor',
+      'photo_only': 'events_deliverable_photo',
+      'video_only': 'events_deliverable_video',
+      'both': 'events_deliverable_both',
+      'scale_s': 'events_scale_s',
+      'scale_m': 'events_scale_m',
+      'scale_l': 'events_scale_l',
+      'baci_wedding': 'events_baci_wedding',
+      'baci_newborn': 'events_baci_newborn',
+      'baci_housewarming': 'events_baci_housewarming',
+      'baci_farewell': 'events_baci_farewell',
+      'baci_other': 'events_baci_other',
+    };
+
     if (value == null) return '';
     final rawValue = value is List
         ? value.map((e) {
             final s = '$e'.trim();
-            return kStaticUiTripleByMessageKey[s]?[lang] ?? s;
+            final translationKey = idToTranslationKey[s] ?? s;
+            return kStaticUiTripleByMessageKey[translationKey]?[lang] ??
+                kStaticUiTripleByMessageKey[s]?[lang] ??
+                s;
           }).where((e) => e.isNotEmpty).join(', ')
         : '$value'.trim();
     if (rawValue.isEmpty) return '';
@@ -882,7 +986,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return '${t('wizard_vehicle_brand_label')}: $rawValue';
       case 'symptoms':
         if (rawValue.isEmpty) return '';
-        return '${t('wizard_vehicle_symptom_title')}: $rawValue';
+        final symptomTitleKey = _state.categoryKey == 'expert_vehicle'
+            ? 'wizard_vehicle_symptom_title'
+            : 'wizard_repair_symptom_title';
+        return '${t(symptomTitleKey)}: $rawValue';
       case 'rentalOptions':
         if (rawValue.isEmpty) return '';
         return '${t('vehicle_rental_duration_title')}: $rawValue';
@@ -1116,6 +1223,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         'memo': _d3MemoController.text.trim(),
         'status': 'pending',
         'wizardI18n': wizardI18n,
+        'memoI18n': wizardI18n['memo'] is Map
+            ? wizardI18n['memo'] as Map<String, dynamic>
+            : null,
       };
       if (photoLocalPaths != null && photoLocalPaths.isNotEmpty) {
         body['_photoLocalPaths'] = photoLocalPaths;
@@ -1693,6 +1803,7 @@ List<Widget> _buildStep2RepairV5() {
           _step2Selections.add(id);
         }
       }),
+      onStateChanged: () => setState(() {}),
     ),
   ];
 }

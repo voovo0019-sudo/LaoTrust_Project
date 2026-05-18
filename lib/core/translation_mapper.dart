@@ -483,6 +483,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Details',
     'lo': 'ລາຍລະອຽດ',
   },
+  'location_label': {
+    'ko': '위치',
+    'en': 'Location',
+    'lo': 'ສະຖານທີ່',
+  },
   'memo_label': {
     'ko': '추가 메모',
     'en': 'Additional Memo',
@@ -632,6 +637,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '아니오',
     'en': 'No',
     'lo': 'ບໍ່',
+  },
+  'inbox_detail': {
+    'ko': '상세 내용',
+    'en': 'Detail',
+    'lo': 'ລາຍລະອຽດ',
   },
   'inbox_photos': {
     'ko': '사진',
@@ -1701,6 +1711,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'beauty_visit_type_title': {'ko': '방문 방식', 'en': 'Service Type', 'lo': 'ປະເພດບໍລິການ'},
   'beauty_visit_home': {'ko': '방문 서비스', 'en': 'Home Visit', 'lo': 'ບໍລິການຮອດເຮືອນ'},
   'beauty_visit_shop': {'ko': '샵 방문', 'en': 'Visit Shop', 'lo': 'ໄປຮ້ານ'},
+  'wizard_beauty_people_label': {
+    'ko': '인원 수',
+    'en': 'Number of People',
+    'lo': 'ຈຳນວນຄົນ',
+  },
   'beauty_aroma_type_title': {'ko': '마사지 종류', 'en': 'Massage Type', 'lo': 'ປະເພດນວດ'},
   'beauty_aroma_swedish': {'ko': '스웨디시', 'en': 'Swedish', 'lo': 'ສະວີດິດ'},
   'beauty_aroma_deep_tissue': {'ko': '딥티슈', 'en': 'Deep Tissue', 'lo': 'ດີບທິດຊູ'},
@@ -1962,6 +1977,21 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   },
   'wizard_vehicle_brand_label': {'ko': '차량 브랜드/모델', 'en': 'Vehicle Brand/Model', 'lo': 'ຍີ່ຫໍ້/ຮຸ່ນລົດ'},
   'wizard_vehicle_symptom_title': {'ko': '증상', 'en': 'Symptoms', 'lo': 'ອາການ'},
+  'wizard_repair_symptom_title': {
+    'ko': '증상',
+    'en': 'Symptoms',
+    'lo': 'ອາການ',
+  },
+  'wizard_repair_symptom_memo_label': {
+    'ko': '증상 메모',
+    'en': 'Symptom Memo',
+    'lo': 'ບັນທຶກອາການ',
+  },
+  'vehicle_symptom_memo_label': {
+    'ko': '증상 메모',
+    'en': 'Symptom Memo',
+    'lo': 'ບັນທຶກອາການ',
+  },
   'wizard_vehicle_sym_engine': {'ko': '엔진 이상', 'en': 'Engine Issue', 'lo': 'ບັນຫາເຄື່ອງ'},
   'wizard_vehicle_sym_tire': {'ko': '타이어', 'en': 'Tire', 'lo': 'ຢາງ'},
   'wizard_vehicle_sym_accident': {'ko': '사고 수리', 'en': 'Accident Repair', 'lo': 'ສ້ອມອຸບັດເຫດ'},
@@ -1969,7 +1999,6 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'vehicle_sym_brake': {'ko': '브레이크 이상', 'en': 'Brake Issue', 'lo': 'ບັນຫາເບຣກ'},
   'vehicle_sym_ac': {'ko': '에어컨 고장', 'en': 'AC Failure', 'lo': 'ແອຊຳລະຫວ່ານ'},
   'vehicle_sym_chain': {'ko': '체인·벨트 문제', 'en': 'Chain & Belt Issue', 'lo': 'ບັນຫາໂສ້ ແລະ ສາຍພານ'},
-  'vehicle_symptom_memo_label': {'ko': '증상 설명 *', 'en': 'Symptom Details *', 'lo': 'ອາການ *'},
   'vehicle_symptom_memo_hint': {'ko': '증상을 자세히 설명해주세요', 'en': 'Please describe the symptom', 'lo': 'ອະທິບາຍອາການໃຫ້ລະອຽດ'},
   'vehicle_car_type_title': {'ko': '차량 종류', 'en': 'Vehicle Type', 'lo': 'ປະເພດລົດ'},
   'vehicle_car_sedan': {'ko': '세단', 'en': 'Sedan', 'lo': 'ເຊດານ'},
@@ -2417,7 +2446,7 @@ class QuickJobTranslationResult {
       QuickJobTranslationResult._(isSuccess: false, bundle: null, message: message);
 }
 
-/// 급구 필드 4개 일괄 번역 → Firestore용 맵 리스트 [title, location, salary, detail].
+/// 급구 필드 5개 일괄 번역 → Firestore용 맵 리스트 [title, location, salary, detail, memo].
 class TranslationMapper {
   TranslationMapper._();
 
@@ -2478,7 +2507,7 @@ class TranslationMapper {
   static Map<String, Map<String, String>> rawTripleBundleForFields(
     Map<String, String> originalData,
   ) {
-    const keys = ['title', 'location', 'salary', 'detail'];
+    const keys = ['title', 'location', 'salary', 'detail', 'memo'];
     return {
       for (final k in keys) k: rawTripleForSameText(originalData[k] ?? ''),
     };
@@ -2511,7 +2540,7 @@ class TranslationMapper {
   static QuickJobTranslationResult _rawFinalizeBundleForAllFields(
     Map<String, String> originalData,
   ) {
-    const keys = ['title', 'location', 'salary', 'detail'];
+    const keys = ['title', 'location', 'salary', 'detail', 'memo'];
     final out = <String, Map<String, String>>{};
     for (final k in keys) {
       final src = (originalData[k] ?? '').trim();
@@ -2531,7 +2560,7 @@ class TranslationMapper {
     required String sourceLanguageCode,
   }) async {
     await _ensureDotenvLoaded();
-    const keys = ['title', 'location', 'salary', 'detail'];
+    const keys = ['title', 'location', 'salary', 'detail', 'memo'];
     final keyTrim = _translateApiKeyValue();
     if (kDebugMode) {
       debugPrint(

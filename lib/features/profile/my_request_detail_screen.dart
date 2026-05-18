@@ -98,6 +98,27 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
     return schedule?.toString() ?? '-';
   }
 
+  String _resolveLocation(Map<String, dynamic> data) {
+    final location = data['location'] as Map<String, dynamic>?;
+    if (location == null) return '-';
+    final lang = _langCode();
+    final wizardI18n = data['wizardI18n'];
+    if (wizardI18n is Map) {
+      final loc = wizardI18n['location'];
+      if (loc is Map) {
+        final translated = loc[lang]?.toString() ?? loc['ko']?.toString() ?? loc['en']?.toString() ?? '';
+        if (translated.isNotEmpty) return translated;
+      }
+    }
+    final landmark = location['landmark']?.toString() ?? '';
+    final fromLandmark = location['fromLandmark']?.toString() ?? '';
+    final toLandmark = location['toLandmark']?.toString() ?? '';
+    if (fromLandmark.isNotEmpty && toLandmark.isNotEmpty) {
+      return '$fromLandmark → $toLandmark';
+    }
+    return landmark.isNotEmpty ? landmark : '-';
+  }
+
   // 상세내용 (wizardI18n.detail 우선)
   String _resolveDetail(Map<String, dynamic> data) {
     final lang = _langCode();
@@ -187,7 +208,17 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
     final category = _resolveCategory(data);
     final schedule = _resolveSchedule(data);
     final detail = _resolveDetail(data);
-    final memo = data['memo']?.toString() ?? '';
+    final location = _resolveLocation(data);
+    final memoI18n = data['memoI18n'];
+    final lang = _langCode();
+    String memo = '';
+    if (memoI18n is Map) {
+      memo = memoI18n[lang]?.toString() ??
+          memoI18n['ko']?.toString() ??
+          memoI18n['en']?.toString() ??
+          '';
+    }
+    if (memo.isEmpty) memo = data['memo']?.toString() ?? '';
     final statusText = _resolveStatus(status);
 
     return Scaffold(
@@ -262,6 +293,7 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
                         children: [
                           _InfoRow(label: _t('schedule_label'), value: schedule, icon: Icons.calendar_today),
                           _InfoRow(label: _t('detail_label'), value: detail, icon: Icons.description_outlined),
+                          _InfoRow(label: _t('location_label'), value: location, icon: Icons.location_on_outlined),
                           _InfoRow(
                             label: _t('memo_label'),
                             value: memo.isNotEmpty ? memo : _t('no_memo'),

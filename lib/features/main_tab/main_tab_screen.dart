@@ -20,18 +20,17 @@ class MainTabScreen extends ConsumerStatefulWidget {
 }
 
 class _MainTabScreenState extends ConsumerState<MainTabScreen> {
-  int _currentIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final themeMode = ref.watch(themeProvider);
+    final currentIndex = ref.watch(currentTabProvider);
     // ignore: unused_local_variable
     final _ = themeMode;
 
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
+        index: currentIndex,
         children: [
           HomeScreen(
             locale: locale,
@@ -43,8 +42,8 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         ],
       ),
       bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentIndex,
-        onIndexChanged: (index) => setState(() => _currentIndex = index),
+        currentIndex: currentIndex,
+        onIndexChanged: (index) => ref.read(currentTabProvider.notifier).setTab(index),
       ),
     );
   }

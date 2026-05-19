@@ -4,21 +4,27 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/providers/providers.dart';
 import '../../core/app_localizations.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends ConsumerWidget {
   const ChatScreen({super.key});
   static const String routeName = '/chat';
 
   static const Color _appBarBlue = Color(0xFF1E3A8A);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: _appBarBlue,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => ref.read(currentTabProvider.notifier).goHome(),
+        ),
         title: Text(context.l10n('chat')),
         centerTitle: true,
       ),

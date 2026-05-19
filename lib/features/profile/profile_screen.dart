@@ -4,7 +4,9 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/providers/providers.dart';
 import '../../core/app_localizations.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
@@ -13,7 +15,7 @@ import '../../services/google_auth_service.dart';
 
 const String profileRouteName = '/profile';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
     super.key,
     this.openPhoneAuthOnStart = false,
@@ -26,10 +28,10 @@ class ProfileScreen extends StatefulWidget {
   final bool discardPendingPostLoginRedirect;
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _verified = false;
 
   String _digitsOnly(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
@@ -83,6 +85,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => ref.read(currentTabProvider.notifier).goHome(),
+        ),
         title: Text(context.l10n('profile')),
         centerTitle: true,
       ),

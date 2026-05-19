@@ -4,18 +4,20 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/providers/providers.dart';
 import '../../core/app_localizations.dart';
 import '../../core/location_service.dart';
 
-class JobsScreen extends StatefulWidget {
+class JobsScreen extends ConsumerStatefulWidget {
   const JobsScreen({super.key});
   static const String routeName = '/jobs';
 
   @override
-  State<JobsScreen> createState() => _JobsScreenState();
+  ConsumerState<JobsScreen> createState() => _JobsScreenState();
 }
 
-class _JobsScreenState extends State<JobsScreen> {
+class _JobsScreenState extends ConsumerState<JobsScreen> {
   static const Color _appBarBlue = Color(0xFF1E3A8A);
   String? _selectedRegionKey;
   String? _selectedTypeKey;
@@ -105,6 +107,10 @@ class _JobsScreenState extends State<JobsScreen> {
       appBar: AppBar(
         backgroundColor: _appBarBlue,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => ref.read(currentTabProvider.notifier).goHome(),
+        ),
         title: Text(context.l10n('jobs')),
         centerTitle: true,
       ),

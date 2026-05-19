@@ -438,6 +438,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Get started easily with your Google account',
     'lo': 'ເລີ່ມຕົ້ນງ່າຍໆດ້ວຍບັນຊີ Google ຂອງທ່ານ',
   },
+  'google_login_loading': {
+    'ko': '로그인 중...',
+    'en': 'Signing in...',
+    'lo': 'ກຳລັງເຂົ້າສູ່ລະບົບ...',
+  },
   'google_login_error': {
     'ko': '구글 로그인에 실패했습니다. 다시 시도해주세요.',
     'en': 'Google sign-in failed. Please try again.',

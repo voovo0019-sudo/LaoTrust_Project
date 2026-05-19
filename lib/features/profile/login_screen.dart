@@ -4,6 +4,7 @@
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../services/auth_service.dart';
 import '../../services/google_auth_service.dart';
 import '../../core/translation_mapper.dart';
 
@@ -21,12 +22,16 @@ class LoginScreen extends StatelessWidget {
         final credential = await signInWithGoogle();
         if (!context.mounted) return;
         if (credential != null) {
-          context.go('/');
+          schedulePostLoginNavigationAfterAuth(
+            sheetContext: context,
+            closeSheet: () {},
+            popToAppRoot: true,
+          );
         } else {
-          if (context.mounted) context.go('/');
+          if (context.mounted) context.go('/main');
         }
       } catch (e) {
-        if (context.mounted) context.go('/');
+        if (context.mounted) context.go('/main');
       }
     });
 

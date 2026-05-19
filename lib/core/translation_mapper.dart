@@ -533,6 +533,21 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'No requests received',
     'lo': 'ບໍ່ມີຄໍາຮ້ອງຂໍ',
   },
+  'inbox_login_required_title': {
+    'ko': '전문가로 활동하고 싶으신가요?',
+    'en': 'Want to work as an expert?',
+    'lo': 'ຢາກເຮັດວຽກເປັນຜູ້ຊ່ຽວຊານບໍ?',
+  },
+  'inbox_login_required_desc': {
+    'ko': '로그인하면 고객의 신청을 받고\n전문가로 활동할 수 있습니다.',
+    'en': 'Sign in to receive customer requests\nand work as an expert.',
+    'lo': 'ເຂົ້າສູ່ລະບົບເພື່ອຮັບຄຳຮ້ອງຈາກລູກຄ້າ\nແລະ ເຮັດວຽກເປັນຜູ້ຊ່ຽວຊານ.',
+  },
+  'inbox_login_btn': {
+    'ko': '로그인하기',
+    'en': 'Sign In',
+    'lo': 'ເຂົ້າສູ່ລະບົບ',
+  },
   'expert_verified_badge': {
     'ko': '인증 전문가',
     'en': 'Verified Expert',

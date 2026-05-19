@@ -4,6 +4,7 @@
 // =============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/translation_mapper.dart';
 import 'package:lao_trust/firebase_options.dart';
 
@@ -184,7 +185,7 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
           .collection('requests')
           .doc(widget.docId)
           .update({'status': 'cancelled'});
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) context.go('/main');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -375,7 +376,7 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
                               borderRadius: BorderRadius.circular(28),
                             ),
                           ),
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () => context.go('/main'),
                           child: Text(_t('close_btn')),
                         ),
                       ),

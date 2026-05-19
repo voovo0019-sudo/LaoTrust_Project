@@ -4,6 +4,7 @@
 // =============================================================================
 import 'dart:async' show TimeoutException;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lao_trust/firebase_options.dart';
 import '../../core/app_localizations.dart';
@@ -144,6 +145,10 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/main'),
+        ),
         title: Text(context.l10n('profile_menu_my_requests')),
         actions: [
           IconButton(

@@ -130,6 +130,13 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
       return map?[lang] as String? ?? data[field]?.toString() ?? '';
     }
 
+    final rawTitle = getI18n('title');
+    final titleParts = rawTitle.split(' · ');
+    final categoryTitle = titleParts.first.trim();
+    final subTypeTitle = titleParts.length > 1
+        ? titleParts.skip(1).join(' · ').trim()
+        : '';
+
     final location = data['location'] as Map<String, dynamic>?;
     String locationStr = '';
     if (wizardI18n != null) {
@@ -169,7 +176,7 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
       appBar: AppBar(
         backgroundColor: _kRoyalBlue,
         title: Text(
-          _t('inbox_detail_title'),
+          categoryTitle,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -184,7 +191,32 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow(_t('inbox_category'), getI18n('title')),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        categoryTitle,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: _kRoyalBlue,
+                        ),
+                      ),
+                      if (subTypeTitle.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            subTypeTitle,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Divider(height: 24),
                   _infoRow(_t('inbox_detail'), detail),
                   _infoRow(_t('inbox_location'), locationStr),
                   _infoRow(_t('inbox_schedule'), scheduleStr),

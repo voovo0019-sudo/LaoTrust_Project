@@ -138,6 +138,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           _buildMenuTile(
             context,
+            icon: Icons.workspace_premium,
+            title: context.t('expert_reg_title'),
+            subtitle: context.t('expert_reg_menu_sub'),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect('/expert_registration');
+                _openGoogleAuthFlow(context);
+                return;
+              }
+              context.push('/expert_registration');
+            },
+          ),
+          _buildMenuTile(
+            context,
             icon: Icons.dashboard,
             title: context.l10n('expert_dashboard'),
             subtitle: context.l10n('profile_expert_dashboard_sub'),

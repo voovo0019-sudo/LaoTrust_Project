@@ -2413,6 +2413,96 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'No power',
     'lo': 'ບໍ່ເປີດໄດ້',
   },
+  'expert_reg_title': {
+    'ko': '전문가로 활동하기',
+    'en': 'Become an Expert',
+    'lo': 'ສະໝັກເປັນຜູ້ຊ່ຽວຊານ',
+  },
+  'expert_reg_menu_sub': {
+    'ko': '서비스 카테고리를 등록하고 의뢰를 받아보세요',
+    'en': 'Register your service categories and receive requests',
+    'lo': 'ລົງທະບຽນປະເພດບໍລິການ ແລະ ຮັບຄຳຂໍ',
+  },
+  'expert_reg_header': {
+    'ko': '담당할 서비스를 선택하세요',
+    'en': 'Select the services you provide',
+    'lo': 'ເລືອກບໍລິການທີ່ທ່ານໃຫ້ບໍລິການ',
+  },
+  'expert_reg_sub': {
+    'ko': '여러 개를 선택할 수 있어요. 선택한 분야의 의뢰만 수신함에 표시됩니다.',
+    'en': 'You can select multiple. Only requests in your selected fields appear in your inbox.',
+    'lo': 'ທ່ານສາມາດເລືອກໄດ້ຫຼາຍອັນ. ສະເພາະຄຳຂໍໃນຂົງເຂດທີ່ເລືອກເທົ່ານັ້ນຈະປາກົດໃນກl່ອງຂໍ້ຄວາມ.',
+  },
+  'expert_reg_save_btn': {
+    'ko': '전문가 등록 완료',
+    'en': 'Complete Registration',
+    'lo': 'ລົງທະບຽນສຳເລັດ',
+  },
+  'expert_reg_select_required': {
+    'ko': '최소 하나의 서비스를 선택해주세요',
+    'en': 'Please select at least one service',
+    'lo': 'ກະລຸນາເລືອກຢ່າງໜ້ອຍໜຶ່ງບໍລິການ',
+  },
+  'expert_reg_save_failed': {
+    'ko': '저장에 실패했습니다. 다시 시도해주세요',
+    'en': 'Save failed. Please try again',
+    'lo': 'ການບັນທຶກລົ້ມເຫລວ. ກະລຸນາລອງໃໝ່',
+  },
+  'expert_reg_done_title': {
+    'ko': '전문가 등록 완료',
+    'en': 'Registration Complete',
+    'lo': 'ລົງທະບຽນສຳເລັດແລ້ວ',
+  },
+  'expert_reg_done_desc': {
+    'ko': '이제 수신함에서 선택한 분야의 의뢰를 받을 수 있습니다.',
+    'en': 'You can now receive requests in your selected fields from your inbox.',
+    'lo': 'ດຽວນີ້ທ່ານສາມາດຮັບຄຳຂໍໃນຂົງເຂດທີ່ເລືອກໄດ້ຈາກກ່ອງຂໍ້ຄວາມ.',
+  },
+  'cat_cleaning': {
+    'ko': '청소',
+    'en': 'Cleaning',
+    'lo': 'ທຳຄວາມສະອາດ',
+  },
+  'cat_moving': {
+    'ko': '이사',
+    'en': 'Moving',
+    'lo': 'ຍ້າຍເຮືອນ',
+  },
+  'cat_repair': {
+    'ko': '가전수리',
+    'en': 'Appliance Repair',
+    'lo': 'ສ້ອມແປງເຄື່ອງໃຊ້ໄຟຟ້າ',
+  },
+  'cat_interior': {
+    'ko': '인테리어',
+    'en': 'Interior',
+    'lo': 'ຕົກແຕ່ງພາຍໃນ',
+  },
+  'cat_business': {
+    'ko': '비즈니스·번역',
+    'en': 'Business & Translation',
+    'lo': 'ທຸລະກິດ ແລະ ການແປພາສາ',
+  },
+  'cat_beauty': {
+    'ko': '뷰티·미용',
+    'en': 'Beauty',
+    'lo': 'ຄວາມງາມ',
+  },
+  'cat_tutoring': {
+    'ko': '과외·레슨',
+    'en': 'Tutoring & Lessons',
+    'lo': 'ການສອນພິເສດ',
+  },
+  'cat_events': {
+    'ko': '이벤트·행사',
+    'en': 'Events',
+    'lo': 'ກິດຈະກຳ ແລະ ງານລ້ຽງ',
+  },
+  'cat_vehicle': {
+    'ko': '차량·운전',
+    'en': 'Vehicle & Driving',
+    'lo': 'ລົດ ແລະ ການຂັບຂີ່',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

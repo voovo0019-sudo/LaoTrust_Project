@@ -17,6 +17,7 @@ import 'features/profile/my_requests_screen.dart';
 import 'features/profile/login_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
+import 'package:lao_trust/features/profile/expert_registration_screen.dart';
 import 'features/profile/partner_support_center_screen.dart';
 import 'features/universal_wizard/universal_wizard_screen.dart';
 import 'features/universal_wizard/request_complete_screen.dart';
@@ -55,6 +56,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/expert_dashboard',
       builder: (context, state) => const ExpertDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/expert_registration',
+      builder: (context, state) => const ExpertRegistrationScreen(),
     ),
     GoRoute(
       path: '/partner_support',

@@ -2,9 +2,10 @@
 // MyRequestDetailScreen - 고객용 신청 상세 화면 v2.0
 // 전문가용 거절하기/수락하기 버튼 없음. 고객 전용.
 // =============================================================================
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/translation_mapper.dart';
 import 'package:lao_trust/firebase_options.dart';
 
@@ -24,6 +25,35 @@ class MyRequestDetailScreen extends StatefulWidget {
 
 class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
   bool _isCancelling = false;
+  StreamSubscription<DocumentSnapshot>? _subscription;
+  Map<String, dynamic>? _liveData;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = FirebaseFirestore.instance
+        .collection('artifacts')
+        .doc(DefaultFirebaseOptions.currentPlatform.projectId)
+        .collection('public')
+        .doc('data')
+        .collection('requests')
+        .doc(widget.docId)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      if (snap.exists) {
+        setState(() {
+          _liveData = snap.data() as Map<String, dynamic>;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   String _langCode() {
     final raw = Localizations.localeOf(context).languageCode.toLowerCase();
@@ -151,6 +181,75 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
     return status;
   }
 
+  Widget _buildMatchedExpertCard(Map<String, dynamic> data) {
+    final acceptedBy = data['acceptedBy'];
+    if (acceptedBy is! Map) return const SizedBox.shrink();
+    final name = acceptedBy['name']?.toString() ?? '';
+    final email = acceptedBy['email']?.toString() ?? '';
+    final acceptedAt = acceptedBy['acceptedAt']?.toString() ?? '';
+    String timeStr = '';
+    if (acceptedAt.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(acceptedAt).toLocal();
+        timeStr =
+            '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} '
+            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      } catch (_) {
+        timeStr = acceptedAt;
+      }
+    }
+    return Card(
+      elevation: 0,
+      color: const Color(0xFFE8F5E9),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFF4CAF50), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.verified_user,
+                    color: Color(0xFF4CAF50), size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  _t('matched_expert_title'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (name.isNotEmpty)
+              _InfoRow(
+                label: _t('matched_expert_name'),
+                value: name,
+                icon: Icons.person_outline,
+              ),
+            if (email.isNotEmpty)
+              _InfoRow(
+                label: _t('matched_expert_contact'),
+                value: email,
+                icon: Icons.email_outlined,
+              ),
+            if (timeStr.isNotEmpty)
+              _InfoRow(
+                label: _t('matched_at'),
+                value: timeStr,
+                icon: Icons.access_time,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _cancelRequest() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -185,11 +284,11 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
           .collection('requests')
           .doc(widget.docId)
           .update({'status': 'cancelled'});
-      if (mounted) context.go('/main');
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류: $e')),
+          SnackBar(content: Text(_t('error_update_failed'))),
         );
       }
     } finally {
@@ -199,7 +298,7 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final data = widget.data;
+    final data = _liveData ?? widget.data;
     final status = (data['status'] ?? 'pending').toString();
     final photos = data['photos'];
     final photoUrls = photos is List
@@ -229,6 +328,10 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
         foregroundColor: Colors.white,
         title: Text(_t('my_request_detail_title')),
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -281,7 +384,12 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 정보 카드
+                  // 매칭된 전문가 카드 (accepted 상태일 때만 노출)
+                  if (status == 'accepted') ...[
+                    _buildMatchedExpertCard(data),
+                    const SizedBox(height: 12),
+                  ],
+                  // 상세 정보 카드
                   Card(
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -376,7 +484,7 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
                               borderRadius: BorderRadius.circular(28),
                             ),
                           ),
-                          onPressed: () => context.go('/main'),
+                          onPressed: () => Navigator.of(context).pop(true),
                           child: Text(_t('close_btn')),
                         ),
                       ),

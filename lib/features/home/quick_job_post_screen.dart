@@ -214,7 +214,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       if (kDebugMode) debugPrint('_submit 최종 에러: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('등록 중 오류: $e')),
+          SnackBar(content: Text(context.t('error_save_failed'))),
         );
       }
     } finally {

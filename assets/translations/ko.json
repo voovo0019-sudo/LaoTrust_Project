@@ -83,7 +83,6 @@
   "repair_question_electric": "전기에 어떤 증상이 있나요?",
   "repair_question_plumbing": "배관에 어떤 증상이 있나요?",
   "repair_question_generic": "어떤 증상이 있나요?",
-  "repair_other_hint": "상세 증상을 자유롭게 적어주세요.",
 
   "symptom_other": "기타",
 
@@ -139,7 +138,7 @@
   "symptom_sp_low_output": "출력 부족",
   "symptom_sp_panel_damage": "패널 손상",
   "repair_other_label": "추가 요청사항",
-  "repair_other_hint": "예) 출장비 문의, 부품 교체 여부, 특이사항 등",
+  "repair_other_hint": "수리 내용을 자세히 적어주세요 (예: 작동 안 됨, 이상한 소리, 물이 샘 등)",
   "symptom_elec_outlet": "콘센트/스위치 고장",
   "symptom_elec_lighting": "조명 설치/교체",
   "symptom_elec_breaker": "누전 차단기",
@@ -270,6 +269,7 @@
   "profile_menu_customer_service_sub": "문의 및 도움말",
   "profile_verified_done": "인증 완료",
   "profile_verified_todo": "4.5 USD 결제 후 파란 배지 활성화",
+  "error_save_failed": "저장 중 오류가 발생했습니다",
   "expert_reg_title": "전문가로 활동하기",
   "expert_reg_menu_sub": "서비스 카테고리를 등록하고 의뢰를 받아보세요",
   "profile_expert_dashboard_sub": "수입·매칭 이력 보기",

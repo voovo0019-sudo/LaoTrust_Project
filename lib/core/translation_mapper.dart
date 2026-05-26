@@ -518,6 +518,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Close',
     'lo': 'ປິດ',
   },
+  'status_rejected': {
+    'ko': '거절됨',
+    'en': 'Rejected',
+    'lo': 'ຖືກປະຕິເສດ',
+  },
   'status_accepted': {
     'ko': '수락됨',
     'en': 'Accepted',
@@ -2502,6 +2507,36 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'ko': '차량·운전',
     'en': 'Vehicle & Driving',
     'lo': 'ລົດ ແລະ ການຂັບຂີ່',
+  },
+  'matched_expert_title': {
+    'ko': '매칭된 전문가',
+    'en': 'Matched Expert',
+    'lo': 'ຜູ້ຊ່ຽວຊານທີ່ຈັບຄູ່',
+  },
+  'matched_expert_name': {
+    'ko': '전문가 이름',
+    'en': 'Expert Name',
+    'lo': 'ຊື່ຜູ້ຊ່ຽວຊານ',
+  },
+  'matched_expert_contact': {
+    'ko': '연락처',
+    'en': 'Contact',
+    'lo': 'ຕິດຕໍ່',
+  },
+  'matched_at': {
+    'ko': '매칭 시간',
+    'en': 'Matched at',
+    'lo': 'ເວລາຈັບຄູ່',
+  },
+  'error_update_failed': {
+    'ko': '오류가 발생했습니다',
+    'en': 'An error occurred',
+    'lo': 'ເກີດຂໍ້ຜິດພາດ',
+  },
+  'error_save_failed': {
+    'ko': '저장 중 오류가 발생했습니다',
+    'en': 'Failed to save',
+    'lo': 'ບໍ່ສາມາດບັນທຶກໄດ້',
   },
 };
 

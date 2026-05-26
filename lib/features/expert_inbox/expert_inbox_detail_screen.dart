@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../core/translation_mapper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../firebase_options.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
@@ -37,6 +38,16 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
   Future<void> _updateStatus(String status) async {
     setState(() => _isLoading = true);
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      final updateData = <String, dynamic>{'status': status};
+      if (status == 'accepted' && user != null) {
+        updateData['acceptedBy'] = {
+          'uid': user.uid,
+          'name': user.displayName ?? '',
+          'email': user.email ?? '',
+          'acceptedAt': DateTime.now().toIso8601String(),
+        };
+      }
       await FirebaseFirestore.instance
           .collection('artifacts')
           .doc(DefaultFirebaseOptions.currentPlatform.projectId)
@@ -44,12 +55,12 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
           .doc('data')
           .collection('requests')
           .doc(widget.docId)
-          .update({'status': status});
+          .update(updateData);
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류: $e')),
+          SnackBar(content: Text(_t('error_update_failed'))),
         );
       }
     } finally {

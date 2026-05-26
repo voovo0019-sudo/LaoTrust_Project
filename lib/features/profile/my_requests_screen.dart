@@ -39,14 +39,6 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     'Other': 'category_other',
   };
 
-  // status 영어값 → 번역키 매핑
-  static const Map<String, String> _statusToKey = {
-    'pending': 'status_pending',
-    'in_progress': 'status_in_progress',
-    'completed': 'status_completed',
-    'cancelled': 'status_cancelled',
-  };
-
   @override
   void initState() {
     super.initState();
@@ -120,22 +112,6 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     } catch (_) {
       return rawKey;
     }
-  }
-
-  // status 영어값 → 현재 언어 기준 표시명 변환
-  String _resolveStatusName(String rawStatus, BuildContext context) {
-    final key = _statusToKey[rawStatus.toLowerCase()];
-    if (key != null) {
-      final triple = kStaticUiTripleByMessageKey[key];
-      if (triple != null) {
-        final locale = Localizations.localeOf(context).languageCode;
-        return triple[locale] ?? triple['en'] ?? rawStatus;
-      }
-      try {
-        return context.l10n(key);
-      } catch (_) {}
-    }
-    return rawStatus;
   }
 
   @override
@@ -219,7 +195,6 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                   ? _resolveCategoryName(rawKey, context)
                   : context.l10n('request_complete_title');
               final rawStatus = (data['status'] ?? 'pending').toString();
-              final statusName = _resolveStatusName(rawStatus, context);
               final createdAt = _formatDate(data['createdAt']);
               // wizardI18n.title 우선 표시
               final wizardI18n = data['wizardI18n'];
@@ -233,20 +208,41 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                 }
               }
 
-              // 상태별 색상
+              final lang = Localizations.localeOf(context)
+                      .languageCode
+                      .toLowerCase()
+                      .startsWith('ko')
+                  ? 'ko'
+                  : Localizations.localeOf(context)
+                          .languageCode
+                          .toLowerCase()
+                          .startsWith('lo')
+                      ? 'lo'
+                      : 'en';
+              String statusText(String key) =>
+                  kStaticUiTripleByMessageKey[key]?[lang] ?? key;
               Color statusColor;
+              String statusName;
               switch (rawStatus.toLowerCase()) {
                 case 'accepted':
                   statusColor = const Color(0xFF4CAF50);
+                  statusName = statusText('status_accepted');
+                  break;
+                case 'rejected':
+                  statusColor = Colors.red;
+                  statusName = statusText('status_rejected');
                   break;
                 case 'cancelled':
                   statusColor = Colors.red;
+                  statusName = statusText('status_cancelled');
                   break;
                 case 'completed':
                   statusColor = const Color(0xFF3F51B5);
+                  statusName = statusText('status_completed');
                   break;
                 default:
                   statusColor = const Color(0xFFFF9800);
+                  statusName = statusText('status_pending');
               }
 
               return GestureDetector(

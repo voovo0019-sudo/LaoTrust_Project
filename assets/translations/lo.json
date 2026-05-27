@@ -508,8 +508,8 @@
   "wizard_photo_pick_gallery": "ຄັງຮູບ",
   "wizard_photo_pick_camera": "ກ້ອງ",
 
-  "wizard_extra_request_label": "ຄຳຂໍເພີ່ມເຕີມ",
-  "wizard_extra_request_hint": "ບັນທຶກສົ່ງໃຫ້ຊ່ຽວຊານ",
+  "wizard_extra_request_label": "ບັນທຶກຄຳຂໍ",
+  "wizard_extra_request_hint": "ຕົວຢ່າງ: ຄ່າເດີນທາງ, ເວລານັດໝາຍ, ຄຳຮ້ອງພິເສດ",
   "wizard_step3_mode_title": "ກະລຸນາເລືອກຮູບແບບບໍລິການ",
   "wizard_step3_mode_remote": "ທາງໄກ / ອອນລາຍ",
   "wizard_step3_mode_remote_desc": "ຜ່ານໄຟລ໌, ວິດີໂອ ຫຼື ໂທລະສັບ",
@@ -550,7 +550,7 @@
   "wizard_summary_category": "ໝວດໝູ່",
   "wizard_summary_subtype": "ປະເພດຍ່ອຍ",
   "wizard_summary_detail": "ລາຍລະອຽດ",
-  "wizard_summary_note": "ບັນທຶກ",
+  "wizard_summary_note": "ບັນທຶກຄຳຂໍ",
 
   "wizard_settlement_title": "ຄຳແນະນຳການຊຳລະ",
   "wizard_settlement_line1": "• ທ່ານສາມາດຈ່າຍໃຫ້ຊ່ຽວຊານໂດຍກົງຜ່ານ BCEL One QR ຫຼື ເງິນສົດໃນລາວ.",

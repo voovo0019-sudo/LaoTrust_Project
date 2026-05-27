@@ -508,8 +508,8 @@
   "wizard_photo_pick_gallery": "Gallery",
   "wizard_photo_pick_camera": "Camera",
 
-  "wizard_extra_request_label": "Additional requests",
-  "wizard_extra_request_hint": "Note to the expert",
+  "wizard_extra_request_label": "Request Note",
+  "wizard_extra_request_hint": "e.g. Travel fee inquiry, preferred visit time, special requests",
   "wizard_step3_mode_title": "How would you like the service?",
   "wizard_step3_mode_remote": "Remote / Online",
   "wizard_step3_mode_remote_desc": "Via file, video call, or phone",
@@ -550,7 +550,7 @@
   "wizard_summary_category": "Category",
   "wizard_summary_subtype": "Subtype",
   "wizard_summary_detail": "Details",
-  "wizard_summary_note": "Note",
+  "wizard_summary_note": "Request Note",
 
   "wizard_settlement_title": "Settlement guide",
   "wizard_settlement_line1": "• You can pay the expert directly via BCEL One QR or cash in Laos.",

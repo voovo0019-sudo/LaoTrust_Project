@@ -530,8 +530,8 @@
   "wizard_photo_pick_gallery": "갤러리",
   "wizard_photo_pick_camera": "카메라",
 
-  "wizard_extra_request_label": "추가 요청사항",
-  "wizard_extra_request_hint": "전문가에게 전달할 메모",
+  "wizard_extra_request_label": "요청 메모",
+  "wizard_extra_request_hint": "예) 출장비 문의, 방문 시간 조정 등 요청사항을 적어주세요",
   "wizard_step3_mode_title": "서비스 방식을 선택해주세요",
   "wizard_step3_mode_remote": "원격/비대면",
   "wizard_step3_mode_remote_desc": "파일 전송·화상·전화로 진행",
@@ -572,7 +572,7 @@
   "wizard_summary_category": "카테고리",
   "wizard_summary_subtype": "세부 유형",
   "wizard_summary_detail": "규모/대상",
-  "wizard_summary_note": "추가 메모",
+  "wizard_summary_note": "요청 메모",
 
   "wizard_settlement_title": "정산 안내",
   "wizard_settlement_line1": "• 라오스 현지 BCEL One QR 결제 또는 현금으로 전문가에게 직접 지불할 수 있습니다.",

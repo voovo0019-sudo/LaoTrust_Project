@@ -27,10 +27,12 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
   bool _isCancelling = false;
   StreamSubscription<DocumentSnapshot>? _subscription;
   Map<String, dynamic>? _liveData;
+  String? _prevStatus;
 
   @override
   void initState() {
     super.initState();
+    _prevStatus = widget.data['status']?.toString() ?? '';
     _subscription = FirebaseFirestore.instance
         .collection('artifacts')
         .doc(DefaultFirebaseOptions.currentPlatform.projectId)
@@ -42,8 +44,19 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
         .listen((snap) {
       if (!mounted) return;
       if (snap.exists) {
+        final newData = snap.data() as Map<String, dynamic>;
+        final newStatus = newData['status']?.toString() ?? '';
+
+        // 핵심: pending → accepted 전환 감지 시 다이얼로그 표시
+        if (_prevStatus == 'pending' && newStatus == 'accepted') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _showMatchedDialog();
+          });
+        }
+
         setState(() {
-          _liveData = snap.data() as Map<String, dynamic>;
+          _prevStatus = newStatus;
+          _liveData = newData;
         });
       }
     });
@@ -179,6 +192,64 @@ class _MyRequestDetailScreenState extends State<MyRequestDetailScreen> {
       if (triple != null) return triple[_langCode()] ?? triple['en'] ?? status;
     }
     return status;
+  }
+
+  void _showMatchedDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _t('match_accepted_title'),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A8A),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          _t('match_accepted_body'),
+          style: const TextStyle(fontSize: 14, height: 1.6),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              _t('match_dialog_close'),
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E3A8A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
+            },
+            child: Text(
+              _t('match_go_my_requests'),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMatchedExpertCard(Map<String, dynamic> data) {

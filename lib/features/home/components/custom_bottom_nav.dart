@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/app_localizations.dart';
 
 class CustomBottomNav extends StatelessWidget {
@@ -7,10 +6,12 @@ class CustomBottomNav extends StatelessWidget {
     super.key,
     required this.currentIndex,
     required this.onIndexChanged,
+    this.profileBadgeCount = 0,
   });
 
   final int currentIndex;
   final ValueChanged<int> onIndexChanged;
+  final int profileBadgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +61,7 @@ class CustomBottomNav extends StatelessWidget {
                 label: context.l10n('profile'),
                 isSelected: currentIndex == 3,
                 onTap: () => onIndexChanged(3),
+                badgeCount: profileBadgeCount,
               ),
             ],
           ),
@@ -76,6 +78,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final IconData icon;
@@ -83,11 +86,13 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final color = isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+    final color =
+        isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(28.0),
@@ -97,17 +102,48 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              size: 22,
-              color: color,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : icon,
+                  size: 22,
+                  color: color,
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFDC2626),
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        badgeCount > 99 ? '99+' : '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: color,
                 letterSpacing: 0.1,
               ),
@@ -118,4 +154,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-

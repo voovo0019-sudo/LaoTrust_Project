@@ -2538,6 +2538,26 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Failed to save',
     'lo': 'ບໍ່ສາມາດບັນທຶກໄດ້',
   },
+  'match_accepted_title': {
+    'ko': '매칭 완료!',
+    'en': 'Matched!',
+    'lo': 'ຈັບຄູ່ສຳເລັດ!',
+  },
+  'match_accepted_body': {
+    'ko': '전문가가 신청을 수락했습니다.\n나의 신청 현황에서 전문가 정보를 확인하세요.',
+    'en': 'An expert has accepted your request.\nCheck the expert info in My Requests.',
+    'lo': 'ຜູ້ຊ່ຽວຊານຮັບຄຳຂໍຂອງທ່ານແລ້ວ.\nກວດເບິ່ງຂໍ້ມູນໃນຄຳຂໍຂອງຂ້ອຍ.',
+  },
+  'match_go_my_requests': {
+    'ko': '나의 신청 현황 보기',
+    'en': 'View My Requests',
+    'lo': 'ເບິ່ງຄຳຂໍຂອງຂ້ອຍ',
+  },
+  'match_dialog_close': {
+    'ko': '닫기',
+    'en': 'Close',
+    'lo': 'ປິດ',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

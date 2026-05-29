@@ -166,8 +166,8 @@ class WizardStep2Vehicle extends StatelessWidget {
       const carTypes = [
         ('sedan', 'vehicle_car_sedan'),
         ('suv', 'vehicle_car_suv'),
-        ('van', 'vehicle_car_van'),
-        ('pickup', 'vehicle_car_pickup'),
+        ('vehicle_car_van', 'vehicle_car_van'),
+        ('vehicle_car_pickup', 'vehicle_car_pickup'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,11 +180,11 @@ class WizardStep2Vehicle extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: carTypes.map((e) {
-              final selected = vehicleSymptoms.contains(e.$1);
+              final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(
                 label: _t(e.$2),
                 selected: selected,
-                onTap: () => onSymptomToggled(e.$1, selected),
+                onTap: () => onSelectionToggled(e.$1, selected),
               );
             }).toList(),
           ),
@@ -221,11 +221,11 @@ class WizardStep2Vehicle extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: motoTypes.map((e) {
-              final selected = vehicleSymptoms.contains(e.$1);
+              final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(
                 label: _t(e.$2),
                 selected: selected,
-                onTap: () => onSymptomToggled(e.$1, selected),
+                onTap: () => onSelectionToggled(e.$1, selected),
               );
             }).toList(),
           ),
@@ -282,7 +282,7 @@ class WizardStep2Vehicle extends StatelessWidget {
     if (subTypeId == 'carwash') {
       const carwashTypes = [
         ('basic', 'vehicle_carwash_basic'),
-        ('interior', 'vehicle_carwash_interior'),
+        ('interior_wash', 'vehicle_carwash_interior'),
         ('full', 'vehicle_carwash_full'),
         ('coating', 'vehicle_carwash_coating'),
       ];

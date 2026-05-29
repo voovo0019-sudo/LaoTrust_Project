@@ -48,9 +48,9 @@ class WizardStep2Beauty extends StatelessWidget {
 
   Widget _massageDurationRow() {
     const durations = [
-      ('60min', 'beauty_duration_60'),
-      ('90min', 'beauty_duration_90'),
-      ('120min', 'beauty_duration_120'),
+      ('beauty_dur_60min', 'beauty_duration_60'),
+      ('beauty_dur_90min', 'beauty_duration_90'),
+      ('beauty_dur_120min', 'beauty_duration_120'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,16 +86,16 @@ class WizardStep2Beauty extends StatelessWidget {
             Expanded(
               child: wizardOutlineToggleTile(
                 label: _t('beauty_visit_home'),
-                selected: step2Selections.contains('visit_home'),
-                onTap: () => onVisitTypeSelected('visit_home'),
+                selected: step2Selections.contains('beauty_visit_home'),
+                onTap: () => onVisitTypeSelected('beauty_visit_home'),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: wizardOutlineToggleTile(
                 label: _t('beauty_visit_shop'),
-                selected: step2Selections.contains('visit_shop'),
-                onTap: () => onVisitTypeSelected('visit_shop'),
+                selected: step2Selections.contains('beauty_visit_shop'),
+                onTap: () => onVisitTypeSelected('beauty_visit_shop'),
               ),
             ),
           ]),
@@ -118,10 +118,10 @@ class WizardStep2Beauty extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              ('full', 'beauty_body_full'),
-              ('back', 'beauty_body_back'),
-              ('leg', 'beauty_body_leg'),
-              ('head', 'beauty_body_head'),
+              ('beauty_body_full', 'beauty_body_full'),
+              ('beauty_body_back', 'beauty_body_back'),
+              ('beauty_body_leg', 'beauty_body_leg'),
+              ('beauty_body_head', 'beauty_body_head'),
             ].map((e) {
               final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(
@@ -153,10 +153,10 @@ class WizardStep2Beauty extends StatelessWidget {
 
     if (subTypeId == 'massage_aroma') {
       const aromaTypes = [
-        ('swedish', 'beauty_aroma_swedish'),
-        ('deep_tissue', 'beauty_aroma_deep_tissue'),
-        ('hot_stone', 'beauty_aroma_hot_stone'),
-        ('foot', 'beauty_aroma_foot'),
+        ('beauty_aroma_swedish', 'beauty_aroma_swedish'),
+        ('beauty_aroma_deep_tissue', 'beauty_aroma_deep_tissue'),
+        ('beauty_aroma_hot_stone', 'beauty_aroma_hot_stone'),
+        ('beauty_aroma_foot', 'beauty_aroma_foot'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,10 +199,10 @@ class WizardStep2Beauty extends StatelessWidget {
 
     if (subTypeId == 'nail') {
       const nailTypes = [
-        ('gel', 'beauty_nail_gel'),
-        ('acrylic', 'beauty_nail_acrylic'),
-        ('art', 'beauty_nail_art'),
-        ('removal', 'beauty_nail_removal'),
+        ('beauty_nail_gel', 'beauty_nail_gel'),
+        ('beauty_nail_acrylic', 'beauty_nail_acrylic'),
+        ('beauty_nail_art', 'beauty_nail_art'),
+        ('beauty_nail_removal', 'beauty_nail_removal'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,11 +243,11 @@ class WizardStep2Beauty extends StatelessWidget {
 
     if (subTypeId == 'hair') {
       const hairTypes = [
-        ('cut', 'beauty_hair_cut'),
-        ('perm', 'beauty_hair_perm'),
-        ('color', 'beauty_hair_color'),
-        ('treatment', 'beauty_hair_treatment'),
-        ('styling', 'beauty_hair_styling'),
+        ('beauty_hair_cut', 'beauty_hair_cut'),
+        ('beauty_hair_perm', 'beauty_hair_perm'),
+        ('beauty_hair_color', 'beauty_hair_color'),
+        ('beauty_hair_treatment', 'beauty_hair_treatment'),
+        ('beauty_hair_styling', 'beauty_hair_styling'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,11 +288,11 @@ class WizardStep2Beauty extends StatelessWidget {
 
     if (subTypeId == 'makeup') {
       const makeupTypes = [
-        ('wedding', 'beauty_makeup_wedding'),
-        ('event', 'beauty_makeup_event'),
-        ('daily', 'beauty_makeup_daily'),
-        ('photo', 'beauty_makeup_photo'),
-        ('baci', 'beauty_makeup_baci'),
+        ('beauty_makeup_wedding', 'beauty_makeup_wedding'),
+        ('beauty_makeup_event', 'beauty_makeup_event'),
+        ('beauty_makeup_daily', 'beauty_makeup_daily'),
+        ('beauty_makeup_photo', 'beauty_makeup_photo'),
+        ('beauty_makeup_baci', 'beauty_makeup_baci'),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,9 +345,9 @@ class WizardStep2Beauty extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              ('arms_legs', 'beauty_waxing_arms_legs'),
-              ('bikini', 'beauty_waxing_bikini'),
-              ('underarm', 'beauty_waxing_underarm'),
+              ('beauty_waxing_arms_legs', 'beauty_waxing_arms_legs'),
+              ('beauty_waxing_bikini', 'beauty_waxing_bikini'),
+              ('beauty_waxing_underarm', 'beauty_waxing_underarm'),
               ('face', 'beauty_waxing_face'),
               ('full', 'beauty_waxing_full'),
             ].map((e) {

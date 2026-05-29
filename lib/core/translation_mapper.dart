@@ -1209,14 +1209,14 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ປະເພດເຄື່ອງຂອງ',
   },
   'moving_cargo_other_hint': {
-    'ko': '예) 피아노, 금고, 대형 식물, 냉동고 등 특수 화물',
+    'ko': '예) 피아노 있음, 엘리베이터 없음, 특별히 조심할 물건 있음',
     'en': 'e.g. Piano, Safe, Large Plant, Freezer, Special cargo',
     'lo': 'ຕົວຢ່າງ: ເປຍໂນ, ຕູ້ເຊັບ, ຕົ້ນໄມ້ໃຫຍ່, ຕູ້ແຊ່',
   },
   'moving_cargo_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '운반 요청사항',
+    'en': 'Moving Request',
+    'lo': 'ຄຳຮ້ອງຂໍການຂົນສົ່ງ',
   },
   'moving_weight': {
     'ko': '무게 (kg)',
@@ -1294,9 +1294,9 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ເຂົ້າສູ່ລະບົບ',
   },
   'appliance_select_title': {
-    'ko': '어떤 가전제품인가요?',
-    'en': 'Which appliance needs repair?',
-    'lo': 'ເຄື່ອງໃຊ້ໄຟຟ້າຫຍັງ?',
+    'ko': '가전제품',
+    'en': 'Appliance',
+    'lo': 'ເຄື່ອງໃຊ້ໄຟຟ້າ',
   },
   'appliance_select_desc': {
     'ko': '수리가 필요한 가전을 선택해 주세요',
@@ -1454,9 +1454,9 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ຂອບເຂດງົບປະມານ',
   },
   'interior_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '시공 요청사항',
+    'en': 'Construction Request',
+    'lo': 'ຄຳຮ້ອງຂໍການກໍ່ສ້າງ',
   },
   'interior_other_hint': {
     'ko': '예) 원하는 스타일, 마감재 선호, 특별 요청사항',
@@ -1681,32 +1681,32 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ເອກະສານພາສີ/ຜ່ານດ່ານ',
   },
   'business_doc_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '문서 요청사항',
+    'en': 'Document Request',
+    'lo': 'ຄຳຮ້ອງຂໍເອກະສານ',
   },
   'business_doc_other_hint': {
-    'ko': '예) 공증 필요, 마감 기한, 특별 요구사항',
+    'ko': '예) 공증 필요, 번역 마감일 있음, 특이사항',
     'en': 'e.g. Notarization needed, Deadline, Special requirements',
     'lo': 'ຕົວຢ່າງ: ຕ້ອງການຢັ້ງຢືນ, ກຳນົດສົ່ງ, ຄຳຮ້ອງພິເສດ',
   },
   'business_interpret_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '통역 요청사항',
+    'en': 'Interpretation Request',
+    'lo': 'ຄຳຮ້ອງຂໍການແປ',
   },
   'business_interpret_other_hint': {
-    'ko': '예) 기술 세미나, 공장 현장, VIP 의전 등',
+    'ko': '예) 의료 전문용어 가능한 통역사 선호, 동시통역 필요',
     'en': 'e.g. Technical seminar, Factory site, VIP protocol',
     'lo': 'ຕົວຢ່າງ: ສຳມະນາວິຊາການ, ໂຮງງານ, VIP',
   },
   'business_visa_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '비자 요청사항',
+    'en': 'Visa Request',
+    'lo': 'ຄຳຮ້ອງຂໍວີຊາ',
   },
   'business_visa_other_hint': {
-    'ko': '예) 결혼비자, 은퇴비자, 특수목적 등',
+    'ko': '예) 급하게 필요, 서류 준비 도움 필요, 재신청 건',
     'en': 'e.g. Marriage visa, Retirement visa, Special purpose',
     'lo': 'ຕົວຢ່າງ: ວີຊາແຕ່ງງານ, ວີຊາບຳນານ, ຈຸດປະສົງພິເສດ',
   },
@@ -1808,6 +1808,12 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Underarm',
     'lo': 'ໃຕ້ແຂນ',
   },
+  // [cleaning - 신규]
+  'cleaning_target_home': {'ko': '가정집', 'en': 'Home', 'lo': 'ບ້ານ'},
+  'cleaning_target_office': {'ko': '사무실', 'en': 'Office', 'lo': 'ຫ້ອງການ'},
+  'cleaning_target_store': {'ko': '매장/가게', 'en': 'Store', 'lo': 'ຮ້ານຄ້າ'},
+  // [interior - 신규]
+  'interior_scope_both': {'ko': '실내외 모두', 'en': 'Both', 'lo': 'ທັງພາຍໃນ ແລະ ພາຍນອກ'},
   'beauty_waxing_face': {
     'ko': '얼굴',
     'en': 'Face',
@@ -1859,12 +1865,12 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ເມກອັບພິທີບາສີ',
   },
   'beauty_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '미용 요청사항',
+    'en': 'Beauty Request',
+    'lo': 'ຄຳຮ້ອງຂໍຄວາມງາມ',
   },
   'beauty_other_hint': {
-    'ko': '예) 원하는 스타일, 알러지 정보, 특별 요청',
+    'ko': '예) 민감성 피부, 특정 성분 알레르기, 선호하는 스타일 있음',
     'en': 'e.g. Desired style, Allergy info, Special requests',
     'lo': 'ຕົວຢ່າງ: ຮູບແບບທີ່ຕ້ອງການ, ອາການແພ້, ຄຳຮ້ອງພິເສດ',
   },
@@ -1921,12 +1927,12 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ພຸດທະສາສະໜາ ແລະ ສະມາທິ',
   },
   'tutor_other_label': {
-    'ko': '증상 메모',
-    'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'ko': '학습 요청사항',
+    'en': 'Learning Request',
+    'lo': 'ຄຳຮ້ອງຂໍການຮຽນ',
   },
   'tutor_other_hint': {
-    'ko': '예) 집중하고 싶은 단원, 시험 준비, 특별 요청',
+    'ko': '예) 시험 준비 중, 특정 교재 사용 원함, 진도 맞춰주세요',
     'en': 'e.g. Specific chapter, Exam prep, Special requests',
     'lo': 'ຕົວຢ່າງ: ບົດສະເພາະ, ກຽມສອບເສັງ, ຄຳຮ້ອງພິເສດ',
   },
@@ -2318,13 +2324,23 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Panel damage',
     'lo': 'ແຜງເສຍຫາຍ',
   },
+  'cleaning_other_label': {
+    'ko': '청소 요청사항',
+    'en': 'Cleaning Request',
+    'lo': 'ຄຳຮ້ອງຂໍການທຳຄວາມສະອາດ',
+  },
+  'cleaning_other_hint': {
+    'ko': '예) 반려동물 있음, 특정 세제 사용 금지, 귀중품 위치 안내',
+    'en': 'e.g. Pets at home, No specific detergents, Valuables location',
+    'lo': 'ຕົວຢ່າງ: ມີສັດລ້ຽງ, ຫ້າມໃຊ້ນ້ຳຍາສະເພາະ, ແຈ້ງທີ່ຕັ້ງຂອງມີຄ່າ',
+  },
   'repair_other_label': {
     'ko': '증상 메모',
     'en': 'Symptom Note',
-    'lo': 'ບັນທຶກອາການ',
+    'lo': 'ໝາຍເຫດອາການ',
   },
   'repair_other_hint': {
-    'ko': '예) 소음 발생, 냉방 약함, 물이 새요 등 증상을 자세히 적어주세요',
+    'ko': '예) 에어컨에서 이상한 소리가 남, 냉기가 안 나옴, 전원이 안 켜짐',
     'en': 'e.g. Noise, Weak cooling, Water leaking — describe symptoms in detail',
     'lo': 'ຕົວຢ່າງ: ສຽງດັງ, ເຢັນອ່ອນ, ນ້ຳຮົ່ວ — ອະທິບາຍອາການລະອຽດ',
   },

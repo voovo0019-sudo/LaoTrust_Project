@@ -165,6 +165,7 @@ class WizardStep2Moving extends StatelessWidget {
                 ('appliance', 'moving_cargo_appliance'),
                 ('box', 'moving_cargo_box'),
                 ('motorcycle', 'moving_cargo_motorcycle'),
+                ('moving_cargo_etc', 'moving_cargo_etc'),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
                 return wizardOutlineToggleTile(

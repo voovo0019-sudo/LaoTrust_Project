@@ -150,6 +150,24 @@ class WizardStep2Cleaning extends StatelessWidget {
     );
   }
 
+  Widget _otherMemoField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        TextField(
+          controller: otherController,
+          onChanged: (_) => onStateChanged(),
+          decoration: wizardOutlineFieldDecoration(
+            _t('cleaning_other_label'),
+            hint: _t('cleaning_other_hint'),
+          ),
+          maxLines: 2,
+        ),
+      ],
+    );
+  }
+
   Widget _housingTypeRow() {
     final types = [
       ('apartment', _t('cleaning_house_apartment')),
@@ -229,6 +247,7 @@ class WizardStep2Cleaning extends StatelessWidget {
                   ),
                 ),
             ]),
+            _otherMemoField(),
           ],
         );
 
@@ -241,6 +260,7 @@ class WizardStep2Cleaning extends StatelessWidget {
             _areaField(),
             const SizedBox(height: 12),
             _scaleRow(),
+            _otherMemoField(),
           ],
         );
 
@@ -259,6 +279,7 @@ class WizardStep2Cleaning extends StatelessWidget {
             _areaField(),
             const SizedBox(height: 12),
             _scaleRow(),
+            _otherMemoField(),
           ],
         );
 
@@ -274,9 +295,9 @@ class WizardStep2Cleaning extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('home', _t('cleaning_visit_home')),
-                ('office', _t('cleaning_visit_office')),
-                ('store', _t('cleaning_visit_store')),
+                ('cleaning_target_home', _t('cleaning_target_home')),
+                ('cleaning_target_office', _t('cleaning_target_office')),
+                ('cleaning_target_store', _t('cleaning_target_store')),
               ].map((e) {
                 final selected = targetController.text == e.$1;
                 return wizardOutlineToggleTile(
@@ -298,10 +319,10 @@ class WizardStep2Cleaning extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('w1', _t('cleaning_cycle_w1')),
-                ('w2', _t('cleaning_cycle_w2')),
-                ('m2', _t('cleaning_cycle_m2')),
-                ('m1', _t('cleaning_cycle_m1')),
+                ('cleaning_cycle_w1', _t('cleaning_cycle_w1')),
+                ('cleaning_cycle_w2', _t('cleaning_cycle_w2')),
+                ('cleaning_cycle_m2', _t('cleaning_cycle_m2')),
+                ('cleaning_cycle_m1', _t('cleaning_cycle_m1')),
               ].map((e) {
                 final selected = cleaningVisitCycle == e.$1;
                 return wizardOutlineToggleTile(
@@ -314,6 +335,7 @@ class WizardStep2Cleaning extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _areaField(),
+            _otherMemoField(),
           ],
         );
 
@@ -355,6 +377,7 @@ class WizardStep2Cleaning extends StatelessWidget {
               selectedKey: guesthouseSelectedFrequency,
               onChanged: onGuesthouseFrequencyChanged,
             ),
+            _otherMemoField(),
           ],
         );
 
@@ -370,10 +393,10 @@ class WizardStep2Cleaning extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('duvet', _t('cleaning_bedding_duvet')),
-                ('pillow', _t('cleaning_bedding_pillow')),
-                ('mattress', _t('cleaning_bedding_mattress')),
-                ('set', _t('cleaning_bedding_set')),
+                ('cleaning_bedding_duvet', _t('cleaning_bedding_duvet')),
+                ('cleaning_bedding_pillow', _t('cleaning_bedding_pillow')),
+                ('cleaning_bedding_mattress', _t('cleaning_bedding_mattress')),
+                ('cleaning_bedding_set', _t('cleaning_bedding_set')),
               ].map((e) {
                 final selected = cleaningBeddingType == e.$1;
                 return wizardOutlineToggleTile(
@@ -412,6 +435,7 @@ class WizardStep2Cleaning extends StatelessWidget {
                   ),
                 ),
             ]),
+            _otherMemoField(),
           ],
         );
 
@@ -427,12 +451,12 @@ class WizardStep2Cleaning extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('ac', _t('cleaning_appliance_ac')),
-                ('fridge', _t('cleaning_appliance_fridge')),
-                ('washer', _t('cleaning_appliance_washer')),
-                ('dishwasher', _t('cleaning_appliance_dishwasher')),
-                ('oven', _t('cleaning_appliance_oven')),
-                ('microwave', _t('cleaning_appliance_microwave')),
+                ('cleaning_appliance_ac', _t('cleaning_appliance_ac')),
+                ('cleaning_appliance_fridge', _t('cleaning_appliance_fridge')),
+                ('cleaning_appliance_washer', _t('cleaning_appliance_washer')),
+                ('cleaning_appliance_dishwasher', _t('cleaning_appliance_dishwasher')),
+                ('cleaning_appliance_oven', _t('cleaning_appliance_oven')),
+                ('cleaning_appliance_microwave', _t('cleaning_appliance_microwave')),
               ].map((e) {
                 final selected = cleaningApplianceTypes.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -465,6 +489,7 @@ class WizardStep2Cleaning extends StatelessWidget {
                   ),
                 ),
             ]),
+            _otherMemoField(),
           ],
         );
 
@@ -474,10 +499,12 @@ class WizardStep2Cleaning extends StatelessWidget {
           children: [
             TextField(
               controller: otherController,
+              onChanged: (_) => onStateChanged(),
               decoration: wizardOutlineFieldDecoration(
-                _t('wizard_other_service_label'),
-                hint: _t('wizard_other_service_hint'),
+                _t('cleaning_other_label'),
+                hint: _t('cleaning_other_hint'),
               ),
+              maxLines: 2,
             ),
             const SizedBox(height: 12),
             _areaField(),

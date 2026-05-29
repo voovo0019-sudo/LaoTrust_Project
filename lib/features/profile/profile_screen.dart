@@ -21,11 +21,13 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.openPhoneAuthOnStart = false,
     this.popToHomeOnAuthSuccess = false,
     this.discardPendingPostLoginRedirect = false,
+    this.acceptedCount = 0,
   });
 
   final bool openPhoneAuthOnStart;
   final bool popToHomeOnAuthSuccess;
   final bool discardPendingPostLoginRedirect;
+  final int acceptedCount;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -117,6 +119,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.assignment,
             title: context.l10n('profile_menu_my_requests'),
             subtitle: context.l10n('profile_menu_my_requests_sub'),
+            badgeCount: widget.acceptedCount,
             onTap: () => context.push('/my_requests'),
           ),
           _buildMenuTile(
@@ -341,15 +344,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
+    int badgeCount = 0,
     VoidCallback? onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final trailing = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (badgeCount > 0) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              badgeCount > 99 ? '99+' : '$badgeCount',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+        ],
+        const Icon(Icons.chevron_right),
+      ],
+    );
     final tile = ListTile(
       leading: Icon(icon, color: colorScheme.primary),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: null,
+      trailing: trailing,
+      onTap: onTap,
     );
 
     return Container(

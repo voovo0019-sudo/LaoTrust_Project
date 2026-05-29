@@ -89,7 +89,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
           ),
           const JobsScreen(),
           const ChatScreen(),
-          const ProfileScreen(),
+          ProfileScreen(acceptedCount: _acceptedCount),
         ],
       ),
       bottomNavigationBar: CustomBottomNav(

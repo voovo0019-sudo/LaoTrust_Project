@@ -100,13 +100,13 @@ class WizardStep2Interior extends StatelessWidget {
 
   Widget _housingTypeRow() {
     final types = [
-      ('house', _t('interior_housing_house')),
-      ('apartment', _t('interior_housing_apartment')),
-      ('condo', _t('interior_housing_condo')),
-      ('commercial', _t('interior_housing_commercial')),
-      ('villa', _t('interior_housing_villa')),
-      ('townhouse', _t('interior_housing_townhouse')),
-      ('guesthouse', _t('interior_housing_guesthouse')),
+      ('interior_housing_house', _t('interior_housing_house')),
+      ('interior_housing_apartment', _t('interior_housing_apartment')),
+      ('interior_housing_condo', _t('interior_housing_condo')),
+      ('interior_housing_commercial', _t('interior_housing_commercial')),
+      ('interior_housing_villa', _t('interior_housing_villa')),
+      ('interior_housing_townhouse', _t('interior_housing_townhouse')),
+      ('interior_housing_guesthouse', _t('interior_housing_guesthouse')),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,9 +217,9 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('interior', _t('interior_painting_interior')),
-                ('exterior', _t('interior_painting_exterior')),
-                ('both', _t('interior_painting_both')),
+                ('interior_painting_interior', _t('interior_painting_interior')),
+                ('interior_painting_exterior', _t('interior_painting_exterior')),
+                ('interior_scope_both', _t('interior_scope_both')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(

@@ -323,6 +323,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           if (_guesthouseSelectedFrequency.isEmpty) {
             errors.add('guesthouseFrequency');
           }
+        } else if (_state.step1SubTypeId == 'bedding' ||
+            _state.step1SubTypeId == 'appliance') {
+          // 침구세탁/가전청소는 면적 입력 없음 → 검증 스킵
         } else if (_cleaningAreaController.text.trim().isEmpty) {
           errors.add('cleaningArea');
         }
@@ -519,7 +522,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'applianceTypes': _cleaningApplianceTypes.toList(),
             'applianceCount': _cleaningApplianceCount,
           },
-          if (_step2OtherSelected)
+          if (_step2OtherSelected ||
+              _step2OtherController.text.trim().isNotEmpty)
             'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_moving':
@@ -568,10 +572,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'budgetRange': _interiorBudgetController.text.trim(),
         };
       case 'expert_business':
+        final subType = _state.step1SubTypeId;
         return {
           'languages': _businessLangs.toList(),
-          'documentKind': _documentTypeController.text.trim(),
           'selections': _step2Selections.toList(),
+          if (subType == 'translate_docs' ||
+              subType == 'legal_doc' ||
+              subType == 'property' ||
+              subType == 'customs' ||
+              subType == 'company_setup' ||
+              subType == 'accounting')
+            'documentKind': _documentTypeController.text.trim(),
+          if (subType == 'interpret')
+            'interpretRequest': _documentTypeController.text.trim(),
+          if (subType == 'visa_permit')
+            'visaRequest': _documentTypeController.text.trim(),
           if (_step2OtherSelected)
             'otherNote': _step2OtherController.text.trim(),
         };
@@ -604,12 +619,90 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         };
       case 'expert_vehicle':
         final isTuktuk = _state.step1SubTypeId == 'tuktuk';
+        final isCarRental = _state.step1SubTypeId == 'car_rental';
+        final isMotoRental = _state.step1SubTypeId == 'moto_rental';
+        final isCarwash = _state.step1SubTypeId == 'carwash';
+        final isRepair = _state.step1SubTypeId == 'car_repair' ||
+            _state.step1SubTypeId == 'moto_repair' ||
+            _state.step1SubTypeId == 'tire_battery';
         return {
-          'brandOrModel': _vehicleBrandController.text.trim(),
-          'symptoms': _vehicleSymptoms.toList(),
-          if (!isTuktuk) 'rentalOptions': _step2Selections.toList(),
-          'symptomDetail': _repairSymptomMemoController.text.trim(),
-          if (isTuktuk) 'tuktukType': _step2Selections.toList(),
+          if (isRepair) ...{
+            'brandOrModel': _vehicleBrandController.text.trim(),
+            'symptoms': _vehicleSymptoms.toList(),
+            'symptomDetail': _repairSymptomMemoController.text.trim(),
+          },
+          if (isCarRental) ...{
+            'brandOrModel': _vehicleBrandController.text.trim(),
+            'carType': _step2Selections
+                .where((id) => {
+                      'sedan',
+                      'suv',
+                      'vehicle_car_van',
+                      'vehicle_car_pickup',
+                    }.contains(id))
+                .toList(),
+            'rentalDuration': _step2Selections
+                .where((id) => {
+                      'half_day',
+                      'full_day',
+                      'weekly',
+                      'monthly',
+                    }.contains(id))
+                .toList(),
+          },
+          if (isMotoRental) ...{
+            'brandOrModel': _vehicleBrandController.text.trim(),
+            'motoType': _step2Selections
+                .where((id) => {
+                      'scooter',
+                      'semi_auto',
+                      'manual',
+                      'big_bike',
+                    }.contains(id))
+                .toList(),
+            'rentalDuration': _step2Selections
+                .where((id) => {
+                      'half_day',
+                      'full_day',
+                      'weekly',
+                      'monthly',
+                    }.contains(id))
+                .toList(),
+          },
+          if (isCarwash) ...{
+            'carwashType': _step2Selections
+                .where((id) => {
+                      'basic',
+                      'interior_wash',
+                      'full',
+                      'coating',
+                    }.contains(id))
+                .toList(),
+            'symptomDetail': _repairSymptomMemoController.text.trim(),
+          },
+          if (isTuktuk) ...{
+            'tuktukType': _step2Selections
+                .where((id) => {'standard', 'electric', 'cargo'}.contains(id))
+                .toList(),
+            'rentalDuration': _step2Selections
+                .where((id) => {
+                      'half_day',
+                      'full_day',
+                      'weekly',
+                      'monthly',
+                    }.contains(id))
+                .toList(),
+          },
+          if (!isRepair &&
+              !isCarRental &&
+              !isMotoRental &&
+              !isCarwash &&
+              !isTuktuk) ...{
+            'brandOrModel': _vehicleBrandController.text.trim(),
+            'symptoms': _vehicleSymptoms.toList(),
+            if (!isTuktuk) 'rentalOptions': _step2Selections.toList(),
+            'symptomDetail': _repairSymptomMemoController.text.trim(),
+          },
           if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
         };
       default:
@@ -641,13 +734,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       final scaleStr = scale.isNotEmpty ? t(scale) : '';
       final freqStr = freq.isNotEmpty ? t(freq) : '';
       return [areaStr, scaleStr, freqStr]
-          .where((s) => s.isNotEmpty)
-          .join(' · ');
-    }
-
-    if (key == 'tuktukType' && value is List) {
-      return value
-          .map((e) => t(e.toString()))
           .where((s) => s.isNotEmpty)
           .join(' · ');
     }
@@ -743,47 +829,86 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     // 저장ID → 번역키 변환 테이블 (글로벌 i18n 표준 - 9개 카테고리 전체)
     const idToTranslationKey = <String, String>{
       // [beauty]
-      'full': 'beauty_body_full',
-      'back': 'beauty_body_back',
-      'leg': 'beauty_body_leg',
-      'head': 'beauty_body_head',
-      '60min': 'beauty_duration_60',
-      '90min': 'beauty_duration_90',
-      '120min': 'beauty_duration_120',
-      'visit_home': 'beauty_visit_home',
-      'visit_shop': 'beauty_visit_shop',
-      'swedish': 'beauty_aroma_swedish',
-      'deep_tissue': 'beauty_aroma_deep_tissue',
-      'hot_stone': 'beauty_aroma_hot_stone',
-      'foot': 'beauty_aroma_foot',
-      // [business]
-      'lang_zh': 'wizard_lang_zh',
-      'lang_th': 'wizard_lang_th',
-      'passport': 'business_doc_passport',
-      'contract': 'business_doc_contract',
-      'certificate': 'business_doc_certificate',
-      'medical': 'business_doc_medical',
-      'corporate': 'business_doc_corporate',
-      'property': 'business_doc_property',
-      'customs': 'business_doc_customs',
+      'beauty_body_full': 'beauty_body_full',
+      'beauty_body_back': 'beauty_body_back',
+      'beauty_body_leg': 'beauty_body_leg',
+      'beauty_body_head': 'beauty_body_head',
+      'beauty_dur_60min': 'beauty_duration_60',
+      'beauty_dur_90min': 'beauty_duration_90',
+      'beauty_dur_120min': 'beauty_duration_120',
+      'beauty_visit_home': 'beauty_visit_home',
+      'beauty_visit_shop': 'beauty_visit_shop',
+      'beauty_aroma_swedish': 'beauty_aroma_swedish',
+      'beauty_aroma_deep_tissue': 'beauty_aroma_deep_tissue',
+      'beauty_aroma_hot_stone': 'beauty_aroma_hot_stone',
+      'beauty_aroma_foot': 'beauty_aroma_foot',
+      'beauty_nail_gel': 'beauty_nail_gel',
+      'beauty_nail_acrylic': 'beauty_nail_acrylic',
+      'beauty_nail_art': 'beauty_nail_art',
+      'beauty_nail_removal': 'beauty_nail_removal',
+      'beauty_hair_cut': 'beauty_hair_cut',
+      'beauty_hair_perm': 'beauty_hair_perm',
+      'beauty_hair_color': 'beauty_hair_color',
+      'beauty_hair_treatment': 'beauty_hair_treatment',
+      'beauty_hair_styling': 'beauty_hair_styling',
+      'beauty_makeup_wedding': 'beauty_makeup_wedding',
+      'beauty_makeup_event': 'beauty_makeup_event',
+      'beauty_makeup_daily': 'beauty_makeup_daily',
+      'beauty_makeup_photo': 'beauty_makeup_photo',
+      'beauty_makeup_baci': 'beauty_makeup_baci',
+      'beauty_waxing_arms_legs': 'beauty_waxing_arms_legs',
+      'beauty_waxing_bikini': 'beauty_waxing_bikini',
+      'beauty_waxing_underarm': 'beauty_waxing_underarm',
+      // [cleaning]
+      'cleaning_target_home': 'cleaning_target_home',
+      'cleaning_target_office': 'cleaning_target_office',
+      'cleaning_target_store': 'cleaning_target_store',
+      'cleaning_cycle_w1': 'cleaning_cycle_w1',
+      'cleaning_cycle_w2': 'cleaning_cycle_w2',
+      'cleaning_cycle_m2': 'cleaning_cycle_m2',
+      'cleaning_cycle_m1': 'cleaning_cycle_m1',
+      'cleaning_bedding_duvet': 'cleaning_bedding_duvet',
+      'cleaning_bedding_pillow': 'cleaning_bedding_pillow',
+      'cleaning_bedding_mattress': 'cleaning_bedding_mattress',
+      'cleaning_bedding_set': 'cleaning_bedding_set',
+      'cleaning_appliance_ac': 'cleaning_appliance_ac',
+      'cleaning_appliance_fridge': 'cleaning_appliance_fridge',
+      'cleaning_appliance_washer': 'cleaning_appliance_washer',
+      'cleaning_appliance_dishwasher': 'cleaning_appliance_dishwasher',
+      'cleaning_appliance_oven': 'cleaning_appliance_oven',
+      'cleaning_appliance_microwave': 'cleaning_appliance_microwave',
+      'cleaning_gh_scale_small': 'cleaning_gh_scale_small',
+      'cleaning_gh_scale_medium': 'cleaning_gh_scale_medium',
+      'cleaning_gh_scale_large': 'cleaning_gh_scale_large',
+      'area_under10': 'area_under10',
+      'area_10to20': 'area_10to20',
+      'area_20to30': 'area_20to30',
+      'area_over30': 'area_over30',
+      'freq_daily': 'freq_daily',
+      'freq_2to3week': 'freq_2to3week',
+      'freq_weekly': 'freq_weekly',
+      'freq_biweekly': 'freq_biweekly',
       // [interior]
-      'house': 'interior_housing_house',
-      'apartment': 'interior_housing_apartment',
-      'condo': 'interior_housing_condo',
-      'commercial': 'interior_housing_commercial',
-      'villa': 'interior_housing_villa',
-      'townhouse': 'interior_housing_townhouse',
-      'guesthouse': 'interior_housing_guesthouse',
-      'paper': 'interior_wallpaper_paper',
-      'fabric': 'interior_wallpaper_fabric',
-      'paint': 'interior_wallpaper_paint',
-      'tile': 'interior_floor_tile',
-      'wood': 'interior_floor_wood',
-      'marble': 'interior_floor_marble',
-      'vinyl': 'interior_floor_vinyl',
-      'budget_s': 'interior_budget_s',
-      'budget_m': 'interior_budget_m',
-      'budget_l': 'interior_budget_l',
+      'interior_housing_house': 'interior_housing_house',
+      'interior_housing_apartment': 'interior_housing_apartment',
+      'interior_housing_condo': 'interior_housing_condo',
+      'interior_housing_commercial': 'interior_housing_commercial',
+      'interior_housing_villa': 'interior_housing_villa',
+      'interior_housing_townhouse': 'interior_housing_townhouse',
+      'interior_housing_guesthouse': 'interior_housing_guesthouse',
+      'interior_wallpaper_paper': 'interior_wallpaper_paper',
+      'interior_wallpaper_fabric': 'interior_wallpaper_fabric',
+      'interior_wallpaper_paint': 'interior_wallpaper_paint',
+      'interior_floor_tile': 'interior_floor_tile',
+      'interior_floor_wood': 'interior_floor_wood',
+      'interior_floor_marble': 'interior_floor_marble',
+      'interior_floor_vinyl': 'interior_floor_vinyl',
+      'interior_budget_s': 'interior_budget_s',
+      'interior_budget_m': 'interior_budget_m',
+      'interior_budget_l': 'interior_budget_l',
+      'interior_painting_interior': 'interior_painting_interior',
+      'interior_painting_exterior': 'interior_painting_exterior',
+      'interior_scope_both': 'interior_scope_both',
       // [moving]
       'pickup': 'moving_vehicle_pickup',
       'van': 'moving_vehicle_van',
@@ -794,6 +919,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'box': 'moving_cargo_box',
       'instrument': 'moving_cargo_instrument',
       'buddha': 'moving_cargo_buddha',
+      'moving_cargo_etc': 'moving_cargo_etc',
       'yes': 'moving_elevator_yes',
       'no': 'moving_elevator_no',
       'detached': 'cleaning_house_detached',
@@ -816,12 +942,28 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'electrical': 'wizard_vehicle_sym_electrical',
       'brake': 'vehicle_sym_brake',
       'chain': 'vehicle_sym_chain',
+      'vehicle_sym_ac': 'vehicle_sym_ac',
       'sedan': 'vehicle_car_sedan',
       'suv': 'vehicle_car_suv',
+      'vehicle_car_van': 'vehicle_car_van',
+      'vehicle_car_pickup': 'vehicle_car_pickup',
       'half_day': 'vehicle_rental_half_day',
       'full_day': 'vehicle_rental_full_day',
       'weekly': 'vehicle_rental_weekly',
       'monthly': 'vehicle_rental_monthly',
+      'scooter': 'vehicle_moto_scooter',
+      'semi_auto': 'vehicle_moto_semi_auto',
+      'manual': 'vehicle_moto_manual',
+      'big_bike': 'vehicle_moto_big_bike',
+      'basic': 'vehicle_carwash_basic',
+      'interior_wash': 'vehicle_carwash_interior',
+      'full': 'vehicle_carwash_full',
+      'coating': 'vehicle_carwash_coating',
+      'standard': 'vehicle_tuktuk_standard',
+      'electric': 'vehicle_tuktuk_electric',
+      'cargo': 'vehicle_tuktuk_cargo',
+      'flat': 'wizard_vehicle_sym_tire',
+      'battery': 'wizard_vehicle_sym_electrical',
       // [events]
       'natural': 'events_photo_natural',
       'studio': 'events_photo_studio',
@@ -829,7 +971,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'indoor': 'events_photo_indoor',
       'photo_only': 'events_deliverable_photo',
       'video_only': 'events_deliverable_video',
-      'both': 'events_deliverable_both',
+      'events_deliverable_both': 'events_deliverable_both',
       'scale_s': 'events_scale_s',
       'scale_m': 'events_scale_m',
       'scale_l': 'events_scale_l',
@@ -838,7 +980,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'baci_housewarming': 'events_baci_housewarming',
       'baci_farewell': 'events_baci_farewell',
       'baci_other': 'events_baci_other',
+      // [business]
+      'lang_zh': 'wizard_lang_zh',
+      'lang_th': 'wizard_lang_th',
     };
+
+    if (key == 'tuktukType' && value is List) {
+      return value
+          .map((e) {
+            final id = e.toString();
+            final translationKey = idToTranslationKey[id] ?? id;
+            return kStaticUiTripleByMessageKey[translationKey]?[lang] ?? id;
+          })
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+    }
 
     if (value == null) return '';
     final rawValue = value is List
@@ -869,7 +1025,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'bathroomCount':
         return '${t('cleaning_bathroom_count')}: $rawValue';
       case 'otherNote':
-        return '${t('wizard_other_service_label')}: $rawValue';
+        final otherLabelKey = switch (_state.categoryKey) {
+          'expert_repair' => 'repair_other_label',
+          'expert_moving' => 'moving_cargo_other_label',
+          'expert_interior' => 'interior_other_label',
+          'expert_business' => switch (_state.step1SubTypeId) {
+            'interpret' => 'business_interpret_other_label',
+            'visa' => 'business_visa_other_label',
+            _ => 'business_doc_other_label',
+          },
+          'expert_beauty' => 'beauty_other_label',
+          'expert_tutoring' => 'tutor_other_label',
+          'expert_cleaning' => 'cleaning_other_label',
+          _ => 'wizard_other_service_label',
+        };
+        return '${t(otherLabelKey)}: $rawValue';
       case 'customService':
         return '${t('wizard_other_service_label')}: $rawValue';
 
@@ -881,7 +1051,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'visitCycle':
         return '${t('cleaning_visit_cycle')}: $rawValue';
       case 'beddingType':
-        return '${t('cleaning_bedding_type')}: $rawValue';
+        final beddingLabel =
+            kStaticUiTripleByMessageKey[rawValue]?[lang] ?? rawValue;
+        return '${t('cleaning_bedding_type')}: $beddingLabel';
       case 'beddingCount':
         return '${t('cleaning_appliance_count')}: $rawValue';
       case 'applianceTypes':
@@ -933,6 +1105,10 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         return '${t('wizard_business_lang_title')}: $rawValue';
       case 'documentKind':
         return '${t('wizard_business_doc_type_label')}: $rawValue';
+      case 'interpretRequest':
+        return '${t('business_interpret_other_label')}: $rawValue';
+      case 'visaRequest':
+        return '${t('business_visa_other_label')}: $rawValue';
       case 'selections':
         if (rawValue.isEmpty) return '';
         final lang = _currentLangCode();
@@ -990,6 +1166,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             ? 'wizard_vehicle_symptom_title'
             : 'wizard_repair_symptom_title';
         return '${t(symptomTitleKey)}: $rawValue';
+      case 'carType':
+        if (rawValue.isEmpty) return '';
+        return '${t('vehicle_car_type_title')}: $rawValue';
+      case 'motoType':
+        if (rawValue.isEmpty) return '';
+        return '${t('vehicle_moto_type_title')}: $rawValue';
+      case 'rentalDuration':
+        if (rawValue.isEmpty) return '';
+        return '${t('vehicle_rental_duration_title')}: $rawValue';
+      case 'carwashType':
+        if (rawValue.isEmpty) return '';
+        return '${t('vehicle_carwash_type_title')}: $rawValue';
       case 'rentalOptions':
         if (rawValue.isEmpty) return '';
         return '${t('vehicle_rental_duration_title')}: $rawValue';
@@ -1701,7 +1889,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         targetController: _cleaningTargetController,
         industryController: _cleaningIndustryController,
         beddingCountController: _cleaningBeddingCountController,
-        otherController: _step1OtherServiceController,
+        otherController: _step2OtherController,
         step2Selections: _step2Selections,
         currentLangCode: _currentLangCode(),
         onScaleChanged: (v) => setState(() => _cleaningScale = v),

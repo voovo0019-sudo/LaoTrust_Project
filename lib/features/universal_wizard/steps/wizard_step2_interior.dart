@@ -11,6 +11,7 @@ class WizardStep2Interior extends StatelessWidget {
   final Set<String> interiorParts;
   final Set<String> step2Selections;
   final TextEditingController budgetController;
+  final TextEditingController areaController;
   final TextEditingController otherController;
   final TextEditingController step1OtherController;
   final String currentLangCode;
@@ -24,6 +25,7 @@ class WizardStep2Interior extends StatelessWidget {
     required this.interiorParts,
     required this.step2Selections,
     required this.budgetController,
+    required this.areaController,
     required this.otherController,
     required this.step1OtherController,
     required this.currentLangCode,
@@ -43,7 +45,7 @@ class WizardStep2Interior extends StatelessWidget {
                   fontWeight: FontWeight.bold, color: kWizardRoyalBlue)),
           const SizedBox(height: 8),
           TextField(
-            controller: budgetController,
+            controller: areaController,
             keyboardType: TextInputType.number,
             decoration: wizardOutlineFieldDecoration(
               _t('interior_area_label'),
@@ -67,9 +69,9 @@ class WizardStep2Interior extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              ('budget_s', 'interior_budget_s'),
-              ('budget_m', 'interior_budget_m'),
-              ('budget_l', 'interior_budget_l'),
+              ('interior_budget_s', 'interior_budget_s'),
+              ('interior_budget_m', 'interior_budget_m'),
+              ('interior_budget_l', 'interior_budget_l'),
             ].map((e) {
               final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(
@@ -150,9 +152,9 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('paper', _t('interior_wallpaper_paper')),
-                ('fabric', _t('interior_wallpaper_fabric')),
-                ('paint', _t('interior_wallpaper_paint')),
+                ('interior_wallpaper_paper', _t('interior_wallpaper_paper')),
+                ('interior_wallpaper_fabric', _t('interior_wallpaper_fabric')),
+                ('interior_wallpaper_paint', _t('interior_wallpaper_paint')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -183,10 +185,10 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('tile', _t('interior_floor_tile')),
-                ('wood', _t('interior_floor_wood')),
-                ('marble', _t('interior_floor_marble')),
-                ('vinyl', _t('interior_floor_vinyl')),
+                ('interior_floor_tile', _t('interior_floor_tile')),
+                ('interior_floor_wood', _t('interior_floor_wood')),
+                ('interior_floor_marble', _t('interior_floor_marble')),
+                ('interior_floor_vinyl', _t('interior_floor_vinyl')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -248,11 +250,11 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('tile', _t('interior_bathroom_tile')),
-                ('toilet', _t('interior_bathroom_toilet')),
-                ('sink', _t('interior_bathroom_sink')),
-                ('shower', _t('interior_bathroom_shower')),
-                ('full', _t('interior_bathroom_full')),
+                ('interior_bathroom_tile', _t('interior_bathroom_tile')),
+                ('interior_bathroom_toilet', _t('interior_bathroom_toilet')),
+                ('interior_bathroom_sink', _t('interior_bathroom_sink')),
+                ('interior_bathroom_shower', _t('interior_bathroom_shower')),
+                ('interior_bathroom_full', _t('interior_bathroom_full')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -281,10 +283,10 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('cabinet', _t('interior_kitchen_cabinet')),
-                ('countertop', _t('interior_kitchen_countertop')),
-                ('sink', _t('interior_kitchen_sink')),
-                ('full', _t('interior_kitchen_full')),
+                ('interior_kitchen_cabinet', _t('interior_kitchen_cabinet')),
+                ('interior_kitchen_countertop', _t('interior_kitchen_countertop')),
+                ('interior_kitchen_sink', _t('interior_kitchen_sink')),
+                ('interior_kitchen_full', _t('interior_kitchen_full')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -315,8 +317,8 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('partial', _t('interior_remodel_partial')),
-                ('full', _t('interior_remodel_full')),
+                ('interior_remodel_partial', _t('interior_remodel_partial')),
+                ('interior_remodel_full', _t('interior_remodel_full')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -335,9 +337,9 @@ class WizardStep2Interior extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('budget_s', _t('interior_budget_s')),
-                ('budget_m', _t('interior_budget_m')),
-                ('budget_l', _t('interior_budget_l')),
+                ('interior_budget_s', _t('interior_budget_s')),
+                ('interior_budget_m', _t('interior_budget_m')),
+                ('interior_budget_l', _t('interior_budget_l')),
               ].map((e) {
                 final selected = step2Selections.contains(e.$1);
                 return wizardOutlineToggleTile(

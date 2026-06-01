@@ -164,7 +164,7 @@ class WizardStep2Moving extends StatelessWidget {
                 ('furniture', 'moving_cargo_furniture'),
                 ('appliance', 'moving_cargo_appliance'),
                 ('box', 'moving_cargo_box'),
-                ('motorcycle', 'moving_cargo_motorcycle'),
+                ('moving_cargo_motorcycle', 'moving_cargo_motorcycle'),
                 ('moving_cargo_etc', 'moving_cargo_etc'),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
@@ -202,11 +202,11 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('apartment', _t('cleaning_house_apartment')),
-                ('villa', _t('cleaning_house_villa')),
-                ('detached', _t('cleaning_house_detached')),
-                ('officetel', _t('cleaning_house_officetel')),
-                ('townhouse', _t('cleaning_house_townhouse')),
+                ('moving_house_apartment', _t('moving_house_apartment')),
+                ('moving_house_villa', _t('moving_house_villa')),
+                ('moving_house_detached', _t('moving_house_detached')),
+                ('moving_house_officetel', _t('moving_house_officetel')),
+                ('moving_house_townhouse', _t('moving_house_townhouse')),
               ].map((e) {
                 final selected = movingHouseType == e.$1;
                 return wizardOutlineToggleTile(
@@ -261,7 +261,7 @@ class WizardStep2Moving extends StatelessWidget {
                 ('box', 'moving_cargo_box'),
                 ('instrument', 'moving_cargo_instrument'),
                 ('buddha', 'moving_cargo_buddha'),
-                ('motorcycle', 'moving_cargo_motorcycle'),
+                ('moving_cargo_motorcycle', 'moving_cargo_motorcycle'),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -328,9 +328,9 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('local', _t('moving_distance_local')),
-                ('city', _t('moving_distance_city')),
-                ('intercity', _t('moving_distance_intercity')),
+                ('moving_distance_local', _t('moving_distance_local')),
+                ('moving_distance_city', _t('moving_distance_city')),
+                ('moving_distance_intercity', _t('moving_distance_intercity')),
               ].map((e) {
                 final selected = movingDistance == e.$1;
                 return wizardOutlineToggleTile(
@@ -369,9 +369,9 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('small_items', 'moving_tuktuk_small_items'),
-                ('furniture', 'moving_tuktuk_furniture'),
-                ('market_goods', 'moving_tuktuk_market_goods'),
+                ('moving_tuktuk_small_items', 'moving_tuktuk_small_items'),
+                ('moving_tuktuk_furniture', 'moving_tuktuk_furniture'),
+                ('moving_tuktuk_market_goods', 'moving_tuktuk_market_goods'),
               ].map((e) {
                 final selected = movingCargoTypes.contains(e.$1);
                 return wizardOutlineToggleTile(
@@ -393,9 +393,9 @@ class WizardStep2Moving extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ('local', 'moving_distance_local'),
-                ('city', 'moving_distance_city'),
-                ('intercity', 'moving_distance_intercity'),
+                ('moving_distance_local', 'moving_distance_local'),
+                ('moving_distance_city', 'moving_distance_city'),
+                ('moving_distance_intercity', 'moving_distance_intercity'),
               ].map((e) {
                 final selected = movingDistance == e.$1;
                 return wizardOutlineToggleTile(

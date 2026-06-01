@@ -348,8 +348,8 @@ class WizardStep2Beauty extends StatelessWidget {
               ('beauty_waxing_arms_legs', 'beauty_waxing_arms_legs'),
               ('beauty_waxing_bikini', 'beauty_waxing_bikini'),
               ('beauty_waxing_underarm', 'beauty_waxing_underarm'),
-              ('face', 'beauty_waxing_face'),
-              ('full', 'beauty_waxing_full'),
+              ('beauty_waxing_face', 'beauty_waxing_face'),
+              ('beauty_waxing_full', 'beauty_waxing_full'),
             ].map((e) {
               final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(
@@ -391,12 +391,12 @@ class WizardStep2Beauty extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              ('basic', 'beauty_skin_basic'),
-              ('deep', 'beauty_skin_deep'),
-              ('moisture', 'beauty_skin_moisture'),
-              ('whitening', 'beauty_skin_whitening'),
-              ('antiaging', 'beauty_skin_antiaging'),
-              ('acne', 'beauty_skin_acne'),
+              ('beauty_skin_basic', 'beauty_skin_basic'),
+              ('beauty_skin_deep', 'beauty_skin_deep'),
+              ('beauty_skin_moisture', 'beauty_skin_moisture'),
+              ('beauty_skin_whitening', 'beauty_skin_whitening'),
+              ('beauty_skin_antiaging', 'beauty_skin_antiaging'),
+              ('beauty_skin_acne', 'beauty_skin_acne'),
             ].map((e) {
               final selected = step2Selections.contains(e.$1);
               return wizardOutlineToggleTile(

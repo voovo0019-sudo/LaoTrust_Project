@@ -119,6 +119,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
   final Set<String> _interiorParts = <String>{};
   final TextEditingController _interiorBudgetController = TextEditingController();
+  final TextEditingController _interiorAreaController = TextEditingController();
 
   final Set<String> _businessLangs = <String>{};
   final TextEditingController _documentTypeController = TextEditingController();
@@ -190,6 +191,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     _tutorOtherController.dispose();
     _eventPeopleController.dispose();
     _interiorBudgetController.dispose();
+    _interiorAreaController.dispose();
     _documentTypeController.dispose();
     _vehicleBrandController.dispose();
     _beautyPeopleController.dispose();
@@ -568,8 +570,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'expert_interior':
         return {
           'parts': _interiorParts.toList(),
-          if (_state.step1SubTypeId == 'remodel')
+          if (_step2Selections.isNotEmpty)
+            'interiorSelections': _step2Selections.toList(),
+          if (_interiorAreaController.text.trim().isNotEmpty)
+            'areaSize': _interiorAreaController.text.trim(),
+          if (_interiorBudgetController.text.trim().isNotEmpty)
             'budgetRange': _interiorBudgetController.text.trim(),
+          if (_step2OtherController.text.trim().isNotEmpty)
+            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_business':
         final subType = _state.step1SubTypeId;
@@ -748,9 +756,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         _state.step1SubTypeId == 'tuktuk') {
       String tuktukCargoLabel(String id) {
         return switch (id) {
-          'small_items' => t('moving_tuktuk_small_items'),
-          'furniture' => t('moving_tuktuk_furniture'),
-          'market_goods' => t('moving_tuktuk_market_goods'),
+          'moving_tuktuk_small_items' => t('moving_tuktuk_small_items'),
+          'moving_tuktuk_furniture' => t('moving_tuktuk_furniture'),
+          'moving_tuktuk_market_goods' => t('moving_tuktuk_market_goods'),
           'other' => t('moving_tuktuk_other'),
           _ => t(id),
         };
@@ -774,7 +782,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           'appliance' => t('moving_cargo_appliance'),
           'box' => t('moving_cargo_box'),
           'etc' => t('moving_cargo_etc'),
-          'motorcycle' => t('moving_cargo_motorcycle'),
+          'moving_cargo_motorcycle' => t('moving_cargo_motorcycle'),
           'instrument' => t('moving_cargo_instrument'),
           'buddha' => t('moving_cargo_buddha'),
           _ => id,
@@ -859,6 +867,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'beauty_waxing_arms_legs': 'beauty_waxing_arms_legs',
       'beauty_waxing_bikini': 'beauty_waxing_bikini',
       'beauty_waxing_underarm': 'beauty_waxing_underarm',
+      'beauty_waxing_face': 'beauty_waxing_face',
+      'beauty_waxing_full': 'beauty_waxing_full',
+      'beauty_skin_basic': 'beauty_skin_basic',
+      'beauty_skin_deep': 'beauty_skin_deep',
+      'beauty_skin_moisture': 'beauty_skin_moisture',
+      'beauty_skin_whitening': 'beauty_skin_whitening',
+      'beauty_skin_antiaging': 'beauty_skin_antiaging',
+      'beauty_skin_acne': 'beauty_skin_acne',
       // [cleaning]
       'cleaning_target_home': 'cleaning_target_home',
       'cleaning_target_office': 'cleaning_target_office',
@@ -909,6 +925,17 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'interior_painting_interior': 'interior_painting_interior',
       'interior_painting_exterior': 'interior_painting_exterior',
       'interior_scope_both': 'interior_scope_both',
+      'interior_bathroom_tile': 'interior_bathroom_tile',
+      'interior_bathroom_toilet': 'interior_bathroom_toilet',
+      'interior_bathroom_sink': 'interior_bathroom_sink',
+      'interior_bathroom_shower': 'interior_bathroom_shower',
+      'interior_bathroom_full': 'interior_bathroom_full',
+      'interior_kitchen_cabinet': 'interior_kitchen_cabinet',
+      'interior_kitchen_countertop': 'interior_kitchen_countertop',
+      'interior_kitchen_sink': 'interior_kitchen_sink',
+      'interior_kitchen_full': 'interior_kitchen_full',
+      'interior_remodel_partial': 'interior_remodel_partial',
+      'interior_remodel_full': 'interior_remodel_full',
       // [moving]
       'pickup': 'moving_vehicle_pickup',
       'van': 'moving_vehicle_van',
@@ -922,8 +949,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'moving_cargo_etc': 'moving_cargo_etc',
       'yes': 'moving_elevator_yes',
       'no': 'moving_elevator_no',
-      'detached': 'cleaning_house_detached',
-      'officetel': 'cleaning_house_officetel',
+      'moving_house_apartment': 'moving_house_apartment',
+      'moving_house_villa': 'moving_house_villa',
+      'moving_house_detached': 'moving_house_detached',
+      'moving_house_officetel': 'moving_house_officetel',
+      'moving_house_townhouse': 'moving_house_townhouse',
+      'moving_cargo_motorcycle': 'moving_cargo_motorcycle',
+      'moving_distance_local': 'moving_distance_local',
+      'moving_distance_city': 'moving_distance_city',
+      'moving_distance_intercity': 'moving_distance_intercity',
+      'moving_tuktuk_small_items': 'moving_tuktuk_small_items',
+      'moving_tuktuk_furniture': 'moving_tuktuk_furniture',
+      'moving_tuktuk_market_goods': 'moving_tuktuk_market_goods',
       // [tutoring]
       'online': 'tutor_class_online',
       'visit': 'tutor_class_visit',
@@ -980,6 +1017,69 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       'baci_housewarming': 'events_baci_housewarming',
       'baci_farewell': 'events_baci_farewell',
       'baci_other': 'events_baci_other',
+      // [repair - electric]
+      'repair_elec_outlet': 'symptom_elec_outlet',
+      'repair_elec_lighting': 'symptom_elec_lighting',
+      'repair_elec_breaker': 'symptom_elec_breaker',
+      'repair_elec_aircon': 'symptom_elec_aircon',
+      'repair_elec_intercom': 'symptom_elec_intercom',
+      'repair_elec_other': 'symptom_other',
+      // [repair - plumbing]
+      'repair_plumb_leak': 'symptom_plumb_leak',
+      'repair_plumb_toilet': 'symptom_plumb_toilet',
+      'repair_plumb_sink': 'symptom_plumb_sink',
+      'repair_plumb_water_heater': 'symptom_plumb_water_heater',
+      'repair_plumb_drain': 'symptom_plumb_drain',
+      'repair_plumb_other': 'symptom_other',
+      // [repair - roof/paint]
+      'repair_roof_interior': 'symptom_roof_interior',
+      'repair_roof_exterior': 'symptom_roof_exterior',
+      'repair_roof_leak': 'symptom_roof_leak',
+      'repair_roof_replace': 'symptom_roof_replace',
+      'repair_roof_waterproof': 'symptom_roof_waterproof',
+      'repair_roof_other': 'symptom_other',
+      // [repair - appliance symptoms]
+      'symptom_ac_no_cold_air': 'symptom_ac_no_cold_air',
+      'symptom_ac_noise': 'symptom_ac_noise',
+      'symptom_ac_water_sound': 'symptom_ac_water_sound',
+      'symptom_ac_not_cool': 'symptom_ac_not_cool',
+      'symptom_fridge_no_cool': 'symptom_fridge_no_cool',
+      'symptom_fridge_noise': 'symptom_fridge_noise',
+      'symptom_fridge_door': 'symptom_fridge_door',
+      'symptom_fridge_ice': 'symptom_fridge_ice',
+      'symptom_washer_no_spin': 'symptom_washer_no_spin',
+      'symptom_washer_water_leak': 'symptom_washer_water_leak',
+      'symptom_washer_noise': 'symptom_washer_noise',
+      'symptom_washer_no_power': 'symptom_washer_no_power',
+      'symptom_tv_no_display': 'symptom_tv_no_display',
+      'symptom_tv_no_sound': 'symptom_tv_no_sound',
+      'symptom_tv_no_power': 'symptom_tv_no_power',
+      'symptom_tv_remote': 'symptom_tv_remote',
+      'symptom_wp_water_leak': 'symptom_wp_water_leak',
+      'symptom_wp_no_cold': 'symptom_wp_no_cold',
+      'symptom_wp_no_hot': 'symptom_wp_no_hot',
+      'symptom_wp_filter': 'symptom_wp_filter',
+      'symptom_fan_no_spin': 'symptom_fan_no_spin',
+      'symptom_fan_noise': 'symptom_fan_noise',
+      'symptom_fan_no_power': 'symptom_fan_no_power',
+      'symptom_rc_no_cook': 'symptom_rc_no_cook',
+      'symptom_rc_no_heat': 'symptom_rc_no_heat',
+      'symptom_rc_no_power': 'symptom_rc_no_power',
+      'symptom_gen_no_start': 'symptom_gen_no_start',
+      'symptom_gen_no_power': 'symptom_gen_no_power',
+      'symptom_gen_noise': 'symptom_gen_noise',
+      'symptom_gen_fuel_leak': 'symptom_gen_fuel_leak',
+      'symptom_wp_no_water': 'symptom_wp_no_water',
+      'symptom_wp_low_pressure': 'symptom_wp_low_pressure',
+      'symptom_wp_noise': 'symptom_wp_noise',
+      'symptom_wp_no_start': 'symptom_wp_no_start',
+      'symptom_sp_no_charge': 'symptom_sp_no_charge',
+      'symptom_sp_low_output': 'symptom_sp_low_output',
+      'symptom_sp_panel_damage': 'symptom_sp_panel_damage',
+      'symptom_other': 'symptom_other',
+      'symptom_other_broken': 'symptom_other_broken',
+      'symptom_other_noise': 'symptom_other_noise',
+      'symptom_other_no_power': 'symptom_other_no_power',
       // [business]
       'lang_zh': 'wizard_lang_zh',
       'lang_th': 'wizard_lang_th',
@@ -1019,6 +1119,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         if (n == 'L') return t('scale_large');
         return rawValue;
       case 'houseType':
+        if (_state.categoryKey == 'expert_moving') {
+          final label = kStaticUiTripleByMessageKey[rawValue]?[lang]
+              ?? kStaticUiTripleByMessageKey['moving_house_$rawValue']?[lang]
+              ?? rawValue;
+          return '${t('moving_house_type')}: $label';
+        }
         return '${t('cleaning_house_type')}: ${t('cleaning_house_$rawValue')}';
       case 'roomCount':
         return '${t('cleaning_room_count')}: $rawValue';
@@ -1063,21 +1169,44 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
       // ── 이사 ──────────────────────────────────
       case 'vehicleType':
-        return '${t('moving_vehicle_type')}: $rawValue';
+        final vehicleLabel = kStaticUiTripleByMessageKey[
+              idToTranslationKey[rawValue] ?? rawValue
+            ]?[lang] ?? rawValue;
+        return '${t('moving_vehicle_type')}: $vehicleLabel';
       case 'floorFrom':
-        return '${t('moving_floor_from')}: $rawValue';
+        final floorFromLabel = kStaticUiTripleByMessageKey[
+              'moving_floor_${rawValue.replaceAll('+', 'plus')}'
+            ]?[lang] ?? rawValue;
+        return '${t('moving_floor_from')}: $floorFromLabel';
       case 'floorTo':
-        return '${t('moving_floor_to')}: $rawValue';
+        final floorToLabel = kStaticUiTripleByMessageKey[
+              'moving_floor_${rawValue.replaceAll('+', 'plus')}'
+            ]?[lang] ?? rawValue;
+        return '${t('moving_floor_to')}: $floorToLabel';
       case 'elevator':
-        return '${t('moving_elevator')}: $rawValue';
+        final elevatorLabel = kStaticUiTripleByMessageKey[
+              idToTranslationKey[rawValue] ?? rawValue
+            ]?[lang] ?? rawValue;
+        return '${t('moving_elevator')}: $elevatorLabel';
       case 'cargoTypes':
+        if (value is List) {
+          final labels = value.map((e) {
+            final id = e.toString();
+            final key = idToTranslationKey[id] ?? id;
+            return kStaticUiTripleByMessageKey[key]?[lang] ?? id;
+          }).where((s) => s.isNotEmpty).join(', ');
+          return '${t('moving_cargo_type')}: $labels';
+        }
         return '${t('moving_cargo_type')}: $rawValue';
       case 'cargoOtherDetail':
         return '${t('moving_cargo_other_label')}: $rawValue';
       case 'weightKg':
         return '${t('moving_weight')}: $rawValue kg';
       case 'distance':
-        return '${t('moving_distance')}: $rawValue';
+        final distanceLabel = kStaticUiTripleByMessageKey[
+              idToTranslationKey[rawValue] ?? rawValue
+            ]?[lang] ?? rawValue;
+        return '${t('moving_distance')}: $distanceLabel';
       case 'fromLandmark':
         return '${t('moving_floor_from')}: $rawValue';
       case 'toLandmark':
@@ -1096,9 +1225,32 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
       // ── 인테리어 ───────────────────────────────
       case 'parts':
+        if (value is List) {
+          final labels = value.map((e) {
+            final id = e.toString();
+            final key = idToTranslationKey[id] ?? id;
+            return kStaticUiTripleByMessageKey[key]?[lang] ?? id;
+          }).where((s) => s.isNotEmpty).join(', ');
+          return '${t('interior_housing_type')}: $labels';
+        }
         return '${t('interior_housing_type')}: $rawValue';
       case 'budgetRange':
-        return '${t('interior_budget_label')}: $rawValue';
+        final budgetKey = idToTranslationKey[rawValue] ?? rawValue;
+        final budgetLabel = kStaticUiTripleByMessageKey[budgetKey]?[lang] ?? rawValue;
+        return '${t('interior_budget_label')}: $budgetLabel';
+      case 'areaSize':
+        return '${t('interior_area_label')}: $rawValue sqm';
+      case 'interiorSelections':
+        if (value is List) {
+          final labels = value.map((e) {
+            final id = e.toString();
+            final key = idToTranslationKey[id] ?? id;
+            return kStaticUiTripleByMessageKey[key]?[lang] ?? id;
+          }).where((s) => s.isNotEmpty).join(', ');
+          if (labels.isEmpty) return '';
+          return '${t('wizard_step2_title')}: $labels';
+        }
+        return '';
 
       // ── 비즈니스·번역 ──────────────────────────
       case 'languages':
@@ -2003,6 +2155,7 @@ List<Widget> _buildStep2RepairV5() {
         interiorParts: _interiorParts,
         step2Selections: _step2Selections,
         budgetController: _interiorBudgetController,
+        areaController: _interiorAreaController,
         otherController: _step2OtherController,
         step1OtherController: _step1OtherServiceController,
         currentLangCode: _currentLangCode(),

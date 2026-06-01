@@ -316,12 +316,12 @@ class WizardStep2Electric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const types = [
-      ('outlet', 'symptom_elec_outlet'),
-      ('lighting', 'symptom_elec_lighting'),
-      ('breaker', 'symptom_elec_breaker'),
-      ('aircon', 'symptom_elec_aircon'),
-      ('intercom', 'symptom_elec_intercom'),
-      ('other', 'symptom_other'),
+      ('repair_elec_outlet', 'symptom_elec_outlet'),
+      ('repair_elec_lighting', 'symptom_elec_lighting'),
+      ('repair_elec_breaker', 'symptom_elec_breaker'),
+      ('repair_elec_aircon', 'symptom_elec_aircon'),
+      ('repair_elec_intercom', 'symptom_elec_intercom'),
+      ('repair_elec_other', 'symptom_other'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,12 +376,12 @@ class WizardStep2Plumbing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const types = [
-      ('leak', 'symptom_plumb_leak'),
-      ('toilet', 'symptom_plumb_toilet'),
-      ('sink', 'symptom_plumb_sink'),
-      ('water_heater', 'symptom_plumb_water_heater'),
-      ('drain', 'symptom_plumb_drain'),
-      ('other', 'symptom_other'),
+      ('repair_plumb_leak', 'symptom_plumb_leak'),
+      ('repair_plumb_toilet', 'symptom_plumb_toilet'),
+      ('repair_plumb_sink', 'symptom_plumb_sink'),
+      ('repair_plumb_water_heater', 'symptom_plumb_water_heater'),
+      ('repair_plumb_drain', 'symptom_plumb_drain'),
+      ('repair_plumb_other', 'symptom_other'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,12 +436,12 @@ class WizardStep2RoofPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const types = [
-      ('interior', 'symptom_roof_interior'),
-      ('exterior', 'symptom_roof_exterior'),
-      ('leak', 'symptom_roof_leak'),
-      ('replace', 'symptom_roof_replace'),
-      ('waterproof', 'symptom_roof_waterproof'),
-      ('other', 'symptom_other'),
+      ('repair_roof_interior', 'symptom_roof_interior'),
+      ('repair_roof_exterior', 'symptom_roof_exterior'),
+      ('repair_roof_leak', 'symptom_roof_leak'),
+      ('repair_roof_replace', 'symptom_roof_replace'),
+      ('repair_roof_waterproof', 'symptom_roof_waterproof'),
+      ('repair_roof_other', 'symptom_other'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

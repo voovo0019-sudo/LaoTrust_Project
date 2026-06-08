@@ -173,7 +173,7 @@ class WizardStep2Cleaning extends StatelessWidget {
       ('apartment', _t('cleaning_house_apartment')),
       ('villa', _t('cleaning_house_villa')),
       ('detached', _t('cleaning_house_detached')),
-      ('officetel', _t('cleaning_house_officetel')),
+      ('studio', _t('cleaning_house_studio')),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

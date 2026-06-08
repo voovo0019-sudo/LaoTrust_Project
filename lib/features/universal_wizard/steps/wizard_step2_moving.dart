@@ -205,7 +205,7 @@ class WizardStep2Moving extends StatelessWidget {
                 ('moving_house_apartment', _t('moving_house_apartment')),
                 ('moving_house_villa', _t('moving_house_villa')),
                 ('moving_house_detached', _t('moving_house_detached')),
-                ('moving_house_officetel', _t('moving_house_officetel')),
+                ('moving_house_studio', _t('moving_house_studio')),
                 ('moving_house_townhouse', _t('moving_house_townhouse')),
               ].map((e) {
                 final selected = movingHouseType == e.$1;

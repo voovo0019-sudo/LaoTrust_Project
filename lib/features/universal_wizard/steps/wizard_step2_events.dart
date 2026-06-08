@@ -58,9 +58,9 @@ class WizardStep2Events extends StatelessWidget {
   Widget build(BuildContext context) {
     if (subTypeId == 'wedding_photo' || subTypeId == 'portrait' ||
         subTypeId == 'commercial' || subTypeId == 'drone') {
-      const photoStyles = [
+      final photoStyles = [
         ('natural', 'events_photo_natural'),
-        ('studio', 'events_photo_studio'),
+        ('events_photo_studio', _t('events_photo_studio')),
         ('outdoor', 'events_photo_outdoor'),
         ('indoor', 'events_photo_indoor'),
       ];

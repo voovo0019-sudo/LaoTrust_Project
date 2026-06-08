@@ -838,10 +838,10 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Detached House',
     'lo': 'ເຮືອນດ່ຽວ',
   },
-  'cleaning_house_officetel': {
-    'ko': '게스트하우스',
-    'en': 'Guesthouse',
-    'lo': 'ເກດສ໌ເຮົາສ໌',
+  'cleaning_house_studio': {
+    'ko': '스튜디오',
+    'en': 'Studio/Serviced Apt',
+    'lo': 'ຫ້ອງສະຕູດິໂອ',
   },
   'cleaning_house_townhouse': {
     'ko': '타운하우스',
@@ -1178,10 +1178,10 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Detached House',
     'lo': 'ເຮືອນດ່ຽວ',
   },
-  'moving_house_officetel': {
-    'ko': '오피스텔',
-    'en': 'Officetel',
-    'lo': 'ອອຟຟິດເທວ',
+  'moving_house_studio': {
+    'ko': '스튜디오',
+    'en': 'Studio/Serviced Apt',
+    'lo': 'ຫ້ອງສະຕູດິໂອ',
   },
   'moving_house_townhouse': {
     'ko': '타운하우스',

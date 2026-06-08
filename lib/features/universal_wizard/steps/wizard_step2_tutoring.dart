@@ -8,6 +8,7 @@ import 'wizard_common.dart';
 
 class WizardStep2Tutoring extends StatelessWidget {
   final String subTypeId;
+  final Set<String> tutoringSubjects;
   final Set<String> tutoringLevels;
   final Set<String> step2Selections;
   final TextEditingController goalController;
@@ -21,6 +22,7 @@ class WizardStep2Tutoring extends StatelessWidget {
   const WizardStep2Tutoring({
     super.key,
     required this.subTypeId,
+    required this.tutoringSubjects,
     required this.tutoringLevels,
     required this.step2Selections,
     required this.goalController,
@@ -34,6 +36,28 @@ class WizardStep2Tutoring extends StatelessWidget {
 
   String _t(String key) =>
       kStaticUiTripleByMessageKey[key]?[currentLangCode] ?? key;
+
+  bool get _isLangType =>
+      tutoringSubjects.any((s) =>
+          s == 'lang_en' || s == 'lang_ko' || s == 'lang_lo' ||
+          s == 'lang_zh' || s == 'lang_th' || s == 'lang_ja') ||
+      subTypeId == 'lang_en' || subTypeId == 'lang_ko' ||
+      subTypeId == 'lang_lo' || subTypeId == 'lang_zh' ||
+      subTypeId == 'lang_th' || subTypeId == 'lang_ja';
+
+  bool get _isAcademic =>
+      tutoringSubjects.contains('math_science') ||
+      subTypeId == 'math_science';
+
+  bool get _isSkill =>
+      tutoringSubjects.any((s) =>
+          s == 'music' || s == 'martial_arts' || s == 'cooking' ||
+          s == 'computer' || s == 'art' || s == 'traditional_dance' ||
+          s == 'buddhism') ||
+      subTypeId == 'music' || subTypeId == 'martial_arts' ||
+      subTypeId == 'cooking' || subTypeId == 'computer' ||
+      subTypeId == 'art' || subTypeId == 'traditional_dance' ||
+      subTypeId == 'buddhism';
 
   Widget _goalField() => TextField(
         controller: goalController,
@@ -138,9 +162,7 @@ class WizardStep2Tutoring extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (subTypeId == 'lang_en' || subTypeId == 'lang_ko' ||
-        subTypeId == 'lang_lo' || subTypeId == 'lang_zh' ||
-        subTypeId == 'lang_th' || subTypeId == 'lang_ja') {
+    if (_isLangType || _isAcademic) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -163,33 +185,7 @@ class WizardStep2Tutoring extends StatelessWidget {
       );
     }
 
-    if (subTypeId == 'math_science') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _levelRow(),
-          const SizedBox(height: 16),
-          _classTypeRow(),
-          const SizedBox(height: 16),
-          _goalField(),
-          const SizedBox(height: 16),
-          TextField(
-            controller: otherController,
-            onChanged: (_) => onStateChanged(),
-            decoration: wizardOutlineFieldDecoration(
-              _t('tutor_other_label'),
-              hint: _t('tutor_other_hint'),
-            ),
-            maxLines: 2,
-          ),
-        ],
-      );
-    }
-
-    if (subTypeId == 'music' || subTypeId == 'martial_arts' ||
-        subTypeId == 'cooking' || subTypeId == 'computer' ||
-        subTypeId == 'art' || subTypeId == 'traditional_dance' ||
-        subTypeId == 'buddhism') {
+    if (_isSkill) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

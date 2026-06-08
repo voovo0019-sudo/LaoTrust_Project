@@ -799,9 +799,9 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'lo': 'ເປົ້າໝາຍການຮຽນ',
   },
   'tutor_goal_hint': {
-    'ko': '원하시는 학습 목표를 입력해주세요',
-    'en': 'Enter your learning goal',
-    'lo': 'ກະລຸນາໃສ່ເປົ້າໝາຍການຮຽນ',
+    'ko': '예) 6개월 안에 일상 회화 가능한 수준으로',
+    'en': 'e.g. Conversational level within 6 months',
+    'lo': 'ຕົວຢ່າງ: ສາມາດສົນທະນາໄດ້ພາຍໃນ 6 ເດືອນ',
   },
   'cleaning_size_s': {
     'ko': 'S (30sqm 이하)',
@@ -1963,6 +1963,26 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'sub_tutor_cooking': {'ko': '요리 클래스', 'en': 'Cooking Class', 'lo': 'ຮຽນປຸງອາຫານ'},
   'sub_tutor_computer': {'ko': '컴퓨터·코딩', 'en': 'Computer & Coding', 'lo': 'ຄອມພິວເຕີ ແລະ ໂຄດດິ້ງ'},
   'sub_tutor_art': {'ko': '미술·드로잉', 'en': 'Art & Drawing', 'lo': 'ສິລະປະ ແລະ ການແຕ້ມ'},
+  'sub_tutor_lang_en': {
+    'ko': '영어',
+    'en': 'English',
+    'lo': 'ພາສາອັງກິດ',
+  },
+  'sub_tutor_lang_ko': {
+    'ko': '한국어',
+    'en': 'Korean',
+    'lo': 'ພາສາເກົາຫຼີ',
+  },
+  'sub_tutor_lang_lo': {
+    'ko': '라오어',
+    'en': 'Lao',
+    'lo': 'ພາສາລາວ',
+  },
+  'sub_tutor_lang_zh': {
+    'ko': '중국어',
+    'en': 'Chinese',
+    'lo': 'ພາສາຈີນ',
+  },
   'sub_tutor_lang_th': {
     'ko': '태국어',
     'en': 'Thai',

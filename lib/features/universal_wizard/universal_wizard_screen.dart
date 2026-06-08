@@ -111,6 +111,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   String _cleaningApplianceCount = '';
   final Set<String> _cleaningApplianceTypes = {};
 
+  final Set<String> _tutoringSubjects = <String>{};
   final Set<String> _tutoringLevels = <String>{};
   final TextEditingController _tutorGoalController = TextEditingController();
   final TextEditingController _tutorOtherController = TextEditingController();
@@ -264,6 +265,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       step3MovingFromLandmark: '',
       step3MovingToLandmark: '',
       step3ServiceMode: null,
+      preferredDateStr: '',
+      preferredTimeStr: '',
+      scheduleIsUrgent: false,
     );
     // Step2 공통
     _step2Selections.clear();
@@ -361,7 +365,12 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     }
   }
 
-  bool _canProceedStep1() => _state.step1SubTypeId.isNotEmpty;
+  bool _canProceedStep1() {
+    if (_config?.categoryKey == 'expert_tutoring') {
+      return _tutoringSubjects.isNotEmpty;
+    }
+    return _state.step1SubTypeId.isNotEmpty;
+  }
 
   void _onNextPressed() {
     final errors = _validateCurrentStep();
@@ -691,7 +700,7 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
         };
       case 'expert_tutoring':
         return {
-          'subject': _state.step1SubTypeId,
+          'subject': _tutoringSubjects.toList(),
           'levels': _tutoringLevels.toList(),
           'classType': _step2Selections.toList(),
           'goal': _tutorGoalController.text.trim(),
@@ -1361,12 +1370,21 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
 
       // ── 과외·레슨 ──────────────────────────────
       case 'subject':
-        if (rawValue.isEmpty) return '';
-        final subjectKey = 'sub_tutor_$rawValue';
-        final subjectLabel = kStaticUiTripleByMessageKey[subjectKey]?[lang]
-            ?? kStaticUiTripleByMessageKey[rawValue]?[lang];
-        return subjectLabel != null
-            ? '${t('wizard_tutoring_subject_from_step1')}: $subjectLabel'
+        if (value == null) return '';
+        final subjects = value is List ? value : [value];
+        if (subjects.isEmpty) return '';
+        final labels = subjects
+            .map((e) {
+              final s = '$e'.trim();
+              final subjectKey = 'sub_tutor_$s';
+              return kStaticUiTripleByMessageKey[subjectKey]?[lang]
+                  ?? kStaticUiTripleByMessageKey[s]?[lang]
+                  ?? '';
+            })
+            .where((s) => s.isNotEmpty)
+            .join(', ');
+        return labels.isNotEmpty
+            ? '${t('wizard_tutoring_subject_from_step1')}: $labels'
             : '';
       case 'classType':
         if (rawValue.isEmpty) return '';
@@ -1919,8 +1937,18 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     return WizardStep1(
       config: config,
       state: _state,
+      tutoringSubjects: _tutoringSubjects,
       onSubTypeSelected: (id, label) {
         setState(() {
+          if (_config?.categoryKey == 'expert_tutoring') {
+            _resetAllInputs();
+            if (_tutoringSubjects.contains(id)) {
+              _tutoringSubjects.remove(id);
+            } else {
+              _tutoringSubjects.add(id);
+            }
+            return;
+          }
           if (_state.step1SubTypeId != id) {
             _resetAllInputs();
           }
@@ -2298,7 +2326,10 @@ List<Widget> _buildStep2RepairV5() {
   List<Widget> _buildStep2TutoringV5() {
     return [
       WizardStep2Tutoring(
-        subTypeId: _state.step1SubTypeId,
+        subTypeId: _tutoringSubjects.isNotEmpty
+            ? _tutoringSubjects.first
+            : _state.step1SubTypeId,
+        tutoringSubjects: _tutoringSubjects,
         tutoringLevels: _tutoringLevels,
         step2Selections: _step2Selections,
         goalController: _tutorGoalController,

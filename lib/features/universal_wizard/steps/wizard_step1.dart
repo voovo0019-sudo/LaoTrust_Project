@@ -12,6 +12,7 @@ class WizardStep1 extends StatelessWidget {
   final UniversalWizardState state;
   final void Function(String id, String label) onSubTypeSelected;
   final String Function(String key) l10n;
+  final Set<String> tutoringSubjects;
 
   const WizardStep1({
     super.key,
@@ -19,6 +20,7 @@ class WizardStep1 extends StatelessWidget {
     required this.state,
     required this.onSubTypeSelected,
     required this.l10n,
+    this.tutoringSubjects = const {},
   });
 
   @override
@@ -43,7 +45,9 @@ class WizardStep1 extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ...config.step1SubTypes.map((e) {
-            final selected = state.step1SubTypeId == e.key;
+            final selected = config.categoryKey == 'expert_tutoring'
+                ? tutoringSubjects.contains(e.key)
+                : state.step1SubTypeId == e.key;
             final label = l10n(e.value);
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -51,8 +55,12 @@ class WizardStep1 extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () => onSubTypeSelected(
-                    selected ? '' : e.key,
-                    selected ? '' : e.value,
+                    config.categoryKey == 'expert_tutoring'
+                        ? e.key
+                        : (selected ? '' : e.key),
+                    config.categoryKey == 'expert_tutoring'
+                        ? e.value
+                        : (selected ? '' : e.value),
                   ),
                   borderRadius: BorderRadius.circular(28),
                   child: Container(
@@ -74,8 +82,12 @@ class WizardStep1 extends StatelessWidget {
                       children: [
                         Icon(
                           selected
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
+                              ? (config.categoryKey == 'expert_tutoring'
+                                  ? Icons.check_box
+                                  : Icons.check_circle)
+                              : (config.categoryKey == 'expert_tutoring'
+                                  ? Icons.check_box_outline_blank
+                                  : Icons.radio_button_unchecked),
                           color: selected ? kWizardRoyalBlue : Colors.grey,
                           size: 24,
                         ),

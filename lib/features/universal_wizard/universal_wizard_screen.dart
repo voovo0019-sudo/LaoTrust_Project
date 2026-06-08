@@ -255,6 +255,90 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     );
   }
 
+  void _resetAllInputs() {
+    // GPS 좌표 초기화 (state 안에 저장되므로 별도 처리)
+    _state = _state.copyWith(
+      step3Lat: null,
+      step3Lng: null,
+      step3Landmark: '',
+      step3MovingFromLandmark: '',
+      step3MovingToLandmark: '',
+      step3ServiceMode: null,
+    );
+    // Step2 공통
+    _step2Selections.clear();
+    _step2OtherSelected = false;
+    _step2OtherController.clear();
+
+    // 사진
+    _pickedImages.clear();
+
+    // cleaning
+    _cleaningAreaController.clear();
+    _cleaningScale = '';
+    _cleaningHouseType = '';
+    _cleaningRoomCount = '';
+    _cleaningBathroomCount = '';
+    _cleaningVisitCycle = '';
+    _cleaningTargetController.clear();
+    _cleaningIndustryController.clear();
+    _cleaningBeddingCountController.clear();
+    _cleaningBeddingType = '';
+    _cleaningApplianceCount = '';
+    _cleaningApplianceTypes.clear();
+    _guesthouseSelectedArea = '';
+    _guesthouseSelectedScale = '';
+    _guesthouseSelectedFrequency = '';
+
+    // moving
+    _movingHouseType = '';
+    _movingVehicleType = '';
+    _movingDistance = '';
+    _movingFloorFrom = '';
+    _movingFloorTo = '';
+    _movingElevator = '';
+    _movingCargoTypes.clear();
+    _movingRoomCountController.clear();
+    _movingCargoOtherController.clear();
+
+    // tutoring
+    _tutoringLevels.clear();
+    _tutorGoalController.clear();
+    _tutorOtherController.clear();
+
+    // events
+    _eventPeopleController.clear();
+
+    // interior
+    _interiorParts.clear();
+    _interiorBudgetController.clear();
+    _interiorAreaController.clear();
+
+    // business
+    _businessLangs.clear();
+    _documentTypeController.clear();
+
+    // vehicle
+    _vehicleSymptoms.clear();
+    _vehicleBrandController.clear();
+
+    // beauty
+    _beautyPeopleController.clear();
+
+    // repair
+    _repairBrand = '';
+    _repairSymptomMemoController.clear();
+
+    // Step3 공통
+    _d3LandmarkController.clear();
+    _d3MovingFromController.clear();
+    _d3MovingToController.clear();
+    _d3MemoController.clear();
+
+    // 유효성 에러
+    _fieldErrors.clear();
+  }
+
   void _goBack() {
     if (_currentStep > 0) {
       setState(() => _currentStep--);
@@ -1837,52 +1921,8 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       state: _state,
       onSubTypeSelected: (id, label) {
         setState(() {
-          if (config.categoryKey == 'expert_moving' &&
-              _state.step1SubTypeId != id) {
-            _movingCargoOtherController.clear();
-            _movingCargoTypes.clear();
-          }
-          if (config.categoryKey == 'expert_business' &&
-              _state.step1SubTypeId != id) {
-            _documentTypeController.clear();
-            _step2Selections.clear();
-          }
-          if (config.categoryKey == 'expert_tutoring' &&
-              _state.step1SubTypeId != id) {
-            _tutoringLevels.clear();
-            _step2Selections.clear();
-            _tutorGoalController.clear();
-            _tutorOtherController.clear();
-          }
-          if (config.categoryKey == 'expert_repair' &&
-              _state.step1SubTypeId != id) {
-            _repairBrand = '';
-            _step2Selections.clear();
-          }
-          if (config.categoryKey == 'expert_interior' &&
-              _state.step1SubTypeId != id) {
-            _interiorParts.clear();
-            _step2Selections.clear();
-          }
-          if (config.categoryKey == 'expert_cleaning' &&
-              _state.step1SubTypeId != id) {
-            _step2Selections.clear();
-          }
-          if (config.categoryKey == 'expert_beauty' &&
-              _state.step1SubTypeId != id) {
-            _step2Selections.clear();
-            _beautyPeopleController.clear();
-          }
-          if (config.categoryKey == 'expert_events' &&
-              _state.step1SubTypeId != id) {
-            _step2Selections.clear();
-            _eventPeopleController.clear();
-          }
-          if (config.categoryKey == 'expert_vehicle' &&
-              _state.step1SubTypeId != id) {
-            _step2Selections.clear();
-            _vehicleBrandController.clear();
-            _vehicleSymptoms.clear();
+          if (_state.step1SubTypeId != id) {
+            _resetAllInputs();
           }
           _state = _state.copyWith(
             step1SubTypeId: id,

@@ -11,6 +11,8 @@ enum ServiceModeChoice {
 }
 
 const Object _kUnsetServiceMode = Object();
+const Object _kUnsetLat = Object();
+const Object _kUnsetLng = Object();
 
 /// 위저드 전체 상태
 class UniversalWizardState {
@@ -79,8 +81,8 @@ class UniversalWizardState {
     String? step3Landmark,
     String? step3MovingFromLandmark,
     String? step3MovingToLandmark,
-    double? step3Lat,
-    double? step3Lng,
+    Object? step3Lat = _kUnsetLat,
+    Object? step3Lng = _kUnsetLng,
     String? preferredDateStr,
     String? preferredTimeStr,
     bool? scheduleIsUrgent,
@@ -100,8 +102,8 @@ class UniversalWizardState {
       step3Landmark: step3Landmark ?? this.step3Landmark,
       step3MovingFromLandmark: step3MovingFromLandmark ?? this.step3MovingFromLandmark,
       step3MovingToLandmark: step3MovingToLandmark ?? this.step3MovingToLandmark,
-      step3Lat: step3Lat ?? this.step3Lat,
-      step3Lng: step3Lng ?? this.step3Lng,
+      step3Lat: identical(step3Lat, _kUnsetLat) ? this.step3Lat : step3Lat as double?,
+      step3Lng: identical(step3Lng, _kUnsetLng) ? this.step3Lng : step3Lng as double?,
       preferredDateStr: preferredDateStr ?? this.preferredDateStr,
       preferredTimeStr: preferredTimeStr ?? this.preferredTimeStr,
       scheduleIsUrgent: scheduleIsUrgent ?? this.scheduleIsUrgent,

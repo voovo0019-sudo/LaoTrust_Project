@@ -1313,7 +1313,9 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'symptomDetail':
         if (rawValue.isEmpty) return '';
         final memoLabel = _state.categoryKey == 'expert_vehicle'
-            ? 'vehicle_symptom_memo_label'
+            ? (_state.step1SubTypeId == 'carwash'
+                ? 'vehicle_carwash_memo_label'
+                : 'vehicle_symptom_memo_label')
             : 'wizard_repair_symptom_memo_label';
         return '${t(memoLabel)}: $rawValue';
 

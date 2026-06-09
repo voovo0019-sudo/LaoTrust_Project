@@ -2151,6 +2151,16 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Coating/Waxing',
     'lo': 'ເຄືອບ/ແວັກຊິງ',
   },
+  'vehicle_carwash_memo_label': {
+    'ko': '세차 요청 메모',
+    'en': 'Carwash Request Notes',
+    'lo': 'ໝາຍເຫດການລ້າງລົດ',
+  },
+  'vehicle_carwash_memo_hint': {
+    'ko': '예) 사이드미러 꼼꼼히, 실내 탈취제 사용, 엔진룸 세척 포함 등',
+    'en': 'e.g. Extra care on mirrors, deodorizer inside, include engine bay, etc.',
+    'lo': 'ຕົວຢ່າງ: ດູແລກະຈົກຢ່າງລະອຽດ, ໃຊ້ສານດັບກິ່ນ, ລ້າງຫ້ອງເຄື່ອງ ເປັນຕົ້ນ',
+  },
   'sedan': {'ko': '세단', 'en': 'Sedan', 'lo': 'ເຊດານ'},
   'suv': {'ko': 'SUV', 'en': 'SUV', 'lo': 'SUV'},
   'van': {'ko': '밴', 'en': 'Van', 'lo': 'ແວນ'},

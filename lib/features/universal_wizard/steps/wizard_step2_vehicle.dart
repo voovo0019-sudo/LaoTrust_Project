@@ -308,6 +308,16 @@ class WizardStep2Vehicle extends StatelessWidget {
               );
             }).toList(),
           ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: symptomMemoController,
+            onChanged: (_) => onStateChanged(),
+            decoration: wizardOutlineFieldDecoration(
+              _t('vehicle_carwash_memo_label'),
+              hint: _t('vehicle_carwash_memo_hint'),
+            ),
+            maxLines: 3,
+          ),
         ],
       );
     }

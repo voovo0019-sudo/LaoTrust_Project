@@ -688,8 +688,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             'interpretRequest': _documentTypeController.text.trim(),
           if (subType == 'visa_permit')
             'visaRequest': _documentTypeController.text.trim(),
-          if (_step2OtherSelected)
-            'otherNote': _step2OtherController.text.trim(),
         };
       case 'expert_beauty':
         return {
@@ -804,7 +802,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
             if (!isTuktuk) 'rentalOptions': _step2Selections.toList(),
             'symptomDetail': _repairSymptomMemoController.text.trim(),
           },
-          if (_step2OtherSelected) 'otherNote': _step2OtherController.text.trim(),
         };
       default:
         return {

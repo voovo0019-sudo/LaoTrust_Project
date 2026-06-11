@@ -16,6 +16,35 @@ import 'app_localizations.dart';
 /// Firestore에 원문을 넣을 때 사용하는 접두(사용자가 입력할 수 없는 형태).
 const String kQuickJobLiteralPrefix = '__lt_literal__:';
 
+// === v8.0 알바 직무 카탈로그 (선택형, ko/en/lo 고정값) ===
+// ※ lo(라오어)는 초안 — 지사장님 현지 검수 후 확정 예정
+const Map<String, Map<String, String>> kQuickJobCatalog = {
+  'restaurant_server': {'ko': '식당 서버', 'en': 'Restaurant server', 'lo': 'ພະນັກງານເສີບອາຫານ'},
+  'cafe_staff': {'ko': '카페 직원', 'en': 'Cafe staff', 'lo': 'ພະນັກງານຄາເຟ'},
+  'kitchen_helper': {'ko': '주방 보조', 'en': 'Kitchen helper', 'lo': 'ຜູ້ຊ່ວຍຄົວ'},
+  'shop_sales': {'ko': '매장 판매', 'en': 'Shop sales', 'lo': 'ພະນັກງານຂາຍ'},
+  'cleaning': {'ko': '청소', 'en': 'Cleaning', 'lo': 'ທຳຄວາມສະອາດ'},
+  'general_labor': {'ko': '단순 노무', 'en': 'General labor', 'lo': 'ແຮງງານທົ່ວໄປ'},
+  'construction': {'ko': '건설 현장', 'en': 'Construction', 'lo': 'ກໍ່ສ້າງ'},
+  'delivery': {'ko': '배달', 'en': 'Delivery', 'lo': 'ສົ່ງເຄື່ອງ'},
+  'driver': {'ko': '운전·오토바이', 'en': 'Driver', 'lo': 'ຄົນຂັບລົດ'},
+  'security': {'ko': '경비', 'en': 'Security', 'lo': 'ຍາມຮັກສາຄວາມປອດໄພ'},
+  'event_staff': {'ko': '행사 스태프', 'en': 'Event staff', 'lo': 'ພະນັກງານຈັດງານ'},
+  'farm_work': {'ko': '농장일', 'en': 'Farm work', 'lo': 'ວຽກກະສິກຳ'},
+  'interpreter': {'ko': '통역·번역', 'en': 'Interpreter', 'lo': 'ນາຍແປພາສາ'},
+  'tutoring': {'ko': '과외·교습', 'en': 'Tutoring', 'lo': 'ສອນພິເສດ'},
+  'tour_guide': {'ko': '투어 가이드', 'en': 'Tour guide', 'lo': 'ໄກ້ນຳທ່ຽວ'},
+  'office_assistant': {'ko': '사무 보조', 'en': 'Office assistant', 'lo': 'ຜູ້ຊ່ວຍຫ້ອງການ'},
+  'beauty': {'ko': '미용', 'en': 'Beauty', 'lo': 'ເສີມສວຍ'},
+  'repair': {'ko': '수리', 'en': 'Repair', 'lo': 'ສ້ອມແປງ'},
+  'photo': {'ko': '사진·촬영', 'en': 'Photography', 'lo': 'ຖ່າຍຮູບ'},
+  'gardening': {'ko': '정원·조경', 'en': 'Gardening', 'lo': 'ຈັດສວນ'},
+  'other': {'ko': '기타 (직접 입력)', 'en': 'Other', 'lo': 'ອື່ນໆ'},
+};
+const Map<String, Map<String, String>> kQuickJobUiText = {
+  'jobtype_label': {'ko': '직무 종류', 'en': 'Job type', 'lo': 'ປະເພດວຽກ'},
+};
+
 /// 사용자가 입력한 제목(공백 제거 후)이 사전에 있으면 저장/표시용 키.
 const Map<String, String> kQuickJobTitlePhraseToKey = {
   '행사': 'quick_job_dyn_event',

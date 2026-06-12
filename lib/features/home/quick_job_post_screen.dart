@@ -17,6 +17,8 @@ import '../../services/auth_service.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
+const Color _royalBlue = Color(0xFF1E3A8A);
+const Color _bgGray = Color(0xFFF8FAFC);
 
 class QuickJobPostScreen extends StatefulWidget {
   const QuickJobPostScreen({
@@ -283,242 +285,465 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
   Widget build(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
     return Scaffold(
+      backgroundColor: _bgGray,
       appBar: AppBar(
-        backgroundColor: _royalNavy,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [_royalNavy, _royalBlue],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
-        title: Text(
-          widget.isEditMode
-              ? context.t('quick_job_post_edit_title')
-              : context.l10n('quick_job_post_title'),
+        elevation: 0,
+        toolbarHeight: 70,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.work_outline, color: Colors.white, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.isEditMode
+                      ? context.t('quick_job_post_edit_title')
+                      : context.l10n('quick_job_post_title'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'LaoTrust',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              kQuickJobUiText['jobtype_label']?[lang] ?? 'Job type',
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: _royalNavy,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 6),
-            // ① 직무 선택 버튼 — InkWell 독립 위젯 (GestureDetector 완전 제거)
-            InkWell(
-              onTap: () async {
-                final selected = await showModalBottomSheet<String>(
-                  context: context,
-                  isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            // ── 직무 선택 카드 ──
+            _buildSectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionLabel(
+                    kQuickJobUiText['jobtype_label']?[lang] ?? 'Job type',
+                    Icons.work_outline,
                   ),
-                  builder: (ctx) {
-                    final sheetLang = Localizations.localeOf(ctx).languageCode;
-                    return SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 12),
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxHeight: MediaQuery.of(ctx).size.height * 0.6,
-                            ),
-                            child: ListView(
-                              shrinkWrap: true,
-                              children: kQuickJobCatalog.entries.map((e) {
-                                return ListTile(
-                                  title: Text(
-                                    e.value[sheetLang] ?? e.value['en'] ?? e.key,
+                  const SizedBox(height: 10),
+                  InkWell(
+                    onTap: () async {
+                      final selected = await showModalBottomSheet<String>(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        builder: (ctx) {
+                          final sheetLang = Localizations.localeOf(ctx).languageCode;
+                          return SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(2),
                                   ),
-                                  onTap: () => Navigator.of(ctx).pop(e.key),
-                                );
-                              }).toList(),
+                                ),
+                                const SizedBox(height: 8),
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+                                  ),
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    children: kQuickJobCatalog.entries.map((e) {
+                                      return ListTile(
+                                        title: Text(
+                                          e.value[sheetLang] ?? e.value['en'] ?? e.key,
+                                        ),
+                                        onTap: () => Navigator.of(ctx).pop(e.key),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                      if (selected != null && mounted) {
+                        setState(() {
+                          _selectedJobType = selected;
+                          if (selected != 'other') _titleController.clear();
+                        });
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _selectedJobType != null
+                              ? _royalBlue
+                              : Colors.grey.shade300,
+                          width: _selectedJobType != null ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        color: _selectedJobType != null
+                            ? _royalBlue.withValues(alpha: 0.05)
+                            : Colors.white,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.badge_outlined,
+                            size: 18,
+                            color: _selectedJobType != null
+                                ? _royalBlue
+                                : Colors.grey.shade400,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _selectedJobType == null
+                                  ? (kQuickJobUiText['select_job_type']?[lang] ?? 'Select job type')
+                                  : (kQuickJobCatalog[_selectedJobType!]?[lang] ?? _selectedJobType!),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: _selectedJobType != null
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                                color: _selectedJobType == null
+                                    ? Colors.grey.shade500
+                                    : _royalBlue,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: _selectedJobType != null
+                                ? _royalBlue
+                                : Colors.grey.shade400,
+                          ),
                         ],
                       ),
-                    );
-                  },
-                );
-                if (selected != null && mounted) {
-                  setState(() {
-                    _selectedJobType = selected;
-                    if (selected != 'other') _titleController.clear();
-                  });
-                }
-              },
-              borderRadius: BorderRadius.circular(28),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _selectedJobType == null
-                            ? (kQuickJobUiText['select_job_type']?[lang] ?? 'Select job type')
-                            : (kQuickJobCatalog[_selectedJobType!]?[lang] ?? _selectedJobType!),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: _selectedJobType == null
-                              ? Colors.grey.shade500
-                              : Colors.black87,
+                    ),
+                  ),
+                  // ② 기타 제목 입력칸
+                  if (_selectedJobType == 'other') ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _titleController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: context.l10n('quick_job_field_title'),
+                        hintText: context.l10n('quick_job_title_hint'),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: _royalBlue, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                     ),
-                    Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
                   ],
-                ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
-            // ② 기타 제목 입력칸 — GestureDetector 없이 완전 독립 배치
-            if (_selectedJobType == 'other') ...[
-              Text(
-                context.l10n('quick_job_field_title'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: _royalNavy,
-                  fontSize: 14,
-                ),
+            // ── 근무 정보 카드 ──
+            _buildSectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionLabel(
+                    context.l10n('quick_job_field_location'),
+                    Icons.location_on_outlined,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildStyledField(
+                    controller: _locationController,
+                    hint: context.l10n('quick_job_location_hint'),
+                    prefixIcon: Icons.location_on_outlined,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSectionLabel(
+                    context.l10n('quick_job_field_salary'),
+                    Icons.payments_outlined,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildStyledField(
+                    controller: _salaryController,
+                    hint: context.l10n('quick_job_salary_hint'),
+                    prefixIcon: Icons.payments_outlined,
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _titleController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: context.l10n('quick_job_title_hint'),
-                  border: OutlineInputBorder(
+            ),
+            const SizedBox(height: 16),
+            // ── 상세 정보 카드 ──
+            _buildSectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionLabel(
+                    context.l10n('quick_job_field_detail'),
+                    Icons.description_outlined,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildStyledField(
+                    controller: _descriptionController,
+                    hint: context.l10n('quick_job_detail_hint'),
+                    maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // ── 마감일 카드 ──
+            _buildSectionCard(
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined, color: _royalBlue, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n('quick_job_deadline_title'),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: _royalNavy,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${_deadline.year}-${_deadline.month.toString().padLeft(2, '0')}-${_deadline.day.toString().padLeft(2, '0')} ${_deadline.hour.toString().padLeft(2, '0')}:00',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _deadline,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 30)),
+                      );
+                      if (picked != null && mounted) {
+                        setState(() => _deadline = DateTime(
+                            picked.year, picked.month, picked.day, _deadline.hour));
+                      }
+                    },
+                    style: TextButton.styleFrom(foregroundColor: _royalBlue),
+                    child: Text(context.l10n('quick_job_deadline_pick_date')),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            // ── 등록 버튼 (그라디언트) ──
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_royalNavy, _royalBlue],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: _royalBlue.withValues(alpha: 0.45),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: _royalNavy.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: (_saving || _isLoading) ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            _buildField(
-              context.l10n('quick_job_field_location'),
-              _locationController,
-              hint: context.l10n('quick_job_location_hint'),
-            ),
-            const SizedBox(height: 16),
-            _buildField(
-              context.l10n('quick_job_field_salary'),
-              _salaryController,
-              hint: context.l10n('quick_job_salary_hint'),
-            ),
-            const SizedBox(height: 16),
-            _buildField(
-              context.l10n('quick_job_field_detail'),
-              _descriptionController,
-              hint: context.l10n('quick_job_detail_hint'),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                context.l10n('quick_job_deadline_title'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: _royalNavy,
-                ),
-              ),
-              subtitle: Text(
-                '${_deadline.year}-${_deadline.month.toString().padLeft(2, '0')}-${_deadline.day.toString().padLeft(2, '0')} ${_deadline.hour.toString().padLeft(2, '0')}:00',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-              trailing: TextButton(
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _deadline,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 30)),
-                  );
-                  if (picked != null && mounted) {
-                    setState(() => _deadline = DateTime(picked.year, picked.month, picked.day, _deadline.hour));
-                  }
-                },
-                child: Text(context.l10n('quick_job_deadline_pick_date')),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+                child: (_saving || _isLoading)
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.isEditMode
+                                ? context.t('quick_job_post_save_edit')
+                                : context.t('quick_job_post_submit'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: (_saving || _isLoading) ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _royalNavy,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              child: (_saving || _isLoading)
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      widget.isEditMode
-                          ? context.t('quick_job_post_save_edit')
-                          : context.t('quick_job_post_submit'),
-                    ),
-            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, {String? hint, int maxLines = 1}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // ── 섹션 카드 래퍼 ──
+  Widget _buildSectionCard({required Widget child, Color? accentColor}) {
+    final color = accentColor ?? _royalBlue;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: color.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 6,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color, color.withValues(alpha: 0.4)],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── 섹션 라벨 (아이콘 + 텍스트) ──
+  Widget _buildSectionLabel(String label, IconData icon) {
+    return Row(
       children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: _royalBlue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 15, color: _royalBlue),
+        ),
+        const SizedBox(width: 10),
         Text(
           label,
           style: const TextStyle(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: _royalNavy,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            fontSize: 15,
           ),
         ),
       ],
+    );
+  }
+
+  // ── 스타일 통일 TextField ──
+  Widget _buildStyledField({
+    required TextEditingController controller,
+    String? hint,
+    int maxLines = 1,
+    IconData? prefixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: _royalBlue.withValues(alpha: 0.6), size: 18)
+            : null,
+        filled: true,
+        fillColor: _bgGray,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: _royalBlue, width: 2),
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: prefixIcon != null ? 8 : 16,
+          vertical: 14,
+        ),
+      ),
     );
   }
 }

@@ -335,7 +335,7 @@
   "quick_job_salary_hint": "ຕົວຢ່າງ: ເຈລະຈາໄດ້ / 15,000 LAK/ຊົ່ວໂມງ",
   "quick_job_detail_hint": "ກະລຸນາລະບຸລາຍລະອຽດວຽກ",
   "quick_job_deadline_title": "ເວລາປິດຮັບ",
-  "quick_job_deadline_pick_date": "ເລືອກວັນທີ",
+  "quick_job_deadline_pick_date": "ເລືອກວັນທີ & ເວລາ",
   "job_deadline_left": "ເຫຼືອປະມານ {h} ຊົ່ວໂມງກ່ອນປິດ",
   "job_deadline_passed": "ປິດຮັບແລ້ວ",
   "quick_job_default_title": "ປະກາດວຽກ",

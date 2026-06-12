@@ -392,6 +392,20 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                   ),
                 ),
                 const SizedBox(height: 14),
+                // 마감일시 표시 (dl이 있을 때만)
+                if (dl != null) ...[
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${dl.year}-${dl.month.toString().padLeft(2, '0')}-${dl.day.toString().padLeft(2, '0')} ${dl.hour.toString().padLeft(2, '0')}:${dl.minute.toString().padLeft(2, '0')}',
+                        style: _qjTextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Row(
                   children: [
                     Icon(Icons.location_on, size: 16, color: Colors.grey.shade500),

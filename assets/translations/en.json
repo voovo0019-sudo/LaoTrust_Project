@@ -335,7 +335,7 @@
   "quick_job_salary_hint": "e.g. Negotiable / 15,000 LAK/hour",
   "quick_job_detail_hint": "Describe the job details",
   "quick_job_deadline_title": "Deadline",
-  "quick_job_deadline_pick_date": "Pick date",
+  "quick_job_deadline_pick_date": "Pick date & time",
   "job_deadline_left": "About {h} hours left",
   "job_deadline_passed": "Deadline passed",
   "quick_job_default_title": "Job posting",

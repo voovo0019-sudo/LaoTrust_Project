@@ -550,7 +550,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${_deadline.year}-${_deadline.month.toString().padLeft(2, '0')}-${_deadline.day.toString().padLeft(2, '0')} ${_deadline.hour.toString().padLeft(2, '0')}:00',
+                          '${_deadline.year}-${_deadline.month.toString().padLeft(2, '0')}-${_deadline.day.toString().padLeft(2, '0')} ${_deadline.hour.toString().padLeft(2, '0')}:${_deadline.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                         ),
                       ],
@@ -558,16 +558,41 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                   ),
                   TextButton(
                     onPressed: () async {
-                      final picked = await showDatePicker(
+                      // 1단계: 날짜 선택
+                      final pickedDate = await showDatePicker(
                         context: context,
                         initialDate: _deadline,
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 30)),
                       );
-                      if (picked != null && mounted) {
-                        setState(() => _deadline = DateTime(
-                            picked.year, picked.month, picked.day, _deadline.hour));
-                      }
+                      if (pickedDate == null || !mounted) return;
+                      // 2단계: 시간 선택
+                      if (!context.mounted) return;
+                      final pickedTime = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay(
+                          hour: _deadline.hour,
+                          minute: _deadline.minute,
+                        ),
+                        builder: (context, child) {
+                          return MediaQuery(
+                            data: MediaQuery.of(context).copyWith(
+                              alwaysUse24HourFormat: true,
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (!mounted) return;
+                      setState(() {
+                        _deadline = DateTime(
+                          pickedDate.year,
+                          pickedDate.month,
+                          pickedDate.day,
+                          pickedTime?.hour ?? _deadline.hour,
+                          pickedTime?.minute ?? _deadline.minute,
+                        );
+                      });
                     },
                     style: TextButton.styleFrom(foregroundColor: _royalBlue),
                     child: Text(context.l10n('quick_job_deadline_pick_date')),

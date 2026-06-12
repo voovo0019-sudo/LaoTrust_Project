@@ -357,7 +357,7 @@
   "quick_job_salary_hint": "예: 협의 / 15,000 LAK/시간",
   "quick_job_detail_hint": "업무 내용을 입력하세요",
   "quick_job_deadline_title": "마감 시각",
-  "quick_job_deadline_pick_date": "날짜 선택",
+  "quick_job_deadline_pick_date": "날짜 · 시간 선택",
   "job_deadline_left": "마감까지 약 {h}시간",
   "job_deadline_passed": "마감됨",
   "quick_job_default_title": "알바 공고",

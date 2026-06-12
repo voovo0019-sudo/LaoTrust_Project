@@ -295,15 +295,6 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     super.dispose();
   }
 
-  String _localizedIfKeyOrRaw(BuildContext context, Object? maybeKeyOrValue) {
-    if (maybeKeyOrValue == null) return '';
-    final raw = maybeKeyOrValue.toString();
-    // If it's a known translation key, localize it; otherwise use raw user-entered text.
-    // (AppLocalizations returns key itself if missing, so this is safe.)
-    final localized = context.l10n(raw);
-    return localized == raw ? raw : localized;
-  }
-
   /// 상세 모달: Pending 문구 대신 ko·en 등 안전한 표시값.
   String _safeDisplay(dynamic fieldValue, String currentLang) {
     if (fieldValue == null) return '';
@@ -326,7 +317,6 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
   void _showQuickJobDetailsDialog({
     required BuildContext context,
     required Map<String, dynamic> job,
-    required String tag,
   }) {
     showDialog(
       context: context,
@@ -344,67 +334,108 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
         final detailLine = job['detailKey'] != null
             ? ctx.t(job['detailKey']!.toString().trim())
             : _safeDisplay(job['detailMap'] ?? job[JobFields.descriptionI18n] ?? job['detail'], lang);
-        return AlertDialog(
-          title: Text(
-            titleLine,
-            style: lang.toLowerCase().startsWith('lo')
-                ? TextStyle(
-                    fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
-                    letterSpacing: 0.1,
-                  )
-                : _qjTextStyle(),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${ctx.t('status')}: $tag',
-                style: lang.toLowerCase().startsWith('lo')
-                    ? TextStyle(
-                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
-                        letterSpacing: 0.1,
-                      )
-                    : _qjTextStyle(),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${ctx.t('location')}: $locationLine',
-                style: lang.toLowerCase().startsWith('lo')
-                    ? TextStyle(
-                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
-                        letterSpacing: 0.1,
-                      )
-                    : _qjTextStyle(),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${ctx.t('salary')}: $salaryLine',
-                style: lang.toLowerCase().startsWith('lo')
-                    ? TextStyle(
-                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
-                        letterSpacing: 0.1,
-                      )
-                    : _qjTextStyle(),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${ctx.t('detail')}: $detailLine',
-                style: lang.toLowerCase().startsWith('lo')
-                    ? TextStyle(
-                        fontFamily: AppTheme.textStyleLaoPrimary.fontFamily,
-                        letterSpacing: 0.1,
-                      )
-                    : _qjTextStyle(),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(ctx.l10n('confirm')),
+        DateTime? dl;
+        final tRaw = job['deadlineAt'];
+        if (tRaw is DateTime) {
+          dl = tRaw;
+        } else if (tRaw is Timestamp) {
+          dl = tRaw.toDate();
+        } else if (tRaw is int) {
+          dl = DateTime.fromMillisecondsSinceEpoch(tRaw);
+        }
+        final remaining = dl?.difference(DateTime.now());
+        final remH = remaining != null ? remaining.inMinutes / 60.0 : null;
+        final urgent = remH != null && remH < 3;
+        final deadlineText = remaining == null
+            ? ''
+            : (remaining.isNegative
+                ? ctx.l10n('job_deadline_passed')
+                : ctx.t('job_deadline_left').replaceAll('{h}', remH!.toStringAsFixed(0)));
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titleLine, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                if (deadlineText.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: urgent ? const Color(0xFFFCEBEB) : const Color(0xFFFAEEDA),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.access_time, size: 13, color: urgent ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
+                        const SizedBox(width: 4),
+                        Text(deadlineText, style: TextStyle(fontSize: 12, color: urgent ? const Color(0xFFA32D2D) : const Color(0xFF854F0B))),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: const Color(0xFFE6F1FB), borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    children: [
+                      Text(kQuickJobUiText['wage_label']?[lang] ?? 'Pay', style: const TextStyle(fontSize: 12, color: Color(0xFF185FA5))),
+                      const SizedBox(height: 2),
+                      Text(salaryLine, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0C447C))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16, color: Colors.grey.shade500),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text('${ctx.t('location')}: $locationLine', style: _qjTextStyle(fontSize: 13))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.assignment_outlined, size: 16, color: Colors.grey.shade500),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text('${ctx.t('detail')}: $detailLine', style: _qjTextStyle(fontSize: 13))),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(ctx.l10n('confirm')),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E3A8A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(kQuickJobUiText['apply_coming_soon']?[lang] ?? 'Coming soon')),
+                        );
+                      },
+                      child: Text(kQuickJobUiText['apply_now']?[lang] ?? 'Apply now'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -463,9 +494,12 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ];
             return Column(
               children: [
-                SizedBox(
-                  height: 78,
-                  child: PageView.builder(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final cardWidth = (constraints.maxWidth * 0.46).clamp(200.0, 300.0);
+                    return SizedBox(
+                      height: 220,
+                      child: PageView.builder(
                     controller: _pageController,
                     padEnds: false,
                     onPageChanged: (page) {
@@ -501,36 +535,30 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       final location = _displayJobLocation(context, job);
                       final salary = _displayJobSalary(context, job);
                       final detail = _displayJobDetail(context, job);
-                      final tag = _localizedIfKeyOrRaw(context, job['tag']);
                       final bool ownJob = _isOwnJob(job);
+                      final lang = Localizations.localeOf(context).languageCode;
 
                       return AnimatedScale(
                         scale: _currentPage == index ? 1.0 : 0.96,
                         duration: const Duration(milliseconds: 300),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(28.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 4,
-                                spreadRadius: 0,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(28.0),
-                            onTap: () => _showQuickJobDetailsDialog(
-                              context: context,
-                              job: job,
-                              tag: tag,
+                        child: SizedBox(
+                          width: cardWidth,
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(28.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 6),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(28.0),
+                              onTap: () => _showQuickJobDetailsDialog(context: context, job: job),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -538,104 +566,89 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                   Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                                          color: remainingHours < 3 ? const Color(0xFFFCEBEB) : const Color(0xFFFAEEDA),
                                           borderRadius: BorderRadius.circular(28.0),
                                         ),
-                                        child: Text(
-                                          tag,
-                                          style: _qjTextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF1E3A8A),
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: Text(
-                                          title,
-                                          style: _qjTextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          softWrap: false,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      if (ownJob)
-                                        Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E3A8A), size: 20),
-                                              tooltip: context.t('quick_job_edit_action'),
-                                              padding: EdgeInsets.zero,
-                                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                              onPressed: () => _openEditJob(
-                                                context,
-                                                job: job,
-                                                title: title,
-                                                location: location,
-                                                salary: salary,
-                                                detail: detail,
-                                                deadlineAt: deadlineResolved,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete_outline, color: Color(0xFF1E3A8A), size: 20),
-                                              tooltip: context.t('quick_job_delete_action'),
-                                              padding: EdgeInsets.zero,
-                                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                              onPressed: () {
-                                                final id = job['documentId']?.toString();
-                                                if (id != null && id.isNotEmpty) {
-                                                  _deleteJobAfterConfirm(context, id);
-                                                }
-                                              },
+                                            Icon(Icons.access_time, size: 12, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              remaining.isNegative ? context.l10n('job_deadline_passed') : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
+                                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
                                             ),
                                           ],
-                                        )
-                                      else
-                                        const Icon(
-                                          Icons.chevron_right,
-                                          color: Color(0xFF1E3A8A),
-                                          size: 20,
                                         ),
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(color: const Color(0xFFE1F5EE), borderRadius: BorderRadius.circular(28.0)),
+                                        child: Text(kQuickJobUiText['recruiting']?[lang] ?? 'Recruiting', style: const TextStyle(fontSize: 11, color: Color(0xFF0F6E56))),
+                                      ),
                                     ],
                                   ),
+                                  const SizedBox(height: 10),
+                                  Text(title, style: _qjTextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 4),
+                                  Text(salary, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 6),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                  Row(
+                                    children: [
+                                      Icon(Icons.location_on, size: 13, color: Colors.grey.shade500),
+                                      const SizedBox(width: 3),
+                                      Flexible(child: Text(location, style: _qjTextStyle(fontSize: 11, color: Colors.grey.shade700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  if (ownJob)
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(4),
-                                          child: LinearProgressIndicator(
-                                            value: progress,
-                                            minHeight: 4,
-                                            backgroundColor: Colors.grey.shade300,
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
-                                          ),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E3A8A), size: 18),
+                                          tooltip: context.t('quick_job_edit_action'),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                          onPressed: () => _openEditJob(context, job: job, title: title, location: location, salary: salary, detail: detail, deadlineAt: deadlineResolved),
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          remaining.isNegative
-                                              ? context.l10n('job_deadline_passed')
-                                              : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
-                                          style: _qjTextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey.shade600,
-                                          ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete_outline, color: Color(0xFF1E3A8A), size: 18),
+                                          tooltip: context.t('quick_job_delete_action'),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                          onPressed: () {
+                                            final id = job['documentId']?.toString();
+                                            if (id != null && id.isNotEmpty) _deleteJobAfterConfirm(context, id);
+                                          },
                                         ),
                                       ],
+                                    )
+                                  else
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF1E3A8A),
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)),
+                                        ),
+                                        onPressed: () => _showQuickJobDetailsDialog(context: context, job: job),
+                                        child: Text(kQuickJobUiText['apply_now']?[lang] ?? 'Apply now', style: const TextStyle(fontSize: 13)),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 6),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: progress,
+                                      minHeight: 3,
+                                      backgroundColor: Colors.grey.shade200,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
                                     ),
                                   ),
                                 ],
@@ -646,6 +659,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       );
                     },
                   ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 8),
                 Row(

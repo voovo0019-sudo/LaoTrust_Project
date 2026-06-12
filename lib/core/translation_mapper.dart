@@ -42,7 +42,12 @@ const Map<String, Map<String, String>> kQuickJobCatalog = {
   'other': {'ko': '기타 (직접 입력)', 'en': 'Other', 'lo': 'ອື່ນໆ'},
 };
 const Map<String, Map<String, String>> kQuickJobUiText = {
-  'jobtype_label': {'ko': '직무 종류', 'en': 'Job type', 'lo': 'ປະເພດວຽກ'},
+  'jobtype_label': {'ko': '직무 유형', 'en': 'Job type', 'lo': 'ປະເພດວຽກ'},
+  'select_job_type': {'ko': '직무를 선택하세요', 'en': 'Select job type', 'lo': 'ກະລຸນາເລືອກປະເພດວຽກ'},
+  'recruiting': {'ko': '모집중', 'en': 'Recruiting', 'lo': 'ກຳລັງຮັບສະໝັກ'},
+  'apply_now': {'ko': '지원하기', 'en': 'Apply now', 'lo': 'ສະໝັກວຽກ'},
+  'wage_label': {'ko': '급여', 'en': 'Pay', 'lo': 'ຄ່າຈ້າງ'},
+  'apply_coming_soon': {'ko': '지원 기능은 곧 오픈됩니다', 'en': 'Apply feature coming soon', 'lo': 'ຟັງຊັນສະໝັກກຳລັງຈະມາ'},
 };
 
 /// 사용자가 입력한 제목(공백 제거 후)이 사전에 있으면 저장/표시용 키.

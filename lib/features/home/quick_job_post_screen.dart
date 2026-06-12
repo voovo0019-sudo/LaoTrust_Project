@@ -50,6 +50,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
   late DateTime _deadline;
   bool _saving = false;
   bool _isLoading = false;
+  String? _selectedJobType;
 
   @override
   void initState() {
@@ -129,14 +130,16 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     });
 
     try {
-      final title = _titleController.text.trim();
+      final selectedType = _selectedJobType ?? 'other';
+      final isOtherJob = selectedType == 'other';
+      final title = isOtherJob ? _titleController.text.trim() : '';
       final locText = _locationController.text.trim();
       final salary = _salaryController.text.trim();
       final detail = _descriptionController.text.trim();
 
       final sourceLang = Localizations.localeOf(context).languageCode;
       final inputData = <String, String>{
-        'title': title,
+        if (isOtherJob) 'title': title,
         'location': locText,
         'salary': salary,
         'detail': detail,
@@ -152,15 +155,22 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
 
         bundled = tResult.bundle ??
             {
-              for (final k in ['title', 'location', 'salary', 'detail'])
+              for (final k in inputData.keys)
                 k: {'ko': inputData[k]!, 'en': inputData[k]!, 'lo': inputData[k]!},
             };
       } catch (e) {
         if (kDebugMode) debugPrint('_submit: 번역 실패 → 원문 저장: $e');
         bundled = {
-          for (final k in ['title', 'location', 'salary', 'detail'])
+          for (final k in inputData.keys)
             k: {'ko': inputData[k]!, 'en': inputData[k]!, 'lo': inputData[k]!},
         };
+      }
+
+      if (!isOtherJob) {
+        final catalogEntry = kQuickJobCatalog[selectedType];
+        bundled['title'] = catalogEntry != null
+            ? Map<String, String>.from(catalogEntry)
+            : {'ko': selectedType, 'en': selectedType, 'lo': selectedType};
       }
 
       if (!mounted) return;
@@ -177,6 +187,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           JobFields.locationI18n: bundled['location']!,
           JobFields.salaryI18n: bundled['salary']!,
           JobFields.descriptionI18n: bundled['detail']!,
+          JobFields.jobType: selectedType,
           JobFields.locationGeo: geo,
           JobFields.deadlineAt: Timestamp.fromDate(_deadline),
           JobFields.createdAt: FieldValue.serverTimestamp(),
@@ -193,19 +204,32 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
             if (kDebugMode) debugPrint('Firestore 수정 백그라운드 에러: $e');
           });
         } else {
-          // Web에서 Firestore 응답 대기 문제 우회
-          // .add() 결과를 기다리지 않고 바로 홈으로 이동
           final docRef = FirebaseFirestore.instance
               .collection(kColJobs)
-              .doc(); // 문서 ID 미리 생성
-
-          // 저장은 백그라운드로 실행 (await 없음)
-          docRef.set(payload).catchError((e) {
-            if (kDebugMode) debugPrint('Firestore 백그라운드 저장 에러: $e');
-          });
-
-          // 저장 완료를 기다리지 않고 즉시 홈 복귀
-          // (데이터는 Firestore에 안전하게 저장됨)
+              .doc();
+          try {
+            await docRef.set(payload)
+                .timeout(const Duration(seconds: 5));
+          } catch (e) {
+            if (kDebugMode) debugPrint('Firestore 저장 오류: $e');
+          }
+          if (mounted) {
+            final localEntry = <String, dynamic>{
+              ...payload,
+              'documentId': docRef.id,
+              'isSample': false,
+              JobFields.titleI18n: bundled['title']!,
+              JobFields.locationI18n: bundled['location']!,
+              JobFields.salaryI18n: bundled['salary']!,
+              JobFields.descriptionI18n: bundled['detail']!,
+              'deadlineAt': _deadline,
+            };
+            Navigator.of(context).pop({
+              '_firebaseHandled': false,
+              ...localEntry,
+            });
+            return;
+          }
         }
       }
 
@@ -257,6 +281,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: _royalNavy,
@@ -272,12 +297,124 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildField(
-              context.l10n('quick_job_field_title'),
-              _titleController,
-              hint: context.l10n('quick_job_title_hint'),
+            Text(
+              kQuickJobUiText['jobtype_label']?[lang] ?? 'Job type',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: _royalNavy,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // ① 직무 선택 버튼 — InkWell 독립 위젯 (GestureDetector 완전 제거)
+            InkWell(
+              onTap: () async {
+                final selected = await showModalBottomSheet<String>(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  builder: (ctx) {
+                    final sheetLang = Localizations.localeOf(ctx).languageCode;
+                    return SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 12),
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+                            ),
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: kQuickJobCatalog.entries.map((e) {
+                                return ListTile(
+                                  title: Text(
+                                    e.value[sheetLang] ?? e.value['en'] ?? e.key,
+                                  ),
+                                  onTap: () => Navigator.of(ctx).pop(e.key),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    );
+                  },
+                );
+                if (selected != null && mounted) {
+                  setState(() {
+                    _selectedJobType = selected;
+                    if (selected != 'other') _titleController.clear();
+                  });
+                }
+              },
+              borderRadius: BorderRadius.circular(28),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectedJobType == null
+                            ? (kQuickJobUiText['select_job_type']?[lang] ?? 'Select job type')
+                            : (kQuickJobCatalog[_selectedJobType!]?[lang] ?? _selectedJobType!),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: _selectedJobType == null
+                              ? Colors.grey.shade500
+                              : Colors.black87,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
+            // ② 기타 제목 입력칸 — GestureDetector 없이 완전 독립 배치
+            if (_selectedJobType == 'other') ...[
+              Text(
+                context.l10n('quick_job_field_title'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _royalNavy,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _titleController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: context.l10n('quick_job_title_hint'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             _buildField(
               context.l10n('quick_job_field_location'),
               _locationController,

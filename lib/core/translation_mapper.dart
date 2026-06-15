@@ -517,6 +517,11 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Preferred Schedule',
     'lo': 'ເວລາທີ່ຕ້ອງການ',
   },
+  'time_picker_title': {'ko': '시간 선택', 'en': 'Select Time', 'lo': 'ເລືອກເວລາ'},
+  'time_picker_hour': {'ko': '시', 'en': 'Hour', 'lo': 'ຊົ່ວໂມງ'},
+  'time_picker_minute': {'ko': '분', 'en': 'Minute', 'lo': 'ນາທີ'},
+  'time_picker_confirm': {'ko': '확인', 'en': 'Confirm', 'lo': 'ຢືນຢັນ'},
+  'time_picker_cancel': {'ko': '취소', 'en': 'Cancel', 'lo': 'ຍົກເລີກ'},
   'detail_label': {
     'ko': '상세 내용',
     'en': 'Details',

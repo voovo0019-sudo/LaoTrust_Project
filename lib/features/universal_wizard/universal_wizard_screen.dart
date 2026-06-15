@@ -1244,9 +1244,11 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       case 'industry':
         return '${t('wizard_cleaning_restaurant_label')}: $rawValue';
       case 'target':
-        return '${t('cleaning_visit_target')}: $rawValue';
+        final targetLabel = kStaticUiTripleByMessageKey[rawValue]?[lang] ?? rawValue;
+        return '${t('cleaning_visit_target')}: $targetLabel';
       case 'visitCycle':
-        return '${t('cleaning_visit_cycle')}: $rawValue';
+        final cycleLabel = kStaticUiTripleByMessageKey[rawValue]?[lang] ?? rawValue;
+        return '${t('cleaning_visit_cycle')}: $cycleLabel';
       case 'beddingType':
         final beddingLabel =
             kStaticUiTripleByMessageKey[rawValue]?[lang] ?? rawValue;
@@ -1825,34 +1827,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   }
 
   Future<void> _pickPreferredTime() async {
-    // 라오어일 때만 영어 locale 강제 (Flutter lo locale 24시간제 버그 대응)
-    // 한국어/영어는 각자 언어 그대로 유지
-    final currentLocale = Localizations.localeOf(context);
-    final overrideLocale = currentLocale.languageCode == 'lo'
-        ? const Locale('en')
-        : currentLocale;
-
-    final t = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      builder: (context, child) {
-        return Localizations.override(
-          context: context,
-          locale: overrideLocale,
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              alwaysUse24HourFormat: false,
-            ),
-            child: child!,
-          ),
-        );
-      },
-    );
-    if (t == null || !mounted) return;
-    final h = t.hour.toString().padLeft(2, '0');
-    final m = t.minute.toString().padLeft(2, '0');
+    if (!mounted) return;
+    final initialTime = _state.preferredTimeStr.isNotEmpty
+        ? _state.preferredTimeStr
+        : '09:00';
+    final result = await showTimePickerDrum(context, initialTime: initialTime);
+    if (result == null || !mounted) return;
     setState(() {
-      _state = _state.copyWith(preferredTimeStr: '$h:$m');
+      _state = _state.copyWith(preferredTimeStr: result);
       _fieldErrors.remove('preferredTime');
     });
   }

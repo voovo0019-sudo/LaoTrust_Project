@@ -14,6 +14,7 @@ import '../../core/translation_mapper.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
+import '../universal_wizard/steps/wizard_common.dart';
 
 const String quickJobPostRouteName = '/quick-job-post';
 const Color _royalNavy = Color(0xFF1E293B);
@@ -566,33 +567,39 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                         lastDate: DateTime.now().add(const Duration(days: 30)),
                       );
                       if (pickedDate == null || !mounted) return;
-                      // 2단계: 시간 선택
+                      // 2단계: 드럼 시간 선택
                       if (!context.mounted) return;
-                      final pickedTime = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay(
-                          hour: _deadline.hour,
-                          minute: _deadline.minute,
-                        ),
-                        builder: (context, child) {
-                          return MediaQuery(
-                            data: MediaQuery.of(context).copyWith(
-                              alwaysUse24HourFormat: true,
-                            ),
-                            child: child!,
-                          );
-                        },
+                      final initialTime =
+                          '${_deadline.hour.toString().padLeft(2, '0')}:${_deadline.minute.toString().padLeft(2, '0')}';
+                      final pickedTime = await showTimePickerDrum(
+                        context,
+                        initialTime: initialTime,
                       );
                       if (!mounted) return;
-                      setState(() {
-                        _deadline = DateTime(
-                          pickedDate.year,
-                          pickedDate.month,
-                          pickedDate.day,
-                          pickedTime?.hour ?? _deadline.hour,
-                          pickedTime?.minute ?? _deadline.minute,
-                        );
-                      });
+                      if (pickedTime != null) {
+                        final parts = pickedTime.split(':');
+                        final h = int.tryParse(parts[0]) ?? _deadline.hour;
+                        final m = int.tryParse(parts[1]) ?? _deadline.minute;
+                        setState(() {
+                          _deadline = DateTime(
+                            pickedDate.year,
+                            pickedDate.month,
+                            pickedDate.day,
+                            h,
+                            m,
+                          );
+                        });
+                      } else {
+                        setState(() {
+                          _deadline = DateTime(
+                            pickedDate.year,
+                            pickedDate.month,
+                            pickedDate.day,
+                            _deadline.hour,
+                            _deadline.minute,
+                          );
+                        });
+                      }
                     },
                     style: TextButton.styleFrom(foregroundColor: _royalBlue),
                     child: Text(context.l10n('quick_job_deadline_pick_date')),

@@ -73,6 +73,7 @@ class FirebaseService {
       return {
         'documentId': doc.id,
         'employerId': data[JobFields.employerId],
+        'contact': data['contact']?.toString() ?? '',
         'titleMap': titleMap,
         'locMap': locMap,
         'salaryMap': salaryMap,
@@ -111,6 +112,7 @@ class FirebaseService {
               return {
                 'documentId': doc.id,
                 'employerId': data[JobFields.employerId],
+                'contact': data['contact']?.toString() ?? '',
                 'titleMap': titleMap,
                 'locMap': locMap,
                 'salaryMap': salaryMap,

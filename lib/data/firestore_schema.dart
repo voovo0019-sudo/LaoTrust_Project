@@ -91,3 +91,22 @@ abstract class JobFields {
   static const String salaryI18n = 'salary_i18n';
   static const String descriptionI18n = 'description_i18n';
 }
+
+// -----------------------------------------------------------------------------
+// 4. applications 컬렉션 (알바 지원 매칭)
+// -----------------------------------------------------------------------------
+const String kColApplications = 'applications';
+
+abstract class ApplicationFields {
+  static const String jobId = 'jobId';
+  static const String applicantId = 'applicantId';
+  static const String employerId = 'employerId';
+  static const String jobTitleI18n = 'jobTitleI18n';
+  static const String status = 'status'; // pending | accepted | rejected
+  static const String createdAt = 'createdAt';
+}
+
+// application status values
+const String kAppStatusPending = 'pending';
+const String kAppStatusAccepted = 'accepted';
+const String kAppStatusRejected = 'rejected';

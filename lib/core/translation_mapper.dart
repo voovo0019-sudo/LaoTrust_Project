@@ -48,6 +48,15 @@ const Map<String, Map<String, String>> kQuickJobUiText = {
   'apply_now': {'ko': '지원하기', 'en': 'Apply now', 'lo': 'ສະໝັກວຽກ'},
   'wage_label': {'ko': '급여', 'en': 'Pay', 'lo': 'ຄ່າຈ້າງ'},
   'apply_coming_soon': {'ko': '지원 기능은 곧 오픈됩니다', 'en': 'Apply feature coming soon', 'lo': 'ຟັງຊັນສະໝັກກຳລັງຈະມາ'},
+  'contact_label': {'ko': '연락처', 'en': 'Contact', 'lo': 'ຕິດຕໍ່'},
+  'contact_hint': {'ko': '전화번호 또는 왓츠앱/라인 ID', 'en': 'Phone or WhatsApp/Line ID', 'lo': 'ເບີໂທ ຫຼື WhatsApp/Line ID'},
+  'apply_login_required': {'ko': '로그인 후 지원 가능합니다', 'en': 'Please login to apply', 'lo': 'ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນ'},
+  'apply_own_job': {'ko': '본인 공고에는 지원할 수 없습니다', 'en': 'Cannot apply to your own job', 'lo': 'ບໍ່ສາມາດສະໝັກວຽກຂອງຕົວເອງໄດ້'},
+  'apply_already': {'ko': '이미 지원하셨습니다', 'en': 'Already applied', 'lo': 'ທ່ານໄດ້ສະໝັກແລ້ວ'},
+  'apply_success_title': {'ko': '지원 완료! 🎉', 'en': 'Applied! 🎉', 'lo': 'ສະໝັກສຳເລັດ! 🎉'},
+  'apply_success_body': {'ko': '구인자가 확인 후 연락드릴 거예요 😊', 'en': 'The employer will contact you soon 😊', 'lo': 'ນາຍຈ້າງຈະຕິດຕໍ່ຫາທ່ານໃນໄວໆນີ້ 😊'},
+  'apply_contact_label': {'ko': '구인자 연락처', 'en': 'Employer Contact', 'lo': 'ຂໍ້ມູນຕິດຕໍ່ນາຍຈ້າງ'},
+  'apply_no_contact': {'ko': '연락처 정보가 없습니다', 'en': 'No contact info', 'lo': 'ບໍ່ມີຂໍ້ມູນຕິດຕໍ່'},
 };
 
 /// 사용자가 입력한 제목(공백 제거 후)이 사전에 있으면 저장/표시용 키.
@@ -532,6 +541,7 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Location',
     'lo': 'ສະຖານທີ່',
   },
+  'contact_label': {'ko': '연락처', 'en': 'Contact', 'lo': 'ຕິດຕໍ່'},
   'memo_label': {
     'ko': '추가 메모',
     'en': 'Additional Memo',
@@ -3348,4 +3358,18 @@ class _GeminiNoRetryException implements Exception {
   final int statusCode;
 }
 
-
+/// 국제 전화 국가코드 목록 (알바 등록 연락처용)
+const List<Map<String, String>> kCountryPhoneCodes = [
+  {'flag': '🇱🇦', 'code': '+856', 'name': 'Laos',       'hint': '20 xx xxx xxx'},
+  {'flag': '🇰🇷', 'code': '+82',  'name': 'Korea',      'hint': '10 xxxx xxxx'},
+  {'flag': '🇹🇭', 'code': '+66',  'name': 'Thailand',   'hint': '8x xxx xxxx'},
+  {'flag': '🇻🇳', 'code': '+84',  'name': 'Vietnam',    'hint': '9x xxx xxxx'},
+  {'flag': '🇨🇳', 'code': '+86',  'name': 'China',      'hint': '1xx xxxx xxxx'},
+  {'flag': '🇯🇵', 'code': '+81',  'name': 'Japan',      'hint': '9x xxxx xxxx'},
+  {'flag': '🇺🇸', 'code': '+1',   'name': 'USA',        'hint': 'xxx xxx xxxx'},
+  {'flag': '🇬🇧', 'code': '+44',  'name': 'UK',         'hint': '7xxx xxx xxxx'},
+  {'flag': '🇩🇪', 'code': '+49',  'name': 'Germany',    'hint': '15x xxxxxxxx'},
+  {'flag': '🇫🇷', 'code': '+33',  'name': 'France',     'hint': '6 xx xx xx xx'},
+  {'flag': '🇦🇺', 'code': '+61',  'name': 'Australia',  'hint': '4xx xxx xxx'},
+  {'flag': '🇸🇬', 'code': '+65',  'name': 'Singapore',  'hint': '8xxx xxxx'},
+];

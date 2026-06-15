@@ -437,11 +437,169 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(kQuickJobUiText['apply_coming_soon']?[lang] ?? 'Coming soon')),
-                        );
+                      onPressed: () async {
+                        final lang = Localizations.localeOf(ctx).languageCode;
+
+                        // ① 로그인 확인
+                        final currentUser = auth.currentUser;
+                        if (currentUser == null) {
+                          Navigator.of(ctx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(kQuickJobUiText['apply_login_required']?[lang] ?? 'Please login')),
+                          );
+                          return;
+                        }
+
+                        // ② 본인 공고 확인
+                        final employerId = job[JobFields.employerId]?.toString() ?? '';
+                        if (employerId == currentUser.uid) {
+                          Navigator.of(ctx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(kQuickJobUiText['apply_own_job']?[lang] ?? 'Cannot apply to your own job')),
+                          );
+                          return;
+                        }
+
+                        // ③ 중복 지원 확인
+                        final jobId = job['documentId']?.toString() ?? '';
+                        if (jobId.isNotEmpty) {
+                          final existing = await FirebaseFirestore.instance
+                              .collection(kColApplications)
+                              .where(ApplicationFields.jobId, isEqualTo: jobId)
+                              .where(ApplicationFields.applicantId, isEqualTo: currentUser.uid)
+                              .limit(1)
+                              .get();
+                          if (existing.docs.isNotEmpty) {
+                            if (ctx.mounted) {
+                              Navigator.of(ctx).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(kQuickJobUiText['apply_already']?[lang] ?? 'Already applied')),
+                              );
+                            }
+                            return;
+                          }
+                        }
+
+                        // ④ Firestore applications 저장
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection(kColApplications)
+                              .add({
+                            ApplicationFields.jobId: jobId,
+                            ApplicationFields.applicantId: currentUser.uid,
+                            ApplicationFields.employerId: employerId,
+                            ApplicationFields.jobTitleI18n: job[JobFields.titleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                            ApplicationFields.status: kAppStatusPending,
+                            ApplicationFields.createdAt: FieldValue.serverTimestamp(),
+                          });
+                        } catch (e) {
+                          if (ctx.mounted) {
+                            Navigator.of(ctx).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                          return;
+                        }
+
+                        // ⑤ 구인자 연락처 가져오기
+                        final contact = job['contact']?.toString() ?? '';
+
+                        // ⑥ 완료 다이얼로그
+                        if (ctx.mounted) {
+                          Navigator.of(ctx).pop();
+                          await showDialog<void>(
+                            context: context,
+                            builder: (dCtx) {
+                              final dLang = Localizations.localeOf(dCtx).languageCode;
+                              return Dialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 64,
+                                        height: 64,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Icons.check_circle_outline, color: Color(0xFF1E3A8A), size: 36),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        kQuickJobUiText['apply_success_title']?[dLang] ?? 'Applied! 🎉',
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        kQuickJobUiText['apply_success_body']?[dLang] ?? 'The employer will contact you soon 😊',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                                      ),
+                                      if (contact.isNotEmpty) ...[
+                                        const SizedBox(height: 16),
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFE6F1FB),
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                kQuickJobUiText['apply_contact_label']?[dLang] ?? 'Employer Contact',
+                                                style: const TextStyle(fontSize: 12, color: Color(0xFF185FA5)),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(Icons.phone_outlined, size: 16, color: Color(0xFF0C447C)),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    contact,
+                                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0C447C)),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          kQuickJobUiText['apply_no_contact']?[dLang] ?? 'No contact info',
+                                          style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 20),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          onPressed: () => Navigator.of(dCtx).pop(),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF1E3A8A),
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                                          ),
+                                          child: Text(
+                                            kQuickJobUiText['apply_success_title']?[dLang] != null ? '확인' : 'OK',
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
                       },
                       child: Text(kQuickJobUiText['apply_now']?[lang] ?? 'Apply now'),
                     ),

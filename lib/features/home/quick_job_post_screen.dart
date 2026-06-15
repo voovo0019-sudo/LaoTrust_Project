@@ -30,6 +30,7 @@ class QuickJobPostScreen extends StatefulWidget {
     this.initialSalary = '',
     this.initialDetail = '',
     this.initialDeadline,
+    this.initialContact = '',
   });
 
   final String? editDocumentId;
@@ -38,6 +39,7 @@ class QuickJobPostScreen extends StatefulWidget {
   final String initialSalary;
   final String initialDetail;
   final DateTime? initialDeadline;
+  final String initialContact;
 
   bool get isEditMode => editDocumentId != null && editDocumentId!.isNotEmpty;
 
@@ -50,10 +52,12 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
   late final TextEditingController _locationController;
   late final TextEditingController _salaryController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _contactController;
   late DateTime _deadline;
   bool _saving = false;
   bool _isLoading = false;
   String? _selectedJobType;
+  String _selectedCountryCode = '+856';
 
   @override
   void initState() {
@@ -62,6 +66,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     _locationController = TextEditingController(text: widget.initialLocation);
     _salaryController = TextEditingController(text: widget.initialSalary);
     _descriptionController = TextEditingController(text: widget.initialDetail);
+    _contactController = TextEditingController(text: widget.initialContact);
     _deadline = widget.initialDeadline ?? DateTime.now().add(const Duration(hours: 24));
     WidgetsBinding.instance.addPostFrameCallback((_) => _primeAuthOnEntry());
   }
@@ -77,6 +82,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
     _locationController.dispose();
     _salaryController.dispose();
     _descriptionController.dispose();
+    _contactController.dispose();
     super.dispose();
   }
 
@@ -196,6 +202,9 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
           JobFields.createdAt: FieldValue.serverTimestamp(),
           JobFields.employerId: employerIdForCurrentSession() ?? '',
           JobFields.status: 'open',
+          'contact': _contactController.text.trim().isEmpty
+              ? ''
+              : '$_selectedCountryCode ${_contactController.text.trim()}',
         };
 
         if (widget.isEditMode && widget.editDocumentId != null) {
@@ -526,6 +535,159 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                     controller: _descriptionController,
                     hint: context.l10n('quick_job_detail_hint'),
                     maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionLabel(
+                    kQuickJobUiText['contact_label']?[lang] ?? 'Contact',
+                    Icons.phone_outlined,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      StatefulBuilder(
+                        builder: (ctx, setDropState) {
+                          return GestureDetector(
+                            onTap: () async {
+                              final selected = await showModalBottomSheet<String>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (sheetCtx) {
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const SizedBox(height: 12),
+                                        Container(
+                                          width: 40,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade300,
+                                            borderRadius: BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: _royalBlue.withValues(alpha: 0.1),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: const Icon(Icons.public, color: _royalBlue, size: 20),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Text(
+                                                'Country Code',
+                                                style: TextStyle(
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF1E293B),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Divider(height: 1),
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxHeight: MediaQuery.of(sheetCtx).size.height * 0.5,
+                                          ),
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: kCountryPhoneCodes.length,
+                                            itemBuilder: (_, i) {
+                                              final item = kCountryPhoneCodes[i];
+                                              final isSelected = item['code'] == _selectedCountryCode;
+                                              return ListTile(
+                                                leading: Text(
+                                                  item['flag'] ?? '',
+                                                  style: const TextStyle(fontSize: 24),
+                                                ),
+                                                title: Text(
+                                                  '${item['name']} (${item['code']})',
+                                                  style: TextStyle(
+                                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                                    color: isSelected ? _royalBlue : const Color(0xFF1E293B),
+                                                  ),
+                                                ),
+                                                trailing: isSelected
+                                                    ? const Icon(Icons.check_circle, color: _royalBlue)
+                                                    : null,
+                                                onTap: () => Navigator.of(sheetCtx).pop(item['code']),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(height: MediaQuery.of(sheetCtx).padding.bottom + 16),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                              if (selected != null) {
+                                setState(() => _selectedCountryCode = selected);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: _bgGray,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    kCountryPhoneCodes.firstWhere(
+                                      (e) => e['code'] == _selectedCountryCode,
+                                      orElse: () => kCountryPhoneCodes[0],
+                                    )['flag'] ?? '🌏',
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _selectedCountryCode,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey.shade600),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildStyledField(
+                          controller: _contactController,
+                          hint: kCountryPhoneCodes.firstWhere(
+                            (e) => e['code'] == _selectedCountryCode,
+                            orElse: () => kCountryPhoneCodes[0],
+                          )['hint'] ?? 'Phone number',
+                          prefixIcon: Icons.phone_outlined,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

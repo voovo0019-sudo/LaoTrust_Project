@@ -159,4 +159,28 @@ class FirebaseService {
               };
             }).toList());
   }
+
+  /// 구직자 본인이 지원한 알바 목록을 실시간 스트림으로 반환
+  Stream<List<Map<String, dynamic>>> watchMyApplicationsAsApplicant(String applicantId) {
+    if (!isFirebaseEnabled) return Stream.value([]);
+    return FirebaseFirestore.instance
+        .collection(kColApplications)
+        .where(ApplicationFields.applicantId, isEqualTo: applicantId)
+        .orderBy(ApplicationFields.createdAt, descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return {
+                'documentId': doc.id,
+                'jobId': data[ApplicationFields.jobId] ?? '',
+                'applicantId': data[ApplicationFields.applicantId] ?? '',
+                'employerId': data[ApplicationFields.employerId] ?? '',
+                'jobTitleI18n': data[ApplicationFields.jobTitleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                'status': data[ApplicationFields.status] ?? kAppStatusPending,
+                'createdAt': data[ApplicationFields.createdAt] is Timestamp
+                    ? (data[ApplicationFields.createdAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
+              };
+            }).toList());
+  }
 }

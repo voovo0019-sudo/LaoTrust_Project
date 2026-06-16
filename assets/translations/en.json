@@ -927,5 +927,12 @@
   "applied_at": "Applied",
   "applicant_status_pending": "Pending",
   "applicant_status_accepted": "Accepted",
-  "applicant_status_rejected": "Rejected"
+  "applicant_status_rejected": "Rejected",
+
+  "my_applications": "My Applications",
+  "my_applications_sub": "Check applied jobs",
+  "no_applications": "No applications yet",
+  "accept_button": "Accept",
+  "reject_button": "Reject",
+  "status_update_success": "Status updated"
 }

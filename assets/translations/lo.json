@@ -927,5 +927,12 @@
   "applied_at": "ວັນທີສະໝັກ",
   "applicant_status_pending": "ລໍຖ້າ",
   "applicant_status_accepted": "ຍອມຮັບ",
-  "applicant_status_rejected": "ປະຕິເສດ"
+  "applicant_status_rejected": "ປະຕິເສດ",
+
+  "my_applications": "ການສະໝັກຂອງຂ້ອຍ",
+  "my_applications_sub": "ກວດສອບການສະໝັກ",
+  "no_applications": "ຍັງບໍ່ມີການສະໝັກ",
+  "accept_button": "ຍອມຮັບ",
+  "reject_button": "ປະຕິເສດ",
+  "status_update_success": "ສະຖານະອັບເດດແລ້ວ"
 }

@@ -22,12 +22,14 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.popToHomeOnAuthSuccess = false,
     this.discardPendingPostLoginRedirect = false,
     this.acceptedCount = 0,
+    this.pendingApplicantCount = 0,
   });
 
   final bool openPhoneAuthOnStart;
   final bool popToHomeOnAuthSuccess;
   final bool discardPendingPostLoginRedirect;
   final int acceptedCount;
+  final int pendingApplicantCount;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -127,6 +129,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.people_outline,
             title: context.l10n('my_job_posts'),
             subtitle: context.l10n('my_job_posts_sub'),
+            badgeCount: widget.pendingApplicantCount,
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;
@@ -136,6 +139,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 return;
               }
               context.push('/my_job_applicants');
+            },
+          ),
+          _buildMenuTile(
+            context,
+            icon: Icons.send_outlined,
+            title: context.l10n('my_applications'),
+            subtitle: context.l10n('my_applications_sub'),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect('/my_applications');
+                _openGoogleAuthFlow(context);
+                return;
+              }
+              context.push('/my_applications');
             },
           ),
           _buildMenuTile(

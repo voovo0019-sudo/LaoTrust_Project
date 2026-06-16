@@ -12,6 +12,7 @@ import '../chat/chat_screen.dart';
 import '../profile/profile_screen.dart';
 import '../home/components/custom_bottom_nav.dart';
 import '../../core/providers/providers.dart';
+import '../../data/firestore_schema.dart';
 import '../../firebase_options.dart';
 
 class MainTabScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,8 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
   StreamSubscription<QuerySnapshot>? _badgeSubscription;
   StreamSubscription<User?>? _authSubscription;
   int _acceptedCount = 0;
+  int _pendingApplicantCount = 0;
+  StreamSubscription<QuerySnapshot>? _applicantBadgeSubscription;
 
   @override
   void initState() {
@@ -33,8 +36,10 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user != null) {
         _startBadgeSubscription(user.uid);
+        _startApplicantBadgeSubscription(user.uid);
       } else {
         _cancelBadgeSubscription();
+        _cancelApplicantBadgeSubscription();
       }
     });
   }
@@ -64,8 +69,30 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
     if (mounted) setState(() => _acceptedCount = 0);
   }
 
+  void _startApplicantBadgeSubscription(String uid) {
+    _applicantBadgeSubscription?.cancel();
+    _applicantBadgeSubscription = FirebaseFirestore.instance
+        .collection(kColApplications)
+        .where(ApplicationFields.employerId, isEqualTo: uid)
+        .where(ApplicationFields.status, isEqualTo: kAppStatusPending)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      setState(() {
+        _pendingApplicantCount = snap.docs.length;
+      });
+    });
+  }
+
+  void _cancelApplicantBadgeSubscription() {
+    _applicantBadgeSubscription?.cancel();
+    _applicantBadgeSubscription = null;
+    if (mounted) setState(() => _pendingApplicantCount = 0);
+  }
+
   @override
   void dispose() {
+    _applicantBadgeSubscription?.cancel();
     _badgeSubscription?.cancel();
     _authSubscription?.cancel();
     super.dispose();
@@ -89,7 +116,10 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
           ),
           const JobsScreen(),
           const ChatScreen(),
-          ProfileScreen(acceptedCount: _acceptedCount),
+          ProfileScreen(
+            acceptedCount: _acceptedCount,
+            pendingApplicantCount: _pendingApplicantCount,
+          ),
         ],
       ),
       bottomNavigationBar: CustomBottomNav(

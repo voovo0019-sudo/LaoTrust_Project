@@ -949,5 +949,12 @@
   "applied_at": "지원일",
   "applicant_status_pending": "검토 중",
   "applicant_status_accepted": "수락됨",
-  "applicant_status_rejected": "거절됨"
+  "applicant_status_rejected": "거절됨",
+
+  "my_applications": "내 지원 현황",
+  "my_applications_sub": "지원한 알바 확인",
+  "no_applications": "아직 지원한 알바가 없습니다",
+  "accept_button": "수락",
+  "reject_button": "거절",
+  "status_update_success": "상태가 변경되었습니다"
 }

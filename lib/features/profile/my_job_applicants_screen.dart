@@ -4,6 +4,7 @@
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/theme.dart';
@@ -86,19 +87,51 @@ class MyJobApplicantsScreen extends ConsumerWidget {
   }
 }
 
-class _ApplicantCard extends StatelessWidget {
+class _ApplicantCard extends StatefulWidget {
   const _ApplicantCard({required this.app});
   final Map<String, dynamic> app;
 
   @override
+  State<_ApplicantCard> createState() => _ApplicantCardState();
+}
+
+class _ApplicantCardState extends State<_ApplicantCard> {
+  bool _updating = false;
+
+  Future<void> _updateStatus(String newStatus) async {
+    final documentId = widget.app['documentId']?.toString() ?? '';
+    if (documentId.isEmpty || _updating) return;
+    setState(() => _updating = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection(kColApplications)
+          .doc(documentId)
+          .update({ApplicationFields.status: newStatus});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n('status_update_success'))),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _updating = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    final titleI18n = app['jobTitleI18n'] as Map<String, dynamic>? ?? {};
+    final titleI18n = widget.app['jobTitleI18n'] as Map<String, dynamic>? ?? {};
     final jobTitle = titleI18n[lang]?.toString().isNotEmpty == true
         ? titleI18n[lang].toString()
         : titleI18n['en']?.toString() ?? '';
-    final status = app['status']?.toString() ?? kAppStatusPending;
-    final createdAtMs = app['createdAt'] as int? ?? 0;
+    final status = widget.app['status']?.toString() ?? kAppStatusPending;
+    final createdAtMs = widget.app['createdAt'] as int? ?? 0;
     final createdAt = createdAtMs > 0
         ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
         : null;
@@ -119,41 +152,82 @@ class _ApplicantCard extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person_outline, color: Color(0xFF1E3A8A), size: 24),
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.person_outline, color: Color(0xFF1E3A8A), size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      jobTitle,
+                      style: TextStyle(
+                        fontFamilyFallback: AppTheme.notoSansLaoFallback,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${context.l10n('applied_at')}: $dateStr',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _StatusBadge(status: status, context: context),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (status == kAppStatusPending) ...[
+            const SizedBox(height: 12),
+            Row(
               children: [
-                Text(
-                  jobTitle,
-                  style: TextStyle(
-                    fontFamilyFallback: AppTheme.notoSansLaoFallback,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1E293B),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _updating ? null : () => _updateStatus(kAppStatusRejected),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF991B1B),
+                      side: const BorderSide(color: Color(0xFFFEE2E2)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: Text(context.l10n('reject_button')),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${context.l10n('applied_at')}: $dateStr',
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _updating ? null : () => _updateStatus(kAppStatusAccepted),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3A8A),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: _updating
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(context.l10n('accept_button')),
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          _StatusBadge(status: status, context: context),
+          ],
         ],
       ),
     );

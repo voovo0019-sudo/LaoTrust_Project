@@ -14,6 +14,7 @@ import 'features/main_tab/main_tab_screen.dart';
 import 'features/request_flow/request_flow_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/my_requests_screen.dart';
+import 'features/profile/my_job_applicants_screen.dart';
 import 'features/profile/login_screen.dart';
 import 'features/profile/bcel_onepay_screen.dart';
 import 'features/profile/expert_dashboard_screen.dart';
@@ -44,6 +45,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/my_requests',
       builder: (context, state) => const MyRequestsScreen(),
+    ),
+    GoRoute(
+      path: '/my_job_applicants',
+      builder: (context, state) => const MyJobApplicantsScreen(),
     ),
     GoRoute(
       path: '/login',

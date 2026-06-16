@@ -941,5 +941,13 @@
   "google_login_title": "구글 계정으로 로그인",
   "google_login_subtitle": "Google 계정으로 간편하게 시작하세요",
   "google_login_error": "구글 로그인에 실패했습니다. 다시 시도해주세요.",
-  "google_already_logged_in": "이미 구글 계정으로 로그인되어 있습니다."
+  "google_already_logged_in": "이미 구글 계정으로 로그인되어 있습니다.",
+
+  "my_job_posts": "내 공고 관리",
+  "my_job_posts_sub": "지원자 현황 확인",
+  "no_applicants": "아직 지원자가 없습니다",
+  "applied_at": "지원일",
+  "applicant_status_pending": "검토 중",
+  "applicant_status_accepted": "수락됨",
+  "applicant_status_rejected": "거절됨"
 }

@@ -919,5 +919,13 @@
   "google_login_title": "ເຂົ້າສູ່ລະບົບດ້ວຍ Google",
   "google_login_subtitle": "ເລີ່ມຕົ້ນງ່າຍໆດ້ວຍບັນຊີ Google ຂອງທ່ານ",
   "google_login_error": "ການເຂົ້າສູ່ລະບົບ Google ລົ້ມເຫລວ. ກະລຸນາລອງໃໝ່.",
-  "google_already_logged_in": "ທ່ານເຂົ້າສູ່ລະບົບດ້ວຍ Google ແລ້ວ."
+  "google_already_logged_in": "ທ່ານເຂົ້າສູ່ລະບົບດ້ວຍ Google ແລ້ວ.",
+
+  "my_job_posts": "ການຈັດການປະກາດຂອງຂ້ອຍ",
+  "my_job_posts_sub": "ກວດສອບຜູ້ສະໝັກ",
+  "no_applicants": "ຍັງບໍ່ມີຜູ້ສະໝັກ",
+  "applied_at": "ວັນທີສະໝັກ",
+  "applicant_status_pending": "ລໍຖ້າ",
+  "applicant_status_accepted": "ຍອມຮັບ",
+  "applicant_status_rejected": "ປະຕິເສດ"
 }

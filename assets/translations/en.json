@@ -919,5 +919,13 @@
   "google_login_title": "Sign in with Google",
   "google_login_subtitle": "Get started easily with your Google account",
   "google_login_error": "Google sign-in failed. Please try again.",
-  "google_already_logged_in": "You are already signed in with Google."
+  "google_already_logged_in": "You are already signed in with Google.",
+
+  "my_job_posts": "My Job Posts",
+  "my_job_posts_sub": "Check applicants",
+  "no_applicants": "No applicants yet",
+  "applied_at": "Applied",
+  "applicant_status_pending": "Pending",
+  "applicant_status_accepted": "Accepted",
+  "applicant_status_rejected": "Rejected"
 }

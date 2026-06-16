@@ -135,4 +135,28 @@ class FirebaseService {
     if (!isFirebaseEnabled) return;
     await firestore.collection(kColJobs).doc(documentId).delete();
   }
+
+  /// 구인자 본인 공고에 달린 지원자 목록을 실시간 스트림으로 반환
+  Stream<List<Map<String, dynamic>>> watchMyJobApplications(String employerId) {
+    if (!isFirebaseEnabled) return Stream.value([]);
+    return FirebaseFirestore.instance
+        .collection(kColApplications)
+        .where(ApplicationFields.employerId, isEqualTo: employerId)
+        .orderBy(ApplicationFields.createdAt, descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return {
+                'documentId': doc.id,
+                'jobId': data[ApplicationFields.jobId] ?? '',
+                'applicantId': data[ApplicationFields.applicantId] ?? '',
+                'employerId': data[ApplicationFields.employerId] ?? '',
+                'jobTitleI18n': data[ApplicationFields.jobTitleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                'status': data[ApplicationFields.status] ?? kAppStatusPending,
+                'createdAt': data[ApplicationFields.createdAt] is Timestamp
+                    ? (data[ApplicationFields.createdAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
+              };
+            }).toList());
+  }
 }

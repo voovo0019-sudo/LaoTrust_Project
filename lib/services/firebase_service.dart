@@ -183,4 +183,138 @@ class FirebaseService {
               };
             }).toList());
   }
+
+  // ─────────────────────────────────────────────────────────────
+  // 채팅 관련 함수
+  // ─────────────────────────────────────────────────────────────
+
+  /// 수락(accepted) 시 1:1 채팅방 생성.
+  /// 이미 같은 jobId+applicantId 방이 있으면 기존 방 ID 반환 (중복 방지).
+  Future<String> createChatRoom({
+    required String jobId,
+    required Map<String, dynamic> jobTitleI18n,
+    required String employerId,
+    required String applicantId,
+  }) async {
+    if (!isFirebaseEnabled) return '';
+    final existing = await FirebaseFirestore.instance
+        .collection(kColChats)
+        .where(ChatFields.jobId, isEqualTo: jobId)
+        .where(ChatFields.applicantId, isEqualTo: applicantId)
+        .get();
+    if (existing.docs.isNotEmpty) return existing.docs.first.id;
+    final ref = FirebaseFirestore.instance.collection(kColChats).doc();
+    await ref.set({
+      ChatFields.jobId: jobId,
+      ChatFields.jobTitleI18n: jobTitleI18n,
+      ChatFields.employerId: employerId,
+      ChatFields.applicantId: applicantId,
+      ChatFields.participants: [employerId, applicantId],
+      ChatFields.lastMessage: '',
+      ChatFields.lastMessageAt: FieldValue.serverTimestamp(),
+      ChatFields.createdAt: FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+
+  /// 내가 참여 중인 채팅방 목록 실시간 스트림.
+  Stream<List<Map<String, dynamic>>> watchMyChatRooms(String uid) {
+    if (!isFirebaseEnabled) return Stream.value([]);
+    return FirebaseFirestore.instance
+        .collection(kColChats)
+        .where(ChatFields.participants, arrayContains: uid)
+        .orderBy(ChatFields.lastMessageAt, descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return {
+                'chatId': doc.id,
+                'jobId': data[ChatFields.jobId] ?? '',
+                'jobTitleI18n': data[ChatFields.jobTitleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                'employerId': data[ChatFields.employerId] ?? '',
+                'applicantId': data[ChatFields.applicantId] ?? '',
+                'participants': data[ChatFields.participants] ?? [],
+                'lastMessage': data[ChatFields.lastMessage] ?? '',
+                'lastMessageAt': data[ChatFields.lastMessageAt] is Timestamp
+                    ? (data[ChatFields.lastMessageAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
+              };
+            }).toList());
+  }
+
+  /// 채팅방 메시지 실시간 스트림.
+  Stream<List<Map<String, dynamic>>> watchMessages(String chatId) {
+    if (!isFirebaseEnabled) return Stream.value([]);
+    return FirebaseFirestore.instance
+        .collection(kColChats)
+        .doc(chatId)
+        .collection(kColMessages)
+        .orderBy(MessageFields.createdAt, descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return {
+                'messageId': doc.id,
+                'senderId': data[MessageFields.senderId] ?? '',
+                'text': data[MessageFields.text] ?? '',
+                'imageUrl': data[MessageFields.imageUrl] ?? '',
+                'isRead': data[MessageFields.isRead] ?? false,
+                'createdAt': data[MessageFields.createdAt] is Timestamp
+                    ? (data[MessageFields.createdAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
+              };
+            }).toList());
+  }
+
+  /// 메시지 전송 (텍스트 or 사진 URL).
+  /// 전송 후 채팅방 lastMessage / lastMessageAt 업데이트.
+  Future<void> sendMessage({
+    required String chatId,
+    required String senderId,
+    String text = '',
+    String imageUrl = '',
+  }) async {
+    if (!isFirebaseEnabled) return;
+    final msgRef = FirebaseFirestore.instance
+        .collection(kColChats)
+        .doc(chatId)
+        .collection(kColMessages)
+        .doc();
+    await msgRef.set({
+      MessageFields.senderId: senderId,
+      MessageFields.text: text,
+      MessageFields.imageUrl: imageUrl,
+      MessageFields.isRead: false,
+      MessageFields.createdAt: FieldValue.serverTimestamp(),
+    });
+    await FirebaseFirestore.instance
+        .collection(kColChats)
+        .doc(chatId)
+        .update({
+      ChatFields.lastMessage: text.isNotEmpty ? text : '📷 사진',
+      ChatFields.lastMessageAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// 채팅방 입장 시 상대방 메시지 읽음 처리.
+  Future<void> markMessagesAsRead({
+    required String chatId,
+    required String myUid,
+  }) async {
+    if (!isFirebaseEnabled) return;
+    final unread = await FirebaseFirestore.instance
+        .collection(kColChats)
+        .doc(chatId)
+        .collection(kColMessages)
+        .where(MessageFields.isRead, isEqualTo: false)
+        .get();
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in unread.docs) {
+      final data = doc.data();
+      if (data[MessageFields.senderId] != myUid) {
+        batch.update(doc.reference, {MessageFields.isRead: true});
+      }
+    }
+    await batch.commit();
+  }
 }

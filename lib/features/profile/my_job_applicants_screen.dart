@@ -100,13 +100,34 @@ class _ApplicantCardState extends State<_ApplicantCard> {
 
   Future<void> _updateStatus(String newStatus) async {
     final documentId = widget.app['documentId']?.toString() ?? '';
+    final jobId = widget.app['jobId']?.toString() ?? '';
+    final jobTitleI18n = widget.app['jobTitleI18n'] as Map<String, dynamic>? ??
+        {'ko': '', 'en': '', 'lo': ''};
+    final employerId = widget.app['employerId']?.toString() ?? '';
+    final applicantId = widget.app['applicantId']?.toString() ?? '';
+
     if (documentId.isEmpty || _updating) return;
     setState(() => _updating = true);
     try {
+      // 1. 지원 상태 업데이트
       await FirebaseFirestore.instance
           .collection(kColApplications)
           .doc(documentId)
           .update({ApplicationFields.status: newStatus});
+
+      // 2. 수락 시 채팅방 자동 생성
+      if (newStatus == kAppStatusAccepted &&
+          jobId.isNotEmpty &&
+          employerId.isNotEmpty &&
+          applicantId.isNotEmpty) {
+        await FirebaseService().createChatRoom(
+          jobId: jobId,
+          jobTitleI18n: jobTitleI18n,
+          employerId: employerId,
+          applicantId: applicantId,
+        );
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n('status_update_success'))),

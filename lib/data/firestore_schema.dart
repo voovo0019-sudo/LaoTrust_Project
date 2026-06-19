@@ -110,3 +110,40 @@ abstract class ApplicationFields {
 const String kAppStatusPending = 'pending';
 const String kAppStatusAccepted = 'accepted';
 const String kAppStatusRejected = 'rejected';
+
+// -----------------------------------------------------------------------------
+// 5. chats 컬렉션 (1:1 채팅방)
+// 수락(accepted) 시 자동 생성. participants 배열로 양방향 조회.
+// -----------------------------------------------------------------------------
+const String kColChats = 'chats';
+const String kColMessages = 'messages'; // 서브컬렉션: chats/{chatId}/messages
+
+abstract class ChatFields {
+  /// 연결된 알바 공고 ID
+  static const String jobId = 'jobId';
+  /// 공고 제목 i18n {ko, en, lo}
+  static const String jobTitleI18n = 'jobTitleI18n';
+  /// 구인자 UID
+  static const String employerId = 'employerId';
+  /// 구직자 UID
+  static const String applicantId = 'applicantId';
+  /// 참여자 배열 [employerId, applicantId] — arrayContains 쿼리용
+  static const String participants = 'participants';
+  /// 마지막 메시지 텍스트 (채팅 목록 미리보기)
+  static const String lastMessage = 'lastMessage';
+  /// 마지막 메시지 시각
+  static const String lastMessageAt = 'lastMessageAt';
+  static const String createdAt = 'createdAt';
+}
+
+abstract class MessageFields {
+  /// 보낸 사람 UID
+  static const String senderId = 'senderId';
+  /// 텍스트 메시지 (nullable)
+  static const String text = 'text';
+  /// 사진 URL — Firebase Storage (nullable)
+  static const String imageUrl = 'imageUrl';
+  /// 읽음 여부
+  static const String isRead = 'isRead';
+  static const String createdAt = 'createdAt';
+}

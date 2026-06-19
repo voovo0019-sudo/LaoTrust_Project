@@ -145,5 +145,8 @@ abstract class MessageFields {
   static const String imageUrl = 'imageUrl';
   /// 읽음 여부
   static const String isRead = 'isRead';
+  /// 채팅 메시지 번역 캐시. {ko: '', en: '', lo: ''} 형태로 저장.
+  /// 한 번 번역한 메시지는 재호출 없이 캐시에서 바로 표시 (API 비용 절감).
+  static const String translatedTextCache = 'translatedTextCache';
   static const String createdAt = 'createdAt';
 }

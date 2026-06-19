@@ -259,6 +259,7 @@ class FirebaseService {
                 'text': data[MessageFields.text] ?? '',
                 'imageUrl': data[MessageFields.imageUrl] ?? '',
                 'isRead': data[MessageFields.isRead] ?? false,
+                'translatedTextCache': data[MessageFields.translatedTextCache] ?? {},
                 'createdAt': data[MessageFields.createdAt] is Timestamp
                     ? (data[MessageFields.createdAt] as Timestamp).millisecondsSinceEpoch
                     : 0,
@@ -316,5 +317,24 @@ class FirebaseService {
       }
     }
     await batch.commit();
+  }
+
+  /// 메시지 번역 결과를 Firestore에 캐시 저장.
+  /// 같은 메시지를 다시 번역할 때 API 재호출 없이 캐시에서 바로 가져오기 위함.
+  Future<void> cacheTranslatedMessage({
+    required String chatId,
+    required String messageId,
+    required String langCode,
+    required String translatedText,
+  }) async {
+    if (!isFirebaseEnabled) return;
+    await FirebaseFirestore.instance
+        .collection(kColChats)
+        .doc(chatId)
+        .collection(kColMessages)
+        .doc(messageId)
+        .update({
+      '${MessageFields.translatedTextCache}.$langCode': translatedText,
+    });
   }
 }

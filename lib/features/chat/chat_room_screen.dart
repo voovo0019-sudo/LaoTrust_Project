@@ -1,12 +1,14 @@
 // =============================================================================
 // LaoTrust 1:1 채팅방 화면
-// 실시간 메시지 송수신 + 읽음 처리. 사진 전송은 별도 추가 예정.
+// 실시간 메시지 송수신 + 읽음 처리 + 메시지별 "번역 보기" 기능.
+// 원문은 절대 지우지 않고, 번역 결과를 추가로 표시 (카카오톡/라인 방식).
 // 모든 텍스트 ko/en/lo Triple-Map 준수. 하드코딩 0개.
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_localizations.dart';
 import '../../core/theme.dart';
+import '../../core/translation_mapper.dart';
 import '../../services/firebase_service.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -31,6 +33,13 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _sending = false;
+
+  // 메시지별 번역 표시 상태 관리 (messageId → 번역된 텍스트, null이면 아직 번역 안 함)
+  final Map<String, String?> _translatedCache = {};
+  // 메시지별 번역 보기 ON/OFF 상태
+  final Map<String, bool> _showTranslated = {};
+  // 메시지별 번역 진행 중 여부
+  final Map<String, bool> _translating = {};
 
   @override
   void initState() {
@@ -76,6 +85,65 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     } finally {
       if (mounted) setState(() => _sending = false);
     }
+  }
+
+  /// 번역 보기 버튼 탭 처리.
+  /// 캐시에 있으면 바로 토글, 없으면 API 호출 후 캐시 저장(메모리+Firestore).
+  Future<void> _onToggleTranslate({
+    required String messageId,
+    required String text,
+    required Map<String, dynamic> existingCache,
+  }) async {
+    // 이미 번역 보기 상태면 → 끄기만 함 (재호출 없음)
+    if (_showTranslated[messageId] == true) {
+      setState(() => _showTranslated[messageId] = false);
+      return;
+    }
+
+    final lang = Localizations.localeOf(context).languageCode;
+
+    // 1. 메모리 캐시 확인
+    if (_translatedCache[messageId] != null) {
+      setState(() => _showTranslated[messageId] = true);
+      return;
+    }
+
+    // 2. Firestore 캐시 확인
+    final firestoreCached = existingCache[lang]?.toString();
+    if (firestoreCached != null && firestoreCached.isNotEmpty) {
+      setState(() {
+        _translatedCache[messageId] = firestoreCached;
+        _showTranslated[messageId] = true;
+      });
+      return;
+    }
+
+    // 3. 캐시 없음 → API 호출
+    setState(() => _translating[messageId] = true);
+    final result = await TranslationMapper.translateChatMessage(
+      text: text,
+      targetLangCode: lang,
+    );
+    if (!mounted) return;
+    setState(() {
+      _translating[messageId] = false;
+      if (result != null && result.isNotEmpty) {
+        _translatedCache[messageId] = result;
+        _showTranslated[messageId] = true;
+        // Firestore에 비동기 캐시 저장 (실패해도 화면엔 영향 없음)
+        FirebaseService().cacheTranslatedMessage(
+          chatId: widget.chatId,
+          messageId: messageId,
+          langCode: lang,
+          translatedText: result,
+        );
+      } else {
+        // 번역 실패 → 스낵바 안내, 원문은 그대로 유지
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n('chat_translate_fail'))),
+        );
+      }
+    });
   }
 
   @override
@@ -134,6 +202,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
+                    final messageId = msg['messageId']?.toString() ?? '';
                     final isMe =
                         msg['senderId']?.toString() == widget.myUid;
                     final text = msg['text']?.toString() ?? '';
@@ -149,6 +218,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                     final timeStr = createdAt != null
                         ? '${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}'
                         : '';
+                    final translatedCacheMap =
+                        msg['translatedTextCache']
+                                as Map<String, dynamic>? ??
+                            {};
 
                     return _MessageBubble(
                       text: text,
@@ -157,6 +230,22 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                       isRead: isRead,
                       timeStr: timeStr,
                       readLabel: context.l10n('chat_read'),
+                      translatedText: _translatedCache[messageId],
+                      showTranslated:
+                          _showTranslated[messageId] ?? false,
+                      isTranslating: _translating[messageId] ?? false,
+                      translateLabel: context.l10n('chat_translate'),
+                      translatingLabel:
+                          context.l10n('chat_translating'),
+                      showOriginalLabel:
+                          context.l10n('chat_show_original'),
+                      onTranslateTap: text.isEmpty
+                          ? null
+                          : () => _onToggleTranslate(
+                                messageId: messageId,
+                                text: text,
+                                existingCache: translatedCacheMap,
+                              ),
                     );
                   },
                 );
@@ -240,6 +329,13 @@ class _MessageBubble extends StatelessWidget {
     required this.isRead,
     required this.timeStr,
     required this.readLabel,
+    required this.translatedText,
+    required this.showTranslated,
+    required this.isTranslating,
+    required this.translateLabel,
+    required this.translatingLabel,
+    required this.showOriginalLabel,
+    required this.onTranslateTap,
   });
 
   final String text;
@@ -248,6 +344,13 @@ class _MessageBubble extends StatelessWidget {
   final bool isRead;
   final String timeStr;
   final String readLabel;
+  final String? translatedText;
+  final bool showTranslated;
+  final bool isTranslating;
+  final String translateLabel;
+  final String translatingLabel;
+  final String showOriginalLabel;
+  final VoidCallback? onTranslateTap;
 
   @override
   Widget build(BuildContext context) {
@@ -315,14 +418,91 @@ class _MessageBubble extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      color: isMe
-                          ? Colors.white
-                          : const Color(0xFF1E293B),
-                      fontSize: 14,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 원문 (항상 표시)
+                      Text(
+                        text,
+                        style: TextStyle(
+                          color: isMe
+                              ? Colors.white
+                              : const Color(0xFF1E293B),
+                          fontSize: 14,
+                        ),
+                      ),
+                      // 번역 결과 (showTranslated=true일 때만 추가 표시)
+                      if (showTranslated && translatedText != null) ...[
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 6),
+                          child: Divider(
+                            height: 1,
+                            color: isMe
+                                ? Colors.white.withValues(alpha: 0.3)
+                                : Colors.grey.shade300,
+                          ),
+                        ),
+                        Text(
+                          translatedText!,
+                          style: TextStyle(
+                            color: isMe
+                                ? Colors.white.withValues(alpha: 0.9)
+                                : const Color(0xFF475569),
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                      // 번역 보기/원문 보기 버튼
+                      if (onTranslateTap != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: GestureDetector(
+                            onTap: isTranslating ? null : onTranslateTap,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isTranslating)
+                                  SizedBox(
+                                    width: 10,
+                                    height: 10,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: isMe
+                                          ? Colors.white
+                                          : const Color(0xFF1E3A8A),
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    Icons.translate,
+                                    size: 12,
+                                    color: isMe
+                                        ? Colors.white
+                                            .withValues(alpha: 0.8)
+                                        : const Color(0xFF1E3A8A),
+                                  ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isTranslating
+                                      ? translatingLabel
+                                      : (showTranslated
+                                          ? showOriginalLabel
+                                          : translateLabel),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isMe
+                                        ? Colors.white
+                                            .withValues(alpha: 0.8)
+                                        : const Color(0xFF1E3A8A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               const SizedBox(height: 4),

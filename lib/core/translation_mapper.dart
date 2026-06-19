@@ -2717,6 +2717,10 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'chat_send': {'ko': '전송', 'en': 'Send', 'lo': 'ສົ່ງ'},
   'chat_photo': {'ko': '사진 전송', 'en': 'Send Photo', 'lo': 'ສົ່ງຮູບ'},
   'chat_read': {'ko': '읽음', 'en': 'Read', 'lo': 'ອ່ານແລ້ວ'},
+  'chat_translate': {'ko': '번역 보기', 'en': 'Translate', 'lo': 'ແປພາສາ'},
+  'chat_translating': {'ko': '번역 중...', 'en': 'Translating...', 'lo': 'ກຳລັງແປ...'},
+  'chat_show_original': {'ko': '원문 보기', 'en': 'Show original', 'lo': 'ເບິ່ງຕົ້ນສະບັບ'},
+  'chat_translate_fail': {'ko': '번역에 실패했습니다', 'en': 'Translation failed', 'lo': 'ການແປລົ້ມເຫລວ'},
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {
@@ -3357,6 +3361,48 @@ class TranslationMapper {
       }
     } catch (_) {}
     debugPrint('TranslationMapper: HTTP ${resp.statusCode} — $detail');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 채팅 메시지 단건 번역 (카카오톡/라인 방식 - 원문 유지 + 번역 추가 표시)
+  // 기존 _callTranslateApi를 그대로 재사용. 실패 시 null 반환 (UI에서 원문만 표시).
+  // ─────────────────────────────────────────────────────────────
+
+  /// 채팅 메시지 1건을 목표 언어로 번역.
+  /// [text]: 번역할 원문 메시지.
+  /// [targetLangCode]: 목표 언어 ('ko' | 'en' | 'lo').
+  /// 실패하거나 API 키 없으면 null 반환 (호출부에서 원문 그대로 표시 처리).
+  static Future<String?> translateChatMessage({
+    required String text,
+    required String targetLangCode,
+  }) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return null;
+    await _ensureDotenvLoaded();
+    if (!isTranslateApiKeyConfigured) {
+      if (kDebugMode) {
+        debugPrint('TranslationMapper: 채팅 번역 - API 키 미설정, 원문 유지');
+      }
+      return null;
+    }
+    final target = _translationMapperLang2(targetLangCode);
+    try {
+      // source를 'auto'로 보내 Google이 원문 언어를 자동 감지하게 함.
+      final result = await _callTranslateApi(
+        text: trimmed,
+        source: 'auto',
+        target: target,
+      ).timeout(const Duration(seconds: 10));
+      return result;
+    } on _GeminiNoRetryException {
+      return null;
+    } on Object catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('TranslationMapper: 채팅 번역 실패: $e');
+        debugPrint('$st');
+      }
+      return null;
+    }
   }
 }
 

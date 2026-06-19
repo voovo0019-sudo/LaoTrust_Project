@@ -942,5 +942,10 @@
   "chat_hint": "ພິມຂໍ້ຄວາມ",
   "chat_send": "ສົ່ງ",
   "chat_photo": "ສົ່ງຮູບ",
-  "chat_read": "ອ່ານແລ້ວ"
+  "chat_read": "ອ່ານແລ້ວ",
+
+  "chat_translate": "ແປພາສາ",
+  "chat_translating": "ກຳລັງແປ...",
+  "chat_show_original": "ເບິ່ງຕົ້ນສະບັບ",
+  "chat_translate_fail": "ການແປລົ້ມເຫລວ"
 }

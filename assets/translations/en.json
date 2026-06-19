@@ -942,5 +942,10 @@
   "chat_hint": "Type a message",
   "chat_send": "Send",
   "chat_photo": "Send Photo",
-  "chat_read": "Read"
+  "chat_read": "Read",
+
+  "chat_translate": "Translate",
+  "chat_translating": "Translating...",
+  "chat_show_original": "Show original",
+  "chat_translate_fail": "Translation failed"
 }

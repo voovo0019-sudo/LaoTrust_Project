@@ -2710,6 +2710,13 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Close',
     'lo': 'ປິດ',
   },
+  'no_chat_rooms': {'ko': '아직 채팅방이 없어요', 'en': 'No chat rooms yet', 'lo': 'ຍັງບໍ່ມີຫ້ອງສົນທະນາ'},
+  'chat_no_message_yet': {'ko': '아직 메시지가 없습니다', 'en': 'No messages yet', 'lo': 'ຍັງບໍ່ມີຂໍ້ຄວາມ'},
+  'chat_room_title': {'ko': '채팅', 'en': 'Chat', 'lo': 'ສົນທະນາ'},
+  'chat_hint': {'ko': '메시지를 입력하세요', 'en': 'Type a message', 'lo': 'ພິມຂໍ້ຄວາມ'},
+  'chat_send': {'ko': '전송', 'en': 'Send', 'lo': 'ສົ່ງ'},
+  'chat_photo': {'ko': '사진 전송', 'en': 'Send Photo', 'lo': 'ສົ່ງຮູບ'},
+  'chat_read': {'ko': '읽음', 'en': 'Read', 'lo': 'ອ່ານແລ້ວ'},
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

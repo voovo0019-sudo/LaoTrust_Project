@@ -934,5 +934,13 @@
   "no_applications": "No applications yet",
   "accept_button": "Accept",
   "reject_button": "Reject",
-  "status_update_success": "Status updated"
+  "status_update_success": "Status updated",
+
+  "no_chat_rooms": "No chat rooms yet",
+  "chat_no_message_yet": "No messages yet",
+  "chat_room_title": "Chat",
+  "chat_hint": "Type a message",
+  "chat_send": "Send",
+  "chat_photo": "Send Photo",
+  "chat_read": "Read"
 }

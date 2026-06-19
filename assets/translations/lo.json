@@ -934,5 +934,13 @@
   "no_applications": "ຍັງບໍ່ມີການສະໝັກ",
   "accept_button": "ຍອມຮັບ",
   "reject_button": "ປະຕິເສດ",
-  "status_update_success": "ສະຖານະອັບເດດແລ້ວ"
+  "status_update_success": "ສະຖານະອັບເດດແລ້ວ",
+
+  "no_chat_rooms": "ຍັງບໍ່ມີຫ້ອງສົນທະນາ",
+  "chat_no_message_yet": "ຍັງບໍ່ມີຂໍ້ຄວາມ",
+  "chat_room_title": "ສົນທະນາ",
+  "chat_hint": "ພິມຂໍ້ຄວາມ",
+  "chat_send": "ສົ່ງ",
+  "chat_photo": "ສົ່ງຮູບ",
+  "chat_read": "ອ່ານແລ້ວ"
 }

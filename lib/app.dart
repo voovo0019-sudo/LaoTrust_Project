@@ -27,6 +27,8 @@ import 'features/home/quick_job_post_screen.dart';
 import 'features/home/expert_detail_screen.dart';
 import 'features/expert_inbox/expert_inbox_screen.dart';
 import 'features/expert_inbox/expert_inbox_detail_screen.dart';
+import 'features/chat/chat_screen.dart';
+import 'features/chat/chat_room_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/main',
@@ -136,6 +138,21 @@ final _router = GoRouter(
     GoRoute(
       path: '/expert_inbox',
       builder: (context, state) => const ExpertInboxScreen(),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) => const ChatScreen(),
+    ),
+    GoRoute(
+      path: '/chat_room',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return ChatRoomScreen(
+          chatId: args?['chatId'] as String? ?? '',
+          jobTitle: args?['jobTitle'] as String? ?? '',
+          myUid: args?['myUid'] as String? ?? '',
+        );
+      },
     ),
   ],
 );

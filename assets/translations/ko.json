@@ -956,5 +956,13 @@
   "no_applications": "아직 지원한 알바가 없습니다",
   "accept_button": "수락",
   "reject_button": "거절",
-  "status_update_success": "상태가 변경되었습니다"
+  "status_update_success": "상태가 변경되었습니다",
+
+  "no_chat_rooms": "아직 채팅방이 없어요",
+  "chat_no_message_yet": "아직 메시지가 없습니다",
+  "chat_room_title": "채팅",
+  "chat_hint": "메시지를 입력하세요",
+  "chat_send": "전송",
+  "chat_photo": "사진 전송",
+  "chat_read": "읽음"
 }

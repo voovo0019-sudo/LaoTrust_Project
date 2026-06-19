@@ -259,7 +259,9 @@ class FirebaseService {
                 'text': data[MessageFields.text] ?? '',
                 'imageUrl': data[MessageFields.imageUrl] ?? '',
                 'isRead': data[MessageFields.isRead] ?? false,
-                'translatedTextCache': data[MessageFields.translatedTextCache] ?? {},
+                'translatedTextCache': Map<String, dynamic>.from(
+          data[MessageFields.translatedTextCache] as Map? ?? {},
+        ),
                 'createdAt': data[MessageFields.createdAt] is Timestamp
                     ? (data[MessageFields.createdAt] as Timestamp).millisecondsSinceEpoch
                     : 0,

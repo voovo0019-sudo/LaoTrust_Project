@@ -219,9 +219,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                         ? '${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}'
                         : '';
                     final translatedCacheMap =
-                        msg['translatedTextCache']
-                                as Map<String, dynamic>? ??
-                            {};
+                        (msg['translatedTextCache'] as Map<String, dynamic>?) ??
+                            <String, dynamic>{};
 
                     return _MessageBubble(
                       text: text,

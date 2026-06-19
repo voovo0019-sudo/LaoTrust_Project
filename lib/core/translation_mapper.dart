@@ -3390,7 +3390,7 @@ class TranslationMapper {
       // source를 'auto'로 보내 Google이 원문 언어를 자동 감지하게 함.
       final result = await _callTranslateApi(
         text: trimmed,
-        source: 'auto',
+        source: '',
         target: target,
       ).timeout(const Duration(seconds: 10));
       return result;

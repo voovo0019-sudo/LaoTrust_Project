@@ -500,7 +500,8 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                             ApplicationFields.jobId: jobId,
                             ApplicationFields.applicantId: currentUser.uid,
                             ApplicationFields.employerId: employerId,
-                            ApplicationFields.jobTitleI18n: job[JobFields.titleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                            ApplicationFields.jobTitleI18n: Map<String, dynamic>.from(
+                                job['titleMap'] as Map? ?? {'ko': '', 'en': '', 'lo': ''}),
                             ApplicationFields.status: kAppStatusPending,
                             ApplicationFields.createdAt: FieldValue.serverTimestamp(),
                           });

@@ -57,6 +57,7 @@ const Map<String, Map<String, String>> kQuickJobUiText = {
   'apply_success_body': {'ko': '구인자가 확인 후 연락드릴 거예요 😊', 'en': 'The employer will contact you soon 😊', 'lo': 'ນາຍຈ້າງຈະຕິດຕໍ່ຫາທ່ານໃນໄວໆນີ້ 😊'},
   'apply_contact_label': {'ko': '구인자 연락처', 'en': 'Employer Contact', 'lo': 'ຂໍ້ມູນຕິດຕໍ່ນາຍຈ້າງ'},
   'apply_no_contact': {'ko': '연락처 정보가 없습니다', 'en': 'No contact info', 'lo': 'ບໍ່ມີຂໍ້ມູນຕິດຕໍ່'},
+  'apply_sample_job': {'ko': '샘플 공고입니다. 실제 등록된 공고에 지원해보세요! 😊', 'en': 'This is a sample listing. Try applying to real job posts! 😊', 'lo': 'ນີ້ແມ່ນປະກາດຕົວຢ່າງ. ລອງສະໝັກວຽກຈິງໆເບິ່ງ! 😊'},
 };
 
 /// 사용자가 입력한 제목(공백 제거 후)이 사전에 있으면 저장/표시용 키.

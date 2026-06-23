@@ -440,6 +440,18 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                       onPressed: () async {
                         final lang = Localizations.localeOf(ctx).languageCode;
 
+                        // 샘플 공고 차단
+                        if (job['isSample'] == true) {
+                          Navigator.of(ctx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(kQuickJobUiText['apply_sample_job']?[lang] ?? 'This is a sample listing.'),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                          return;
+                        }
+
                         // ① 로그인 확인
                         final currentUser = auth.currentUser;
                         if (currentUser == null) {

@@ -106,8 +106,8 @@ class _ChatRoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    final titleI18n =
-        room['jobTitleI18n'] as Map<String, dynamic>? ?? {};
+    final titleI18n = Map<String, dynamic>.from(
+        room['jobTitleI18n'] as Map? ?? {});
     final jobTitle = titleI18n[lang]?.toString().isNotEmpty == true
         ? titleI18n[lang].toString()
         : titleI18n['en']?.toString() ?? '';

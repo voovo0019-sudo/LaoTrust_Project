@@ -101,8 +101,8 @@ class _ApplicantCardState extends State<_ApplicantCard> {
   Future<void> _updateStatus(String newStatus) async {
     final documentId = widget.app['documentId']?.toString() ?? '';
     final jobId = widget.app['jobId']?.toString() ?? '';
-    final jobTitleI18n = widget.app['jobTitleI18n'] as Map<String, dynamic>? ??
-        {'ko': '', 'en': '', 'lo': ''};
+    final jobTitleI18n = Map<String, dynamic>.from(
+        widget.app['jobTitleI18n'] as Map? ?? {'ko': '', 'en': '', 'lo': ''});
     final employerId = widget.app['employerId']?.toString() ?? '';
     final applicantId = widget.app['applicantId']?.toString() ?? '';
 

@@ -230,7 +230,8 @@ class FirebaseService {
               return {
                 'chatId': doc.id,
                 'jobId': data[ChatFields.jobId] ?? '',
-                'jobTitleI18n': data[ChatFields.jobTitleI18n] ?? {'ko': '', 'en': '', 'lo': ''},
+                'jobTitleI18n': Map<String, dynamic>.from(
+                    data[ChatFields.jobTitleI18n] as Map? ?? {'ko': '', 'en': '', 'lo': ''}),
                 'employerId': data[ChatFields.employerId] ?? '',
                 'applicantId': data[ChatFields.applicantId] ?? '',
                 'participants': data[ChatFields.participants] ?? [],

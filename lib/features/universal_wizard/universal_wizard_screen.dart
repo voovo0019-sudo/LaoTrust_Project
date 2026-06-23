@@ -1446,7 +1446,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
   Future<void> _submit() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
-    // ignore: avoid_print
     debugPrint('[SUBMIT] Start');
 
     final cfg = _config ?? kUniversalWizardConfigs['expert_repair']!;
@@ -1460,7 +1459,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
     try {
       if (_pickedImages.isNotEmpty) {
         if (!isFirebaseEnabled) {
-          // ignore: avoid_print
           debugPrint('[SUBMIT] No Firebase, skipping save');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1469,7 +1467,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           }
           photoUrls = <String>[];
         } else {
-          // ignore: avoid_print
           debugPrint('[SUBMIT] Checking online status');
           List<ConnectivityResult> conn = <ConnectivityResult>[];
           try {
@@ -1490,7 +1487,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               e == ConnectivityResult.mobile ||
               e == ConnectivityResult.wifi ||
               e == ConnectivityResult.ethernet);
-          // ignore: avoid_print
           debugPrint('[SUBMIT] Network status checked (online=$online)');
           if (online) {
             if (!mounted) return;
@@ -1521,17 +1517,14 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
               ),
             );
             try {
-              // ignore: avoid_print
               debugPrint('[SUBMIT] Photo upload started');
               photoUrls = await uploadExpertRequestImagesFromXFiles(
                 files: _pickedImages,
                 userId: uid,
               ).timeout(const Duration(seconds: 30));
-              // ignore: avoid_print
               debugPrint('[SUBMIT] Photo upload done: ${photoUrls.length} URLs');
             } on TimeoutException catch (e) {
               if (kDebugMode) debugPrint('UniversalWizard: ?ъ쭊 ?낅줈????꾩븘?? $e');
-              // ignore: avoid_print
               debugPrint('[SUBMIT] Photo upload skipped, proceeding with photoUrls=[]');
               photoUrls = <String>[];
               if (mounted) {
@@ -1544,7 +1537,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 debugPrint('UniversalWizard: ?ъ쭊 ?낅줈???ㅽ뙣: $e');
                 debugPrint('$st');
               }
-              // ignore: avoid_print
               debugPrint('[SUBMIT] Photo upload failed, proceeding with photoUrls=[]: $e');
               photoUrls = <String>[];
               if (mounted) {
@@ -1553,19 +1545,16 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
                 );
               }
             } finally {
-              // ignore: avoid_print
               debugPrint('[SUBMIT] Photo upload finally (continuing regardless)');
               if (mounted) Navigator.of(context).pop();
             }
           } else {
             photoLocalPaths =
                 _pickedImages.map((e) => e.path).where((s) => s.isNotEmpty).toList();
-            // ignore: avoid_print
             debugPrint('[SUBMIT] No Firebase, skipping ${_pickedImages.length} photos');
           }
         }
       } else {
-        // ignore: avoid_print
         debugPrint('[SUBMIT] No Firebase, skipping save');
       }
 
@@ -1628,7 +1617,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         );
       }
-      // ignore: avoid_print
       debugPrint('[SUBMIT] Save started');
       try {
         final tResult = await TranslationMapper.translateAllFieldsStrict(
@@ -1649,7 +1637,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
       if (translateProgressShown && mounted) {
         Navigator.of(context).pop();
       }
-      // ignore: avoid_print
       debugPrint('[SUBMIT] Save complete');
 
       final body = <String, dynamic>{
@@ -1705,7 +1692,6 @@ class _UniversalWizardScreenState extends State<UniversalWizardScreen> {
           ),
         );
       }
-      // ignore: avoid_print
       debugPrint('[SUBMIT] Firestore save started (photos=${photoUrls.length})');
       unawaited(
         saveExpertRequestV5OfflineFirst(body).then((_) {

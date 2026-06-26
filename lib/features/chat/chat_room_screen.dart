@@ -4,11 +4,17 @@
 // 원문은 절대 지우지 않고, 번역 결과를 추가로 표시 (카카오톡/라인 방식).
 // 모든 텍스트 ko/en/lo Triple-Map 준수. 하드코딩 0개.
 // =============================================================================
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/app_localizations.dart';
 import '../../core/theme.dart';
 import '../../core/translation_mapper.dart';
+import '../../firebase_options.dart';
 import '../../services/firebase_service.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -33,6 +39,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _sending = false;
+  bool _sendingPhoto = false;
 
   // 메시지별 번역 표시 상태 관리 (messageId → 번역된 텍스트, null이면 아직 번역 안 함)
   final Map<String, String?> _translatedCache = {};
@@ -84,6 +91,75 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       }
     } finally {
       if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _sendPhoto() async {
+    if (_sendingPhoto) return;
+    final picker = ImagePicker();
+    final XFile? picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+    if (!mounted) return;
+    final photoLabel = context.l10n('chat_photo');
+    setState(() => _sendingPhoto = true);
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.isAnonymous) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n('apply_login_required'))),
+          );
+        }
+        return;
+      }
+      await user.getIdToken(true);
+      late final FirebaseStorage storage;
+      if (kIsWeb) {
+        final webBucket = DefaultFirebaseOptions.web.storageBucket;
+        storage = (webBucket != null && webBucket.isNotEmpty)
+            ? FirebaseStorage.instanceFor(bucket: webBucket)
+            : FirebaseStorage.instance;
+      } else {
+        storage = FirebaseStorage.instance;
+      }
+      final bytes = await picked.readAsBytes();
+      if (bytes.isEmpty) return;
+      final ext = picked.path.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+      final batch = DateTime.now().millisecondsSinceEpoch;
+      final ref = storage.ref(
+        'artifacts/${widget.myUid}/chat_photos/${widget.chatId}/$batch.$ext',
+      );
+      final mime = picked.mimeType ?? 'image/jpeg';
+      await ref.putData(bytes, SettableMetadata(contentType: mime));
+      final url = await ref.getDownloadURL();
+      await FirebaseService().sendMessage(
+        chatId: widget.chatId,
+        senderId: widget.myUid,
+        text: '',
+        imageUrl: url,
+        photoLabel: photoLabel,
+      );
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sendingPhoto = false);
     }
   }
 
@@ -268,6 +344,35 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 horizontal: 12, vertical: 8),
             child: Row(
               children: [
+                GestureDetector(
+                  onTap: _sendingPhoto ? null : _sendPhoto,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2FF),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: const Color(0xFF1E3A8A),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: _sendingPhoto
+                        ? const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF1E3A8A),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.image_outlined,
+                            color: Color(0xFF1E3A8A),
+                            size: 24,
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _textController,

@@ -275,8 +275,9 @@ class FirebaseService {
   Future<void> sendMessage({
     required String chatId,
     required String senderId,
-    String text = '',
-    String imageUrl = '',
+    required String text,
+    String? imageUrl,
+    String? photoLabel,
   }) async {
     if (!isFirebaseEnabled) return;
     final msgRef = FirebaseFirestore.instance
@@ -287,7 +288,7 @@ class FirebaseService {
     await msgRef.set({
       MessageFields.senderId: senderId,
       MessageFields.text: text,
-      MessageFields.imageUrl: imageUrl,
+      if (imageUrl != null && imageUrl.isNotEmpty) MessageFields.imageUrl: imageUrl,
       MessageFields.isRead: false,
       MessageFields.createdAt: FieldValue.serverTimestamp(),
     });
@@ -295,7 +296,11 @@ class FirebaseService {
         .collection(kColChats)
         .doc(chatId)
         .update({
-      ChatFields.lastMessage: text.isNotEmpty ? text : '📷 사진',
+      ChatFields.lastMessage: text.isNotEmpty
+          ? text
+          : (photoLabel != null && photoLabel.isNotEmpty
+              ? photoLabel
+              : '[photo]'),
       ChatFields.lastMessageAt: FieldValue.serverTimestamp(),
     });
   }

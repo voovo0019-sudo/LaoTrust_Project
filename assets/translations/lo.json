@@ -947,5 +947,14 @@
   "chat_translate": "ແປພາສາ",
   "chat_translating": "ກຳລັງແປ...",
   "chat_show_original": "ເບິ່ງຕົ້ນສະບັບ",
-  "chat_translate_fail": "ການແປລົ້ມເຫລວ"
+  "chat_translate_fail": "ການແປລົ້ມເຫລວ",
+
+  "profile_edit_title": "ຂໍ້ມູນໂປຣໄຟລ໌",
+  "profile_edit_name": "ຊື່ / ຊື່ຫຼິ້ນ",
+  "profile_edit_phone": "ເບີໂທລະສັບ",
+  "profile_save": "ບັນທຶກ",
+  "profile_save_success": "ບັນທຶກໂປຣໄຟລ໌ສຳເລັດ",
+
+  "deadline_label": "ກຳນົດເວລາ",
+  "job_status_open": "ກຳລັງຮັບສະໝັກ"
 }

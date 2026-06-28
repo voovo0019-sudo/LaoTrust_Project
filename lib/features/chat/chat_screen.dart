@@ -120,6 +120,9 @@ class _ChatRoomTile extends StatelessWidget {
         ? '${lastMessageAt.hour.toString().padLeft(2, '0')}:${lastMessageAt.minute.toString().padLeft(2, '0')}'
         : '';
     final chatId = room['chatId']?.toString() ?? '';
+    final employerId = room['employerId']?.toString() ?? '';
+    final applicantId = room['applicantId']?.toString() ?? '';
+    final otherUid = (myUid == employerId) ? applicantId : employerId;
 
     return GestureDetector(
       onTap: () {
@@ -130,6 +133,7 @@ class _ChatRoomTile extends StatelessWidget {
               'chatId': chatId,
               'jobTitle': jobTitle,
               'myUid': myUid,
+              'otherUid': otherUid,
             },
           );
         }

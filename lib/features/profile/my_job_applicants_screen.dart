@@ -35,7 +35,7 @@ class MyJobApplicantsScreen extends ConsumerWidget {
       );
     }
 
-    final stream = FirebaseService().watchMyJobApplications(currentUser.uid);
+    final stream = FirebaseService().watchMyPostedJobs(currentUser.uid);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -77,8 +77,76 @@ class MyJobApplicantsScreen extends ConsumerWidget {
             itemCount: applications.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              final app = applications[index];
-              return _ApplicantCard(app: app);
+              final job = applications[index];
+              final lang = Localizations.localeOf(context).languageCode;
+              final titleI18n = Map<String, dynamic>.from(
+                  job[JobFields.titleI18n] as Map? ?? {});
+              final jobTitle = titleI18n[lang]?.toString().isNotEmpty == true
+                  ? titleI18n[lang].toString()
+                  : titleI18n['en']?.toString() ?? '';
+              final deadlineAt = job['deadlineAt'];
+              String deadlineStr = '';
+              if (deadlineAt is Timestamp) {
+                final dt = deadlineAt.toDate();
+                deadlineStr =
+                    '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
+              }
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        const Color(0xFF1E3A8A).withValues(alpha: 0.08),
+                    child: const Icon(Icons.work_outline,
+                        color: Color(0xFF1E3A8A), size: 22),
+                  ),
+                  title: Text(
+                    jobTitle.isNotEmpty ? jobTitle : '-',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  subtitle: deadlineStr.isNotEmpty
+                      ? Text(
+                          '${context.l10n('deadline_label')}: $deadlineStr',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
+                        )
+                      : null,
+                  trailing: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      context.l10n('job_status_open'),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF1E3A8A),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              );
             },
           );
         },

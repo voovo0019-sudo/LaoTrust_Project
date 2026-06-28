@@ -6,11 +6,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/providers/providers.dart';
 import '../../core/app_localizations.dart';
+import '../../core/translation_mapper.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
+import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';
+import '../../services/firebase_service.dart';
 import '../../services/google_auth_service.dart';
 
 const String profileRouteName = '/profile';
@@ -37,6 +41,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _verified = false;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  bool _savingProfile = false;
+  bool _profileSaved = false;
+  String _selectedCountryCode = '+856';
 
   String _digitsOnly(String input) => input.replaceAll(RegExp(r'[^0-9]'), '');
 
@@ -47,6 +56,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       clearPostLoginRedirect();
     }
     _loadVerified();
+    _loadUserProfile();
     if (widget.openPhoneAuthOnStart) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
@@ -55,9 +65,76 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadVerified() async {
     final v = await isVerifiedBadgeActive();
     if (mounted) setState(() => _verified = v);
+  }
+
+  Future<void> _loadUserProfile() async {
+    final uid = auth.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(kColUsers)
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      final data = doc.data();
+      if (data != null && mounted) {
+        setState(() {
+          _nameController.text = data[UserFields.displayName]?.toString() ?? '';
+          final savedPhone = data[UserFields.phone]?.toString() ?? '';
+          // 저장된 전화번호에서 국가코드 분리
+          final matchedCode = kCountryPhoneCodes
+              .map((e) => e['code']!)
+              .firstWhere(
+                (code) => savedPhone.startsWith(code),
+                orElse: () => '+856',
+              );
+          if (savedPhone.startsWith(matchedCode)) {
+            _selectedCountryCode = matchedCode;
+            _phoneController.text =
+                savedPhone.substring(matchedCode.length).trim();
+          } else {
+            _phoneController.text = savedPhone;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveProfile() async {
+    final uid = auth.currentUser?.uid;
+    if (uid == null) return;
+    setState(() => _savingProfile = true);
+    try {
+      await FirebaseService().updateUserProfile(
+        uid: uid,
+        displayName: _nameController.text,
+        phone: '$_selectedCountryCode ${_phoneController.text.trim()}',
+      );
+      if (mounted) {
+        setState(() => _profileSaved = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n('profile_save_success'))),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n('error_update_failed'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingProfile = false);
+    }
   }
 
   void _openBcelOnepay(BuildContext context) {
@@ -109,6 +186,252 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
           _buildProfileHeader(theme, colorScheme),
           const SizedBox(height: 20),
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n('profile_edit_title'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF1E3A8A),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _nameController,
+                  onChanged: (_) => setState(() => _profileSaved = false),
+                  decoration: InputDecoration(
+                    labelText: context.l10n('profile_edit_name'),
+                    filled: true,
+                    fillColor: const Color(0xFFF1F5F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.person_outline,
+                        color: Color(0xFF1E3A8A)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final selected = await showModalBottomSheet<String>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (sheetCtx) {
+                            return Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(28)),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    width: 40,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 16),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF1E3A8A)
+                                                .withValues(alpha: 0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(Icons.public,
+                                              color: Color(0xFF1E3A8A),
+                                              size: 20),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          context.l10n('phone_auth_country_label'),
+                                          style: const TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(height: 1),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxHeight:
+                                          MediaQuery.of(sheetCtx).size.height *
+                                              0.5,
+                                    ),
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: kCountryPhoneCodes.length,
+                                      itemBuilder: (_, i) {
+                                        final item = kCountryPhoneCodes[i];
+                                        final isSelected =
+                                            item['code'] == _selectedCountryCode;
+                                        return ListTile(
+                                          leading: Text(
+                                            item['flag'] ?? '',
+                                            style:
+                                                const TextStyle(fontSize: 24),
+                                          ),
+                                          title: Text(
+                                            '${item['name']} (${item['code']})',
+                                            style: TextStyle(
+                                              fontWeight: isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: isSelected
+                                                  ? const Color(0xFF1E3A8A)
+                                                  : const Color(0xFF1E293B),
+                                            ),
+                                          ),
+                                          trailing: isSelected
+                                              ? const Icon(Icons.check_circle,
+                                                  color: Color(0xFF1E3A8A))
+                                              : null,
+                                          onTap: () => Navigator.of(sheetCtx)
+                                              .pop(item['code']),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SafeArea(
+                                    child: SizedBox(height: 8),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                        if (selected != null && mounted) {
+                          setState(() {
+                            _selectedCountryCode = selected;
+                            _profileSaved = false;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              kCountryPhoneCodes.firstWhere(
+                                (e) => e['code'] == _selectedCountryCode,
+                                orElse: () => kCountryPhoneCodes[0],
+                              )['flag'] ?? '',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _selectedCountryCode,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1E3A8A),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.keyboard_arrow_down,
+                                size: 18, color: Colors.grey.shade600),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _phoneController,
+                        onChanged: (_) => setState(() => _profileSaved = false),
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: kCountryPhoneCodes.firstWhere(
+                            (e) => e['code'] == _selectedCountryCode,
+                            orElse: () => kCountryPhoneCodes[0],
+                          )['hint'] ?? 'Phone number',
+                          hintStyle: TextStyle(
+                              color: Colors.grey.shade400, fontSize: 13),
+                          filled: true,
+                          fillColor: const Color(0xFFF1F5F9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _savingProfile ? null : _saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3A8A),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: _savingProfile
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            _profileSaved
+                                ? context.l10n('profile_save_success')
+                                : context.l10n('profile_save'),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           _buildMenuTile(
             context,
             icon: Icons.account_balance_wallet,

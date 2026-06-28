@@ -151,6 +151,7 @@ final _router = GoRouter(
           chatId: args?['chatId'] as String? ?? '',
           jobTitle: args?['jobTitle'] as String? ?? '',
           myUid: args?['myUid'] as String? ?? '',
+          otherUid: args?['otherUid'] as String? ?? '',
         );
       },
     ),

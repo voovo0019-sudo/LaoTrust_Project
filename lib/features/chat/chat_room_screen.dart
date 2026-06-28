@@ -23,11 +23,13 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
     required this.chatId,
     required this.jobTitle,
     required this.myUid,
+    this.otherUid = '',
   });
 
   final String chatId;
   final String jobTitle;
   final String myUid;
+  final String otherUid;
 
   static const String routeName = '/chat_room';
 
@@ -47,6 +49,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final Map<String, bool> _showTranslated = {};
   // 메시지별 번역 진행 중 여부
   final Map<String, bool> _translating = {};
+  String _otherDisplayName = '';
 
   @override
   void initState() {
@@ -55,6 +58,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       chatId: widget.chatId,
       myUid: widget.myUid,
     );
+    _loadOtherDisplayName();
   }
 
   @override
@@ -160,6 +164,15 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       }
     } finally {
       if (mounted) setState(() => _sendingPhoto = false);
+    }
+  }
+
+  Future<void> _loadOtherDisplayName() async {
+    if (widget.otherUid.isEmpty) return;
+    final name = await FirebaseService()
+        .getUserDisplayName(widget.otherUid);
+    if (name != null && name.isNotEmpty && mounted) {
+      setState(() => _otherDisplayName = name);
     }
   }
 
@@ -305,6 +318,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                       isRead: isRead,
                       timeStr: timeStr,
                       readLabel: context.l10n('chat_read'),
+                      senderName: isMe ? '' : _otherDisplayName,
                       translatedText: _translatedCache[messageId],
                       showTranslated:
                           _showTranslated[messageId] ?? false,
@@ -433,6 +447,7 @@ class _MessageBubble extends StatelessWidget {
     required this.isRead,
     required this.timeStr,
     required this.readLabel,
+    required this.senderName,
     required this.translatedText,
     required this.showTranslated,
     required this.isTranslating,
@@ -448,6 +463,7 @@ class _MessageBubble extends StatelessWidget {
   final bool isRead;
   final String timeStr;
   final String readLabel;
+  final String senderName;
   final String? translatedText;
   final bool showTranslated;
   final bool isTranslating;
@@ -466,12 +482,28 @@ class _MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor:
-                  const Color(0xFF1E3A8A).withValues(alpha: 0.1),
-              child: const Icon(Icons.person,
-                  color: Color(0xFF1E3A8A), size: 18),
+            Column(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor:
+                      const Color(0xFF1E3A8A).withValues(alpha: 0.1),
+                  child: const Icon(Icons.person,
+                      color: Color(0xFF1E3A8A), size: 18),
+                ),
+                if (senderName.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      senderName,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 8),
           ],

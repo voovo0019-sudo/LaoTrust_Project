@@ -947,5 +947,14 @@
   "chat_translate": "Translate",
   "chat_translating": "Translating...",
   "chat_show_original": "Show original",
-  "chat_translate_fail": "Translation failed"
+  "chat_translate_fail": "Translation failed",
+
+  "profile_edit_title": "Profile Info",
+  "profile_edit_name": "Name / Nickname",
+  "profile_edit_phone": "Phone Number",
+  "profile_save": "Save",
+  "profile_save_success": "Profile saved successfully",
+
+  "deadline_label": "Deadline",
+  "job_status_open": "Hiring"
 }

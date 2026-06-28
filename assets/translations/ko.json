@@ -969,5 +969,14 @@
   "chat_translate": "번역 보기",
   "chat_translating": "번역 중...",
   "chat_show_original": "원문 보기",
-  "chat_translate_fail": "번역에 실패했습니다"
+  "chat_translate_fail": "번역에 실패했습니다",
+
+  "profile_edit_title": "프로필 정보",
+  "profile_edit_name": "이름 / 닉네임",
+  "profile_edit_phone": "전화번호",
+  "profile_save": "저장",
+  "profile_save_success": "프로필이 저장되었습니다",
+
+  "deadline_label": "마감",
+  "job_status_open": "모집중"
 }

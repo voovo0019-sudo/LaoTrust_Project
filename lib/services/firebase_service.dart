@@ -345,4 +345,53 @@ class FirebaseService {
       '${MessageFields.translatedTextCache}.$langCode': translatedText,
     });
   }
+
+  /// 사용자 displayName + phone Firestore 저장
+  Future<void> updateUserProfile({
+    required String uid,
+    required String displayName,
+    required String phone,
+  }) async {
+    if (!isFirebaseEnabled) return;
+    await FirebaseFirestore.instance
+        .collection(kColUsers)
+        .doc(uid)
+        .set({
+      UserFields.displayName: displayName.trim(),
+      UserFields.phone: phone.trim(),
+      UserFields.updatedAt: FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  /// UID로 displayName 조회 (채팅 발신자 이름용)
+  Future<String?> getUserDisplayName(String uid) async {
+    if (!isFirebaseEnabled || uid.isEmpty) return null;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(kColUsers)
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      return doc.data()?[UserFields.displayName]?.toString();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// 내가 등록한 알바 공고 목록 (구인자용)
+  Stream<List<Map<String, dynamic>>> watchMyPostedJobs(String employerId) {
+    if (!isFirebaseEnabled || employerId.isEmpty) {
+      return Stream.value([]);
+    }
+    return FirebaseFirestore.instance
+        .collection(kColJobs)
+        .where(JobFields.employerId, isEqualTo: employerId)
+        .orderBy(JobFields.createdAt, descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) {
+              final data = Map<String, dynamic>.from(doc.data());
+              data['documentId'] = doc.id;
+              return data;
+            }).toList());
+  }
 }

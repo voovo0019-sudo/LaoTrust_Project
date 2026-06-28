@@ -4,6 +4,7 @@
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
@@ -12,7 +13,13 @@ import '../../data/firestore_schema.dart';
 import '../../services/firebase_service.dart';
 
 class MyJobApplicantsScreen extends ConsumerWidget {
-  const MyJobApplicantsScreen({super.key});
+  const MyJobApplicantsScreen({
+    super.key,
+    this.jobId,
+    this.jobTitle,
+  });
+  final String? jobId;
+  final String? jobTitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +30,9 @@ class MyJobApplicantsScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFF1E3A8A),
           foregroundColor: Colors.white,
-          title: Text(context.l10n('my_job_posts')),
+          title: Text((jobId != null && jobId!.isNotEmpty)
+              ? (jobTitle ?? context.l10n('my_job_posts'))
+              : context.l10n('my_job_posts')),
           centerTitle: true,
         ),
         body: Center(
@@ -35,14 +44,18 @@ class MyJobApplicantsScreen extends ConsumerWidget {
       );
     }
 
-    final stream = FirebaseService().watchMyPostedJobs(currentUser.uid);
+    final stream = (jobId != null && jobId!.isNotEmpty)
+        ? FirebaseService().watchJobApplicants(jobId!)
+        : FirebaseService().watchMyPostedJobs(currentUser.uid);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,
-        title: Text(context.l10n('my_job_posts')),
+        title: Text((jobId != null && jobId!.isNotEmpty)
+            ? (jobTitle ?? context.l10n('my_job_posts'))
+            : context.l10n('my_job_posts')),
         centerTitle: true,
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
@@ -77,14 +90,21 @@ class MyJobApplicantsScreen extends ConsumerWidget {
             itemCount: applications.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              final job = applications[index];
+              final item = applications[index];
+
+              // 지원자 목록 모드
+              if (jobId != null && jobId!.isNotEmpty) {
+                return _ApplicantCard(app: item);
+              }
+
+              // 공고 목록 모드
               final lang = Localizations.localeOf(context).languageCode;
               final titleI18n = Map<String, dynamic>.from(
-                  job[JobFields.titleI18n] as Map? ?? {});
-              final jobTitle = titleI18n[lang]?.toString().isNotEmpty == true
+                  item[JobFields.titleI18n] as Map? ?? {});
+              final jobTitleText = titleI18n[lang]?.toString().isNotEmpty == true
                   ? titleI18n[lang].toString()
                   : titleI18n['en']?.toString() ?? '';
-              final deadlineAt = job['deadlineAt'];
+              final deadlineAt = item['deadlineAt'];
               String deadlineStr = '';
               if (deadlineAt is Timestamp) {
                 final dt = deadlineAt.toDate();
@@ -104,6 +124,18 @@ class MyJobApplicantsScreen extends ConsumerWidget {
                   ],
                 ),
                 child: ListTile(
+                  onTap: () {
+                    final docId = item['documentId']?.toString() ?? '';
+                    if (docId.isNotEmpty) {
+                      context.push(
+                        '/my_job_applicants',
+                        extra: {
+                          'jobId': docId,
+                          'jobTitle': jobTitleText,
+                        },
+                      );
+                    }
+                  },
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   leading: CircleAvatar(
@@ -113,7 +145,7 @@ class MyJobApplicantsScreen extends ConsumerWidget {
                         color: Color(0xFF1E3A8A), size: 22),
                   ),
                   title: Text(
-                    jobTitle.isNotEmpty ? jobTitle : '-',
+                    jobTitleText.isNotEmpty ? jobTitleText : '-',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -220,10 +252,13 @@ class _ApplicantCardState extends State<_ApplicantCard> {
         ? titleI18n[lang].toString()
         : titleI18n['en']?.toString() ?? '';
     final status = widget.app['status']?.toString() ?? kAppStatusPending;
-    final createdAtMs = widget.app['createdAt'] as int? ?? 0;
-    final createdAt = createdAtMs > 0
-        ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-        : null;
+    final createdAtRaw = widget.app['createdAt'];
+    DateTime? createdAt;
+    if (createdAtRaw is Timestamp) {
+      createdAt = createdAtRaw.toDate();
+    } else if (createdAtRaw is int && createdAtRaw > 0) {
+      createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtRaw);
+    }
     final dateStr = createdAt != null
         ? '${createdAt.year}.${createdAt.month.toString().padLeft(2, '0')}.${createdAt.day.toString().padLeft(2, '0')}'
         : '';

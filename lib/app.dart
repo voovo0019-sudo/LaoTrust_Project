@@ -51,7 +51,13 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/my_job_applicants',
-      builder: (context, state) => const MyJobApplicantsScreen(),
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return MyJobApplicantsScreen(
+          jobId: args?['jobId'] as String?,
+          jobTitle: args?['jobTitle'] as String?,
+        );
+      },
     ),
     GoRoute(
       path: '/my_applications',

@@ -394,4 +394,19 @@ class FirebaseService {
               return data;
             }).toList());
   }
+
+  /// 특정 공고의 지원자 목록 (구인자용)
+  Stream<List<Map<String, dynamic>>> watchJobApplicants(String jobId) {
+    if (!isFirebaseEnabled || jobId.isEmpty) return Stream.value([]);
+    return FirebaseFirestore.instance
+        .collection(kColApplications)
+        .where(ApplicationFields.jobId, isEqualTo: jobId)
+        .orderBy(ApplicationFields.createdAt, descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) {
+              final data = Map<String, dynamic>.from(doc.data());
+              data['documentId'] = doc.id;
+              return data;
+            }).toList());
+  }
 }

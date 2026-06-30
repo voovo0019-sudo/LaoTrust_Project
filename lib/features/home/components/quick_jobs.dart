@@ -683,7 +683,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                   builder: (context, constraints) {
                     final cardWidth = (constraints.maxWidth * 0.46).clamp(200.0, 300.0);
                     return SizedBox(
-                      height: 220,
+                      height: 236,
                       child: PageView.builder(
                     controller: _pageController,
                     padEnds: false,
@@ -750,25 +750,31 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                 children: [
                                   Row(
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: remainingHours < 3 ? const Color(0xFFFCEBEB) : const Color(0xFFFAEEDA),
-                                          borderRadius: BorderRadius.circular(28.0),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.access_time, size: 12, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              remaining.isNegative ? context.l10n('job_deadline_passed') : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
-                                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
-                                            ),
-                                          ],
+                                      Flexible(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: remainingHours < 3 ? const Color(0xFFFCEBEB) : const Color(0xFFFAEEDA),
+                                            borderRadius: BorderRadius.circular(28.0),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.access_time, size: 12, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
+                                              const SizedBox(width: 4),
+                                              Flexible(
+                                                child: Text(
+                                                  remaining.isNegative ? context.l10n('job_deadline_passed') : context.t('job_deadline_left').replaceAll('{h}', remainingHours.toStringAsFixed(0)),
+                                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: remainingHours < 3 ? const Color(0xFFA32D2D) : const Color(0xFF854F0B)),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      const Spacer(),
+                                      const SizedBox(width: 6),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(color: const Color(0xFFE1F5EE), borderRadius: BorderRadius.circular(28.0)),

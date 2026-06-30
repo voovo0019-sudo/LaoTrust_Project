@@ -15,6 +15,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../core/firebase_service.dart';
+import '../core/push_notification_service.dart' show saveFcmTokenAfterLogin;
 
 // ---------------------------------------------------------------------------
 // 로그인 함수
@@ -44,11 +45,14 @@ Future<UserCredential?> signInWithGoogle() async {
     googleProvider.addScope('profile');
     googleProvider.setCustomParameters({'prompt': 'select_account'});
 
+    final UserCredential credential;
     if (kIsWeb) {
-      return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      credential = await FirebaseAuth.instance.signInWithPopup(googleProvider);
     } else {
-      return await FirebaseAuth.instance.signInWithProvider(googleProvider);
+      credential = await FirebaseAuth.instance.signInWithProvider(googleProvider);
     }
+    await saveFcmTokenAfterLogin();
+    return credential;
   } on FirebaseAuthException catch (e) {
     if (e.code == 'popup-closed-by-user' ||
         e.code == 'cancelled-popup-request' ||

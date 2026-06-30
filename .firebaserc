@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "laotrust-web"
-  }
+    "default": "laotrust-v2"
+  },
+  "targets": {},
+  "etags": {}
 }

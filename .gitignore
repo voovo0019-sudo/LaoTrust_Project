@@ -11,3 +11,6 @@ lib/firebase_options.dart
 
 # Firebase hosting cache
 .firebase/
+
+# Android Firebase config
+android/app/google-services.json

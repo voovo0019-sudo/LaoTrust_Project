@@ -22,7 +22,9 @@ void main() async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     setFirebaseEnabled(true);
     await enableFirestoreOfflinePersistence();
-  } catch (_) {
+  } catch (e, st) {
+    debugPrint('FIREBASE_INIT_ERROR: $e');
+    debugPrint('FIREBASE_INIT_STACK: $st');
     setFirebaseEnabled(false);
   }
 

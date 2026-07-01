@@ -180,6 +180,9 @@ class FirebaseService {
                 'createdAt': data[ApplicationFields.createdAt] is Timestamp
                     ? (data[ApplicationFields.createdAt] as Timestamp).millisecondsSinceEpoch
                     : 0,
+                'statusUpdatedAt': data[ApplicationFields.statusUpdatedAt] is Timestamp
+                    ? (data[ApplicationFields.statusUpdatedAt] as Timestamp).millisecondsSinceEpoch
+                    : 0,
               };
             }).toList());
   }

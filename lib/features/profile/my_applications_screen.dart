@@ -1,6 +1,7 @@
 // =============================================================================
 // 내 지원 현황 화면 — 구직자가 본인이 지원한 알바와 상태를 확인하는 화면
 // =============================================================================
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_localizations.dart';
@@ -9,11 +10,37 @@ import '../../core/theme.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/firebase_service.dart';
 
-class MyApplicationsScreen extends ConsumerWidget {
+class MyApplicationsScreen extends ConsumerStatefulWidget {
   const MyApplicationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApplicationsScreen> createState() =>
+      _MyApplicationsScreenState();
+}
+
+class _MyApplicationsScreenState extends ConsumerState<MyApplicationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _markApplicationsSeen();
+  }
+
+  Future<void> _markApplicationsSeen() async {
+    final uid = auth.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection(kColUsers)
+          .doc(uid)
+          .set(
+        {UserFields.applicationsLastSeenAt: FieldValue.serverTimestamp()},
+        SetOptions(merge: true),
+      );
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentUser = auth.currentUser;
 
     if (currentUser == null) {

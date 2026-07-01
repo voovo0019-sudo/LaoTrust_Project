@@ -29,6 +29,12 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
   int _pendingApplicantCount = 0;
   StreamSubscription<QuerySnapshot>? _applicantBadgeSubscription;
 
+  int _unseenApplicationCount = 0;
+  int _applicationsLastSeenMs = 0;
+  List<Map<String, dynamic>> _myApplicationsRaw = <Map<String, dynamic>>[];
+  StreamSubscription<QuerySnapshot>? _myApplicationsSubscription;
+  StreamSubscription<DocumentSnapshot>? _lastSeenSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -37,9 +43,11 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
       if (user != null) {
         _startBadgeSubscription(user.uid);
         _startApplicantBadgeSubscription(user.uid);
+        _startUnseenApplicationSubscription(user.uid);
       } else {
         _cancelBadgeSubscription();
         _cancelApplicantBadgeSubscription();
+        _cancelUnseenApplicationSubscription();
       }
     });
   }
@@ -90,8 +98,67 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
     if (mounted) setState(() => _pendingApplicantCount = 0);
   }
 
+  void _startUnseenApplicationSubscription(String uid) {
+    _myApplicationsSubscription?.cancel();
+    _lastSeenSubscription?.cancel();
+
+    _myApplicationsSubscription = FirebaseFirestore.instance
+        .collection(kColApplications)
+        .where(ApplicationFields.applicantId, isEqualTo: uid)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      _myApplicationsRaw = snap.docs.map((doc) {
+        final data = doc.data();
+        final status = data[ApplicationFields.status]?.toString() ?? kAppStatusPending;
+        final updatedRaw = data[ApplicationFields.statusUpdatedAt];
+        final updatedMs = updatedRaw is Timestamp ? updatedRaw.millisecondsSinceEpoch : 0;
+        return {'status': status, 'updatedMs': updatedMs};
+      }).toList();
+      _recomputeUnseenApplications();
+    });
+
+    _lastSeenSubscription = FirebaseFirestore.instance
+        .collection(kColUsers)
+        .doc(uid)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      final data = snap.data();
+      final raw = data == null ? null : data[UserFields.applicationsLastSeenAt];
+      _applicationsLastSeenMs = raw is Timestamp ? raw.millisecondsSinceEpoch : 0;
+      _recomputeUnseenApplications();
+    });
+  }
+
+  void _recomputeUnseenApplications() {
+    var count = 0;
+    for (final app in _myApplicationsRaw) {
+      final status = app['status']?.toString() ?? kAppStatusPending;
+      final updatedMs = app['updatedMs'] as int? ?? 0;
+      final isDecided = status == kAppStatusAccepted || status == kAppStatusRejected;
+      if (isDecided && updatedMs > _applicationsLastSeenMs) {
+        count++;
+      }
+    }
+    if (!mounted) return;
+    setState(() => _unseenApplicationCount = count);
+  }
+
+  void _cancelUnseenApplicationSubscription() {
+    _myApplicationsSubscription?.cancel();
+    _myApplicationsSubscription = null;
+    _lastSeenSubscription?.cancel();
+    _lastSeenSubscription = null;
+    _myApplicationsRaw = <Map<String, dynamic>>[];
+    _applicationsLastSeenMs = 0;
+    if (mounted) setState(() => _unseenApplicationCount = 0);
+  }
+
   @override
   void dispose() {
+    _myApplicationsSubscription?.cancel();
+    _lastSeenSubscription?.cancel();
     _applicantBadgeSubscription?.cancel();
     _badgeSubscription?.cancel();
     _authSubscription?.cancel();
@@ -119,6 +186,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
           ProfileScreen(
             acceptedCount: _acceptedCount,
             pendingApplicantCount: _pendingApplicantCount,
+            unseenApplicationCount: _unseenApplicationCount,
           ),
         ],
       ),
@@ -126,7 +194,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         currentIndex: currentIndex,
         onIndexChanged: (index) =>
             ref.read(currentTabProvider.notifier).setTab(index),
-        profileBadgeCount: _acceptedCount,
+        profileBadgeCount: _acceptedCount + _pendingApplicantCount + _unseenApplicationCount,
       ),
     );
   }

@@ -36,6 +36,9 @@ abstract class UserFields {
   static const String commanderApproved = 'commander_approved';
   /// 디지털 파트너 고유 시리얼 번호 (예: LT-P-2024-00001).
   static const String partnerSerialId = 'partner_serial_id';
+
+  /// 지원자가 "내 지원 현황"을 마지막으로 확인한 시각 (배지 clear-on-view 기준).
+  static const String applicationsLastSeenAt = 'applicationsLastSeenAt';
 }
 
 /// user_type 값 / User type values
@@ -104,6 +107,7 @@ abstract class ApplicationFields {
   static const String jobTitleI18n = 'jobTitleI18n';
   static const String status = 'status'; // pending | accepted | rejected
   static const String createdAt = 'createdAt';
+  static const String statusUpdatedAt = 'statusUpdatedAt';
 }
 
 // application status values

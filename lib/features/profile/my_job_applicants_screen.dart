@@ -209,11 +209,14 @@ class _ApplicantCardState extends State<_ApplicantCard> {
     if (documentId.isEmpty || _updating) return;
     setState(() => _updating = true);
     try {
-      // 1. 지원 상태 업데이트
+      // 1. 지원 상태 업데이트 (상태 변경 시각도 함께 기록 → 지원자 배지 기준)
       await FirebaseFirestore.instance
           .collection(kColApplications)
           .doc(documentId)
-          .update({ApplicationFields.status: newStatus});
+          .update({
+        ApplicationFields.status: newStatus,
+        ApplicationFields.statusUpdatedAt: FieldValue.serverTimestamp(),
+      });
 
       // 2. 수락 시 채팅방 자동 생성
       if (newStatus == kAppStatusAccepted &&

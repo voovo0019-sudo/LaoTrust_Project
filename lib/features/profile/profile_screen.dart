@@ -27,6 +27,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.discardPendingPostLoginRedirect = false,
     this.acceptedCount = 0,
     this.pendingApplicantCount = 0,
+    this.unseenApplicationCount = 0,
   });
 
   final bool openPhoneAuthOnStart;
@@ -34,6 +35,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
   final bool discardPendingPostLoginRedirect;
   final int acceptedCount;
   final int pendingApplicantCount;
+  final int unseenApplicationCount;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -469,6 +471,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.send_outlined,
             title: context.l10n('my_applications'),
             subtitle: context.l10n('my_applications_sub'),
+            badgeCount: widget.unseenApplicationCount,
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;

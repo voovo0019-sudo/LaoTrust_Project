@@ -14,3 +14,7 @@ lib/firebase_options.dart
 
 # Android Firebase config
 android/app/google-services.json
+
+.agents/
+skills-lock.json
+functions_check.txt

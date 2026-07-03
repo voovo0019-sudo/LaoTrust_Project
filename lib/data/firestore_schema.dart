@@ -138,6 +138,12 @@ abstract class ChatFields {
   /// 마지막 메시지 시각
   static const String lastMessageAt = 'lastMessageAt';
   static const String createdAt = 'createdAt';
+
+  // 숨고 서비스 매칭 전용 채팅방 필드
+  static const String requestId = 'requestId';
+  static const String clientId = 'clientId';
+  static const String expertId = 'expertId';
+  static const String chatType = 'chatType'; // 'job' | 'service_request'
 }
 
 abstract class MessageFields {
@@ -154,3 +160,40 @@ abstract class MessageFields {
   static const String translatedTextCache = 'translatedTextCache';
   static const String createdAt = 'createdAt';
 }
+
+// -----------------------------------------------------------------------------
+// 6. quotes 컬렉션 (숨고 서비스 매칭 견적)
+// 전문가가 손님 요청에 견적을 제출. 손님이 견적 선택 → 채팅 시작.
+// -----------------------------------------------------------------------------
+const String kColQuotes = 'quotes';
+
+abstract class QuoteFields {
+  /// 어떤 요청에 대한 견적인지 (requests 문서 ID)
+  static const String requestId = 'requestId';
+  /// 채팅방 제목용 카테고리명 {ko, en, lo}
+  static const String requestTitleI18n = 'requestTitleI18n';
+  /// 카테고리 키 (예: expert_cleaning)
+  static const String categoryKey = 'categoryKey';
+  /// 견적 보낸 전문가 UID
+  static const String expertId = 'expertId';
+  /// 요청 올린 손님 UID
+  static const String clientId = 'clientId';
+  /// 견적 가격 — 선택 입력 (null 허용)
+  static const String price = 'price';
+  /// 통화 — 기본 'USD'
+  static const String currency = 'currency';
+  /// 예상 소요 시간 — 선택 입력 (null 허용)
+  static const String estimatedDuration = 'estimatedDuration';
+  /// 전문가 인사말/소개 메시지 — 필수
+  static const String message = 'message';
+  /// 견적 상태: pending | accepted | rejected
+  static const String status = 'status';
+  static const String createdAt = 'createdAt';
+  /// 손님이 수락/거절한 시각 (배지 clear-on-view용)
+  static const String statusUpdatedAt = 'statusUpdatedAt';
+}
+
+// quote status values
+const String kQuoteStatusPending = 'pending';
+const String kQuoteStatusAccepted = 'accepted';
+const String kQuoteStatusRejected = 'rejected';

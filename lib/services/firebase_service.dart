@@ -220,6 +220,36 @@ class FirebaseService {
     return ref.id;
   }
 
+  /// 숨고 서비스 매칭 전용 1:1 채팅방 생성.
+  /// 중복 체크: requestId + expertId 조합으로 기존 채팅방 확인.
+  Future<String> createServiceChatRoom({
+    required String requestId,
+    required Map<String, dynamic> requestTitleI18n,
+    required String clientId,
+    required String expertId,
+  }) async {
+    if (!isFirebaseEnabled) return '';
+    final existing = await FirebaseFirestore.instance
+        .collection(kColChats)
+        .where(ChatFields.requestId, isEqualTo: requestId)
+        .where(ChatFields.expertId, isEqualTo: expertId)
+        .get();
+    if (existing.docs.isNotEmpty) return existing.docs.first.id;
+    final ref = FirebaseFirestore.instance.collection(kColChats).doc();
+    await ref.set({
+      ChatFields.requestId: requestId,
+      ChatFields.requestTitleI18n: requestTitleI18n,
+      ChatFields.clientId: clientId,
+      ChatFields.expertId: expertId,
+      ChatFields.chatType: 'service_request',
+      ChatFields.participants: [clientId, expertId],
+      ChatFields.lastMessage: '',
+      ChatFields.lastMessageAt: FieldValue.serverTimestamp(),
+      ChatFields.createdAt: FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+
   /// 내가 참여 중인 채팅방 목록 실시간 스트림.
   Stream<List<Map<String, dynamic>>> watchMyChatRooms(String uid) {
     if (!isFirebaseEnabled) return Stream.value([]);
@@ -242,6 +272,9 @@ class FirebaseService {
                 'lastMessageAt': data[ChatFields.lastMessageAt] is Timestamp
                     ? (data[ChatFields.lastMessageAt] as Timestamp).millisecondsSinceEpoch
                     : 0,
+                'clientId': data[ChatFields.clientId] ?? '',
+                'expertId': data[ChatFields.expertId] ?? '',
+                'chatType': data[ChatFields.chatType] ?? 'job',
               };
             }).toList());
   }

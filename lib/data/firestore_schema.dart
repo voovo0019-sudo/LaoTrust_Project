@@ -141,6 +141,7 @@ abstract class ChatFields {
 
   // 숨고 서비스 매칭 전용 채팅방 필드
   static const String requestId = 'requestId';
+  static const String requestTitleI18n = 'requestTitleI18n';
   static const String clientId = 'clientId';
   static const String expertId = 'expertId';
   static const String chatType = 'chatType'; // 'job' | 'service_request'

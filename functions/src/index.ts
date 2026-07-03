@@ -230,7 +230,7 @@ export const onNewRequest = onDocumentCreated(
     // users 컬렉션에서 userType=expert AND categories 배열에 categoryKey 포함
     const expertsSnap = await db
       .collection("users")
-      .where("userType", "==", "expert")
+      .where("user_type", "==", "expert")
       .where("categories", "array-contains", categoryKey)
       .get();
 

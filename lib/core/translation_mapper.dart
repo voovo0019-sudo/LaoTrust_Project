@@ -668,6 +668,61 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
     'en': 'Reject',
     'lo': 'ປະຕິເສດ',
   },
+  'quote_btn_send': {
+    'ko': '견적 보내기',
+    'en': 'Send Quote',
+    'lo': 'ສົ່ງໃບສະເໜີລາຄາ',
+  },
+  'quote_price_label': {
+    'ko': '견적 금액 (선택)',
+    'en': 'Price (optional)',
+    'lo': 'ລາຄາ (ທາງເລືອກ)',
+  },
+  'quote_duration_label': {
+    'ko': '예상 소요시간 (선택)',
+    'en': 'Est. Duration (optional)',
+    'lo': 'ໄລຍະເວລາຄາດຄະເນ (ທາງເລືອກ)',
+  },
+  'quote_message_label': {
+    'ko': '인사말 / 소개',
+    'en': 'Message',
+    'lo': 'ຂໍ້ຄວາມ',
+  },
+  'quote_message_hint': {
+    'ko': '자기소개와 강점을 적어주세요',
+    'en': 'Introduce yourself and your strengths',
+    'lo': 'ກະລຸນາແນະນຳຕົວທ່ານ',
+  },
+  'quote_submit_confirm': {
+    'ko': '견적을 보내시겠습니까?',
+    'en': 'Send this quote?',
+    'lo': 'ສົ່ງໃບສະເໜີລາຄານີ້ບໍ?',
+  },
+  'quote_sent': {
+    'ko': '견적을 보냈습니다',
+    'en': 'Quote sent',
+    'lo': 'ສົ່ງໃບສະເໜີລາຄາແລ້ວ',
+  },
+  'quote_already_sent': {
+    'ko': '이미 견적을 보냈습니다',
+    'en': 'Quote already sent',
+    'lo': 'ສົ່ງໃບສະເໜີລາຄາແລ້ວ',
+  },
+  'quote_send_failed': {
+    'ko': '견적 전송에 실패했습니다',
+    'en': 'Failed to send quote',
+    'lo': 'ສົ່ງໃບສະເໜີລາຄາລົ້ມເຫລວ',
+  },
+  'quote_price_hint': {
+    'ko': '예: 50 USD',
+    'en': 'e.g. 50 USD',
+    'lo': 'ຕົວຢ່າງ: 50 USD',
+  },
+  'quote_duration_hint': {
+    'ko': '예: 2시간',
+    'en': 'e.g. 2 hours',
+    'lo': 'ຕົວຢ່າງ: 2 ຊົ່ວໂມງ',
+  },
   'inbox_detail_title': {
     'ko': '신청 상세',
     'en': 'Request Detail',

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../core/translation_mapper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../firebase_options.dart';
+import '../../data/firestore_schema.dart';
 
 const Color _kRoyalBlue = Color(0xFF1E3A8A);
 
@@ -35,32 +35,68 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
     return kStaticUiTripleByMessageKey[key]?[lang] ?? key;
   }
 
-  Future<void> _updateStatus(String status) async {
+  bool _quoteSent = false;
+
+  Future<void> _checkQuoteAlreadySent() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+      final snap = await FirebaseFirestore.instance
+          .collection(kColQuotes)
+          .where(QuoteFields.requestId, isEqualTo: widget.docId)
+          .where(QuoteFields.expertId, isEqualTo: uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      if (mounted) {
+        setState(() => _quoteSent = snap.docs.isNotEmpty);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _sendQuote({
+    required String message,
+    String? price,
+    String? estimatedDuration,
+  }) async {
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      final updateData = <String, dynamic>{'status': status};
-      if (status == 'accepted' && user != null) {
-        updateData['acceptedBy'] = {
-          'uid': user.uid,
-          'name': user.displayName ?? '',
-          'email': user.email ?? '',
-          'acceptedAt': DateTime.now().toIso8601String(),
-        };
-      }
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) throw Exception('no uid');
+      final data = widget.data;
+      final clientId = data[RequestFields.userId] as String? ?? '';
+      final categoryKey = data['categoryKey'] as String? ?? '';
+      final wizardI18n = data['wizardI18n'] as Map<String, dynamic>?;
+      final titleMap = wizardI18n?['title'] as Map<String, dynamic>? ??
+          {'ko': categoryKey, 'en': categoryKey, 'lo': categoryKey};
       await FirebaseFirestore.instance
-          .collection('artifacts')
-          .doc(DefaultFirebaseOptions.currentPlatform.projectId)
-          .collection('public')
-          .doc('data')
-          .collection('requests')
-          .doc(widget.docId)
-          .update(updateData);
-      if (mounted) Navigator.of(context).pop();
-    } catch (e) {
+          .collection(kColQuotes)
+          .add({
+            QuoteFields.requestId: widget.docId,
+            QuoteFields.requestTitleI18n: titleMap,
+            QuoteFields.categoryKey: categoryKey,
+            QuoteFields.expertId: uid,
+            QuoteFields.clientId: clientId,
+            QuoteFields.price: price?.isNotEmpty == true ? price : null,
+            QuoteFields.currency: 'USD',
+            QuoteFields.estimatedDuration:
+                estimatedDuration?.isNotEmpty == true
+                    ? estimatedDuration
+                    : null,
+            QuoteFields.message: message,
+            QuoteFields.status: kQuoteStatusPending,
+            QuoteFields.createdAt: FieldValue.serverTimestamp(),
+          });
+      if (mounted) {
+        setState(() => _quoteSent = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_t('quote_sent'))),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_t('error_update_failed'))),
+          SnackBar(content: Text(_t('quote_send_failed'))),
         );
       }
     } finally {
@@ -68,36 +104,129 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
     }
   }
 
-  Future<void> _confirmAndUpdate(String status) async {
-    final confirmKey =
-        status == 'accepted' ? 'inbox_accept_confirm' : 'inbox_reject_confirm';
-    final confirmed = await showDialog<bool>(
+  void _showQuoteBottomSheet() {
+    if (_quoteSent) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_t('quote_already_sent'))),
+      );
+      return;
+    }
+    final priceController = TextEditingController();
+    final durationController = TextEditingController();
+    final messageController = TextEditingController();
+    showModalBottomSheet(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
         ),
-        content: Text(_t(confirmKey)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(_t('inbox_confirm_no')),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kRoyalBlue,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(_t('inbox_confirm_yes')),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              _t('quote_btn_send'),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _kRoyalBlue,
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: _t('quote_price_label'),
+                hintText: _t('quote_price_hint'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: durationController,
+              decoration: InputDecoration(
+                labelText: _t('quote_duration_label'),
+                hintText: _t('quote_duration_hint'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: messageController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: _t('quote_message_label'),
+                hintText: _t('quote_message_hint'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kRoyalBlue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                ),
+                onPressed: () {
+                  final msg = messageController.text.trim();
+                  if (msg.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(_t('quote_message_hint')),
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.of(ctx).pop();
+                  _sendQuote(
+                    message: msg,
+                    price: priceController.text.trim(),
+                    estimatedDuration: durationController.text.trim(),
+                  );
+                },
+                child: Text(
+                  _t('quote_btn_send'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
-    if (confirmed == true) await _updateStatus(status);
   }
 
   Widget _infoRow(String label, String value) {
@@ -130,10 +259,15 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _checkQuoteAlreadySent();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final data = widget.data;
     final lang = _langCode();
-    final status = data['status'] as String? ?? 'pending';
     final wizardI18n = data['wizardI18n'] as Map<String, dynamic>?;
 
     String getI18n(String field) {
@@ -263,60 +397,31 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (status == 'pending') ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            onPressed: () => _confirmAndUpdate('rejected'),
-                            child: Text(
-                              _t('inbox_btn_reject'),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _quoteSent ? Colors.grey : _kRoyalBlue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _kRoyalBlue,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            onPressed: () => _confirmAndUpdate('accepted'),
-                            child: Text(
-                              _t('inbox_btn_accept'),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else ...[
-                    Center(
+                      ),
+                      onPressed:
+                          _quoteSent ? null : _showQuoteBottomSheet,
                       child: Text(
-                        status == 'accepted'
-                            ? _t('inbox_status_accepted')
-                            : _t('inbox_status_rejected'),
-                        style: TextStyle(
+                        _quoteSent
+                            ? _t('quote_already_sent')
+                            : _t('quote_btn_send'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: status == 'accepted' ? Colors.green : Colors.red,
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),

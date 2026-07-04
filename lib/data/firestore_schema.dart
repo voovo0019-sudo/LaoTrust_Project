@@ -42,6 +42,9 @@ abstract class UserFields {
 
   /// 전문가가 견적을 보낸 요청 ID 목록 (역참조 배열, 목록 화면 상태 표시용)
   static const String quotedRequestIds = 'quotedRequestIds';
+
+  /// 손님이 견적함을 마지막으로 확인한 시각 (배지 clear-on-view용)
+  static const String quotesLastSeenAt = 'quotesLastSeenAt';
 }
 
 /// user_type 값 / User type values

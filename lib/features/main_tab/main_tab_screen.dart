@@ -30,10 +30,15 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
   StreamSubscription<QuerySnapshot>? _applicantBadgeSubscription;
 
   int _unseenApplicationCount = 0;
+  int _unseenQuoteCount = 0;
   int _applicationsLastSeenMs = 0;
+  int _quotesLastSeenMs = 0;
   List<Map<String, dynamic>> _myApplicationsRaw = <Map<String, dynamic>>[];
+  List<Map<String, dynamic>> _myQuotesRaw = <Map<String, dynamic>>[];
   StreamSubscription<QuerySnapshot>? _myApplicationsSubscription;
+  StreamSubscription<QuerySnapshot>? _quotesSubscription;
   StreamSubscription<DocumentSnapshot>? _lastSeenSubscription;
+  StreamSubscription<DocumentSnapshot>? _quotesLastSeenSubscription;
 
   @override
   void initState() {
@@ -44,10 +49,12 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         _startBadgeSubscription(user.uid);
         _startApplicantBadgeSubscription(user.uid);
         _startUnseenApplicationSubscription(user.uid);
+        _startUnseenQuoteSubscription(user.uid);
       } else {
         _cancelBadgeSubscription();
         _cancelApplicantBadgeSubscription();
         _cancelUnseenApplicationSubscription();
+        _cancelUnseenQuoteSubscription();
       }
     });
   }
@@ -155,8 +162,70 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
     if (mounted) setState(() => _unseenApplicationCount = 0);
   }
 
+  void _startUnseenQuoteSubscription(String uid) {
+    _quotesSubscription?.cancel();
+    _quotesLastSeenSubscription?.cancel();
+    _quotesSubscription = FirebaseFirestore.instance
+        .collection(kColQuotes)
+        .where(QuoteFields.clientId, isEqualTo: uid)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      _myQuotesRaw = snap.docs.map((doc) {
+        final data = doc.data();
+        final status =
+            data[QuoteFields.status]?.toString() ?? kQuoteStatusPending;
+        final createdRaw = data[QuoteFields.createdAt];
+        final createdMs =
+            createdRaw is Timestamp ? createdRaw.millisecondsSinceEpoch : 0;
+        return {'status': status, 'createdMs': createdMs};
+      }).toList();
+      _recomputeUnseenQuotes();
+    });
+    _quotesLastSeenSubscription = FirebaseFirestore.instance
+        .collection(kColUsers)
+        .doc(uid)
+        .snapshots()
+        .listen((snap) {
+      if (!mounted) return;
+      final data = snap.data();
+      final raw = data == null
+          ? null
+          : data[UserFields.quotesLastSeenAt];
+      _quotesLastSeenMs =
+          raw is Timestamp ? raw.millisecondsSinceEpoch : 0;
+      _recomputeUnseenQuotes();
+    });
+  }
+
+  void _recomputeUnseenQuotes() {
+    var count = 0;
+    for (final q in _myQuotesRaw) {
+      final status = q['status']?.toString() ?? kQuoteStatusPending;
+      final createdMs = q['createdMs'] as int? ?? 0;
+      if (status == kQuoteStatusPending &&
+          createdMs > _quotesLastSeenMs) {
+        count++;
+      }
+    }
+    if (!mounted) return;
+    setState(() => _unseenQuoteCount = count);
+  }
+
+  void _cancelUnseenQuoteSubscription() {
+    _quotesSubscription?.cancel();
+    _quotesSubscription = null;
+    _quotesLastSeenSubscription?.cancel();
+    _quotesLastSeenSubscription = null;
+    _myQuotesRaw = <Map<String, dynamic>>[];
+    _quotesLastSeenMs = 0;
+    if (mounted) setState(() => _unseenQuoteCount = 0);
+  }
+
   @override
   void dispose() {
+    _quotesSubscription?.cancel();
+    _quotesLastSeenSubscription?.cancel();
     _myApplicationsSubscription?.cancel();
     _lastSeenSubscription?.cancel();
     _applicantBadgeSubscription?.cancel();
@@ -187,6 +256,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
             acceptedCount: _acceptedCount,
             pendingApplicantCount: _pendingApplicantCount,
             unseenApplicationCount: _unseenApplicationCount,
+            unseenQuoteCount: _unseenQuoteCount,
           ),
         ],
       ),
@@ -194,7 +264,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         currentIndex: currentIndex,
         onIndexChanged: (index) =>
             ref.read(currentTabProvider.notifier).setTab(index),
-        profileBadgeCount: _acceptedCount + _pendingApplicantCount + _unseenApplicationCount,
+        profileBadgeCount: _acceptedCount + _pendingApplicantCount + _unseenApplicationCount + _unseenQuoteCount,
       ),
     );
   }

@@ -28,6 +28,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.acceptedCount = 0,
     this.pendingApplicantCount = 0,
     this.unseenApplicationCount = 0,
+    this.unseenQuoteCount = 0,
   });
 
   final bool openPhoneAuthOnStart;
@@ -36,6 +37,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
   final int acceptedCount;
   final int pendingApplicantCount;
   final int unseenApplicationCount;
+  final int unseenQuoteCount;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -454,6 +456,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.request_quote_outlined,
             title: context.t('my_quotes_title'),
             subtitle: context.t('quote_btn_send'),
+            badgeCount: widget.unseenQuoteCount,
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;
@@ -515,6 +518,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ? context.l10n('profile_verified_done')
                 : context.l10n('profile_verified_todo'),
             onTap: () => _openBcelOnepay(context),
+          ),
+          _buildMenuTile(
+            context,
+            icon: Icons.inbox_rounded,
+            title: context.t('expert_inbox_title'),
+            subtitle: context.t('expert_inbox_empty'),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect('/expert_inbox');
+                _openGoogleAuthFlow(context);
+                return;
+              }
+              context.push('/expert_inbox');
+            },
           ),
           _buildMenuTile(
             context,

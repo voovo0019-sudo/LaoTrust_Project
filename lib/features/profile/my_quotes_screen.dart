@@ -16,6 +16,27 @@ class MyQuotesScreen extends StatefulWidget {
 }
 
 class _MyQuotesScreenState extends State<MyQuotesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _markQuotesSeen();
+  }
+
+  Future<void> _markQuotesSeen() async {
+    try {
+      final uid = auth.currentUser?.uid;
+      if (uid == null) return;
+      await FirebaseFirestore.instance
+          .collection(kColUsers)
+          .doc(uid)
+          .set(
+            {UserFields.quotesLastSeenAt: FieldValue.serverTimestamp()},
+            SetOptions(merge: true),
+          )
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {}
+  }
+
   String _langCode() {
     final raw = Localizations.localeOf(context).languageCode.toLowerCase();
     if (raw.startsWith('ko')) return 'ko';

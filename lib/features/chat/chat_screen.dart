@@ -46,7 +46,13 @@ class ChatScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => ref.read(currentTabProvider.notifier).goHome(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              ref.read(currentTabProvider.notifier).goHome();
+            }
+          },
         ),
         title: Text(context.l10n('chat')),
         centerTitle: true,

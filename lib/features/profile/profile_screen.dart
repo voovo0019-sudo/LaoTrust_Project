@@ -451,6 +451,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           _buildMenuTile(
             context,
+            icon: Icons.request_quote_outlined,
+            title: context.t('my_quotes_title'),
+            subtitle: context.t('quote_btn_send'),
+            onTap: () async {
+              await finalizeAppAuthState();
+              if (!context.mounted) return;
+              if (isFirebaseEnabled && !hasRecognizedUserSession) {
+                setPostLoginRedirect('/my_quotes');
+                _openGoogleAuthFlow(context);
+                return;
+              }
+              context.push('/my_quotes');
+            },
+          ),
+          _buildMenuTile(
+            context,
             icon: Icons.people_outline,
             title: context.l10n('my_job_posts'),
             subtitle: context.l10n('my_job_posts_sub'),

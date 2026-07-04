@@ -86,6 +86,15 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
             QuoteFields.status: kQuoteStatusPending,
             QuoteFields.createdAt: FieldValue.serverTimestamp(),
           });
+
+      // 역참조 배열 업데이트 — 목록 화면 상태 표시용
+      await FirebaseFirestore.instance
+          .collection(kColUsers)
+          .doc(uid)
+          .update({
+            UserFields.quotedRequestIds: FieldValue.arrayUnion([widget.docId]),
+          });
+
       if (mounted) {
         setState(() => _quoteSent = true);
         ScaffoldMessenger.of(context).showSnackBar(

@@ -29,6 +29,7 @@ import 'features/expert_inbox/expert_inbox_screen.dart';
 import 'features/expert_inbox/expert_inbox_detail_screen.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/chat/chat_room_screen.dart';
+import 'features/profile/my_quotes_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/main',
@@ -140,6 +141,10 @@ final _router = GoRouter(
           data: args?['data'] as Map<String, dynamic>? ?? {},
         );
       },
+    ),
+    GoRoute(
+      path: '/my_quotes',
+      builder: (context, state) => const MyQuotesScreen(),
     ),
     GoRoute(
       path: '/expert_inbox',

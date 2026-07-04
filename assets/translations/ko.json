@@ -978,5 +978,19 @@
   "profile_save_success": "프로필이 저장되었습니다",
 
   "deadline_label": "마감",
-  "job_status_open": "모집중"
+  "job_status_open": "모집중",
+
+  "my_quotes_title": "내 견적함",
+  "quote_btn_send": "견적 보내기",
+  "expert_inbox_title": "전문가 수신함",
+  "expert_inbox_empty": "새 요청이 없습니다",
+  "expert_status_new": "새 요청",
+  "expert_status_quoted": "견적 완료",
+  "client_quotes_empty": "아직 받은 견적이 없습니다",
+  "client_quote_pending": "검토중",
+  "client_quote_accepted": "수락함",
+  "client_quote_accept_done": "전문가와 대화를 시작합니다",
+  "client_chat_with_expert": "이 전문가와 대화하기",
+  "client_call_expert": "전문가에게 전화하기",
+  "client_quote_rejected": "거절됨"
 }

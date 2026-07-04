@@ -2777,6 +2777,81 @@ const Map<String, Map<String, String>> kStaticUiTripleByMessageKey = {
   'chat_translating': {'ko': '번역 중...', 'en': 'Translating...', 'lo': 'ກຳລັງແປ...'},
   'chat_show_original': {'ko': '원문 보기', 'en': 'Show original', 'lo': 'ເບິ່ງຕົ້ນສະບັບ'},
   'chat_translate_fail': {'ko': '번역에 실패했습니다', 'en': 'Translation failed', 'lo': 'ການແປລົ້ມເຫລວ'},
+  'my_quotes_title': {
+    'ko': '내 견적함',
+    'en': 'My Quotes',
+    'lo': 'ໃບສະເໜີລາຄາຂອງຂ້ອຍ',
+  },
+  'chat': {
+    'ko': '대화하기',
+    'en': 'Chat',
+    'lo': 'ສົນທະນາ',
+  },
+  'call': {
+    'ko': '전화 연결',
+    'en': 'Call',
+    'lo': 'ໂທລະສັບ',
+  },
+  'quote_call_locked': {
+    'ko': '견적 수락 후 연락처가 공개됩니다',
+    'en': 'Contact revealed after accepting',
+    'lo': 'ຂໍ້ມູນຕິດຕໍ່ຈະເປີດເຜີຍຫຼັງຈາກຍອມຮັບ',
+  },
+  'expert_inbox_title': {
+    'ko': '전문가 수신함',
+    'en': 'Expert Inbox',
+    'lo': 'ກ່ອງຮັບຜູ້ຊ່ຽວຊານ',
+  },
+  'expert_inbox_empty': {
+    'ko': '새 요청이 없습니다',
+    'en': 'No new requests',
+    'lo': 'ບໍ່ມີຄຳຮ້ອງໃໝ່',
+  },
+  'expert_status_new': {
+    'ko': '새 요청',
+    'en': 'New',
+    'lo': 'ໃໝ່',
+  },
+  'expert_status_quoted': {
+    'ko': '견적 완료',
+    'en': 'Quoted',
+    'lo': 'ສະເໜີແລ້ວ',
+  },
+  'client_quotes_empty': {
+    'ko': '아직 받은 견적이 없습니다',
+    'en': 'No quotes received yet',
+    'lo': 'ຍັງບໍ່ໄດ້ຮັບໃບສະເໜີລາຄາ',
+  },
+  'client_quote_pending': {
+    'ko': '검토중',
+    'en': 'Pending',
+    'lo': 'ກຳລັງພິຈາລະນາ',
+  },
+  'client_quote_accepted': {
+    'ko': '수락함',
+    'en': 'Accepted',
+    'lo': 'ຍອມຮັບແລ້ວ',
+  },
+  'client_quote_accept_done': {
+    'ko': '전문가와 대화를 시작합니다',
+    'en': 'Starting chat with expert',
+    'lo': 'ເລີ່ມສົນທະນາກັບຜູ້ຊ່ຽວຊານ',
+  },
+  'client_chat_with_expert': {
+    'ko': '이 전문가와 대화하기',
+    'en': 'Chat with expert',
+    'lo': 'ສົນທະນາກັບຜູ້ຊ່ຽວຊານ',
+  },
+  'client_call_expert': {
+    'ko': '전문가에게 전화하기',
+    'en': 'Call expert',
+    'lo': 'ໂທຫາຜູ້ຊ່ຽວຊານ',
+  },
+  'client_quote_rejected': {
+    'ko': '거절됨',
+    'en': 'Rejected',
+    'lo': 'ຖືກປະຕິເສດ',
+  },
 };
 
 bool translationMapperIsLegacyEnglishBridgePhrase(String s) {

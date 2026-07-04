@@ -956,5 +956,19 @@
   "profile_save_success": "Profile saved successfully",
 
   "deadline_label": "Deadline",
-  "job_status_open": "Hiring"
+  "job_status_open": "Hiring",
+
+  "my_quotes_title": "My Quotes",
+  "quote_btn_send": "Send Quote",
+  "expert_inbox_title": "Expert Inbox",
+  "expert_inbox_empty": "No new requests",
+  "expert_status_new": "New",
+  "expert_status_quoted": "Quoted",
+  "client_quotes_empty": "No quotes received yet",
+  "client_quote_pending": "Pending",
+  "client_quote_accepted": "Accepted",
+  "client_quote_accept_done": "Starting chat with expert",
+  "client_chat_with_expert": "Chat with expert",
+  "client_call_expert": "Call expert",
+  "client_quote_rejected": "Rejected"
 }

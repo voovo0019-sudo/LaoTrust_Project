@@ -17,6 +17,7 @@ class ExpertInboxScreen extends StatefulWidget {
 
 class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
   List<String> _expertCategories = [];
+  List<String> _quotedRequestIds = [];
   late Future<void> _categoriesReady;
 
   String _langCode(BuildContext context) {
@@ -31,36 +32,14 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
     return kStaticUiTripleByMessageKey[key]?[lang] ?? key;
   }
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'accepted':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  String _statusLabel(BuildContext context, String status) {
-    switch (status) {
-      case 'accepted':
-        return _t(context, 'inbox_status_accepted');
-      case 'rejected':
-        return _t(context, 'inbox_status_rejected');
-      default:
-        return _t(context, 'inbox_status_pending');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _categoriesReady = _loadExpertCategories();
+    _categoriesReady = _loadExpertData();
   }
 
-  /// 전문가 등록 categories 로드. 실패·오프라인 시 빈 배열 → 전체 표시(하위 호환).
-  Future<void> _loadExpertCategories() async {
+  /// 전문가 categories + quotedRequestIds 한 번에 로드
+  Future<void> _loadExpertData() async {
     try {
       if (!isFirebaseEnabled) return;
       final uid = auth.currentUser?.uid;
@@ -71,12 +50,16 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
           .get()
           .timeout(const Duration(seconds: 5));
       final data = doc.data();
-      if (data != null && data['categories'] is List) {
-        _expertCategories = List<String>.from(data['categories']);
+      if (data != null) {
+        if (data['categories'] is List) {
+          _expertCategories = List<String>.from(data['categories']);
+        }
+        if (data[UserFields.quotedRequestIds] is List) {
+          _quotedRequestIds =
+              List<String>.from(data[UserFields.quotedRequestIds]);
+        }
       }
-    } catch (_) {
-      // 로드 실패 시 _expertCategories 비어 있음 → 전체 표시
-    }
+    } catch (_) {}
   }
 
   @override
@@ -88,7 +71,7 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
       appBar: AppBar(
         backgroundColor: _kRoyalBlue,
         title: Text(
-          _t(context, 'inbox_title'),
+          _t(context, 'expert_inbox_title'),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -157,23 +140,20 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                 return StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('artifacts')
-                      .doc(
-                          DefaultFirebaseOptions.currentPlatform.projectId)
+                      .doc(DefaultFirebaseOptions.currentPlatform.projectId)
                       .collection('public')
                       .doc('data')
                       .collection('requests')
                       .orderBy('createdAt', descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const Center(
-                          child: CircularProgressIndicator());
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
                     }
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return Center(
                         child: Text(
-                          _t(context, 'inbox_empty'),
+                          _t(context, 'expert_inbox_empty'),
                           style: TextStyle(
                             color: Colors.grey.shade500,
                             fontSize: 16,
@@ -181,20 +161,24 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                         ),
                       );
                     }
-                    var docs = snapshot.data!.docs;
-                    if (_expertCategories.isNotEmpty) {
-                      docs = docs.where((doc) {
-                        final data =
-                            doc.data() as Map<String, dynamic>;
-                        final categoryKey =
-                            data['categoryKey'] as String? ?? '';
-                        return _expertCategories.contains(categoryKey);
-                      }).toList();
-                    }
+                    final myUid = auth.currentUser?.uid ?? '';
+                    var docs = snapshot.data!.docs.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final categoryKey =
+                          data['categoryKey'] as String? ?? '';
+                      final requestUserId =
+                          data[RequestFields.userId] as String? ?? '';
+                      // ① 내가 올린 요청 제외 (손님 차단)
+                      if (requestUserId == myUid) return false;
+                      // ② 전문가 카테고리 없으면 아무것도 안 보임 (전문가 아닌 유저 차단)
+                      if (_expertCategories.isEmpty) return false;
+                      // ③ 내 담당 카테고리만
+                      return _expertCategories.contains(categoryKey);
+                    }).toList();
                     if (docs.isEmpty) {
                       return Center(
                         child: Text(
-                          _t(context, 'inbox_empty'),
+                          _t(context, 'expert_inbox_empty'),
                           style: TextStyle(
                             color: Colors.grey.shade500,
                             fontSize: 16,
@@ -206,11 +190,10 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                       padding: const EdgeInsets.all(16),
                       itemCount: docs.length,
                       itemBuilder: (context, index) {
-                        final data = docs[index].data()
-                            as Map<String, dynamic>;
+                        final data =
+                            docs[index].data() as Map<String, dynamic>;
                         final docId = docs[index].id;
-                        final status =
-                            data['status'] as String? ?? 'pending';
+                        final isQuoted = _quotedRequestIds.contains(docId);
                         final categoryKey =
                             data['categoryKey'] as String? ?? '';
                         final createdAt = data['createdAt'];
@@ -227,10 +210,10 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                         final rawTitle = titleMap?[lang] as String? ??
                             _t(context,
                                 'cat_${categoryKey.replaceAll('expert_', '')}');
-                        final titleParts = rawTitle.split(' · ');
+                        final titleParts = rawTitle.split(' ? ');
                         final categoryTitle = titleParts.first.trim();
                         final subTypeTitle = titleParts.length > 1
-                            ? titleParts.skip(1).join(' · ').trim()
+                            ? titleParts.skip(1).join(' ? ').trim()
                             : '';
 
                         return Card(
@@ -258,10 +241,8 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: _kRoyalBlue
-                                          .withValues(alpha: 0.1),
-                                      borderRadius:
-                                          BorderRadius.circular(12),
+                                      color: _kRoyalBlue.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Icon(
                                       Icons.inbox_rounded,
@@ -284,8 +265,8 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                                         ),
                                         if (subTypeTitle.isNotEmpty)
                                           Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 2),
+                                            padding: const EdgeInsets.only(
+                                                top: 2),
                                             child: Text(
                                               subTypeTitle,
                                               style: TextStyle(
@@ -305,25 +286,33 @@ class _ExpertInboxScreenState extends State<ExpertInboxScreen> {
                                       ],
                                     ),
                                   ),
+                                  // 견적 발송 여부 기반 상태 배지
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _statusColor(status)
+                                      color: (isQuoted
+                                              ? Colors.green
+                                              : Colors.orange)
                                           .withValues(alpha: 0.1),
-                                      borderRadius:
-                                          BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: _statusColor(status),
+                                        color: isQuoted
+                                            ? Colors.green
+                                            : Colors.orange,
                                         width: 1,
                                       ),
                                     ),
                                     child: Text(
-                                      _statusLabel(context, status),
+                                      isQuoted
+                                          ? _t(context, 'expert_status_quoted')
+                                          : _t(context, 'expert_status_new'),
                                       style: TextStyle(
-                                        color: _statusColor(status),
+                                        color: isQuoted
+                                            ? Colors.green
+                                            : Colors.orange,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),

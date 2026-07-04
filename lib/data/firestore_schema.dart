@@ -39,6 +39,9 @@ abstract class UserFields {
 
   /// 지원자가 "내 지원 현황"을 마지막으로 확인한 시각 (배지 clear-on-view 기준).
   static const String applicationsLastSeenAt = 'applicationsLastSeenAt';
+
+  /// 전문가가 견적을 보낸 요청 ID 목록 (역참조 배열, 목록 화면 상태 표시용)
+  static const String quotedRequestIds = 'quotedRequestIds';
 }
 
 /// user_type 값 / User type values

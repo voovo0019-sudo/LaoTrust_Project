@@ -956,5 +956,19 @@
   "profile_save_success": "ບັນທຶກໂປຣໄຟລ໌ສຳເລັດ",
 
   "deadline_label": "ກຳນົດເວລາ",
-  "job_status_open": "ກຳລັງຮັບສະໝັກ"
+  "job_status_open": "ກຳລັງຮັບສະໝັກ",
+
+  "my_quotes_title": "ໃບສະເໜີລາຄາຂອງຂ້ອຍ",
+  "quote_btn_send": "ສົ່ງໃບສະເໜີລາຄາ",
+  "expert_inbox_title": "ກ່ອງຮັບຜູ້ຊ່ຽວຊານ",
+  "expert_inbox_empty": "ບໍ່ມີຄຳຮ້ອງໃໝ່",
+  "expert_status_new": "ໃໝ່",
+  "expert_status_quoted": "ສະເໜີແລ້ວ",
+  "client_quotes_empty": "ຍັງບໍ່ໄດ້ຮັບໃບສະເໜີລາຄາ",
+  "client_quote_pending": "ກຳລັງພິຈາລະນາ",
+  "client_quote_accepted": "ຍອມຮັບແລ້ວ",
+  "client_quote_accept_done": "ເລີ່ມສົນທະນາກັບຜູ້ຊ່ຽວຊານ",
+  "client_chat_with_expert": "ສົນທະນາກັບຜູ້ຊ່ຽວຊານ",
+  "client_call_expert": "ໂທຫາຜູ້ຊ່ຽວຊານ",
+  "client_quote_rejected": "ຖືກປະຕິເສດ"
 }

@@ -992,5 +992,6 @@
   "client_quote_accept_done": "전문가와 대화를 시작합니다",
   "client_chat_with_expert": "이 전문가와 대화하기",
   "client_call_expert": "전문가에게 전화하기",
-  "client_quote_rejected": "거절됨"
+  "client_quote_rejected": "거절됨",
+  "login_required": "로그인이 필요합니다"
 }

@@ -970,5 +970,6 @@
   "client_quote_accept_done": "ເລີ່ມສົນທະນາກັບຜູ້ຊ່ຽວຊານ",
   "client_chat_with_expert": "ສົນທະນາກັບຜູ້ຊ່ຽວຊານ",
   "client_call_expert": "ໂທຫາຜູ້ຊ່ຽວຊານ",
-  "client_quote_rejected": "ຖືກປະຕິເສດ"
+  "client_quote_rejected": "ຖືກປະຕິເສດ",
+  "login_required": "ກະລຸນາເຂົ້າສູ່ລະບົບ"
 }

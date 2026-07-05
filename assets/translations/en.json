@@ -970,5 +970,6 @@
   "client_quote_accept_done": "Starting chat with expert",
   "client_chat_with_expert": "Chat with expert",
   "client_call_expert": "Call expert",
-  "client_quote_rejected": "Rejected"
+  "client_quote_rejected": "Rejected",
+  "login_required": "Login required"
 }

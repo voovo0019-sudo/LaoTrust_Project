@@ -53,6 +53,13 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
     } catch (_) {}
   }
 
+  /// 현재 로그인 유저가 이 요청의 손님이면 true (전문가 화면 차단)
+  bool _isClientOfThisRequest() {
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final clientId = widget.data[RequestFields.userId] as String? ?? '';
+    return uid == clientId;
+  }
+
   Future<void> _sendQuote({
     required String message,
     String? price,
@@ -340,7 +347,9 @@ class _ExpertInboxDetailScreenState extends State<ExpertInboxDetailScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _isClientOfThisRequest()
+              ? Center(child: Text(_t('expert_inbox_empty')))
+              : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

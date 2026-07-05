@@ -275,6 +275,8 @@ class FirebaseService {
                 'clientId': data[ChatFields.clientId] ?? '',
                 'expertId': data[ChatFields.expertId] ?? '',
                 'chatType': data[ChatFields.chatType] ?? 'job',
+                'requestTitleI18n': Map<String, dynamic>.from(
+                    data[ChatFields.requestTitleI18n] as Map? ?? {'ko': '', 'en': '', 'lo': ''}),
               };
             }).toList());
   }

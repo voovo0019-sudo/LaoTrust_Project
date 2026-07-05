@@ -112,8 +112,11 @@ class _ChatRoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
+    final chatType = room['chatType']?.toString() ?? 'job';
     final titleI18n = Map<String, dynamic>.from(
-        room['jobTitleI18n'] as Map? ?? {});
+        chatType == 'service_request'
+            ? (room['requestTitleI18n'] as Map? ?? {})
+            : (room['jobTitleI18n'] as Map? ?? {}));
     final jobTitle = titleI18n[lang]?.toString().isNotEmpty == true
         ? titleI18n[lang].toString()
         : titleI18n['en']?.toString() ?? '';
@@ -126,7 +129,6 @@ class _ChatRoomTile extends StatelessWidget {
         ? '${lastMessageAt.hour.toString().padLeft(2, '0')}:${lastMessageAt.minute.toString().padLeft(2, '0')}'
         : '';
     final chatId = room['chatId']?.toString() ?? '';
-    final chatType = room['chatType']?.toString() ?? 'job';
     final String otherUid;
     if (chatType == 'service_request') {
       final clientId = room['clientId']?.toString() ?? '';

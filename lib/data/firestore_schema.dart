@@ -151,6 +151,10 @@ abstract class ChatFields {
   static const String clientId = 'clientId';
   static const String expertId = 'expertId';
   static const String chatType = 'chatType'; // 'job' | 'service_request'
+
+  /// 수신자별 읽지 않은 메시지 수 필드명 생성
+  /// 예: unreadCount__KsH4OOTCmcevX4lmgMOOgpoUvWu2
+  static String unreadCountKey(String uid) => 'unreadCount__$uid';
 }
 
 abstract class MessageFields {

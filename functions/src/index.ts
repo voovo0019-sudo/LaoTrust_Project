@@ -2,7 +2,7 @@ import {setGlobalOptions} from "firebase-functions";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import {initializeApp} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
+import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
 
 initializeApp();
@@ -136,6 +136,16 @@ export const onNewChatMessage = onDocumentCreated(
         chatId,
         error: String(err),
       });
+    }
+
+    // 수신자 읽지 않은 메시지 카운트 +1
+    try {
+      const unreadKey = `unreadCount__${recipientId}`;
+      await db.collection("chats").doc(chatId).update({
+        [unreadKey]: FieldValue.increment(1),
+      });
+    } catch (err) {
+      logger.error("Failed to update unread count", {recipientId, chatId});
     }
   }
 );

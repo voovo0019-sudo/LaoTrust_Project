@@ -7,11 +7,13 @@ class CustomBottomNav extends StatelessWidget {
     required this.currentIndex,
     required this.onIndexChanged,
     this.profileBadgeCount = 0,
+    this.chatBadgeCount = 0,
   });
 
   final int currentIndex;
   final ValueChanged<int> onIndexChanged;
   final int profileBadgeCount;
+  final int chatBadgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,7 @@ class CustomBottomNav extends StatelessWidget {
                 label: context.l10n('chat'),
                 isSelected: currentIndex == 2,
                 onTap: () => onIndexChanged(2),
+                badgeCount: chatBadgeCount,
               ),
               _NavItem(
                 icon: Icons.person_outline,

@@ -14,6 +14,7 @@ import '../home/components/custom_bottom_nav.dart';
 import '../../core/providers/providers.dart';
 import '../../data/firestore_schema.dart';
 import '../../firebase_options.dart';
+import '../../services/firebase_service.dart';
 
 class MainTabScreen extends ConsumerStatefulWidget {
   const MainTabScreen({super.key});
@@ -31,6 +32,8 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
 
   int _unseenApplicationCount = 0;
   int _unseenQuoteCount = 0;
+  int _unreadChatCount = 0;
+  StreamSubscription<List<Map<String, dynamic>>>? _chatBadgeSubscription;
   int _applicationsLastSeenMs = 0;
   int _quotesLastSeenMs = 0;
   List<Map<String, dynamic>> _myApplicationsRaw = <Map<String, dynamic>>[];
@@ -50,11 +53,13 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         _startApplicantBadgeSubscription(user.uid);
         _startUnseenApplicationSubscription(user.uid);
         _startUnseenQuoteSubscription(user.uid);
+        _startChatBadgeSubscription(user.uid);
       } else {
         _cancelBadgeSubscription();
         _cancelApplicantBadgeSubscription();
         _cancelUnseenApplicationSubscription();
         _cancelUnseenQuoteSubscription();
+        _cancelChatBadgeSubscription();
       }
     });
   }
@@ -222,8 +227,31 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
     if (mounted) setState(() => _unseenQuoteCount = 0);
   }
 
+  void _startChatBadgeSubscription(String uid) {
+    _chatBadgeSubscription?.cancel();
+    _chatBadgeSubscription = FirebaseService()
+        .watchMyChatRooms(uid)
+        .listen((rooms) {
+      if (!mounted) return;
+      var count = 0;
+      for (final room in rooms) {
+        final key = ChatFields.unreadCountKey(uid);
+        final unread = room[key] as int? ?? 0;
+        count += unread;
+      }
+      setState(() => _unreadChatCount = count);
+    });
+  }
+
+  void _cancelChatBadgeSubscription() {
+    _chatBadgeSubscription?.cancel();
+    _chatBadgeSubscription = null;
+    if (mounted) setState(() => _unreadChatCount = 0);
+  }
+
   @override
   void dispose() {
+    _chatBadgeSubscription?.cancel();
     _quotesSubscription?.cancel();
     _quotesLastSeenSubscription?.cancel();
     _myApplicationsSubscription?.cancel();
@@ -265,6 +293,7 @@ class _MainTabScreenState extends ConsumerState<MainTabScreen> {
         onIndexChanged: (index) =>
             ref.read(currentTabProvider.notifier).setTab(index),
         profileBadgeCount: _acceptedCount + _pendingApplicantCount + _unseenApplicationCount + _unseenQuoteCount,
+        chatBadgeCount: _unreadChatCount,
       ),
     );
   }

@@ -277,6 +277,12 @@ class FirebaseService {
                 'chatType': data[ChatFields.chatType] ?? 'job',
                 'requestTitleI18n': Map<String, dynamic>.from(
                     data[ChatFields.requestTitleI18n] as Map? ?? {'ko': '', 'en': '', 'lo': ''}),
+                // unreadCount__{uid} 동적 필드 전체 포함
+                ...Map.fromEntries(
+                  data.entries.where(
+                    (e) => e.key.startsWith('unreadCount__'),
+                  ),
+                ),
               };
             }).toList());
   }
@@ -363,6 +369,14 @@ class FirebaseService {
       }
     }
     await batch.commit();
+
+    // 내 미읽음 카운트 초기화
+    try {
+      await FirebaseFirestore.instance
+          .collection(kColChats)
+          .doc(chatId)
+          .update({ChatFields.unreadCountKey(myUid): 0});
+    } catch (_) {}
   }
 
   /// 메시지 번역 결과를 Firestore에 캐시 저장.

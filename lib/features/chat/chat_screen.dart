@@ -9,6 +9,7 @@ import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme.dart';
+import '../../data/firestore_schema.dart';
 import '../../services/firebase_service.dart';
 
 class ChatScreen extends ConsumerWidget {
@@ -129,6 +130,8 @@ class _ChatRoomTile extends StatelessWidget {
         ? '${lastMessageAt.hour.toString().padLeft(2, '0')}:${lastMessageAt.minute.toString().padLeft(2, '0')}'
         : '';
     final chatId = room['chatId']?.toString() ?? '';
+    final unreadCount = (room[ChatFields.unreadCountKey(myUid)] as int? ?? 0);
+    final hasUnread = unreadCount > 0;
     final String otherUid;
     if (chatType == 'service_request') {
       final clientId = room['clientId']?.toString() ?? '';
@@ -179,14 +182,41 @@ class _ChatRoomTile extends StatelessWidget {
             child: const Icon(Icons.chat_bubble_outline,
                 color: Color(0xFF1E3A8A), size: 22),
           ),
-          title: Text(
-            jobTitle,
-            style: TextStyle(
-              fontFamilyFallback: AppTheme.notoSansLaoFallback,
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-              color: const Color(0xFF1E293B),
-            ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  jobTitle,
+                  style: TextStyle(
+                    fontFamilyFallback: AppTheme.notoSansLaoFallback,
+                    fontWeight: hasUnread ? FontWeight.w800 : FontWeight.w600,
+                    fontSize: 15,
+                    color: hasUnread
+                        ? const Color(0xFF1E3A8A)
+                        : const Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+              if (hasUnread)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFDC2626),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : '$unreadCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
           subtitle: Text(
             lastMessage.isEmpty

@@ -921,6 +921,9 @@
   "google_login_error": "ການເຂົ້າສູ່ລະບົບ Google ລົ້ມເຫລວ. ກະລຸນາລອງໃໝ່.",
   "google_already_logged_in": "ທ່ານເຂົ້າສູ່ລະບົບດ້ວຍ Google ແລ້ວ.",
 
+  "logout": "ອອກຈາກລະບົບ",
+  "logout_sub": "ອອກຈາກລະບົບບັນຊີປັດຈຸບັນ",
+
   "my_job_posts": "ການຈັດການປະກາດຂອງຂ້ອຍ",
   "my_job_posts_sub": "ກວດສອບຜູ້ສະໝັກ",
   "no_applicants": "ຍັງບໍ່ມີຜູ້ສະໝັກ",

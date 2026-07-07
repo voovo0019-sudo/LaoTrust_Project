@@ -943,6 +943,9 @@
   "google_login_error": "구글 로그인에 실패했습니다. 다시 시도해주세요.",
   "google_already_logged_in": "이미 구글 계정으로 로그인되어 있습니다.",
 
+  "logout": "로그아웃",
+  "logout_sub": "현재 계정에서 로그아웃합니다",
+
   "my_job_posts": "내 공고 관리",
   "my_job_posts_sub": "지원자 현황 확인",
   "no_applicants": "아직 지원자가 없습니다",

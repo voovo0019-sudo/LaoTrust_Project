@@ -921,6 +921,9 @@
   "google_login_error": "Google sign-in failed. Please try again.",
   "google_already_logged_in": "You are already signed in with Google.",
 
+  "logout": "Log out",
+  "logout_sub": "Sign out of your current account",
+
   "my_job_posts": "My Job Posts",
   "my_job_posts_sub": "Check applicants",
   "no_applicants": "No applicants yet",

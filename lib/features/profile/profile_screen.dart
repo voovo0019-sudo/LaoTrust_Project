@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/providers/providers.dart';
 import '../../core/app_localizations.dart';
-import '../../core/translation_mapper.dart';
+import '../../core/country_phone_codes.dart';
 import '../../core/verified_badge_service.dart';
 import '../../core/firebase_service.dart';
 import '../../data/firestore_schema.dart';
@@ -454,8 +454,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _buildMenuTile(
             context,
             icon: Icons.request_quote_outlined,
-            title: context.t('my_quotes_title'),
-            subtitle: context.t('quote_btn_send'),
+            title: context.l10n('my_quotes_title'),
+            subtitle: context.l10n('quote_btn_send'),
             badgeCount: widget.unseenQuoteCount,
             onTap: () async {
               await finalizeAppAuthState();
@@ -522,8 +522,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _buildMenuTile(
             context,
             icon: Icons.inbox_rounded,
-            title: context.t('expert_inbox_title'),
-            subtitle: context.t('expert_inbox_empty'),
+            title: context.l10n('expert_inbox_title'),
+            subtitle: context.l10n('expert_inbox_empty'),
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;
@@ -538,8 +538,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _buildMenuTile(
             context,
             icon: Icons.workspace_premium,
-            title: context.t('expert_reg_title'),
-            subtitle: context.t('expert_reg_menu_sub'),
+            title: context.l10n('expert_reg_title'),
+            subtitle: context.l10n('expert_reg_menu_sub'),
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;
@@ -570,8 +570,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _buildMenuTile(
             context,
             icon: Icons.shield,
-            title: context.t('partner_support_center_title'),
-            subtitle: context.t('partner_support_center_info'),
+            title: context.l10n('partner_support_center_title'),
+            subtitle: context.l10n('partner_support_center_info'),
             onTap: () async {
               await finalizeAppAuthState();
               if (!context.mounted) return;

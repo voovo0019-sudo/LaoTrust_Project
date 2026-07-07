@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
 import '../../core/translation_mapper.dart';
+import '../../core/country_phone_codes.dart';
 import '../../core/location_service.dart';
 import '../../data/firestore_schema.dart';
 import '../../services/auth_service.dart';

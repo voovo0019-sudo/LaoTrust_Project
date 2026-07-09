@@ -116,7 +116,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   String _displayJobTitle(BuildContext context, Map<String, dynamic> job) {
     if (job['titleKey'] != null) {
-      return context.t(job['titleKey']!.toString().trim());
+      return context.l10n(job['titleKey']!.toString().trim());
     }
     final lang = Localizations.localeOf(context).languageCode;
     final tm = job['titleMap'] ?? job[JobFields.titleI18n];
@@ -170,7 +170,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
 
   String _displayJobDetail(BuildContext context, Map<String, dynamic> job) {
     if (job['detailKey'] != null) {
-      return context.t(job['detailKey']!.toString().trim());
+      return context.l10n(job['detailKey']!.toString().trim());
     }
     final lang = Localizations.localeOf(context).languageCode;
     final m = job['detailMap'] ?? job[JobFields.descriptionI18n];
@@ -211,16 +211,16 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        title: Text(context.t('quick_job_login_required_title')),
-        content: Text(context.t('quick_job_login_required_message')),
+        title: Text(context.l10n('quick_job_login_required_title')),
+        content: Text(context.l10n('quick_job_login_required_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(context.t('quick_job_dialog_cancel')),
+            child: Text(context.l10n('quick_job_dialog_cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(context.t('quick_job_go_to_profile')),
+            child: Text(context.l10n('quick_job_go_to_profile')),
           ),
         ],
       ),
@@ -237,16 +237,16 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        title: Text(context.t('quick_job_delete_confirm_title')),
-        content: Text(context.t('quick_job_delete_confirm_message')),
+        title: Text(context.l10n('quick_job_delete_confirm_title')),
+        content: Text(context.l10n('quick_job_delete_confirm_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(context.t('quick_job_dialog_cancel')),
+            child: Text(context.l10n('quick_job_dialog_cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(context.t('quick_job_delete_action')),
+            child: Text(context.l10n('quick_job_delete_action')),
           ),
         ],
       ),
@@ -261,7 +261,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t('quick_job_save_failed'))),
+          SnackBar(content: Text(context.l10n('quick_job_save_failed'))),
         );
       }
     }
@@ -323,7 +323,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
       builder: (ctx) {
         final lang = Localizations.localeOf(ctx).languageCode;
         final titleLine = job['titleKey'] != null
-            ? ctx.t(job['titleKey']!.toString().trim())
+            ? ctx.l10n(job['titleKey']!.toString().trim())
             : _safeDisplay(job['titleMap'] ?? job[JobFields.titleI18n] ?? job['title'], lang);
         final locationLine = job['locKey'] != null
             ? ctx.l10n(job['locKey']!.toString())
@@ -332,7 +332,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ? ctx.l10n(job['salaryKey']!.toString())
             : _safeDisplay(job['salaryMap'] ?? job[JobFields.salaryI18n] ?? job['salary'], lang);
         final detailLine = job['detailKey'] != null
-            ? ctx.t(job['detailKey']!.toString().trim())
+            ? ctx.l10n(job['detailKey']!.toString().trim())
             : _safeDisplay(job['detailMap'] ?? job[JobFields.descriptionI18n] ?? job['detail'], lang);
         DateTime? dl;
         final tRaw = job['deadlineAt'];
@@ -350,7 +350,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
             ? ''
             : (remaining.isNegative
                 ? ctx.l10n('job_deadline_passed')
-                : ctx.t('job_deadline_left').replaceAll('{h}', remH!.toStringAsFixed(0)));
+                : ctx.l10n('job_deadline_left').replaceAll('{h}', remH!.toStringAsFixed(0)));
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           child: Padding(
@@ -410,7 +410,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                   children: [
                     Icon(Icons.location_on, size: 16, color: Colors.grey.shade500),
                     const SizedBox(width: 6),
-                    Expanded(child: Text('${ctx.t('location')}: $locationLine', style: _qjTextStyle(fontSize: 13))),
+                    Expanded(child: Text('${ctx.l10n('location')}: $locationLine', style: _qjTextStyle(fontSize: 13))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -419,7 +419,7 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                   children: [
                     Icon(Icons.assignment_outlined, size: 16, color: Colors.grey.shade500),
                     const SizedBox(width: 6),
-                    Expanded(child: Text('${ctx.t('detail')}: $detailLine', style: _qjTextStyle(fontSize: 13))),
+                    Expanded(child: Text('${ctx.l10n('detail')}: $detailLine', style: _qjTextStyle(fontSize: 13))),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -801,14 +801,14 @@ class _QuickJobsSectionState extends State<QuickJobsSection> {
                                       children: [
                                         IconButton(
                                           icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E3A8A), size: 18),
-                                          tooltip: context.t('quick_job_edit_action'),
+                                          tooltip: context.l10n('quick_job_edit_action'),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                           onPressed: () => _openEditJob(context, job: job, title: title, location: location, salary: salary, detail: detail, deadlineAt: deadlineResolved),
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.delete_outline, color: Color(0xFF1E3A8A), size: 18),
-                                          tooltip: context.t('quick_job_delete_action'),
+                                          tooltip: context.l10n('quick_job_delete_action'),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                           onPressed: () {

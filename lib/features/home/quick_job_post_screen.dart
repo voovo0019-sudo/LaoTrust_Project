@@ -92,16 +92,16 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        title: Text(context.t('quick_job_login_required_title')),
-        content: Text(context.t('quick_job_login_required_message')),
+        title: Text(context.l10n('quick_job_login_required_title')),
+        content: Text(context.l10n('quick_job_login_required_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(context.t('quick_job_dialog_cancel')),
+            child: Text(context.l10n('quick_job_dialog_cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(context.t('quick_job_go_to_profile')),
+            child: Text(context.l10n('quick_job_go_to_profile')),
           ),
         ],
       ),
@@ -251,7 +251,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
       if (kDebugMode) debugPrint('_submit 최종 에러: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t('error_save_failed'))),
+          SnackBar(content: Text(context.l10n('error_save_failed'))),
         );
       }
     } finally {
@@ -327,7 +327,7 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
               children: [
                 Text(
                   widget.isEditMode
-                      ? context.t('quick_job_post_edit_title')
+                      ? context.l10n('quick_job_post_edit_title')
                       : context.l10n('quick_job_post_title'),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -816,8 +816,8 @@ class _QuickJobPostScreenState extends State<QuickJobPostScreen> {
                           const SizedBox(width: 8),
                           Text(
                             widget.isEditMode
-                                ? context.t('quick_job_post_save_edit')
-                                : context.t('quick_job_post_submit'),
+                                ? context.l10n('quick_job_post_save_edit')
+                                : context.l10n('quick_job_post_submit'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

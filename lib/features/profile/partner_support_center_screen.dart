@@ -96,7 +96,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.t('partner_upload_removed')),
+        content: Text(context.l10n('partner_upload_removed')),
         backgroundColor: _royalNavy,
       ),
     );
@@ -124,7 +124,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.t('partner_upload_success')),
+          content: Text(context.l10n('partner_upload_success')),
           backgroundColor: _royalNavy,
         ),
       );
@@ -149,7 +149,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.t('partner_upload_success')),
+        content: Text(context.l10n('partner_upload_success')),
         backgroundColor: _royalNavy,
       ),
     );
@@ -183,7 +183,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.t('partner_upload_success')),
+        content: Text(context.l10n('partner_upload_success')),
         backgroundColor: _royalNavy,
       ),
     );
@@ -204,7 +204,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: Text(context.t('partner_pick_gallery')),
+                title: Text(context.l10n('partner_pick_gallery')),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickFromGallery(type);
@@ -212,7 +212,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.photo_camera_outlined),
-                title: Text(context.t('partner_pick_camera')),
+                title: Text(context.l10n('partner_pick_camera')),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _pickFromCamera(type);
@@ -221,7 +221,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
               const SizedBox(height: 6),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(context.t('confirm')),
+                child: Text(context.l10n('confirm')),
               ),
             ],
           ),
@@ -267,7 +267,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
       appBar: AppBar(
         backgroundColor: _royalNavy,
         foregroundColor: Colors.white,
-        title: Text(context.t('partner_support_center_title')),
+        title: Text(context.l10n('partner_support_center_title')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -277,24 +277,24 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
             _buildInfoCard(),
             const SizedBox(height: 24),
             _buildUploadSection(
-              context.t('partner_upload_id'),
-              context.t('partner_upload_id_hint'),
+              context.l10n('partner_upload_id'),
+              context.l10n('partner_upload_id_hint'),
               Icons.badge,
               _idUploaded,
               type: 'id',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
-              context.t('partner_upload_cert'),
-              context.t('partner_upload_cert_hint'),
+              context.l10n('partner_upload_cert'),
+              context.l10n('partner_upload_cert_hint'),
               Icons.card_membership,
               _certUploaded,
               type: 'cert',
             ),
             const SizedBox(height: 16),
             _buildUploadSection(
-              context.t('partner_upload_portfolio'),
-              context.t('partner_upload_portfolio_hint'),
+              context.l10n('partner_upload_portfolio'),
+              context.l10n('partner_upload_portfolio_hint'),
               Icons.photo_library,
               _portfolioUploaded,
               type: 'portfolio',
@@ -310,7 +310,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                         borderRadius: BorderRadius.circular(28),
                       ),
                       content: Text(
-                        context.t('partner_review_complete_message'),
+                        context.l10n('partner_review_complete_message'),
                       ),
                       actions: [
                         TextButton(
@@ -320,7 +320,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                               (route) => route.isFirst,
                             );
                           },
-                          child: Text(context.t('confirm')),
+                          child: Text(context.l10n('confirm')),
                         ),
                       ],
                     ),
@@ -334,7 +334,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
-                child: Text(context.t('partner_submit_for_review')),
+                child: Text(context.l10n('partner_submit_for_review')),
               ),
           ],
         ),
@@ -356,7 +356,7 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              context.t('partner_support_center_info'),
+              context.l10n('partner_support_center_info'),
               style: const TextStyle(
                 color: _royalNavy,
                 fontSize: 13,

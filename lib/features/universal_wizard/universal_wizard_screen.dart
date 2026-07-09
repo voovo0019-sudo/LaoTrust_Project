@@ -2482,7 +2482,7 @@ List<Widget> _buildStep2RepairV5() {
               side: const BorderSide(color: _kRoyalBlue, width: 1.2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             ),
-            child: Text(isLast ? context.t('apply_final') : context.t('next_step')),
+            child: Text(isLast ? context.l10n('apply_final') : context.l10n('next_step')),
           ),
         ),
       ),

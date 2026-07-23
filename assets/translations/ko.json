@@ -414,6 +414,8 @@
   "partner_pick_gallery": "갤러리에서 선택",
   "partner_pick_camera": "카메라로 촬영",
   "partner_review_complete_message": "검수 요청이 완료되었습니다",
+  "partner_uploading": "업로드 중...",
+  "partner_upload_failed": "업로드 실패. 다시 시도해주세요.",
 
   "request_step_progress": "Step {current} / {total}",
   "request_step1_title": "어떤 증상이 있나요?",

@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../core/app_localizations.dart';
 import '../../core/firebase_service.dart';
+import '../../firebase_options.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 const String partnerSupportCenterRouteName = '/partner-support-center';
@@ -32,6 +33,8 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
   String? _certDownloadUrl;
   final List<String> _portfolioDownloadUrls = <String>[];
 
+  bool _isUploading = false;
+
   bool get _idUploaded => _idImage != null;
   bool get _certUploaded => _certImage != null;
   bool get _portfolioUploaded => _portfolioImages.isNotEmpty;
@@ -43,15 +46,37 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
   Reference _refFor({required String type, int? index}) {
     final uid = _uid ?? 'anonymous';
     final ts = DateTime.now().millisecondsSinceEpoch;
+    late final FirebaseStorage storage;
+    if (kIsWeb) {
+      final webBucket = DefaultFirebaseOptions.web.storageBucket;
+      storage = (webBucket != null && webBucket.isNotEmpty)
+          ? FirebaseStorage.instanceFor(bucket: webBucket)
+          : FirebaseStorage.instance;
+    } else {
+      storage = FirebaseStorage.instance;
+    }
     if (type == 'portfolio') {
       final i = index ?? _portfolioImages.length;
-      return FirebaseStorage.instance.ref('partner_support/$uid/portfolio_${i}_$ts.jpg');
+      return storage.ref('partner_support/$uid/portfolio_${i}_$ts.jpg');
     }
-    return FirebaseStorage.instance.ref('partner_support/$uid/${type}_$ts.jpg');
+    return storage.ref('partner_support/$uid/${type}_$ts.jpg');
   }
 
   Future<String?> _uploadToStorage(XFile file, {required String type, int? index}) async {
     if (!isFirebaseEnabled) return null;
+    // Auth 사전 검증
+    final user = auth.currentUser;
+    if (user == null || user.isAnonymous) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n('partner_upload_failed')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    }
     final ref = _refFor(type: type, index: index);
     final metadata = SettableMetadata(contentType: 'image/jpeg');
     try {
@@ -62,8 +87,16 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
         await ref.putFile(File(file.path), metadata).timeout(const Duration(seconds: 15));
       }
       return await ref.getDownloadURL().timeout(const Duration(seconds: 10));
-    } catch (_) {
-      // Keep local preview even when cloud upload is delayed/failed.
+    } catch (e) {
+      debugPrint('[Storage] partner upload failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n('partner_upload_failed')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return null;
     }
   }
@@ -302,30 +335,95 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
             const SizedBox(height: 32),
             if (_canSubmitForReview)
               ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      content: Text(
-                        context.l10n('partner_review_complete_message'),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(ctx).pop();
-                            Navigator.of(context).popUntil(
-                              (route) => route.isFirst,
+                onPressed: _isUploading
+                    ? null
+                    : () async {
+                        final scaffoldMessenger = ScaffoldMessenger.of(context); // await 전에 저장
+                        final navigator = Navigator.of(context); // await 전에 저장
+                        final l10n = context.l10n; // await 전에 저장
+                        // 업로드 완료 여부 확인
+                        final hasLocal = _idImage != null ||
+                            _certImage != null ||
+                            _portfolioImages.isNotEmpty;
+                        final hasUploaded = _idDownloadUrl != null ||
+                            _certDownloadUrl != null ||
+                            _portfolioDownloadUrls.isNotEmpty;
+
+                        if (hasLocal && !hasUploaded) {
+                          // 로컬엔 있는데 Storage엔 없음 = 업로드 실패 상태
+                          // 재시도
+                          setState(() => _isUploading = true);
+                          try {
+                            if (_idImage != null && _idDownloadUrl == null) {
+                              final url =
+                                  await _uploadToStorage(_idImage!, type: 'id');
+                              if (mounted && url != null) {
+                                setState(() => _idDownloadUrl = url);
+                              }
+                            }
+                            if (_certImage != null &&
+                                _certDownloadUrl == null) {
+                              final url = await _uploadToStorage(_certImage!,
+                                  type: 'cert');
+                              if (mounted && url != null) {
+                                setState(() => _certDownloadUrl = url);
+                              }
+                            }
+                            if (_portfolioImages.isNotEmpty &&
+                                _portfolioDownloadUrls.isEmpty) {
+                              for (var i = 0;
+                                  i < _portfolioImages.length;
+                                  i++) {
+                                final url = await _uploadToStorage(
+                                    _portfolioImages[i],
+                                    type: 'portfolio',
+                                    index: i);
+                                if (mounted && url != null) {
+                                  setState(
+                                      () => _portfolioDownloadUrls.add(url));
+                                }
+                              }
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isUploading = false);
+                            }
+                          }
+                          // 재시도 후에도 실패면 안내
+                          final stillFailed = _idDownloadUrl == null &&
+                              _certDownloadUrl == null &&
+                              _portfolioDownloadUrls.isEmpty;
+                          if (stillFailed && mounted) {
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(l10n('partner_upload_failed')),
+                                backgroundColor: Colors.red,
+                              ),
                             );
-                          },
-                          child: Text(context.l10n('confirm')),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                            return;
+                          }
+                        }
+                        if (!context.mounted) return;
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            content: Text(
+                                l10n('partner_review_complete_message')),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  navigator.popUntil((route) => route.isFirst);
+                                },
+                                child: Text(l10n('confirm')),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _royalNavy,
                   foregroundColor: Colors.white,
@@ -334,7 +432,16 @@ class _PartnerSupportCenterScreenState extends State<PartnerSupportCenterScreen>
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
-                child: Text(context.l10n('partner_submit_for_review')),
+                child: _isUploading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(context.l10n('partner_submit_for_review')),
               ),
           ],
         ),

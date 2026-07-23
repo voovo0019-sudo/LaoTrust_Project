@@ -392,6 +392,8 @@
   "partner_pick_gallery": "Choose from gallery",
   "partner_pick_camera": "Take a photo",
   "partner_review_complete_message": "Review request has been completed.",
+  "partner_uploading": "Uploading...",
+  "partner_upload_failed": "Upload failed. Please try again.",
 
   "request_step_progress": "Step {current} / {total}",
   "request_step1_title": "What symptoms are you experiencing?",

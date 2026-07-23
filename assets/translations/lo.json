@@ -392,6 +392,8 @@
   "partner_pick_gallery": "ເລືອກຈາກຄັງຮູບ",
   "partner_pick_camera": "ຖ່າຍຮູບດ້ວຍກ້ອງ",
   "partner_review_complete_message": "ສົ່ງຄຳຂໍກວດສອບສຳເລັດແລ້ວ",
+  "partner_uploading": "ກຳລັງອັບໂຫລດ...",
+  "partner_upload_failed": "ອັບໂຫລດບໍ່ສຳເລັດ. ກະລຸນາລອງໃໝ່.",
 
   "request_step_progress": "Step {current} / {total}",
   "request_step1_title": "ທ່ານມີອາການຫຍັງ?",
